@@ -1,0 +1,1713 @@
+---
+title: "Turning Points Codebook"
+author: 
+  - name: "Maria L. Schweer-Collins, PhD"
+    email: "mschweer@uoregon.edu"
+    affiliations:
+      - name: 'University of Oregon'
+        city: 'Eugene'
+        state: 'OR'
+  - name: "Jonathan A. Pedroza, PhD"
+    email: "cpppedroza@gmail.com"
+format: 
+  pdf:
+    toc: true
+    toc-depth: 3
+    toc-title: Contents
+    number-sections: true
+    number-depth: 3
+    colorlinks: true
+bibliography: C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/tpw_references.bib
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+library(here)
+
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE,
+                      echo = FALSE)
+
+theme_set(theme_light())
+
+data <- read_csv('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/data_77included.csv') 
+
+complete <- read_csv('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/data_calculated.csv')
+
+source('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/functions/codebook_fun.R')
+```
+
+### Missing Data Rule
+
+-   For scales with [10 or more items]{.underline}, a composite score (average/total) is computed for **TC** that have less than [20%]{.underline} of the items from that measure missing
+
+-   For scales with [7 to 9 items]{.underline}, a composite score (average/total) is computed for **TC** that have less than [30%]{.underline} of the items from that measure missing
+
+-   For scales with [3 to 6 items]{.underline}, a composite score (average/total) is computed for **TC** that have less than [33%]{.underline} of the items from that measure missing
+
+-   For scales with [only 2 items]{.underline}, composite scores (average/total) are calculated on a [case by case basis]{.underline}
+
+# Mental Health
+
+## BSI
+
+### BSI Description
+
+-   Variables for BSI scale
+
+    -   `bsi1`, `bsi2`, `bsi3`, `bsi4`, `bsi5`, `bsi6`, `bsi7`, `bsi8`, `bsi9`, `bsi10`, `bsi11`, `bsi12`, `bsi13`, `bsi14`, `bsi15`, `bsi16`, `bsi17`, `bsi18`, `bsi19`
+
+    -   Variable Scale
+
+        -   0 - "Not at all"
+
+        -   1 - "A little bit"
+
+        -   2 - "Moderately"
+
+        -   3 - "Quite a bit"
+
+        -   4 - "Very much"
+
+-   Total scores should range from 0 to 76
+
+-   Revere Scoring
+
+    -   N/A
+
+-   Subscales
+
+    -   Somatization: `bsi2`, `bsi3`, `bsi10`, `bsi11`, `bsi12`, `bsi13`, `bsi15`
+
+    -   Anxiety: `bsi1`, `bsi5`, `bsi9`, `bsi16`, `bsi17`, `bsi18`
+
+    -   Depression: `bsi4`, `bsi6`, `bsi7`, `bsi8`, `bsi14`, `bsi19`
+
+-   Missing Data Rule:
+
+    -   N/A
+
+-   Reference: @derogatis1983brief
+
+    -   [Link here](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F)
+
+    -   [DOI here](https://doi.org/10.1017/S0033291700048017)
+
+### BSI Missing Data
+
+```{r bsi missing data, warning = FALSE, message = FALSE}
+data %>%
+  select(
+    id:bsi19
+  ) %>% 
+  pct_miss_fun(
+    id = 'id',
+    n_items = 19
+  )
+```
+
+### BSI Scale & Subscale Distributions
+
+```{r bsi distributions}
+complete %>%
+  composite_hist(
+    x = bsi_total
+  ) +
+  labs(title = 'Distribution of Total Scores for BSI Measure')
+
+complete %>%
+  composite_hist(x = bsi_soma_total) +
+  labs(title = 'Distribution for BSI Somatization Subscale')
+
+complete %>%
+  composite_hist(x = bsi_anx_total) +
+  labs(title = 'Distribution for BSI Anxiety Subscale')
+
+complete %>%
+  composite_hist(x = bsi_dep_total) +
+  labs(title = 'Distribution for BSI Depression Subscale')
+```
+
+### BSI Internal Reliability
+
+```{r bsi alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+bsi_alpha <-
+  complete %>%
+  select(bsi1:bsi19) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_som <-
+  complete %>%
+  select(bsi2:bsi3,
+         bsi10:bsi13,
+         bsi15) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_anx <-
+  complete %>%
+  select(bsi1, bsi5, bsi9, bsi16:bsi18) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_dep <-
+  complete %>%
+  select(bsi4, bsi6:bsi8, bsi14, bsi19) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_table <- tibble(
+  Scale = c('BSI',
+            'BSI - Somatization',
+            'BSI - Anxiety',
+            'BSI - Depression'),
+  Alpha = c(round(bsi_alpha$total$raw_alpha, 3),
+            round(bsi_alpha_som$total$raw_alpha, 3),
+            round(bsi_alpha_anx$total$raw_alpha, 3),
+            round(bsi_alpha_dep$total$raw_alpha, 3))
+)
+
+bsi_alpha_table %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for BSI Entire Scale & Subscales'
+  )
+```
+
+## CESD
+
+### CESD Description
+
+-   Variables for CESD scale
+
+    -   `c1`, `c2`, `c3`, `c4`, `c5`, `c6`, `c7`, `c8`, `c9`, `c10`, `c11`, `c12`, `c13`, `c14`, `c15`, `c16`, `c17`, `c18`, `c19`, `c20`
+
+    -   Variable Scale
+
+        -   0 - "Rarely or none of the time"
+
+        -   1 - "Some or a little of the time"
+
+        -   2 - "Occasionally or a moderate amount of time"
+
+        -   3 - "Most or all of the time"
+
+-   Total scores should range from `0` to `60`
+
+-   Revere Scoring
+
+    -   Items `c4`, `c8`, `c12`, and `c16` are reverse scored
+
+-   Variables For Other Items
+
+    -   `c21`, `c22`, `c23`, `c24`
+
+        -   if response is `No` to item `c21`, then TC moved on to item `c24`
+
+    -   Variable Scale
+
+        -   0 - No
+
+        -   1 - Yes
+
+        -   2 - Declined to Answer
+
+-   Subscales
+
+    -   Positive Affect
+
+        -   `c4_r`, `c8_r`, `c12_r`, `c16_r`
+
+    -   Depressive Symptoms
+
+        -   `c1`, `c2`, `c3`, `c5`, `c6`, `c7`, `c9`, `c10`, `c11`, `c13`, `c14`, `c15`, `c17`, `c18`, `c19`, `c20`
+
+-   Missing Data Rule:
+
+    -   N/A
+
+-   Reference: @radloff1977ces
+
+    -   [Link here](https://journals.sagepub.com/doi/abs/10.1177/014662167700100306)
+
+    -   [DOI here](https://doi.org/10.1177%2F014662167700100306)
+
+-   Additional References:
+
+    -   Cutoff Information: @henry2018determining
+
+        -   [Link here](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4)
+
+        -   [DOI here](https://doi.org/10.1016/j.jad.2018.02.071)
+
+    -   Items for Potential Subscales: @canady2009measurement
+
+        -   [Link here](https://connect.springerpub.com/content/sgrjnm/17/2/91.abstract)
+
+        -   [DOI here](10.1891/1061-3749.17.2.91)
+
+### CESD Missing Data
+
+```{r}
+data %>%
+  select(id,
+         c1:c20,
+         c4_r:c16_r) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 20
+  ) %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Missing Data',
+    subtitle = 'By Each Participant'
+  )
+```
+
+Missing data for suicidal ideation, plan, and attempt items.
+
+```{r}
+data %>%
+  select(id,
+         c21:c24) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 20
+  ) %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Missing Data',
+    subtitle = 'By Each Participant'
+  )
+```
+
+### CESD Scale & Suscale Distributions
+
+```{r}
+complete %>%
+  composite_hist(cesd_total) +
+  labs(
+    title = 'CESD Total Score Distribution'
+    )
+
+complete %>%
+  composite_hist(
+    cesd_dep_symp_total
+    ) +
+  labs(
+    title = 'Total Score Distribution',
+       subtitle = 'Depressive Symptoms Subscale'
+    )
+
+complete %>%
+  composite_hist(
+    cesd_pos_aff_total,
+    bins = 10
+    ) +
+  labs(
+    title = 'Total Score Distribution',
+       subtitle = 'Depressive Symptoms Subscale'
+    )
+```
+
+### CESD Cutoffs
+
+```{r}
+complete %>%
+  cutoff_plot(
+    x = cesd_total,
+    cutoff = 16,
+    cutoff_other = 23
+  ) +
+  labs(
+    title = 'Cutoff Scores for CESD Total Scores',
+    caption = 'Cutoffs are 16 and/or 23\nSee references for literature on cutoff scores.'
+  )
+```
+
+### CESD Internal Reliability
+
+```{r}
+cesd_alpha <-
+  complete %>%
+  select(c1:c16_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+cesd_dep_alpha <-
+  complete %>%
+  select(c1:c20) %>%
+  psych::alpha(check.keys = TRUE)
+
+cesd_pos_aff_alpha <-
+  complete %>%
+  select(c4_r, c8_r, c12_r, c16_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+
+cesd_alpha_table <- tibble(
+  Scale = c('CESD', 'CESD - Depressive Symptoms',
+            'CESD - Positive Affect'),
+  Alpha = c(round(cesd_alpha$total$raw_alpha, 3),
+            round(cesd_dep_alpha$total$raw_alpha, 3),
+            round(cesd_pos_aff_alpha$total$raw_alpha, 3)
+  )
+)
+
+cesd_alpha_table %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for CESD Entire Scale & Subscales'
+  )
+```
+
+# COVID-19
+
+## CIQ
+
+### CIQ Description
+
+-   Variables for BSI COVID-19 items
+
+    -   `ciq1`, `ciq2`, `ciq3`
+
+    -   Variable Scale
+
+        -   1 - "Not true of me at all"
+
+        -   2
+
+        -   3
+
+        -   4
+
+        -   5
+
+        -   6
+
+        -   7 - "Very true of me"
+
+-   Total score should range from 3 to 21
+
+-   Reverse Scoring
+
+    -   item `ciq3` should be reverse scored
+
+-   Reference: @conway2020social
+
+    -   [Link here](https://psyarxiv.com/z2x9a/download?format=pdf)
+
+### CIQ Missing Data
+
+```{r, warning = FALSE, message = FALSE}
+data %>%
+  select(id,
+         ciq1:ciq3_r) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 3
+  )
+```
+
+### CIQ Scale Distribution
+
+```{r}
+complete %>%
+  composite_hist(
+    x = ciq_psych_total,
+    bins = 10
+    ) +
+  labs(title = 'Distribution for CIQ Psychological Scale')
+```
+
+### CIQ Internal Reliability
+
+```{r}
+ciq_alpha <-
+  complete %>%
+  select(ciq1, ciq2, ciq3_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+ciq_alpha_table <- tibble(
+  Scale = 'CIQ - Psychological Scale',
+  Alpha = round(ciq_alpha$total$raw_alpha, 3)
+)
+  
+ciq_alpha_table %>%
+ gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for CIQ - Psychological Scale'
+  )
+```
+
+# Substance Use
+
+## DAST
+
+### DAST Description
+
+-   Variables for DAST scale
+
+    -   `d00`, `d1a`, `d2a`, `d2b`, `d3`, `d4`, `d5`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`
+
+    -   Variable scale
+
+        -   1 - "Yes"
+
+        -   0 - "No"
+
+    -   Total scores should range from `0` to `20`
+
+    -   Reverse scoring
+
+        -   Items `d4` and `d5` are reverse coded
+
+        -   both were renamed to `d4_r` and `d5_r` respectively
+
+    -   `d2a` and `d2b` are skip logic questions based on responses for `d1a`
+
+        -   `d1a = 1` moved on to respond to `d2a`
+
+        -   `d1a = 0` or `d1a = -77` moved on to respond to `d2b`
+
+-   Subscales
+
+    -   No subscales were created for this measure as there was a lack of evidence supporting a subscale structure
+
+-   Missing Data Rule:
+
+    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+
+-   Reference: @gavin1989diagnostic
+
+    -   [Link here](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1360-0443.1989.tb03463.x)
+
+    -   [DOI here](https://doi.org/10.1111/j.1360-0443.1989.tb03463.x)
+
+### DAST Missing Data
+
+```{r}
+data %>%
+  select(
+    id,
+    d1a:d3,
+    d6:d5_r
+         ) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 21
+  ) %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DAST Missing Data',
+    subtitle = 'By Participant'
+  )
+  
+```
+
+### DAST Scale & Subscale Distributions
+
+```{r}
+complete %>%
+  composite_hist(
+    x = dast_total
+  ) +
+  labs(
+    title = 'Distribution of Total Scores for DAST Measure'
+  )
+```
+
+### DAST Severity
+
+```{r}
+complete %>%
+  severity_plot(
+  x = dast_total,
+  bins = 20,
+  low_xmin = 1,
+  low_xmax = 5.5,
+  medium_xmin = 5.5,
+  medium_xmax = 10.5,
+  large_xmin = 10.5,
+  large_xmax = 15.5,
+  critical_xmin = 15.5,
+  critical_xmax = 20) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 3,
+    y = -1.5,
+    label = 'Low'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 8,
+    y = -1.5,
+    label = 'Intermediate'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 13,
+    y = -1.5,
+    label = 'Substantial'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 18,
+    y = -1.5,
+    label = 'Severe'
+  ) +
+  labs(
+    title = 'Severity Categories',
+    subtitle = 'Based on DAST',
+    caption = 'Cutoffs are:\nLow = 1-5,\nIntermediate = 6-10,\nSubstantial = 11-15,\nSevere = 16-20'
+  )
+```
+
+### DAST Internal Reliability
+
+```{r}
+dast_alpha <-
+  complete %>%
+  select(
+    d1a:d3,
+    d6:d5_r
+         ) %>%
+  mutate(
+    d2 = coalesce(d2a, d2b)
+  ) %>% 
+  select(-d2a, -d2b) %>% 
+  drop_na(d2) %>% 
+  psych::alpha(check.keys = TRUE)
+
+
+dast_alpha_table <-
+  tibble(
+  Scale = 'DAST',
+  Alpha = round(dast_alpha$total$raw_alpha, 3)
+)
+
+dast_alpha_table %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for DAST Scale'
+  )
+
+```
+
+# Child Abuse
+
+## BCAP
+
+### BCAP Description
+
+-   Variables for the BCAP measure
+
+    -   `q1`,`q2`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q9`, `q10`, `q11`, `q12`, `q13`, `q14`, `q15`, `q16`, `q17`, `q18`, `q19`, `q20`, `q21`, `q22`, `q23`, `q24`, `q25`, `q26`, `q27`, `q28`, `q29`, `q30`, `q31`, `q32`, `q33`, `q34`
+    -   Variable Scale
+        -   1 - "Agree"
+
+        -   0 - "Disagree"
+
+        -   -77 - "Decline to respond"
+    -   Total scores should range from 0 to 24
+        -   total scale score is the BCAP risk scale with all the items that are not part of the lie and random responding subscales
+
+        -   `q1`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q10`, `q11`, `q12`, `q13`, `q14`, `q16`, `q17`, `q19`, `q20`, `q22`, `q23`, `q24`, `q25`, `q27`, `q29`, `q30`, `q31`, `q32`, `q33`
+    -   Reverse coding
+        -   Items `q1`, `q2`, `q23`, and `q29` should be reverse coded
+
+-   Subscales
+
+    -   Happiness (reverse coded)
+
+        -   `q1`, `q23`, `q29`
+
+    -   Feelings of persecution
+
+        -   `q3`, `q25`, `q33`
+
+    -   Loneliness
+
+        -   `q5`, `q12`, `q22`, `q31`
+
+    -   Family conflict
+
+        -   `q6`, `q13`, `q17`
+
+    -   Rigidity
+
+        -   `q7`, `q14`, `q20`, `q32`
+
+    -   Distress
+
+        -   `q8`, `q11`, `q16`, `q19`, `q27`
+
+    -   Poverty
+
+        -   `q10`, `q30`
+
+-   Additional subscales to remove invalid cases
+
+    -   Lie
+
+        -   `q4`, `q9`, `q15`, `q21`, `q26`, `q34`
+
+    -   Random responding
+
+        -   `q2`, `q18`, `q28`
+
+-   Missing Data Rule:
+
+    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+
+-   Reference: @ondersma2005brief
+
+    -   [Link here](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug)
+
+    -   [DOI here](https://doi.org/10.1207/s15374424jccp3402_9)
+
+### BCAP Missing Data
+
+```{r}
+data %>%
+  select(
+    id,
+    q3:q22,
+    q24:q28,
+    q30:q29_r
+         ) %>% 
+    pct_miss_fun(
+      id = 'id', 
+      n_items = 34 
+    ) %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'BCAP Missing Data',
+    subtitle = 'By Participant'
+  )
+```
+
+### BCAP Scale & Subscale Distributions
+
+```{r}
+complete %>%
+  composite_hist(
+    x = bcap_risk_total
+  ) +
+  labs(
+    title = 'Distribution of Total Scores for BCAP Risk Scale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_happy_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Happiness Subscale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_feel_pers_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Feelings of Persecution Subscale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_lonely_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Loneliness Subscale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_fam_conf_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Family Conflict Subscale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_rigid_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Rigidity Subscale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_distress_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Distress Subscale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_poverty_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Poverty Subscale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_lie_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Lying Subscale'
+  )
+
+complete %>% 
+  composite_hist(
+    x = bcap_random_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Random Responding Subscale'
+  )
+```
+
+### BCAP Cutoffs
+
+```{r}
+complete %>%
+  cutoff_plot(
+    x = bcap_risk_total,
+    cutoff = 9,
+    cutoff_other = 12
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Scale',
+    caption = 'Cutoffs are 9 and 12\nSee references for literature on cutoff scores.'
+  )
+
+complete %>% 
+  cutoff_plot(
+    x = bcap_lie_total,
+    cutoff = 4
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Lie Subscale',
+    caption = 'If 4 or more (score of 4) items are endorsed,\ncase may be invalid'
+  )
+
+complete %>% 
+  cutoff_plot(
+    x = bcap_random_total,
+    cutoff = 0
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Random Responding Subscale',
+    caption = 'If any of these items are endorsed (score > 0),\ncase may be invalid'
+  )
+```
+
+### BCAP Internal Reliability
+
+```{r}
+bcap_alpha <- 
+  complete %>% 
+  select(
+    q1_r,
+    q2_r,
+    q3:q22,
+    q23_r,
+    q24:q28,
+    q29_r,
+    q30:q34
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_risk_alpha <-
+  complete %>%
+  select(
+    q1_r,
+    q3,
+    q5:q8,
+    q10:q14,
+    q16:q17,
+    q19:q20,
+    q22,
+    q23_r,
+    q24:q25,
+    q27,
+    q29_r,
+    q30:q33
+    ) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_happy_alpha <- 
+  complete %>% 
+  select(q1_r, q23_r, q29_r) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_feel_pers_alpha <- 
+  complete %>% 
+  select(q3, q25, q33) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_lonely_alpha <- 
+  complete %>% 
+  select(q5, q12, q22, q31) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_fam_conf_alpha <- 
+  complete %>% 
+  select(q6, q13, q17) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_rigid_alpha <-
+  complete %>% 
+  select(q7, q14, q20, q32) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_distress_alpha <- 
+  complete %>% 
+  select(q8, q11, q16, q19, q27) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_poverty_alpha <- 
+  complete %>% 
+  select(q10, q30) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_lie_alpha <-
+  complete %>% 
+  select(q4, q9, q15, q21, q26, q34) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_random_alpha <-
+  complete %>% 
+  select(q2_r, q19, q28) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_alpha_table <-
+  tibble(
+    Scale = c('BCAP Complete Scale', 'BCAP Risk Scale',
+              'Happiness Subscale', 'Feelings of Persecution Subscale',
+              'Loneliness Subscale', 'Family Conflict Subscale',
+              'Rigidity Subscale', 'Distress Subscale',
+              'Poverty Subscale',
+              'Lying Subscale', 'Random Responding Subscale'),
+    Alpha = c(round(bcap_alpha$total$raw_alpha, 3),
+              round(bcap_risk_alpha$total$raw_alpha, 3),
+              round(bcap_happy_alpha$total$raw_alpha, 3),
+              round(bcap_feel_pers_alpha$total$raw_alpha, 3),
+              round(bcap_lonely_alpha$total$raw_alpha, 3),
+              round(bcap_fam_conf_alpha$total$raw_alpha, 3), 
+              round(bcap_rigid_alpha$total$raw_alpha, 3), 
+              round(bcap_distress_alpha$total$raw_alpha, 3),
+              round(bcap_poverty_alpha$total$raw_alpha, 3), 
+              round(bcap_lie_alpha$total$raw_alpha, 3),
+              round(bcap_random_alpha$total$raw_alpha, 3))
+  )
+
+bcap_alpha_table %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for BCAP Scale & Subscales'
+  )
+
+```
+
+# Partner Relationships
+
+## DYADC
+
+### DYADC Description
+
+-   Variables for DYADC scale
+
+    -   `e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`, `e14`, `e15`, `e16`, `e17`, `e18`, `e19`, `e20`, `e21`, `e22`, `e23`, `e24`, `e25`, `e26`, `e27`, `e28`, `e29`, `e30`, `e31`, `e32`
+
+-   Variable Scale
+
+    -   For items `e1` to `e15`
+
+        -   5 - "Always Agree"
+
+        -   4 - "Almost Always Agree"
+
+        -   3 - "Occasionally Disagree"
+
+        -   2 - "Frequently Disagree"
+
+        -   1 - "Almost Always Disagree"
+
+        -   0 - "Always Disagree"
+
+        -   -77 - "Declined to Respond"
+
+    -   Items `e16` to `e22`, except `e18` and `e19` are reverse scored
+
+        -   0 - "All the time"
+
+        -   1 - "Most of the time"
+
+        -   2 - "More often than not"
+
+        -   3 - "Occasionally"
+
+        -   4 - "Rarely"
+
+        -   5 - "Never"
+
+        -   -77 -"Declined to Respond"
+
+    -   Items `e23` and `e24` are both on the following scale
+
+        -   4 - "Every day"
+
+        -   3 - "Almost every day"
+
+        -   2 - "Occasionally"
+
+        -   1 - "Rarely"
+
+        -   0 - "Never"
+
+        -   -77 - "Declined to Respond"
+
+    -   Items `e25` to `e28`
+
+        -   0 - "Never"
+
+        -   1 - "Less than once a month"
+
+        -   2 - "Once or twice a month"
+
+        -   3 - "Once or twice a week"
+
+        -   4 - "Once a day"
+
+        -   5 - "More often"
+
+        -   -77 - "Declined to Respond"
+
+    -   Items `e29` and `e30`
+
+        -   0 - "Yes"
+
+        -   1 - "No"
+
+    -   `e31`
+
+        -   0 - "Extremely Unhappy"
+
+        -   1 - "Fairly Unhappy"
+
+        -   2 - "A Little Unhappy"
+
+        -   3 - "Happy"
+
+        -   4 - "Very Happy"
+
+        -   5 - "Extremely Happy"
+
+        -   6 - "Perfect"
+
+        -   -77 - "Declined to Respond"
+
+    -   `e32`
+
+        -   5 - "I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
+
+        -   4 - "I want very much for my relationship to succeed, and will do all I can to see that it does."
+
+        -   3 - "I want very much for my relationship to succeed, and will do my fair share to see that it does."
+
+        -   2 - "It would be nice if my relationship succeeded, but I can't do much more than I'm doing now to help it succeed."
+
+        -   1 - "It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going."
+
+        -   0 - "My relationship can never succeed, and there is no more that I can do to keep the relationship going."
+
+        -   -77 - "Declined to Respond"
+
+-   Total scores should range from 0 to 151
+
+-   Reverse Coding
+
+    -   `e18` and `e19` are reverse coded
+
+-   Subscales
+
+    -   Dyadic Consensus
+
+        -   `e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`
+
+    -   Affective Expression
+
+        -   `e4`, `e6`, `e29`, `e30`
+
+    -   Dyadic Satisfaction
+
+        -   `e16`, `e17`, `e18`, `e19`, `e20`, `e21`, `e22`, `e23`, `e31`, `e32`
+
+    -   Dyadic Cohesion
+
+        -   `e24`, `e25`, `e26`, `e27`, `e28`
+
+-   Missing Data Rule:
+
+    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+
+-   Reference: @spanier1976measuring
+
+    -   [Link here](https://www.jstor.org/stable/350547)
+
+    -   [DOI here](https://doi.org/10.2307/350547)
+
+### DYADC Missing Data
+
+```{r}
+data %>%
+  select(
+    id,
+    e1:e32
+  ) %>% 
+  pct_miss_fun(
+    id = 'id',
+    n_items = 32
+  ) %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DYADC Missing Data',
+    subtitle = 'By Participant'
+  )
+```
+
+### DYADC Scale & Subscale Distributions
+
+```{r}
+complete %>%
+  composite_hist(
+    x = dyadc_total
+  ) +
+  labs(
+    title = 'Distribution for DYADC Scale'
+  )
+
+complete %>%
+  composite_hist(
+    x = dyadc_con_total
+  ) +
+  labs(
+    title = 'Distribution for DYADC Consensus Subscale'
+  )
+
+complete %>%
+  composite_hist(
+    x = dyadc_aff_exp_total,
+    bins = 10
+  ) +
+  labs(
+    title = 'Distribution for DYADC Affectional Expression Subscale'
+  )
+
+complete %>%
+  composite_hist(
+    x = dyadc_satis_total
+  ) +
+  labs(
+    title = 'Distribution for DYADC Satisfaction Subscale'
+  )
+
+complete %>%
+  composite_hist(
+    x = dyadc_cohes_total
+  ) +
+  labs(
+    title = 'Distribution for DYADC Cohesion Subscale'
+  )
+```
+
+### DYADC Cutoffs
+
+```{r}
+complete %>%
+  cutoff_plot(
+    x = dyadc_total,
+    cutoff = 92,
+    cutoff_other = 107
+  ) +
+  labs(
+    title = 'Cutoff Values for DYADC Scale',
+    caption = 'Cutoffs are 92 and 107\nSee references for literature on cutoff scores.'
+  )
+```
+
+### DYADC Internal Reliability
+
+```{r}
+dyadc_alpha <-
+  complete %>% 
+  select(
+    e1:e32
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_con_alpha <-
+  complete %>% 
+  select(
+    e1:e13
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_aff_exp_alpha <-
+  complete %>% 
+  select(
+    e4, e6, e29, e30
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_satis_alpha <-
+  complete %>% 
+  select(
+    e16:e23,
+    e31,
+    e32
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_cohes_alpha <-
+  complete %>% 
+  select(
+    e24:e28
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_alpha_table <- 
+  tibble(
+    Scale = c('DYADC',
+              'DYADC - Consensus',
+              'DYADC - Affectional Expression',
+              'DYADC - Satisfaction',
+              'DYADC - Cohesion'
+      
+    ),
+    Alpha = c(round(dyadc_alpha$total$raw_alpha, 3),
+              round(dyadc_con_alpha$total$raw_alpha, 3),
+              round(dyadc_aff_exp_alpha$total$raw_alpha, 3),
+              round(dyadc_satis_alpha$total$raw_alpha, 3),
+              round(dyadc_cohes_alpha$total$raw_alpha, 3))
+  )
+
+dyadc_alpha_table %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'Alpha Values for DYADC Scale & Subscales'
+  )
+```
+
+## CTS2S
+
+### CTS2S Description
+
+-   Variables in CTS2S
+
+    -   `ct1`, `ct2`, `ct3`, `ct4`, `ct5`, `ct6`, `ct7`, `ct8`, `ct9`, `ct10`, `ct11`, `ct12`, `ct13`, `ct14`, `ct15`, `ct16`, `ct17`, `ct18`, `ct19`, `ct20`
+
+-   Variable Scale
+
+    -   1 - "Once in the past year"
+
+    -   2 - "Twice in the past year"
+
+    -   3 - "3-5 times in the past year"
+
+    -   4 - "6-10 times in the past year"
+
+    -   5 - "11-20 times in the past year"
+
+    -   6 - "More than 20 times in the past year"
+
+    -   7 - "Not in the past year, but it did happen before"
+
+    -   8 - "This has never happened"
+
+    -   -77 - "Declined to Respond"
+
+-   Subscales (Individual/Participant/TC)
+
+    -   Psychological Aggression
+
+        -   `ct3`, `ct13`
+
+    -   Physical Injury
+
+        -   `ct5`, `ct15`
+
+    -   Assault
+
+        -   `ct9`, `ct11`
+
+    -   Sexual Cohesion
+
+        -   `ct17`, `ct19`
+
+    -   Negotiation
+
+        -   `ct1`, `ct7`
+
+-   Subscales (Partner)
+
+    -   Psychological Aggression
+
+        -   `ct4`, `ct14`
+
+    -   Physical Injury
+
+        -   `ct6`, `ct16`
+
+    -   Assault
+
+        -   `ct10`, `ct12`
+
+    -   Sexual Cohesion
+
+        -   `ct18`, `ct20`
+
+    -   Negotiation
+
+        -   `ct2`, `ct8`
+
+-   CTS2S should not have a calculated total/average composite score
+
+-   CTS2S has three different ways of scoring (Prevalence, Severity, Mutuality)
+
+    -   Prevalence
+
+        -   assessed for both individual/participant/TC and partner
+
+        -   assessed by whether any behavior within each subscale occurred in the past year
+
+    -   Severity
+
+        -   assessed for both individual/participant/TC and partner
+
+        -   assessed as either no instance of the behavior, minor instance of the behavior, or severe instance of the behavior for each subscale
+
+        -   0 - "No"
+
+        -   1 - "Minor"
+
+        -   2 - "Severe"
+
+    -   Mutuality
+
+        -   assessed by combining responses from both individual/participant/TC and partner
+
+        -   assessed as either none, male/partner only, female/individual/participant/TC only, both
+
+        -   0 - "None"
+
+        -   1 - "Partner only"
+
+        -   2 - "Individual/Participant/TC only"
+
+        -   3 - "Both"
+
+-   Missing Data Rule:
+
+    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+
+-   Reference: @straus2004short
+
+    -   [Link here](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract)
+
+    -   [DOI here](10.1891/vivi.19.5.507.63686)
+
+### CTS2S Missing Data
+
+```{r}
+data %>%
+  select(
+    id,
+    ct1:ct20
+  ) %>% 
+  pct_miss_fun(
+    id = 'id',
+    n_items = 20
+  ) %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'CTS2S Missing Data',
+    subtitle = 'By Participant'
+  )
+```
+
+### CTS2S Severity Distributions (Individual \[TC\])
+
+```{r}
+complete %>%
+  mutate(
+    cts_psy_agg_ind_sev = case_when(
+      cts_psy_agg_ind_sev == 0 ~ 'No Psychological Aggression',
+      cts_psy_agg_ind_sev == 1 ~ 'Minor Psychological Aggression',
+      cts_psy_agg_ind_sev == 2 ~ 'Severe Psychological Aggression'
+    ),
+    cts_psy_agg_ind_sev = as.factor(cts_psy_agg_ind_sev),
+    cts_psy_agg_ind_sev = relevel(cts_psy_agg_ind_sev, 'No Psychological Aggression')
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_ind_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Individual (TC) Psychological Aggression Severity',
+       x = '')
+
+complete %>%
+  mutate(
+    cts_injury_ind_sev = case_when(
+      cts_injury_ind_sev == 0 ~ 'No Injury',
+      cts_injury_ind_sev == 1 ~ 'Minor Injury',
+      cts_injury_ind_sev == 2 ~ 'Severe Injury'
+    ),
+    cts_injury_ind_sev = as.factor(cts_injury_ind_sev),
+    cts_injury_ind_sev = relevel(cts_injury_ind_sev, 'No Injury')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_ind_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Individual (TC) Physical Injury Severity',
+       x = '')
+
+complete %>%
+  mutate(
+    cts_assault_ind_sev = case_when(
+      cts_assault_ind_sev == 0 ~ 'No Assault',
+      cts_assault_ind_sev == 1 ~ 'Minor Assault',
+      cts_assault_ind_sev == 2 ~ 'Severe Assault'
+    ),
+    cts_assault_ind_sev = as.factor(cts_assault_ind_sev),
+    cts_assault_ind_sev = relevel(cts_assault_ind_sev, 'No Assault')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_ind_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Individual (TC) Assault Severity',
+       x = '')
+
+complete %>%
+  mutate(
+    cts_sex_ind_sev = case_when(
+      cts_sex_ind_sev == 0 ~ 'No Sexual Cohesion',
+      cts_sex_ind_sev == 1 ~ 'Minor Sexual Cohesion',
+      cts_sex_ind_sev == 2 ~ 'Severe Sexual Cohesion'
+    ),
+    cts_sex_ind_sev = as.factor(cts_sex_ind_sev),
+    cts_sex_ind_sev = relevel(cts_sex_ind_sev, 'No Sexual Cohesion')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_ind_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Individual (TC) Sexual Cohesion Severity',
+       x = '')
+```
+
+### CTS2S Severity Distributions (Partner)
+
+```{r}
+complete %>%
+  mutate(
+    cts_psy_agg_part_sev = case_when(
+      cts_psy_agg_part_sev == 0 ~ 'No Psychological Aggression',
+      cts_psy_agg_part_sev == 1 ~ 'Minor Psychological Aggression',
+      cts_psy_agg_part_sev == 2 ~ 'Severe Psychological Aggression'
+    ),
+    cts_psy_agg_part_sev = as.factor(cts_psy_agg_part_sev),
+    cts_psy_agg_part_sev = relevel(cts_psy_agg_part_sev, 'No Psychological Aggression')
+    ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_part_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Partner Psychological Aggression Severity',
+       x = '')
+
+complete %>%
+  mutate(
+    cts_injury_part_sev = case_when(
+      cts_injury_part_sev == 0 ~ 'No Injury',
+      cts_injury_part_sev == 1 ~ 'Minor Injury',
+      cts_injury_part_sev == 2 ~ 'Severe Injury'
+    ),
+    cts_injury_part_sev = as.factor(cts_injury_part_sev),
+    cts_injury_part_sev = relevel(cts_injury_part_sev, 'No Injury')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_part_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Partner Physical Injury Severity',
+       x = '')
+
+complete %>%
+  mutate(
+    cts_assault_part_sev = case_when(
+      cts_assault_part_sev == 0 ~ 'No Assault',
+      cts_assault_part_sev == 1 ~ 'Minor Assault',
+      cts_assault_part_sev == 2 ~ 'Severe Assault'
+    ),
+    cts_assault_part_sev = as.factor(cts_assault_part_sev),
+    cts_assault_part_sev = relevel(cts_assault_part_sev, 'No Assault')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_part_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Partner Assault Severity',
+       x = '')
+
+complete %>%
+  mutate(
+    cts_sex_part_sev = case_when(
+      cts_sex_part_sev == 0 ~ 'No Sexual Cohesion',
+      cts_sex_part_sev == 1 ~ 'Minor Sexual Cohesion',
+      cts_sex_part_sev == 2 ~ 'Severe Sexual Cohesion'
+    ),
+    cts_sex_part_sev = as.factor(cts_sex_part_sev),
+    cts_sex_part_sev = relevel(cts_sex_part_sev, 'No Sexual Cohesion')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_part_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Partner Sexual Cohesion Severity',
+       x = '')
+```
+
+### CTS2S Prevalence Distributions
+
+```{r}
+complete %>%
+  pivot_longer(
+    cols = c(cts_psy_agg_ind_prev, cts_psy_agg_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_psy_agg_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_psy_agg_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Distribution of Psychological Aggression Prevalence')
+
+complete %>%
+  pivot_longer(
+    cols = c(cts_injury_ind_prev, cts_injury_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_injury_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_injury_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Distribution of Physical Injury Prevalence')
+
+complete %>%
+  pivot_longer(
+    cols = c(cts_assault_ind_prev, cts_assault_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_assault_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_assault_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Distribution of Assault Prevalence')
+
+complete %>%
+  pivot_longer(
+    cols = c(cts_sex_ind_prev, cts_sex_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_sex_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_sex_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Distribution of Sexual Cohesion Prevalence')
+```
+
+### CTS2S Mutuality Distributions
+
+```{r}
+complete %>%
+  mutate(
+    cts_psy_agg_mutual = case_when(
+      cts_psy_agg_mutual == 0 ~ 'Neither',
+      cts_psy_agg_mutual == 1 ~ 'Male Only',
+      cts_psy_agg_mutual == 2 ~ 'Female Only',
+      cts_psy_agg_mutual == 3 ~ 'Both'
+    ),
+    cts_psy_agg_mutual = as.factor(cts_psy_agg_mutual),
+    cts_psy_agg_mutual = relevel(cts_psy_agg_mutual, 'Neither')
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_mutual
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Mutual Psychological Aggression')
+
+complete %>%
+  mutate(
+    cts_injury_mutual = case_when(
+      cts_injury_mutual == 0 ~ 'Neither',
+      cts_injury_mutual == 1 ~ 'Male Only',
+      cts_injury_mutual == 2 ~ 'Female Only',
+      cts_injury_mutual == 3 ~ 'Both'
+    ),
+    cts_injury_mutual = as.factor(cts_injury_mutual),
+    cts_injury_mutual = relevel(cts_injury_mutual, 'Neither')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_mutual
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Mutual Injury')
+
+complete %>%
+  mutate(
+    cts_assault_mutual = case_when(
+      cts_assault_mutual == 0 ~ 'Neither',
+      cts_assault_mutual == 1 ~ 'Male Only',
+      cts_assault_mutual == 2 ~ 'Female Only',
+      cts_assault_mutual == 3 ~ 'Both'
+    ),
+    cts_assault_mutual = as.factor(cts_assault_mutual),
+    cts_assault_mutual = relevel(cts_assault_mutual, 'Neither')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_mutual
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Mutual Assault')
+
+complete %>%
+  mutate(
+    cts_sex_mutual = case_when(
+      cts_sex_mutual == 0 ~ 'Neither',
+      cts_sex_mutual == 1 ~ 'Male Only',
+      cts_sex_mutual == 2 ~ 'Female Only',
+      cts_sex_mutual == 3 ~ 'Both'
+    ),
+    cts_sex_mutual = as.factor(cts_sex_mutual),
+    cts_sex_mutual = relevel(cts_sex_mutual, 'Neither')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_mutual
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Mutual Sexual Cohesion')
+```
+
+### CTS2S Internal Reliability
+
+-   authors describe that internal reliability is not appropriate for the `CTS2S` measure.
+
+# References
