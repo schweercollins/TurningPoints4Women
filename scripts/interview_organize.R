@@ -1,17 +1,16 @@
 library(tidyverse)
 
 interview <-
-# read_csv('C:/Users/cpppe/Desktop/github_projects/
-  # tpwdata_fork/jp_files/interview.csv') %>%
-  read_csv('D:/delete_when_done/interview.csv') %>%
+  read_csv('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_files/interview.csv') %>%
+  # read_csv('D:/delete_when_done/interview.csv') %>%
   mutate(id = assessment_screen_2) %>%
   select(-matches('^pct')) %>%
   mutate(
     id = case_when(
       id == 'av' ~ 'P901',
       TRUE ~ id
-    )
-  ) %>%
+      )
+    ) %>%
   filter(id != 'AG400',
          id != 'K000',
          id != 'F000',
@@ -30,16 +29,13 @@ inter_data <-
   full_join(inter_data, p831_inter)
 
 maria_file <-
-  # rio::import('C:/Users/cpppe/Desktop/github_projects/
-              # TurningPoints4Women/do_not_push/GLOINFO_DOB.SAV') %>%
-  rio::import('D:/delete_when_done/GLOINFO_DOB.SAV') %>%
+  rio::import('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/GLOINFO_DOB.SAV') %>%
+  # rio::import('D:/delete_when_done/GLOINFO_DOB.SAV') %>%
   janitor::clean_names()
 
 child_history <-
-# readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/
-# TurningPoints4Women/do_not_push/
-# full_pregnancy_child_history.xlsx') %>%
-  readxl::read_excel('D:/delete_when_done/full_pregnancy_child_history.xlsx') %>%
+readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/full_pregnancy_child_history.xlsx') %>%
+  # readxl::read_excel('D:/delete_when_done/full_pregnancy_child_history.xlsx') %>%
   janitor::clean_names()
 
 ex <- inter_data[, colSums(is.na(inter_data)) != nrow(inter_data)]
@@ -862,18 +858,22 @@ ex %>%
   ) %>%
   pivot_longer(
     cols = -id,
-    names_to = 'type_of_kid',
-    values_to = 'yes_no_kid'
+    names_to = 'type_of_kiddo',
+    values_to = 'yes_kiddo'
   ) %>%
-  filter(yes_no_kid == 1) %>%
-  group_by(id, type_of_kid) %>%
-  count(yes_no_kid) %>%
-  ungroup() %>% View()
-  group_by(id) %>%
-  summarize(
-    total_num_kids = sum(n)
-    ) %>%
-  ungroup()
+  filter(yes_kiddo == 1) %>%
+  group_by(id, type_of_kiddo) %>%
+  count(yes_kiddo) %>%
+  ungroup() %>%
+  pivot_wider(
+    names_from = type_of_kid,
+    values_from = yes_kiddo
+  )
+  # group_by(id) %>%
+  # summarize(
+  #   total_num_kids = sum(n)
+  #   ) %>%
+  # ungroup()
 
 # number of stepchildren
 comb_long_step <-

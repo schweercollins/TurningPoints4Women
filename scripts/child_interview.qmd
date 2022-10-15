@@ -26,21 +26,42 @@ interview <- read_csv('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_fi
     id = assessment_screen_2,
     wave = 'tp'
     ) %>%
-  select(-matches('^pct')) %>%
+  select(
+    -matches('^pct')
+    ) %>%
   mutate(
     id = case_when(
       id == 'av' ~ 'P901',
       TRUE ~ id
     )
   ) %>%
-  filter(id != 'AG400',
-         id != 'K000',
-         id != 'F000',
-         id != 'P100',
-         id != '65973269',
-         id != 'P831')
+  filter(
+    id != 'AG400',
+    id != 'K000',
+    id != 'F000',
+    id != 'P100',
+    id != '65973269'
+         )
 
-maria_file <- rio::import('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_files/GLOINFO_DOB.SAV') %>%
+p831_inter <- interview %>%
+  filter(id == 'P831') %>%
+  filter(assessment_screen == '11/30/2021')
+
+inter_data <-
+  interview %>%
+  filter(id != 'P831')
+
+inter_data <-
+  full_join(inter_data, p831_inter)
+
+maria_file <-
+  rio::import('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/GLOINFO_DOB.SAV') %>%
+  # rio::import('D:/delete_when_done/GLOINFO_DOB.SAV') %>%
+  janitor::clean_names()
+
+child_history <-
+readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/full_pregnancy_child_history.xlsx') %>%
+  # readxl::read_excel('D:/delete_when_done/full_pregnancy_child_history.xlsx') %>%
   janitor::clean_names()
 ```
 
@@ -53,8 +74,6 @@ remove_df <- remove_df[ - as.numeric(which(apply(remove_df, 2, var) == 0))]
 ```
 
 ### Meaningful Names (Hopefully)
-
--   commented out columns are to show the names and what they correspond to
 
 -   JP Notes:
 
@@ -748,6 +767,11 @@ remove_df <-
 ```{r}
 comb_long_preg <-
   remove_df %>%
+  select(
+    id,
+    matches('preg_result$'),
+    curr_preg
+  ) %>% 
   pivot_longer(
     cols = matches('preg_result$'),
     names_to = 'preg_result_name',
@@ -772,16 +796,73 @@ comb_long_preg <-
       TRUE ~ NA_character_
     )
   ) %>% 
-  select(
-    id,
-    times_preg,
-    preg_result,
-    preg_result_name,
-    curr_preg
-  ) %>% 
   arrange(id)
 
+new_births_table <- comb_long_preg %>%
+  drop_na(
+    preg_result,
+    curr_preg
+    ) %>%
+  group_by(id) %>%
+  count(preg_result_name, preg_result, curr_preg) %>%
+  ungroup() %>%
+  arrange(id) %>%
+  mutate(
+    new_birth = case_when(
+    preg_result == 'birth' ~ 1,
+    preg_result == 'multiple_birth' ~ 2,
+    !preg_result %in% c('birth', 'multiple_birth') ~ 0,
+    TRUE ~ 0
+    ),
+    new_birth_bi = case_when(
+      preg_result %in% c('birth', 'multiple_birth') ~ 1,
+      !preg_result %in% c('birth', 'multiple_birth') ~ 0,
+      TRUE ~ 0
+    )
+  ) %>%
+  group_by(id) %>%
+  summarize(
+    new_birth_counts = sum(new_birth),
+    new_birth_counts_bi = sum(new_birth_bi)
+    ) %>%
+  ungroup()
+
+# comb_long_preg %>%
+#   drop_na(
+#     preg_result,
+#     curr_preg
+#   ) %>%
+#   group_by(id) %>%
+#   count(preg_result_name, preg_result, curr_preg) %>%
+#   ungroup() %>%
+#   arrange(id) %>%
+#   mutate(
+#     new_birth = case_when(
+#       preg_result %in% c('birth', 'multiple_birth') ~ 1,
+#       !preg_result %in% c('birth', 'multiple_birth') ~ 0,
+#       TRUE ~ 0
+#     )
+#   ) %>%
+#   summarize(
+#     total_birth_counts = sum(new_birth)
+#   )
+```
+
+```{r}
+new_births_table %>% 
+  janitor::adorn_totals(where = 'row') %>% 
+  gt::gt()
+
+comb_long_preg %>%
+  count(preg_result) %>%
+  drop_na() %>% 
+  gt::gt()
+
 comb_long_preg %>% 
+  group_by(id, preg_result) %>% 
+  summarize(preg_result_count = n()) %>% 
+  ungroup() %>% 
+  drop_na() %>% 
   gt::gt()
 ```
 
@@ -790,98 +871,66 @@ comb_long_preg %>%
 ```{r}
 comb_long_numkid <-
 remove_df %>%
-  pivot_longer(
-    cols = c(matches('name$')),
-    names_to = 'kid_name',
-    values_to = 'actual_name'
-  ) %>%
-  drop_na(kid_name, actual_name) %>%
-  group_by(id, kid_name) %>%
-  count(actual_name) %>%
-  ungroup() %>%
-  group_by(id) %>%
-  summarize(
-    total_num_kids = sum(n)
-    ) %>%
-  ungroup() 
-
-comb_long_numkid %>% 
-  gt::gt()
-```
-
-### Number of All Stepchildren
-
-```{r}
-comb_long_step <-
-remove_df %>%
-  pivot_longer(
-    cols = c(matches('name$')),
-    names_to = 'kid_name',
-    values_to = 'actual_name'
-  ) %>%
-  drop_na(kid_name, actual_name) %>%
-  group_by(id, kid_name) %>%
-  mutate(
-    kid_count = n()
-         ) %>%
-  ungroup() %>%
   select(
     id,
-    kid_name,
-    actual_name,
-    kid_count,
-    sc_parent_num
-    ) %>%
-  filter(
-    str_detect(
-      kid_name,
-      '^other_sc'
-    )
-) %>% 
-  group_by(id, kid_name) %>%
-  summarize(
-    total_stepkid = kid_count + sc_parent_num
-    ) %>%
-  ungroup()
-
-comb_long_step %>% 
-  arrange(id) %>% 
-  gt::gt()
-
-```
-
-### Number of Other Children
-
-```{r}
-comb_long_other <-
-remove_df %>%
-  pivot_longer(
-    cols = c(matches('name$')),
-    names_to = 'kid_name',
-    values_to = 'actual_name'
+    matches('name$'),
+    matches('^pc.*birth_04'),
+    matches('^pc.*custody'),
+    matches('^pc.*lost_custody'),
+    matches('sm_.*welfare_contact')
   ) %>%
-  drop_na(kid_name, actual_name) %>%
-  group_by(id, kid_name) %>%
-  count(actual_name) %>%
-  ungroup() %>%
-  filter(
-    str_detect(
-      kid_name,
-      '^other'
+  mutate(
+    across(
+      .cols = c(
+        matches('^bc\\d'),
+        matches('^other_sc\\d'),
+        matches('^other_kid\\d')
+        ),
+      .fns = ~case_when(
+        is.na(.x) ~ 0,
+        TRUE ~ 1
+      ),
+      .names = '{.col}_num'
     ),
-    !str_detect(
-      kid_name,
-      '_sc\\d_'
+    across(
+      .cols = c(matches('sm_sc\\d_welfare_contact')),
+      .fns = ~case_when(
+        .x == 4 ~ 0,
+        TRUE ~ 1
+      ),
+      .names = '{.col}_num'
+    ),
+    across(
+      .cols = c(matches('pc_bc\\d_birth_04')),
+      .fns = ~case_when(
+        .x == 3 ~ 0,
+        TRUE ~ 1
+      ),
+      .names = '{.col}_num'
     )
   ) %>% 
-  group_by(id) %>%
-  summarize(
-    total_other_kid = sum(n,
-    na.rm = TRUE)
-            ) %>% 
-  ungroup()
+    select(
+      id,
+      matches('num$')
+    ) %>% 
+  pivot_longer(
+    cols = c(matches('num$')),
+    names_to = 'type_of_kiddo',
+    values_to = 'yes_kiddo'
+  ) %>% 
+  filter(yes_kiddo == 1) %>%
+  group_by(id, type_of_kiddo) %>%
+  count(yes_kiddo) %>%
+  ungroup() %>% 
+  pivot_wider(
+    names_from = type_of_kiddo,
+    values_from = yes_kiddo
+  )
 
-comb_long_other %>% 
+comb_long_numkid %>% 
+  select(-n) %>% 
+  janitor::adorn_totals(where = 'col') %>% 
+  relocate(Total, .after = id) %>% 
   gt::gt()
 ```
 
@@ -890,34 +939,57 @@ comb_long_other %>%
 ```{r}
 comb_long_age <-
 remove_df %>%
-  pivot_longer(
-    cols = c(matches('age_preg$')),
-    names_to = 'kid_number',
-    values_to = 'age_preg'
-  ) %>%
-  drop_na(kid_number, age_preg) %>%
-  group_by(id, kid_number) %>%
-  count(age_preg) %>%
-  ungroup() %>%
-  separate(
-    col = kid_number,
-    into = c('birth_number',
-             'tc_remove',
-             'age_remove',
-             'preg_remove')
-  ) %>%
-  relocate(
-    birth_number,
-    .after = id
-  ) %>%
   select(
-    -matches(
-      'remove$'
-    ),
-    -n
-  )
-
+    id,
+    matches('preg_result$'),
+    matches('age_preg$')
+  ) %>% 
+  mutate(
+    across(
+      .cols = matches('preg_result$'),
+      .fns = ~case_when(
+        .x == 1 ~ 'still_preg',
+        .x == 2 ~ 'miscarriage',
+        .x == 3 ~ 'abortion',
+        .x == 4 ~ 'birth',
+        .x == 5 ~ 'multiple_birth',
+        .x == 6 ~ 'stillbirth',
+        .x == 7 ~ 'false_pos',
+        .x == 8 ~ 'decline',
+        TRUE ~ NA_character_
+      )
+    )
+  ) %>% 
+  # filter(
+  #   if_any(
+  #     .cols = matches('preg_result$'),
+  #     .fns = ~str_detect(.x, 'birth')
+  #     )
+  # ) %>% 
+  arrange(
+    across(
+      .cols = matches('preg_result$')
+    )
+  ) %>% 
+  pivot_longer(
+    cols = c(matches('preg_result$')),
+    names_to = 'preg_result',
+    values_to = 'preg_result_value'
+  ) %>% 
+  drop_na(preg_result_value) %>%
+  # filter(preg_result_value == 'birth') %>% # use this to only see the births
+  distinct(
+    id,
+    preg_result,
+    preg_result_value,
+    .keep_all = TRUE
+    ) %>% 
+  relocate(preg_result, .after = id) %>% 
+  relocate(preg_result_value, .after = preg_result) %>% 
+  arrange(id)
+  
 comb_long_age %>% 
+  arrange(id) %>% 
   gt::gt()
 ```
 
@@ -926,8 +998,9 @@ comb_long_age %>%
 ```{r}
 comb_long_race <-
 remove_df %>%
-  pivot_longer(
-    cols = c(matches('white$'),
+  select(
+    id,
+    matches('white$'),
              matches('black$'),
              matches('amer_ind$'),
              matches('samoan$'),
@@ -939,22 +1012,40 @@ remove_df %>%
              matches('native_hawaii_all$'),
              matches('other_asian_all$'),
              matches('asian_indian$'),
-             matches('text$')),
+             matches('text$')
+  ) %>% 
+  pivot_longer(
+    cols = -id,
     names_to = 'race_name',
     values_to = 'race'
   ) %>%
   drop_na(race_name, race) %>%
-  select(
-    id,
-    race_name,
-    race
+  mutate(
+    race_name = str_replace(
+      race_name,
+      'pc_bc',
+      'born'
+    ),
+    race_name = str_replace(
+      race_name,
+      'bc',
+      'new_birth'
+    ),
+    race_name = str_replace(
+      race_name,
+      'other_sc',
+      'other_step_child'
+    ),
+    race_name = str_replace(
+      race_name,
+      'sm_sc',
+      'step_mother_step_child'
+    )
     ) %>% 
   arrange(id) 
 
 comb_long_race %>% 
-  group_by(id, race_name, race) %>% 
-  count() %>% 
-  arrange(id) %>% 
+  arrange(id, race_name) %>% 
   gt::gt()
 
 ```
@@ -995,21 +1086,31 @@ assess_date_sub <-
 ### Names
 
 ```{r, eval = FALSE}
-# remove_df %>%
-#   pivot_longer(
-#     cols = c(matches('name$')),
-#     names_to = 'kid_name',
-#     values_to = 'actual_name'
-#   ) %>%
-#   drop_na(kid_name, actual_name) %>%
-#   group_by(id, kid_name) %>%
-#   count(actual_name) %>%
-#   ungroup() %>%
-#   group_by(id) %>%
-#   summarize(
-#     total_num_kids = sum(n)
-#     ) %>%
-#   ungroup() 
+kiddo_name <- 
+  remove_df %>% # there is no column with biological children that are already born
+  select(
+    id,
+    matches('name$')
+  ) %>% 
+  pivot_longer(
+    cols = c(matches('name$')),
+    names_to = 'kid_name',
+    values_to = 'actual_name'
+  ) %>%
+  drop_na(kid_name, actual_name) %>%
+  arrange(id)
+
+kiddo_name <-
+  kiddo_name %>% 
+separate(
+    kid_name,
+    into = c('kiddo_name', 'remove'),
+    sep = '_(?=[^_]+$)'
+  ) %>% 
+    select(-remove)
+
+kiddo_name %>% 
+  gt::gt()
 ```
 
 ### Children Date of Birth
@@ -1017,23 +1118,62 @@ assess_date_sub <-
 ```{r}
 comb_long_dob <-
 remove_df %>% 
+  select(
+    id,
+    matches('dob$')
+  ) %>%
   pivot_longer(
-      cols = matches('dob$'),
+      cols = -id,
       names_to = 'dob_name',
       values_to = 'dob'
       ) %>%
   drop_na(dob_name, dob) %>% 
-  select(
+  distinct(
     id,
-    dob_name,
-    dob
-  ) %>% 
-  distinct() %>% 
-  group_by(id) %>% 
-  count(dob_name, dob) %>% 
+    .keep_all = TRUE
+    ) %>% 
   arrange(id)
 
+dob_name <-
 comb_long_dob %>% 
+  separate(
+    dob_name,
+    into = c('kiddo_name', 'remove'),
+    sep = '_(?=[^_]+$)'
+  ) %>% 
+  select(-remove)
+
+
+comb_long_dob %>% 
+  gt::gt()
+
+name_dob <-
+  right_join(
+    dob_name,
+    kiddo_name
+  )
+
+name_dob <- 
+  name_dob %>% 
+  mutate(
+    kiddo_name = str_replace(
+      kiddo_name,
+      'bc',
+      'new_birth'
+    ),
+    kiddo_name = str_replace(
+      kiddo_name,
+      'other_sc',
+      'other_step_child'
+    ),
+    kiddo_name = str_replace(
+      kiddo_name,
+      'sm_sc',
+      'step_mother_step_child'
+    )
+  )
+
+name_dob %>% 
   gt::gt()
 ```
 
@@ -1114,6 +1254,10 @@ comb_long_eth %>%
 ```{r}
 comb_long_gender <-
   remove_df %>%
+  select(
+    id,
+    matches('gender_id$')
+  ) %>% 
   pivot_longer(
     cols = matches('gender_id$'),
     names_to = 'gender_name',
@@ -1140,11 +1284,41 @@ comb_long_gender <-
     gender_id
   ) %>% 
   distinct() %>%
-  arrange(id)
+  arrange(id) %>% 
+  separate(
+    col = gender_name,
+    into = c('kiddo_name', 'rest', 'remove'),
+    sep = '_'
+  ) %>% 
+  select(-remove) %>% 
+  unite(
+    col = 'kiddo_name',
+    c(kiddo_name, rest),
+    sep = '_'
+  ) %>% 
+  mutate(
+    kiddo_name = str_remove(
+      kiddo_name,
+      '_gender'
+    ),
+    kiddo_name = str_replace(
+      kiddo_name,
+      'bc',
+      'new_birth'
+    ),
+    kiddo_name = str_replace(
+      kiddo_name,
+      'other_sc',
+      'other_step_child'
+    ),
+    kiddo_name = str_replace(
+      kiddo_name,
+      'sm_sc',
+      'step_mother_step_child'
+    )
+  )
 
 comb_long_gender %>% 
-  # group_by(id) %>% 
-  # count(gender_name, gender_id) %>% 
   gt::gt()
 ```
 
@@ -1153,16 +1327,34 @@ comb_long_gender %>%
 ```{r}
 comb_long_custody <-
   remove_df %>%
+  select(
+    id,
+    matches('\\d_custody$'),
+    matches('living_with$')
+  ) %>% 
+  mutate(
+    sm_sc1_living_with = case_when(
+      sm_sc1_living_with == 'Yes' ~ 1,
+      sm_sc1_living_with == 'No' ~ 2,
+      sm_sc1_living_with == 'Decline' ~ 3,
+      is.na(sm_sc1_living_with) ~ NA_real_
+    ),
+    across(
+      .cols = matches('living_with$'),
+      .fns = ~case_when(
+        .x == 1 ~ 'Yes',
+        .x == 2 ~ 'No',
+        .x == 3 ~ 'Decline',
+        .x == 4 ~ NA_character_,
+        TRUE ~ NA_character_
+      )
+    )
+  ) %>%
   pivot_longer(
     cols = matches('\\d_custody$'),
     names_to = 'custody_name',
     values_to = 'custody'
   ) %>%
-  select(
-    id,
-    custody_name,
-    custody
-  ) %>% 
   mutate(
     custody = case_when(
       custody == 1 ~ 'tc',
@@ -1176,10 +1368,16 @@ comb_long_custody <-
       custody == 9 ~ 'state',
       custody == 10 ~ 'don\'t know',
       custody == 11 ~ 'decline',
-      TRUE ~ NA_character_
+      custody == 12 ~ NA_character_,
+      TRUE ~ 'no_info_input'
     )
   ) %>% 
-    drop_na(custody_name, custody) %>% 
+  pivot_longer(
+    cols = matches('living_with$'),
+    names_to = 'kiddo_living',
+    values_to = 'kiddo_live_yesno'
+  ) %>% 
+  drop_na(custody, kiddo_live_yesno) %>% 
   arrange(id)
 
 comb_long_custody %>% 
