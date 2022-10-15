@@ -1,6 +1,9 @@
 library(tidyverse)
 
-interview <- read_csv('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_files/interview.csv') %>%
+interview <-
+# read_csv('C:/Users/cpppe/Desktop/github_projects/
+  # tpwdata_fork/jp_files/interview.csv') %>%
+  read_csv('D:/delete_when_done/interview.csv') %>%
   mutate(id = assessment_screen_2) %>%
   select(-matches('^pct')) %>%
   mutate(
@@ -26,10 +29,17 @@ inter_data <-
 inter_data <-
   full_join(inter_data, p831_inter)
 
-maria_file <- rio::import('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/GLOINFO_DOB.SAV') %>%
+maria_file <-
+  # rio::import('C:/Users/cpppe/Desktop/github_projects/
+              # TurningPoints4Women/do_not_push/GLOINFO_DOB.SAV') %>%
+  rio::import('D:/delete_when_done/GLOINFO_DOB.SAV') %>%
   janitor::clean_names()
 
-child_history <- readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/full_pregnancy_child_history.xlsx') %>%
+child_history <-
+# readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/
+# TurningPoints4Women/do_not_push/
+# full_pregnancy_child_history.xlsx') %>%
+  readxl::read_excel('D:/delete_when_done/full_pregnancy_child_history.xlsx') %>%
   janitor::clean_names()
 
 ex <- inter_data[, colSums(is.na(inter_data)) != nrow(inter_data)]
@@ -776,7 +786,7 @@ comb_long_preg %>%
   ) %>%
   group_by(id) %>%
   summarize(
-    birth_counts = sum(new_birth)
+    new_birth_counts = sum(new_birth)
     ) %>%
   ungroup()
 
@@ -797,7 +807,7 @@ comb_long_preg %>%
     )
   ) %>%
   summarize(
-    birth_counts = sum(new_birth)
+    total_birth_counts = sum(new_birth)
   )
 
 comb_long_preg %>%
@@ -809,21 +819,56 @@ comb_long_preg %>%
 # comb_long_numkid <-
 ex %>%
   select(
+    id,
     matches('name$'),
     matches('^pc.*birth_04'),
     matches('^pc.*custody'),
     matches('^pc.*lost_custody'),
     matches('sm_.*welfare_contact')
-  ) %>% # us the other variables to count who is missing and who is not. If there is a missing response count it as 0
-  pivot_longer(
-    cols = c(matches('name$')),
-    names_to = 'kid_name',
-    values_to = 'actual_name'
   ) %>%
-  drop_na(kid_name, actual_name) %>%
-  group_by(id, kid_name) %>%
-  count(actual_name) %>%
-  ungroup() %>%
+  mutate(
+    across(
+      .cols = c(
+        matches('^bc\\d'),
+        matches('^other_sc\\d'),
+        matches('^other_kid\\d')
+        ),
+      .fns = ~case_when(
+        is.na(.x) ~ 0,
+        TRUE ~ 1
+      ),
+      .names = '{.col}_num'
+    ),
+    across(
+      .cols = c(matches('sm_sc\\d_welfare_contact')),
+      .fns = ~case_when(
+        .x == 4 ~ 0,
+        TRUE ~ 1
+      ),
+      .names = '{.col}_num'
+    ),
+    across(
+      .cols = c(matches('pc_bc\\d_birth_04')),
+      .fns = ~case_when(
+        .x == 3 ~ 0,
+        TRUE ~ 1
+      ),
+      .names = '{.col}_num'
+    )
+  ) %>%
+  select(
+    id,
+    matches('num$')
+  ) %>%
+  pivot_longer(
+    cols = -id,
+    names_to = 'type_of_kid',
+    values_to = 'yes_no_kid'
+  ) %>%
+  filter(yes_no_kid == 1) %>%
+  group_by(id, type_of_kid) %>%
+  count(yes_no_kid) %>%
+  ungroup() %>% View()
   group_by(id) %>%
   summarize(
     total_num_kids = sum(n)
