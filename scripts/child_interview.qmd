@@ -1364,6 +1364,7 @@ comb_long_custody <-
     matches('\\d_custody$'),
     matches('living_with$')
   ) %>% 
+    # filter(id == 'HR119') %>% View()
   mutate(
     sm_sc1_living_with = case_when(
       sm_sc1_living_with == 'Yes' ~ 1,
