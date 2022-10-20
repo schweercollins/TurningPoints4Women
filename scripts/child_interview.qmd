@@ -1085,7 +1085,7 @@ assess_date_sub <-
 
 ### Names
 
-```{r, eval = FALSE}
+```{r}
 kiddo_name <- 
   remove_df %>% # there is no column with biological children that are already born
   select(
@@ -1207,15 +1207,21 @@ name_dob %>%
 ### Are the kiddos Latino?
 
 ```{r}
-# comb_long_lat <-
-  remove_df %>% 
+comb_long_lat <-
+  remove_df %>%
+  select(
+    id,
+    matches('latino$'),
+    matches('mexican$'),
+    matches('latino_other$'),
+    matches('latino_other_text$'),
+    matches('puerto_rican$'),
+    matches('cuban$'),
+    matches('latino_dontknow$')
+  ) %>% 
   mutate(
     across(
-      .cols = c(matches('^bc\\d_latino'),
-                matches('pc_bc\\d_latino'),
-                matches('sm_sc\\d_latino'),
-                matches('other_sc\\d_latino'),
-                matches('other_kid\\d_latino')),
+      .cols = c(matches('latino$')),
       .fns = ~case_when(
         .x == 1 ~ 'Yes',
         .x == 2 ~ 'No',
@@ -1227,17 +1233,62 @@ name_dob %>%
   ) %>% 
   pivot_longer(
     cols = matches('latino$'),
-    names_to = 'kid_num_latino',
+    names_to = 'are_latino',
       values_to = 'latino_yn'
   ) %>% 
-  drop_na(kid_num_latino, latino_yn) %>% 
-  select(
-    id,
-    kid_num_latino,
-    latino_yn
+  pivot_longer(
+    cols = -c(matches('latino$'),
+              id,
+              latino_yn),
+    names_to = 'kiddo_latino',
+    values_to = 'specific_latino'
   ) %>% 
-  distinct() %>%
-  arrange(id)
+  drop_na(
+  latino_yn,
+  specific_latino
+  ) %>%
+  separate(
+    are_latino,
+    into = c('type', 'number', 'remove'),
+    sep = '_'
+  ) %>% 
+  select(-remove) %>% 
+  filter(number != 'latino') %>% 
+  unite(
+    'are_latino',
+    c('type', 'number'),
+    sep = '_'
+  ) %>% 
+  mutate(kiddo_latino2 = kiddo_latino) %>% 
+  separate(
+    kiddo_latino2,
+    into = c('type', 'number', 'remove'),
+    sep = '_'
+  ) %>% 
+  select(-remove) %>% 
+  filter(number != 'latino') %>% 
+  unite(
+    'kiddo_latino2',
+    c('type', 'number'),
+    sep = '_'
+  ) %>% 
+  relocate(
+    kiddo_latino2,
+    .after = kiddo_latino
+    ) %>% 
+  mutate(
+    same_kid_question = case_when(
+      are_latino == kiddo_latino2 ~ TRUE,
+      are_latino != kiddo_latino2 ~ FALSE,
+      TRUE ~ FALSE
+    )
+  ) %>% 
+  filter(same_kid_question == TRUE) %>% 
+  # distinct(
+  #   id,
+  #   .keep_all = TRUE
+  # ) %>%
+  arrange(id) 
 
 comb_long_lat %>% 
   gt::gt()
