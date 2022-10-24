@@ -1,0 +1,1610 @@
+---
+title: "Measure Items"
+author: "Jonathan A. Pedroza, PhD"
+format: 
+  html:
+    code-fold: true
+    toc: true
+    toc-location: left
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
+
+theme_set(theme_light())
+```
+
+```{r}
+source('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/functions/codebook_fun.R')
+
+path <- 'C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push'
+
+data <- read_csv(path)
+```
+
+## BSI Item Descriptive Statistics
+
+BSI Prompt: Below is a list of problems and complaints that people sometimes have. Please read each one carefully. After you have done so, please circle the number to the right that best describes HOW MUCH DISCOMFORT THAT PROBLEM HAS CAUSED YOU DURING THE PAST WEEK INCLUDING TODAY.
+
+During the past week, how much were you bothered by...
+
+bsi1: Nervousness or shakiness inside?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi1,
+    decline = TRUE
+  )
+```
+
+bsi2: Faintness or dizziness?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi2,
+    decline = TRUE
+  )
+```
+
+bsi3: Pains in heart or chest?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi3,
+    decline = TRUE
+  )
+```
+
+bsi4: Thoughts of ending your life?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi4,
+    decline = TRUE
+  )
+```
+
+bsi5: (Feeling) Suddenly scared for no reason?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi5,
+    decline = TRUE
+  )
+```
+
+bsi6: Feeling lonely?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi6,
+    decline = TRUE
+  )
+```
+
+bsi7: Feeling blue?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi7,
+    decline = TRUE
+  )
+```
+
+bsi8: Feeling no interest in things?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi8,
+    decline = TRUE
+  )
+```
+
+bsi9: Feeling fearful?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi9,
+    decline = TRUE
+  )
+```
+
+bsi10: Nausea or upset stomach?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi10,
+    decline = TRUE
+  )
+```
+
+bsi11: Trouble getting your breath?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi11,
+    decline = TRUE
+  )
+```
+
+bsi12: Hot or cold spells?
+
+```{r}
+
+bsi %>%
+  prop_fun_plot(
+    x = bsi12,
+    decline = TRUE
+  )
+```
+
+bsi13: Numbness or tingling in parts of your body?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi13,
+    decline = TRUE
+  )
+```
+
+bsi14: Feeling hopeless about the future?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi14,
+    decline = TRUE
+  )
+```
+
+bsi15: Feeling weak in parts of your body?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi15,
+    decline = TRUE
+  )
+```
+
+bsi16: Feeling tense or keyed up?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi16,
+    decline = TRUE
+  )
+```
+
+bsi17: Spells of terror or panic?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi17,
+    decline = TRUE
+  )
+```
+
+bsi18: Feeling so restless you couldn't sit still?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi18,
+    decline = TRUE
+  )
+```
+
+bsi19: Feelings of worthlessness?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi19,
+    decline = TRUE
+  )
+```
+
+### CESD Item Descriptive Statistics
+
+CESD Prompt: Circle the number for each statement that best describes how often you felt this way DURING THE PAST WEEK:
+
+-   c1: I was bothered by things that usually don't bother me
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c1,
+    decline = TRUE
+  )
+```
+
+-   c2: I did not feel like eating; my appetite was poor
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c2,
+    decline = TRUE
+  )
+```
+
+-   c3: I felt that I could not shake off the blues even with help from my family or friends
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c3,
+    decline = TRUE
+  )
+```
+
+-   c4: I felt that I was just as good as other people (Reverse Coded)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c4_r,
+    decline = TRUE
+  )
+```
+
+-   c5: I had trouble keeping my mind on what I was doing
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c5,
+    decline = TRUE
+  )
+```
+
+-   c6: I felt depressed
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c6,
+    decline = TRUE
+  )
+```
+
+-   c7: I felt that everything I did was an effort
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c7,
+    decline = TRUE
+  )
+```
+
+-   c8: I felt hopeful about the future (Reverse Coded)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c8_r,
+    decline = TRUE
+  )
+```
+
+-   c9: I thought my life had been a failure
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c9,
+    decline = TRUE
+  )
+```
+
+-   c10: I felt fearful
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c10,
+    decline = TRUE
+  )
+```
+
+-   c11: My sleep was restless
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c11,
+    decline = TRUE
+  )
+```
+
+-   c12: I was happy (Reverse Coded)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c12_r,
+    decline = TRUE
+  )
+```
+
+-   c13: I talked less than usual
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c13,
+    decline = TRUE
+  )
+```
+
+-   c14: I felt lonely
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c14,
+    decline = TRUE
+  )
+```
+
+-   c15: People were unfriendly
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c15,
+    decline = TRUE
+  )
+```
+
+-   c16: I enjoyed life (Reverse Coded)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c16_r,
+    decline = TRUE
+  )
+```
+
+-   c17: I had crying spells
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c17,
+    decline = TRUE
+  )
+```
+
+-   c18: I felt sad
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c18,
+    decline = TRUE
+  )
+```
+
+-   c19: I felt that people disliked me
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c19,
+    decline = TRUE
+  )
+```
+
+-   c20: I could not "get going"
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c20,
+    decline = TRUE
+  )
+```
+
+## CESD Additional Item Descriptive Statistics
+
+-   c21: In the past 6 months, have you ever thought about killing yourself? (Suicide Ideation)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c21,
+    decline = TRUE
+  )
+```
+
+-   c22: In the past 6 months have you thought often about killing yourself? (Suicide Ideation)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c22,
+    decline = TRUE
+  )
+```
+
+-   c23: In the past 6 months, did you have a plan for killing yourself? (Suicide Plan)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c23,
+    decline = TRUE
+  )
+```
+
+-   c24: In the past 6 months, have you tried to kill yourself? (Suicide Attempt)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c24,
+    decline = TRUE
+  )
+```
+
+
+## CIQ Descriptive Statistics
+
+ciq1: I have become depressed because of the Coronavirus (COVID-19).
+
+```{r}
+ciq %>%
+  prop_fun_plot(
+    x = ciq1,
+    decline = TRUE
+  )
+```
+
+ciq2: The Coronavirus (COVID-19) outbreak has impacted my psychological health negatively.
+
+```{r}
+ciq %>%
+  prop_fun_plot(
+    x = ciq2,
+    decline = TRUE
+  )
+```
+
+ciq3: The Coronavirus (COVID-19) pandemic has NOT made me feel any worse than I did.
+
+```{r}
+ciq %>% 
+  prop_fun_plot(
+    x = ciq3_r,
+    decline = TRUE
+  )
+```
+
+## DAST Item Description
+
+-   d00: Screener for whether the TC is currently pregnant or not ()
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = preg_screen,
+    decline = TRUE
+  )
+```
+
+-   d1a: Have you used drugs other than those required for medical reasons in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d1a,
+    decline = TRUE
+  )
+```
+
+-   d2a: Have you abused prescription drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d2a,
+    decline = TRUE
+  )
+```
+
+-   d2b: Have you abused prescription drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d2b,
+    decline = TRUE
+  )
+```
+
+-   d3: Have you abused more than one drug at a time in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d3,
+    decline = TRUE
+  )
+```
+
+-   d4: Could you get through the week without using drugs in the last 6 months? (Reverse Coded)
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d4_r,
+    decline = TRUE
+  )
+```
+
+-   d5: Were you always able to stop using drugs when you wanted to in the last 6 months? (Reverse Coded)
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d5_r,
+    decline = TRUE
+  )
+```
+
+-   d6: Have you ever had "blackouts" or "flashbacks" as a result of drug use in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d6,
+    decline = TRUE
+  )
+```
+
+-   d7: Have you ever felt bad or guilty about your drug use in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d7,
+    decline = TRUE
+  )
+```
+
+-   d8: Has your partner/spouse (or parents) ever complained about your involvement with drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d8,
+    decline = TRUE
+  )
+```
+
+-   d9: Has (your) drug abuse created problems between you and your partner/spouse or your parents in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d9,
+    decline = TRUE
+  )
+```
+
+-   d10: Have you lost friends because of your use of drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d10,
+    decline = TRUE
+  )
+```
+
+-   d11: Have you neglected your family because of your use of drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d11,
+    decline = TRUE
+  )
+```
+
+-   d12: Have you been in trouble at work because of your use of drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d12,
+    decline = TRUE
+  )
+```
+
+-   d13: Have you lost a job because of drug abuse in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d13,
+    decline = TRUE
+  )
+```
+
+-   d14: Have you gotten into fights when under the influence of drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d14,
+    decline = TRUE
+  )
+```
+
+-   d15: Have you engaged in illegal activities in order to obtain drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d15,
+    decline = TRUE
+  )
+```
+
+-   d16: Have you been arrested for possession of illegal drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d16,
+    decline = TRUE
+  )
+```
+
+-   d17: Have you experienced withdrawal symptoms (felt sick) when you stopped taking drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d17,
+    decline = TRUE
+  )
+```
+
+-   d18: Have you had medical problems as a result of your drug use(e.g., memory loss, hepatitis, convulsions, bleeding, etc.) in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d18,
+    decline = TRUE
+  )
+```
+
+-   d19: Have you gone to anyone for help for a drug problem in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d19,
+    decline = TRUE
+  )
+```
+
+-   d20: Have you been involved in a treatment program especially related to drug use in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d20,
+    decline = TRUE
+  )
+```
+
+## BCAP Item Descriptive Statistics
+
+-   q1: I am a happy person (reversed coded)
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q1_r,
+    decline = TRUE
+  )
+```
+
+-   q2: I know what is the right and wrong way to act (reverse coded)
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q2_r,
+    decline = TRUE
+  )
+```
+
+-   q3: People have caused me a lot of pain
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q3,
+    decline = TRUE
+  )
+```
+
+-   q4: I sometimes act without thinking
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q4,
+    decline = TRUE
+  )
+```
+
+-   q5: I am often lonely inside
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q5,
+    decline = TRUE
+  )
+```
+
+-   q6: My family fights a lot
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q6,
+    decline = TRUE
+  )
+```
+
+-   q7: Everything in a home should always be in its place
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q7,
+    decline = TRUE
+  )
+```
+
+-   q8: I often feel very upset
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q8,
+    decline = TRUE
+  )
+```
+
+-   q9: Sometimes I have bad thoughts
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q9,
+    decline = TRUE
+  )
+```
+
+-   q10: I sometimes worry that I will not have enough to eat
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q10,
+    decline = TRUE
+  )
+```
+
+-   q11: I am easily upset by my problems
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q11,
+    decline = TRUE
+  )
+```
+
+-   q12: Sometimes I feel all alone in the world
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q12,
+    decline = TRUE
+  )
+```
+
+-   q13: My family has problems getting along
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q13,
+    decline = TRUE
+  )
+```
+
+-   q14: Children should never disobey
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q14,
+    decline = TRUE
+  )
+```
+
+-   q15: I sometimes lose my temper
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q15,
+    decline = TRUE
+  )
+```
+
+-   q16: I often feel worthless
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q16,
+    decline = TRUE
+  )
+```
+
+-   q17: My family has many problems
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q17,
+    decline = TRUE
+  )
+```
+
+-   q18: It is okay to let a child stay in dirty diapers for a while
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q18,
+    decline = TRUE
+  )
+```
+
+-   q19: I am often upset and do not know why
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q19,
+    decline = TRUE
+  )
+```
+
+-   q20: Children should be quiet and listen
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q20,
+    decline = TRUE
+  )
+```
+
+-   q21: I sometimes fail to keep all of my promises
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q21,
+    decline = TRUE
+  )
+```
+
+-   q22: I often feel very alone
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q22,
+    decline = TRUE
+  )
+```
+
+-   q23: My life is good (reverse coded)
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q23_r,
+    decline = TRUE
+  )
+```
+
+-   q24: I am often upset
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q24,
+    decline = TRUE
+  )
+```
+
+-   q25: Other people have made my life unhappy
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q25,
+    decline = TRUE
+  )
+```
+
+-   q26: I sometimes say bad words
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q26,
+    decline = TRUE
+  )
+```
+
+-   q27: I am often depressed
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q27,
+    decline = TRUE
+  )
+```
+
+-   q28: Children should not learn how to swim
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q28,
+    decline = TRUE
+  )
+```
+
+-   q29: My life is happy (reverse coded)
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q29_r,
+    decline = TRUE
+  )
+```
+
+-   q30: I sometimes worry that my needs will not be met
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q30,
+    decline = TRUE
+  )
+```
+
+-   q31: I often feel alone
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q31,
+    decline = TRUE
+  )
+```
+
+-   q32: A child needs very strict rules
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q32,
+    decline = TRUE
+  )
+```
+
+-   q33: Other people have made my life hard
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q33,
+    decline = TRUE
+  )
+```
+
+-   q34: People sometimes take advantage of me
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q34,
+    decline = TRUE
+  )
+```
+
+## DYADC Item Descriptive Statistics
+
+Most people have disagreements in their relationships. Please indicate below the approximate extent of agreement or disagreement between you and your partner for each item on the following list **thinking about the [past 6 months]{.underline}**. Please [circle one number]{.underline} for each question (please do not circle in between two numbers).
+
+-   e1: Handling family finances
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e1,
+    decline = TRUE
+  )
+```
+
+-   e2: Matters of recreation
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e2,
+    decline = TRUE
+  )
+```
+
+-   e3: Religious matters
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e3,
+    decline = TRUE
+  )
+```
+
+-   e4: Demonstrations of affection
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e4,
+    decline = TRUE
+  )
+```
+
+-   e5: Friends
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e5,
+    decline = TRUE
+  )
+```
+
+-   e6: Sex relations
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e6,
+    decline = TRUE
+  )
+```
+
+-   e7: Conventionality (correct or proper behavior)
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e7,
+    decline = TRUE
+  )
+```
+
+-   e8: Philosophy of life (the way you live your life)
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e8,
+    decline = TRUE
+  )
+```
+
+-   e9: Ways of dealing with parents or in-laws
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e9,
+    decline = TRUE
+  )
+```
+
+-   e10: Aims, goals, and things believed important
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e10,
+    decline = TRUE
+  )
+```
+
+-   e11: Amount of time spent together
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e11,
+    decline = TRUE
+  )
+```
+
+-   e12: Making major decisions
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e12,
+    decline = TRUE
+  )
+```
+
+-   e13: Household tasks
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e13,
+    decline = TRUE
+  )
+```
+
+-   e14: Leisure time and activities
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e14,
+    decline = TRUE
+  )
+```
+
+-   e15: Career decisions
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e15,
+    decline = TRUE
+  )
+```
+
+**Thinking about the past 6 months, how often...**
+
+-   e16: do you discuss or have you considered divorce, separation, or terminating your relationship?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e16,
+    decline = TRUE
+  )
+```
+
+-   e17: do you or your partner leave the house after a fight?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e17,
+    decline = TRUE
+  )
+```
+
+-   e18: in general, how often do you think that things between you and your partner are going well? (reverse coded)
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e18,
+    decline = TRUE
+  )
+```
+
+-   e19: do you confide in your partner? (reverse coded)
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e19,
+    decline = TRUE
+  )
+```
+
+-   e20: do you ever regret that you are dating/married/living together?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e20,
+    decline = TRUE
+  )
+```
+
+-   e21: do you and your partner quarrel?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e21,
+    decline = TRUE
+  )
+```
+
+-   e22: do you and your partner "get on each other's nerves"?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e22,
+    decline = TRUE
+  )
+```
+
+**In the past 6 months, how often...**
+
+-   e23: do you kiss your partner?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e23,
+    decline = TRUE
+  )
+```
+
+-   e24: do you and your partner engage in outside interests together?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e24,
+    decline = TRUE
+  )
+```
+
+**Thinking about the past 6 months, how often do you...**
+
+-   e25: have an interesting chat?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e25,
+    decline = TRUE
+  )
+```
+
+-   e26: laugh together?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e26,
+    decline = TRUE
+  )
+```
+
+-   e27: calmly discuss something?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e27,
+    decline = TRUE
+  )
+```
+
+-   e28: work together on a project?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e28,
+    decline = TRUE
+  )
+```
+
+**Please indicate if items below were problems in your relationships in the past few weeks.**
+
+-   e29: being too tired for sex.
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e29,
+    decline = TRUE
+  )
+```
+
+-   e30: not showing love.
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e30,
+    decline = TRUE
+  )
+```
+
+-   e31: Please circle the number that best describes the degree of happiness in your relationship.
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e31,
+    decline = TRUE
+  )
+```
+
+-   e32: Which of the following statements best describes how you feel about the future of your relationship? Please **circle one answer** only.
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e32,
+    decline = TRUE
+  )
+```
+
+
+## CTS2S Item Description
+
+No matter how well a couple gets along, there are times when they disagree, get annoyed with the other person, want different things from each other, or just have spats or fights because they are in a bad mood, are tired or for some other reason. Couples also have many different ways of trying to settle their differences. This is a list of things that might happen when you have differences. Please mark how many times you did each to these things in the past year, and how many times your partner did them in the past year. If you or your partner did not do one of these things in the past year, but it happened before that, mark a "7" on your answer sheet for that question. If it never happened, mark an "8" on your answer sheet.
+
+-   ct1: I explained my side or suggested a compromise for a disagreement with my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct1,
+    decline = TRUE
+  )
+```
+
+-   ct2: My partner explained his or her side or suggested a compromise for a disagreement with me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct2,
+    decline = TRUE
+  )
+```
+
+-   ct3: I insulted or swore or shouted or yelled at my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct3,
+    decline = TRUE
+  )
+```
+
+-   ct4: My partner insulted or swore or shouted or yelled at me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct4,
+    decline = TRUE
+  )
+```
+
+-   ct5: I had a sprain, bruise, or small cut, or felt pain the next day because of a fight with my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct5,
+    decline = TRUE
+  )
+```
+
+-   ct6: My partner had a sprain, bruise, or small cut or felt pain the next day because of a fight with me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct6,
+    decline = TRUE
+  )
+```
+
+-   ct7: I showed respect for, or showed that I cared about my partner's feelings about an issue
+
+    we disagreed on
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct7,
+    decline = TRUE
+  )
+```
+
+-   ct8: My partner showed respect for, or showed that he or she cared about my feeling about an issue we disagreed on
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct8,
+    decline = TRUE
+  )
+```
+
+-   ct9: I pushed, shoved, or slapped my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct9,
+    decline = TRUE
+  )
+```
+
+-   ct10: My partner pushed, shoved, or slapped me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct10,
+    decline = TRUE
+  )
+```
+
+-   ct11: I punched or kicked or beat-up my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct11,
+    decline = TRUE
+  )
+```
+
+-   ct12: My partner punched or kicked or beat-me-up
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct12,
+    decline = TRUE
+  )
+```
+
+-   ct13: I destroyed something belonging to my partner or threatened to hit my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct13,
+    decline = TRUE
+  )
+```
+
+-   ct14: My partner destroyed something belonging to me or threatened to hit me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct14,
+    decline = TRUE
+  )
+```
+
+-   ct15: I went see a doctor (M.D.) or needed to see a doctor because of a fight with my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct15,
+    decline = TRUE
+  )
+```
+
+-   ct16: My partner went to see a doctor (M.D.) or needed to see a doctor because of a fight with me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct16,
+    decline = TRUE
+  )
+```
+
+-   ct17: I used force (like hitting, holding down, or using a weapon) to make my partner have sex
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct17,
+    decline = TRUE
+  )
+```
+
+-   ct18: My partner used force (like hitting, holding down, or using a weapon) to make me have sex
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct18,
+    decline = TRUE
+  )
+```
+
+-   ct19: I insisted on sex when my partner did not want to or insisted on sex without a condom (but did not use physical force)
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct19,
+    decline = TRUE
+  )
+```
+
+-   ct20: My partner insisted on sex when I did not want to or insisted on sex without a condom (but did not use physical force)
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct20,
+    decline = TRUE
+  )
+```
+
+
