@@ -1081,6 +1081,45 @@ assess_date_sub <-
     id,
     tp_assess_date
     )
+
+# child_history <- readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_files/full_pregnancy_child_history.xlsx') %>%
+#   janitor::clean_names()
+
+child_sub <-
+  child_history %>%
+  mutate(
+    id = fam_id,
+    first_assessment = date0
+    ) %>%
+  select(
+    id,
+    dob,
+    total_number_of_children:number_of_other_children,
+    preg_num:child_num,
+    child_dob:child_n,
+    first_assessment
+  )
+
+date_diff_df <- 
+  right_join(
+  child_sub,
+  assess_date_sub
+  )
+
+date_diff_df <-
+  date_diff_df %>%
+  mutate(
+    month_compare = lubridate::interval(
+      first_assessment,
+      tp_assess_date
+      )
+  )
+
+date_diff_df$month_diff <- date_diff_df$month_compare %/% months(1)
+
+date_diff_df <-
+  date_diff_df %>%
+  arrange(id)
 ```
 
 ### Names
@@ -1253,11 +1292,16 @@ comb_long_lat <-
     sep = '_'
   ) %>% 
   select(-remove) %>% 
-  filter(number != 'latino') %>% 
   unite(
     'are_latino',
     c('type', 'number'),
     sep = '_'
+  ) %>% 
+  mutate(
+    are_latino = str_remove(
+      are_latino,
+      '_latino$'
+    )
   ) %>% 
   mutate(kiddo_latino2 = kiddo_latino) %>% 
   separate(
@@ -1266,12 +1310,21 @@ comb_long_lat <-
     sep = '_'
   ) %>% 
   select(-remove) %>% 
-  filter(number != 'latino') %>% 
   unite(
     'kiddo_latino2',
     c('type', 'number'),
     sep = '_'
-  ) %>% 
+  ) %>%
+  mutate(
+  kiddo_latino2 = str_remove(
+  kiddo_latino2,
+  '_latino$'
+  ),
+  kiddo_latino2 = str_remove(
+    kiddo_latino2,
+    '_mexican$'
+  )
+  ) %>%
   relocate(
     kiddo_latino2,
     .after = kiddo_latino
@@ -1283,7 +1336,7 @@ comb_long_lat <-
       TRUE ~ FALSE
     )
   ) %>% 
-  filter(same_kid_question == TRUE) %>% 
+  filter(same_kid_question == TRUE) %>%
   # distinct(
   #   id,
   #   .keep_all = TRUE
@@ -1292,39 +1345,6 @@ comb_long_lat <-
 
 comb_long_lat %>% 
   gt::gt()
-```
-
-### Children Ethnicity (Latino)
-
-```{r}
-comb_long_eth <-
-  remove_df %>%
-pivot_longer(
-  cols = c(matches('latino_other$'),
-           matches('mexican$'),
-           matches('cuban$'),
-           matches('puerto_rican$')),
-  names_to = 'latino_group_name',
-  values_to = 'latino_group'
-) %>%
-  drop_na(latino_group_name, latino_group) %>% 
-  select(
-    id,
-    latino_group_name,
-    latino_group
-  ) %>% 
-  distinct() %>%
-  arrange(id) %>% 
-  filter(
-    !str_detect(
-      latino_group_name,
-      '^bc\\d'
-      )
-  )
-
-comb_long_eth %>% 
-  group_by(id) %>% 
-  count(latino_group_name)
 ```
 
 ### Children Gender
@@ -1468,33 +1488,7 @@ comb_long_custody %>%
   gt::gt()
 ```
 
-## Month Difference
-
-```{r}
-child_history <- readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_files/full_pregnancy_child_history.xlsx') %>%
-  janitor::clean_names()
-
-assess_date_sub <-
-  assess_date %>%
-  select(
-    id,
-    tp_assess_date
-    )
-
-child_sub <-
-  child_history %>%
-  mutate(
-    family = fam_id
-    ) %>%
-  select(
-    dob,
-    total_number_of_children:number_of_other_children,
-    preg_num:child_num,
-    child_dob:child_n,
-    date0,
-    family
-  )
-```
+## EXTRA
 
 ```{r}
 combined <-
@@ -1538,25 +1532,6 @@ date_diff_df <-
     )
 
 ```
-
-```{r}
-date_diff_df <-
-  date_diff_df %>%
-  mutate(
-    month_compare = lubridate::interval(
-      first_assessment,
-      tp_assess_date
-      )
-  )
-
-date_diff_df$month_diff <- date_diff_df$month_compare %/% months(1)
-
-date_diff_df <-
-  date_diff_df %>%
-  arrange(id)
-```
-
-### EXTRA
 
 ```{r, eval = FALSE}
 jp <-
