@@ -1001,18 +1001,18 @@ remove_df %>%
   select(
     id,
     matches('white$'),
-             matches('black$'),
-             matches('amer_ind$'),
-             matches('samoan$'),
-             matches('race_other$'),
-             matches('filipino$'),
-             matches('vietnames$'),
-             matches('other_pacific$'),
-             matches('native_hawaii$'),
-             matches('native_hawaii_all$'),
-             matches('other_asian_all$'),
-             matches('asian_indian$'),
-             matches('text$')
+    matches('black$'),
+    matches('amer_ind$'),
+    matches('samoan$'),
+    matches('race_other$'),
+    matches('filipino$'),
+    matches('vietnames$'),
+    matches('other_pacific$'),
+    matches('native_hawaii$'),
+    matches('native_hawaii_all$'),
+    matches('other_asian_all$'),
+    matches('asian_indian$'),
+    matches('text$')
   ) %>% 
   pivot_longer(
     cols = -id,
@@ -1048,78 +1048,6 @@ comb_long_race %>%
   arrange(id, race_name) %>% 
   gt::gt()
 
-```
-
-### Months From Baseline
-
-```{r}
-library(lubridate)
-
-# months from baseline
-assess_date <-
-  remove_df %>%
-  drop_na(assessment_screen) %>%
-  separate(
-    col = assessment_screen,
-    into = c('month',
-             'day',
-             'year'),
-    sep = '/'
-  ) %>%
-  unite(
-    col = 'assessment_screen',
-    c(month, day, year),
-    sep = '-'
-  ) %>%
-  mutate(
-    tp_assess_date = mdy(assessment_screen)
-  )
-
-assess_date_sub <-
-  assess_date %>%
-  select(
-    id,
-    tp_assess_date
-    )
-
-# child_history <- readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_files/full_pregnancy_child_history.xlsx') %>%
-#   janitor::clean_names()
-
-child_sub <-
-  child_history %>%
-  mutate(
-    id = fam_id,
-    first_assessment = date0
-    ) %>%
-  select(
-    id,
-    dob,
-    total_number_of_children:number_of_other_children,
-    preg_num:child_num,
-    child_dob:child_n,
-    first_assessment
-  )
-
-date_diff_df <- 
-  right_join(
-  child_sub,
-  assess_date_sub
-  )
-
-date_diff_df <-
-  date_diff_df %>%
-  mutate(
-    month_compare = lubridate::interval(
-      first_assessment,
-      tp_assess_date
-      )
-  )
-
-date_diff_df$month_diff <- date_diff_df$month_compare %/% months(1)
-
-date_diff_df <-
-  date_diff_df %>%
-  arrange(id)
 ```
 
 ### Names
@@ -1241,6 +1169,78 @@ name_dob <-
   
 name_dob %>% 
   gt::gt()
+```
+
+### Months From Baseline
+
+```{r}
+library(lubridate)
+
+# months from baseline
+assess_date <-
+  remove_df %>%
+  drop_na(assessment_screen) %>%
+  separate(
+    col = assessment_screen,
+    into = c('month',
+             'day',
+             'year'),
+    sep = '/'
+  ) %>%
+  unite(
+    col = 'assessment_screen',
+    c(month, day, year),
+    sep = '-'
+  ) %>%
+  mutate(
+    tp_assess_date = mdy(assessment_screen)
+  )
+
+assess_date_sub <-
+  assess_date %>%
+  select(
+    id,
+    tp_assess_date
+    )
+
+# child_history <- readxl::read_excel('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_files/full_pregnancy_child_history.xlsx') %>%
+#   janitor::clean_names()
+
+child_sub <-
+  child_history %>%
+  mutate(
+    id = fam_id,
+    first_assessment = date0
+    ) %>%
+  select(
+    id,
+    dob,
+    total_number_of_children:number_of_other_children,
+    preg_num:child_num,
+    child_dob:child_n,
+    first_assessment
+  )
+
+date_diff_df <- 
+  right_join(
+  child_sub,
+  assess_date_sub
+  )
+
+date_diff_df <-
+  date_diff_df %>%
+  mutate(
+    month_compare = lubridate::interval(
+      first_assessment,
+      tp_assess_date
+      )
+  )
+
+date_diff_df$month_diff <- date_diff_df$month_compare %/% months(1)
+
+date_diff_df <-
+  date_diff_df %>%
+  arrange(id)
 ```
 
 ### Are the kiddos Latino?
@@ -1485,443 +1485,5 @@ comb_long_custody <-
   arrange(id)
 
 comb_long_custody %>% 
-  gt::gt()
-```
-
-## EXTRA
-
-```{r}
-combined <-
-  maria_file %>%
-  left_join(
-    child_sub
-  )
-
-combined <-
-  combined %>%
-  select(
-    family:dob,
-    date0
-  ) %>%
-  rename(
-    first_assessment = date0,
-    id = family
-  )
-
-combined <- 
-  combined %>% 
-  distinct(
-    id, 
-    dob,
-    first_assessment,
-    .keep_all = TRUE
-  ) %>% 
-  drop_na()
-
-date_diff_df <-
-  full_join(
-  combined,
-  assess_date_sub
-  )
-
-date_diff_df <- 
-  date_diff_df %>% 
-  distinct(
-    id,
-    .keep_all = TRUE
-    )
-
-```
-
-```{r, eval = FALSE}
-jp <-
-  left_join(combined, comb_long_age)
-
-jp <-
-  comb_long_numkid %>%
-  rename(family = id) %>%
-  right_join(jp)
-
-jp <-
-  comb_long_other %>%
-  rename(family = id) %>%
-  right_join(jp)
-
-jp <-
-  comb_long_preg %>% 
-  rename(family = id) %>%
-  right_join(jp)
-
-jp <-
-  comb_long_step %>%
-  rename(family = id) %>%
-  right_join(jp)
-
-
-jp <-
-  assess_date_sub %>%
-  rename(family = id) %>%
-  right_join(jp)
-
-jp <-
-  comb_long_race %>%
-    rename(family = id) %>%
-    right_join(jp)
-
-jp <- 
-  jp %>% 
-  rename(tc_dob = dob)
-
-# issue
-jp <-
-  comb_long_dob %>%
-  select(
-    -n
-  ) %>%
-    rename(family = id) %>%
-    right_join(jp)
-
-# need to include custody
-jp <-
-  comb_long_custody %>%
-    rename(family = id) %>%
-    right_join(jp)
-
-# need to include ethnicity
-jp <-
-  comb_long_eth %>%
-    rename(family = id) %>%
-    right_join(jp)
-
-jp <-
-  comb_long_lat %>% 
-  rename(family = id) %>% 
-  right_join(jp)
-
-jp <- 
-  comb_long_gender %>% 
-  rename(family = id) %>% 
-  right_join(jp)
-
-jp <-
-  jp %>%
-  distinct(
-    across(
-      .cols = everything()
-    )
-  )
-
-# this will get rid of the three missing births, don't run this until you find out
-# why they don't have first assessments (P828, P829, P847)
-# jp <- 
-  # jp %>%
-  # drop_na(first_assessment)
-
-jp <-
-  jp %>%
-  relocate(
-    first_assessment,
-    .after = family
-  ) %>%
-    relocate(
-      curr_preg,
-      .before = preg_result_name
-    ) %>%
-    relocate(
-      total_stepkid,
-      .before = total_other_kid
-    ) %>%
-    relocate(
-      nfam,
-      .before = first_assessment
-    ) %>%
-    relocate(
-      cohort,
-      .before = first_assessment
-    ) %>%
-    relocate(
-      dob,
-      .before = first_assessment
-    ) %>%
-    relocate(
-      glptx,
-      .before = first_assessment
-    ) %>%
-  relocate(
-    age_preg,
-    .before = total_stepkid
-  ) %>%
-  relocate(
-    birth_number,
-    .after = age_preg
-  ) %>%
-  mutate(
-    birth_number = case_when(
-      ((preg_result %in% c('stillbirth', 'abortion','miscarriage')) &
-         !is.na(birth_number)) ~ NA_character_,
-      TRUE ~ birth_number
-    )
-  )
-
-jp <-
-  jp %>%
-  mutate(
-    month_compare = lubridate::interval(
-      first_assessment,
-      tp_assess_date
-      )
-  )
-
-jp$month_diff <- jp$month_compare %/% months(1)
-
-jp <-
-  jp %>%
-  arrange(family)
-
-# jp_sub <- 
-#   jp %>% 
-#   select(
-#     family:tp_assess_date,
-#     times_preg,
-#     wave:month_diff
-#   )
-```
-
-```{r, eval = FALSE}
-rm(comb_long_age, 
-   combined,
-   maria_file,
-   comb_long_numkid,
-   comb_long_dob,
-   comb_long_custody,
-   comb_long_gender,
-   comb_long_eth,
-   comb_long_lat,
-   comb_long_race,
-   comb_long_other,
-   comb_long_preg,
-   comb_long_step,
-   interview,
-   remove_df,
-   assess_date,
-   assess_date_sub,
-   child_history,
-   child_sub)
-
-gc()
-```
-
-## Calculations
-
-### Pregnancy Results
-
--   For each Family/ID
-
-```{r, eval = FALSE}
-jp %>%
-  distinct(family, preg_result_name, preg_result) %>% 
-  group_by(family, preg_result_name) %>% 
-  count(preg_result) %>%
-  ungroup() %>% 
-  drop_na() %>% 
-  gt::gt() 
-```
-
--   Pregnancy Results Summarized
-
-```{r, eval = FALSE}
-jp %>% 
-  distinct(family, preg_result) %>% 
-  count(preg_result) %>% 
-  drop_na() %>% 
-  gt::gt()
-```
-
--   Cumulative Number of Births
-
-```{r, eval = FALSE}
-jp %>% 
-  distinct(
-    family, 
-    preg_result_name,
-    preg_result,
-    curr_preg
-    ) %>%
-  group_by(family) %>% 
-  count(
-    preg_result_name,
-    preg_result,
-    curr_preg
-    ) %>% 
-  ungroup() %>% 
-  drop_na() %>%
-  filter(preg_result == 'birth') %>%
-  summarize(
-    total_preg = sum(n,
-                     na.rm = TRUE)
-  ) %>% 
-  gt::gt() 
-  
-```
-
-### Kiddos
-
--   Numbered Kiddos
-
-```{r, eval = FALSE}
-jp %>% 
-  select(
-    family,
-    preg_result_name, 
-    preg_result
-  ) %>% 
-  distinct(
-    family,
-    preg_result_name, 
-    preg_result
-           ) %>% 
-  drop_na() %>% 
-  gt::gt()
-```
-
--   Kiddo (Biological, Step, Other Step, Other) Race
-
-```{r, eval = FALSE}
-jp %>% 
-  select(
-    family,
-    race_name,
-    race
-  ) %>% 
-  distinct(
-    family,
-    race_name,
-    race
-  ) %>%
-  group_by(family, race_name) %>% 
-  count(race) %>% 
-  ungroup() %>% 
-  drop_na() %>% 
-  gt::gt()
-```
-
--   Kiddo Ethnicity (Latino) If they are NA then they responded No to the kiddo being Latina/o.
-
-```{r, eval = FALSE}
-jp %>% 
-  select(
-    family,
-    latino_group_name,
-    latino_group
-  ) %>% 
-  distinct(
-    family,
-    latino_group_name,
-    latino_group
-  ) %>% 
-  drop_na() %>% 
-  gt::gt()
-```
-
--   Kiddo Gender
-
-```{r, eval = FALSE}
-jp %>% 
-  select(
-    family,
-    gender_name,
-    gender_id
-  ) %>% 
-  distinct(
-    family,
-    gender_name,
-    gender_id
-  ) %>% 
-  drop_na() %>% 
-  gt::gt()
-```
-
--   Kiddo Custody
-
-```{r, eval = FALSE}
-jp %>% 
-  select(
-    family,
-    custody_name,
-    custody
-  ) %>% 
-  mutate(
-    custody_yn = if_else(
-      custody %in% c('tc',
-                     'tc and partner',
-                     'tc bio dad - living'),
-      'Yes',
-      'No'
-      )
-  ) %>% 
-  distinct(
-    family,
-    custody_name,
-    custody,
-    custody_yn
-  ) %>% 
-  drop_na() %>% 
-  filter(
-    str_detect(
-      custody_name,
-      'pc_'
-      )
-    ) %>% 
-  group_by(family, custody_name) %>% 
-  count(custody, custody_yn) %>% 
-  ungroup() %>% 
-  gt::gt()
-```
-
--   Total Number of Step, Other, and Biological Kiddos
-
-```{r, eval = FALSE}
-jp %>% 
-  select(
-    family,
-    total_stepkid, 
-    total_other_kid, 
-    total_num_kids
-  ) %>% 
-  group_by(family) %>% 
-  count(
-    total_stepkid, 
-    total_other_kid, 
-    total_num_kids
-  ) %>% 
-  drop_na(total_num_kids) %>% 
-  ungroup() %>% 
-  arrange(family) %>%
-  select(-n) %>% 
-  gt::gt()
-```
-
-### Months From Baseline
-
--   
-
-        Differences between the first assessment date and the TP wave assessment date. Dates are included for double-checking. 
-
-```{r, eval = FALSE}
-jp %>% 
-  select(
-    family, 
-    first_assessment,
-    tp_assess_date,
-    # month_compare,
-    month_diff
-  ) %>% 
-  distinct(
-    family,
-    first_assessment,
-    tp_assess_date,
-    month_diff
-    ) %>% 
-  drop_na() %>% 
   gt::gt()
 ```
