@@ -1,0 +1,209 @@
+---
+title: "Child Interview Tables"
+author: "JP"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+editor: visual
+---
+
+# Tables for Interview Data
+
+```{r}
+library(tidyverse)
+library(reactable)
+
+final <- read_csv("C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/calc_interview_data_allkids.csv")
+```
+
+## Custody
+
+```{r}
+final %>% 
+  select(
+    id,
+    full_id,
+    who_custody,
+    living_with_bi
+  ) %>% 
+  distinct(
+    id, full_id, .keep_all = TRUE
+  ) %>% 
+  drop_na(who_custody) %>% 
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```
+
+## Ethnicity
+
+```{r}
+final %>% 
+  select(
+    id,
+    full_id,
+    latino_group,
+    specific_latino_group,
+    multi_latino
+  ) %>% 
+  distinct(
+    id,
+    full_id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(
+    latino_group,
+    multi_latino
+  ) %>%
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```
+
+## Race
+
+```{r}
+final %>% 
+  select(
+    id,
+    full_id,
+    primary_race,
+    specific_race,
+    race_group_multi
+  ) %>% 
+  distinct(
+    id,
+    full_id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(
+    primary_race,
+    race_group_multi
+  ) %>%
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```
+
+## Kiddo Count per TC
+
+```{r}
+final %>% 
+  select(
+    id,
+    full_id,
+    kid_ind_count
+  ) %>% 
+  distinct(
+    id,
+    full_id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(kid_ind_count) %>%
+  reactable::reactable(filterable = TRUE, minRows = 10)
+
+final %>% 
+  select(
+    id,
+    total_kid_count_per_tc
+  ) %>% 
+  distinct(
+    id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(total_kid_count_per_tc) %>%
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```
+
+## Currently Pregnant and Pregnancy Results
+
+```{r}
+final %>% 
+  select(
+    id,
+    full_id,
+    curr_preg,
+    preg_result
+  ) %>% 
+  distinct(
+    id,
+    full_id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(curr_preg) %>%
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```
+
+## TC Age & TC Date of Birth
+
+```{r}
+final %>% 
+  select(
+    id,
+    # full_id,
+    tc_age,
+    tc_dob
+  ) %>% 
+  distinct(
+    id,
+    # full_id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(tc_age) %>% 
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```
+
+## Names, Gender, & Date of Birth
+
+```{r}
+final %>% 
+  select(
+    id,
+    full_id,
+    dob,
+    curr_preg,
+    gender_id,
+    actual_name
+  ) %>% 
+  distinct(
+    id,
+    full_id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(
+    gender_id
+  ) %>%
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```
+
+## Assessment Dates
+
+```{r}
+final %>% 
+  select(
+    id,
+    first_assessment,
+    tp_assess_date,
+    month_diff
+  ) %>% 
+  distinct(
+    id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(tp_assess_date) %>% 
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```
+
+### Assessment Dates (Complete Data)
+
+```{r}
+final %>% 
+  select(
+    id,
+    first_assessment,
+    tp_assess_date,
+    month_diff
+  ) %>% 
+  distinct(
+    id,
+    .keep_all = TRUE
+  ) %>% 
+  drop_na(tp_assess_date, month_diff) %>% 
+  reactable::reactable(filterable = TRUE, minRows = 10)
+```

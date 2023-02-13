@@ -1,0 +1,4226 @@
+---
+title: "Internal Codebook"
+author: "Jonathan A. Pedroza, PhD"
+format: 
+  html:
+    code-fold: true
+    toc: true
+    toc-location: left
+bibliography: twp_references.bib
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+# Turning Points Code Book
+
+```{r packages, include = FALSE}
+library(tidyverse)
+
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
+
+theme_set(theme_light())
+
+source('C:/Users/cpppe/Desktop/github_projects/tpwdata_fork/jp_files/codebook_fun.R')
+```
+
+### JP Notes
+
+-   BSI measure: There is no question for depression ("Your feelings being easily hurt")
+
+### Missing Data Rule
+
+-   For scales with [10 or more items]{.underline}, a composite score (average/total) is computed for **TC** that have less than [20%]{.underline} of the items from that measure missing
+
+-   For scales with [7 to 9 items]{.underline}, a composite score (average/total) is computed for **TC** that have less than [30%]{.underline} of the items from that measure missing
+
+-   For scales with [3 to 6 items]{.underline}, a composite score (average/total) is computed for **TC** that have less than [33%]{.underline} of the items from that measure missing
+
+-   For scales with [only 2 items]{.underline}, composite scores (average/total) are calculated on a [case by case basis]{.underline}
+
+### Data Cleaning
+
+-   There is an assessment for P901 that was completed on May 28, 2022 by Shawn and in "Assessment Screen 2 -- TC ID" it says "av" and should be changed to "P901"
+
+-   P831 should have a Part A and a Part B that should be merged. I believe these are P831 (which I refer to as part A) and P831B (which I refer to as part B)
+
+-   Nov 19, 2021 with TC ID: 65973269 is a pilot, but I am checking on this
+
+-   See the pilots that can be removed below:
+
+```{r}
+tibble(
+  id = c('AG400', 'K000',
+         'F000', 'P100'),
+  date = c('08/14/2022', '02/04/2022',
+           '02/03/2022', '01/21/2022')
+) %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'Pilot/Fake Data'
+  )
+```
+
+```{r, include = FALSE}
+full <- read_csv('C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/do_not_push/tpw_data.csv') %>% 
+  mutate(
+    id = assessment_screen_2
+  )
+```
+
+```{r}
+no_test <-
+  full %>%
+  mutate(
+    id = case_when(
+      id == 'av' ~ 'P901',
+      TRUE ~ id
+    )
+  ) %>%
+  filter(id != 'AG400',
+           id != 'K000',
+           id != 'F000', 
+           id != 'P100',
+         id != '65973269')
+
+p831 <- no_test %>%
+  filter(id == 'P831' &
+           assessment_screen_4 != 'ME')
+
+p831a <- p831 %>%
+  filter(assessment_screen == '11/30/2021') %>%
+  select(...1:socd4k)
+
+p831b <-
+  p831 %>%
+  filter(assessment_screen == '12/16/2021') %>%
+    select(socinf_screen:pcl19d_77)
+
+p831 <-
+  bind_cols(p831a, p831b)
+
+no_test <- no_test %>%
+  filter(id != 'P831')
+
+no_test <- full_join(no_test, p831)
+
+```
+
+# Mental Health
+
+## BSI
+
+### BSI Data Manipulation
+
+```{r bsi creation, message = FALSE, warning = FALSE}
+bsi <-
+  no_test %>%
+  select(
+    id,
+    matches(
+      '^bsi'
+    ),
+    -bsi20, 
+    -bsi21,
+    -bsi22
+  ) %>%
+  subtract_scale(
+    id = 'id',
+    value = 1
+  ) %>%
+    mutate(
+      across(
+        .cols = c(bsi1:bsi19),
+        .fns = ~case_when(
+         .x == 0 ~ 0,
+         .x == 1 ~ 1,
+         .x == 2 ~ 2,
+         .x == 3 ~ 3,
+         .x == 4 ~ 4,
+         .x == 5 ~ 5,
+         .x == 6 ~ -77,
+         TRUE ~ NA_real_
+        )
+      )
+    )
+```
+
+### BSI Description
+
+-   Variables for BSI scale
+
+    -   `bsi1`, `bsi2`, `bsi3`, `bsi4`, `bsi5`, `bsi6`, `bsi7`, `bsi8`, `bsi9`, `bsi10`, `bsi11`, `bsi12`, `bsi13`, `bsi14`, `bsi15`, `bsi16`, `bsi17`, `bsi18`, `bsi19`
+
+    -   Variable Scale
+
+        -   0 - "Not at all"
+
+        -   1 - "A little bit"
+
+        -   2 - "Moderately"
+
+        -   3 - "Quite a bit"
+
+        -   4 - "Very much"
+
+-   Total scores should range from 0 to 76
+
+-   Revere Scoring
+
+    -   N/A
+
+-   Subscales
+
+    -   Somatization: `bsi2`, `bsi3`, `bsi10`, `bsi11`, `bsi12`, `bsi13`, `bsi15`
+
+    -   Anxiety: `bsi1`, `bsi5`, `bsi9`, `bsi16`, `bsi17`, `bsi18`
+
+    -   Depression: `bsi4`, `bsi6`, `bsi7`, `bsi8`, `bsi14`, `bsi19`
+
+-   Missing Data Rule:
+
+    -   N/A
+
+-   Reference: @derogatis1983brief
+
+### BSI Item Descriptive Statistics
+
+BSI Prompt: Below is a list of problems and complaints that people sometimes have. Please read each one carefully. After you have done so, please circle the number to the right that best describes HOW MUCH DISCOMFORT THAT PROBLEM HAS CAUSED YOU DURING THE PAST WEEK INCLUDING TODAY.
+
+During the past week, [how much were you bothered by...]{.underline}
+
+bsi1: Nervousness or shakiness inside?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi1,
+    decline = TRUE
+  )
+```
+
+bsi2: Faintness or dizziness?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi2,
+    decline = TRUE
+  )
+```
+
+bsi3: Pains in heart or chest?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi3,
+    decline = TRUE
+  )
+```
+
+bsi4: Thoughts of ending your life?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi4,
+    decline = TRUE
+  )
+```
+
+bsi5: (Feeling) Suddenly scared for no reason?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi5,
+    decline = TRUE
+  )
+```
+
+bsi6: Feeling lonely?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi6,
+    decline = TRUE
+  )
+```
+
+bsi7: Feeling blue?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi7,
+    decline = TRUE
+  )
+```
+
+bsi8: Feeling no interest in things?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi8,
+    decline = TRUE
+  )
+```
+
+bsi9: Feeling fearful?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi9,
+    decline = TRUE
+  )
+```
+
+bsi10: Nausea or upset stomach?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi10,
+    decline = TRUE
+  )
+```
+
+bsi11: Trouble getting your breath?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi11,
+    decline = TRUE
+  )
+```
+
+bsi12: Hot or cold spells?
+
+```{r}
+
+bsi %>%
+  prop_fun_plot(
+    x = bsi12,
+    decline = TRUE
+  )
+```
+
+bsi13: Numbness or tingling in parts of your body?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi13,
+    decline = TRUE
+  )
+```
+
+bsi14: Feeling hopeless about the future?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi14,
+    decline = TRUE
+  )
+```
+
+bsi15: Feeling weak in parts of your body?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi15,
+    decline = TRUE
+  )
+```
+
+bsi16: Feeling tense or keyed up?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi16,
+    decline = TRUE
+  )
+```
+
+bsi17: Spells of terror or panic?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi17,
+    decline = TRUE
+  )
+```
+
+bsi18: Feeling so restless you couldn't sit still?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi18,
+    decline = TRUE
+  )
+```
+
+bsi19: Feelings of worthlessness?
+
+```{r}
+bsi %>%
+  prop_fun_plot(
+    x = bsi19,
+    decline = TRUE
+  )
+```
+
+### BSI Missing Data
+
+No missing data found in the BSI measure.
+
+Below is for missing data in the BSI items.
+
+```{r bsi missing data, warning = FALSE, message = FALSE}
+bsi %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 19
+  )
+```
+
+### BSI Code For Calculations
+
+Below is the code that treats `-77` values as `NA`
+
+```{r bsi calculations, warning = FALSE, message = FALSE}
+bsi_calc <-
+  bsi %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+### BSI Composite & Subscale Score Creation
+
+```{r, message = FALSE, warning = FALSE}
+bsi_complete <-
+  bsi_calc %>%
+  composite_total_avg_fun(
+    id = 'id',
+    max_value = 4,
+    n_items = 19
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c('bsi2', 'bsi3', 'bsi10',
+               'bsi11', 'bsi12', 'bsi13', 'bsi15'),
+    scale2 = c('bsi1', 'bsi5', 'bsi9',
+               'bsi16', 'bsi17', 'bsi18'),
+    scale3 = c('bsi4', 'bsi6', 'bsi7',
+               'bsi8', 'bsi14', 'bsi19')
+  ) %>%
+  rename(
+    bsi_total = sum_values,
+    bsi_avg = mean_values,
+    bsi_soma_total = total1,
+    bsi_anx_total = total2,
+    bsi_dep_total = total3
+  )
+
+```
+
+### BSI Scale & Subscale Distributions
+
+```{r bsi distributions}
+bsi_complete %>%
+  composite_hist(
+    x = bsi_total
+  ) +
+  labs(title = 'Distribution of Total Scores for BSI Measure')
+
+bsi_complete %>%
+  composite_hist(x = bsi_soma_total) +
+  labs(title = 'Distribution for BSI Somatization Subscale')
+
+bsi_complete %>%
+  composite_hist(x = bsi_anx_total) +
+  labs(title = 'Distribution for BSI Anxiety Subscale')
+
+bsi_complete %>%
+  composite_hist(x = bsi_dep_total) +
+  labs(title = 'Distribution for BSI Depression Subscale')
+```
+
+### BSI Cutoffs
+
+```{r}
+bsi_complete %>%
+  cutoff_plot(
+    x = bsi_total,
+    cutoff = 0
+  ) +
+  labs(title = 'Cutoff Value for BSI Measure')
+```
+
+### BSI Internal Reliability
+
+```{r bsi alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+bsi_alpha <-
+  bsi_complete %>%
+  select(bsi1:bsi19) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_som <-
+  bsi_complete %>%
+  select(bsi2:bsi3,
+         bsi10:bsi13,
+         bsi15) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_anx <-
+  bsi_complete %>%
+  select(bsi1, bsi5, bsi9, bsi16:bsi18) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_dep <-
+  bsi_complete %>%
+  select(bsi4, bsi6:bsi8, bsi14, bsi19) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_table <- tibble(
+  Scale = c('BSI',
+            'BSI - Somatization',
+            'BSI - Anxiety',
+            'BSI - Depression'),
+  Alpha = c(round(bsi_alpha$total$raw_alpha, 3),
+            round(bsi_alpha_som$total$raw_alpha, 3),
+            round(bsi_alpha_anx$total$raw_alpha, 3),
+            round(bsi_alpha_dep$total$raw_alpha, 3))
+)
+
+bsi_alpha_table %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for BSI Entire Scale & Subscales'
+  )
+```
+
+## CESD
+
+### CESD Data Manipulation
+
+```{r cesd creation, warning = FALSE, message = FALSE}
+cesd <-
+no_test %>%
+  select(
+    id,
+    matches(
+      '^c\\d'
+    )
+  ) %>%
+  subtract_scale(
+    id = 'id',
+    value = 1
+  )
+
+cesd <-
+cesd %>%
+  mutate(
+    across(
+      .cols = c(c1:c20),
+      .fns = ~case_when(
+        .x == 0 ~ 0,
+        .x == 1 ~ 1,
+        .x == 2 ~ 2,
+        .x == 3 ~ 3,
+        .x == 4 ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      .cols = c(c21:c24),
+      .fns = ~case_when(
+        .x == 0 ~ 1,
+        .x == 1 ~ 0,
+        .x == 2 ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    c4_r = case_when(
+      c4 == 0 ~ 3,
+      c4 == 1 ~ 2,
+      c4 == 2 ~ 1,
+      c4 == 3 ~ 0,
+      c4 == -77 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    c8_r = case_when(
+      c8 == 0 ~ 3,
+      c8 == 1 ~ 2,
+      c8 == 2 ~ 1,
+      c8 == 3 ~ 0,
+      c8 == -77 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    c12_r = case_when(
+      c12 == 0 ~ 3,
+      c12 == 1 ~ 2,
+      c12 == 2 ~ 1,
+      c12 == 3 ~ 0,
+      c12 == -77 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    c16_r = case_when(
+      c16 == 0 ~ 3,
+      c16 == 1 ~ 2,
+      c16 == 2 ~ 1,
+      c16 == 3 ~ 0,
+      c16 == -77 ~ -77,
+      TRUE ~ NA_real_
+    )
+  )
+
+```
+
+### CESD Description
+
+-   Variables for CESD scale
+
+    -   `c1`, `c2`, `c3`, `c4`, `c5`, `c6`, `c7`, `c8`, `c9`, `c10`, `c11`, `c12`, `c13`, `c14`, `c15`, `c16`, `c17`, `c18`, `c19`, `c20`
+
+    -   Variable Scale
+
+        -   0 - "Rarely or none of the time"
+
+        -   1 - "Some or a little of the time"
+
+        -   2 - "Occasionally or a moderate amount of time"
+
+        -   3 - "Most or all of the time"
+
+-   Total scores should range from `0` to `60`
+
+-   Revere Scoring
+
+    -   Items `c4`, `c8`, `c12`, and `c16` are reverse scored
+
+-   Variables For Other Items
+
+    -   `c21`, `c22`, `c23`, `c24`
+
+        -   if response is `No` to item `c21`, then TC moved on to item `c24`
+
+    -   Variable Scale
+
+        -   0 - No
+
+        -   1 - Yes
+
+        -   2 - Declined to Answer
+
+-   Subscales
+
+    -   Positive Affect
+
+        -   `c4_r`, `c8_r`, `c12_r`, `c16_r`
+
+    -   Depressive Symptoms
+
+        -   `c1`, `c2`, `c3`, `c5`, `c6`, `c7`, `c9`, `c10`, `c11`, `c13`, `c14`, `c15`, `c17`, `c18`, `c19`, `c20`
+
+-   Missing Data Rule:
+
+    -   N/A
+
+-   Reference: @radloff1977ces
+
+    -   Additional References:
+
+        -   Cutoff Information: @henry2018determining
+
+        -   Items for Potential Subscales: @canady2009measurement
+
+### CESD Item Descriptive Statistics
+
+CESD Prompt: Circle the number for each statement that best describes how often you felt this way DURING THE PAST WEEK:
+
+-   c1: I was bothered by things that usually don't bother me
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c1,
+    decline = TRUE
+  )
+```
+
+-   c2: I did not feel like eating; my appetite was poor
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c2,
+    decline = TRUE
+  )
+```
+
+-   c3: I felt that I could not shake off the blues even with help from my family or friends
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c3,
+    decline = TRUE
+  )
+```
+
+-   c4: I felt that I was just as good as other people (Reverse Coded)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c4_r,
+    decline = TRUE
+  )
+```
+
+-   c5: I had trouble keeping my mind on what I was doing
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c5,
+    decline = TRUE
+  )
+```
+
+-   c6: I felt depressed
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c6,
+    decline = TRUE
+  )
+```
+
+-   c7: I felt that everything I did was an effort
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c7,
+    decline = TRUE
+  )
+```
+
+-   c8: I felt hopeful about the future (Reverse Coded)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c8_r,
+    decline = TRUE
+  )
+```
+
+-   c9: I thought my life had been a failure
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c9,
+    decline = TRUE
+  )
+```
+
+-   c10: I felt fearful
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c10,
+    decline = TRUE
+  )
+```
+
+-   c11: My sleep was restless
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c11,
+    decline = TRUE
+  )
+```
+
+-   c12: I was happy (Reverse Coded)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c12_r,
+    decline = TRUE
+  )
+```
+
+-   c13: I talked less than usual
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c13,
+    decline = TRUE
+  )
+```
+
+-   c14: I felt lonely
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c14,
+    decline = TRUE
+  )
+```
+
+-   c15: People were unfriendly
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c15,
+    decline = TRUE
+  )
+```
+
+-   c16: I enjoyed life (Reverse Coded)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c16_r,
+    decline = TRUE
+  )
+```
+
+-   c17: I had crying spells
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c17,
+    decline = TRUE
+  )
+```
+
+-   c18: I felt sad
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c18,
+    decline = TRUE
+  )
+```
+
+-   c19: I felt that people disliked me
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c19,
+    decline = TRUE
+  )
+```
+
+-   c20: I could not "get going"
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c20,
+    decline = TRUE
+  )
+```
+
+### CESD Additional Item Descriptive Statistics
+
+-   c21: In the past 6 months, have you ever thought about killing yourself? (Suicide Ideation)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c21,
+    decline = TRUE
+  )
+```
+
+-   c22: In the past 6 months have you thought often about killing yourself? (Suicide Ideation)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c22,
+    decline = TRUE
+  )
+```
+
+-   c23: In the past 6 months, did you have a plan for killing yourself? (Suicide Plan)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c23,
+    decline = TRUE
+  )
+```
+
+-   c24: In the past 6 months, have you tried to kill yourself? (Suicide Attempt)
+
+```{r}
+cesd %>%
+  prop_fun_plot(
+    x = c24,
+    decline = TRUE
+  )
+```
+
+### CESD Missing Data
+
+```{r}
+cesd %>%
+  select(id,
+         c1:c20,
+         c4_r:c16_r) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 20
+  ) %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Missing Data',
+    subtitle = 'By Each Participant'
+  )
+```
+
+```{r}
+cesd %>%
+  select(id,
+         c21:c24) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 20
+  ) %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Missing Data',
+    subtitle = 'By Each Participant'
+  )
+```
+
+### CESD Code For Calculations
+
+```{r}
+cesd_calc <-
+  cesd %>%
+    mutate(
+      across(
+        .cols = -id,
+        .fns = ~case_when(
+          .x == -77 ~ NA_real_,
+          TRUE ~ .x
+        )
+      )
+    )
+```
+
+### CESD Composite & Subscale Score Creation
+
+```{r}
+cesd_complete <-
+  cesd_calc %>%
+  composite_total_avg_fun(
+    id = c('id',
+           'c4',
+           'c8',
+           'c12',
+           'c16',
+           'c21',
+           'c22',
+           'c23',
+           'c24'),
+    n_items = 20
+  ) %>%
+  subscale_create(
+    total_only = FALSE,
+    scale1 = c('c1', 'c2', 'c3', 'c5',
+               'c6', 'c9', 'c10', 'c11',
+               'c13', 'c14', 'c15', 'c17',
+               'c18', 'c19', 'c20'),
+    scale1_nitems = 15,
+    scale2 = c('c4_r', 'c8_r', 'c12_r', 'c16_r'),
+    scale2_nitems = 4
+  ) %>%
+  rename(
+    cesd_total = sum_values,
+    cesd_avg = mean_values,
+    cesd_dep_symp_total = total1,
+    cesd_dep_symp_avg = avg1,
+    cesd_pos_aff_total = total2,
+    cesd_pos_aff_avg = avg2
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  )
+```
+
+### CESD Scale & Suscale Distributions
+
+```{r}
+cesd_complete %>%
+  composite_hist(cesd_total) +
+  labs(
+    title = 'CESD Total Score Distribution'
+    )
+
+cesd_complete %>%
+  composite_hist(
+    cesd_dep_symp_total
+    ) +
+  labs(
+    title = 'Total Score Distribution',
+       subtitle = 'Depressive Symptoms Subscale'
+    )
+
+cesd_complete %>%
+  composite_hist(
+    cesd_pos_aff_total,
+    bins = 10
+    ) +
+  labs(
+    title = 'Total Score Distribution',
+       subtitle = 'Depressive Symptoms Subscale'
+    )
+```
+
+### CESD Cutoffs
+
+```{r}
+cesd_complete %>%
+  cutoff_plot(
+    x = cesd_total,
+    cutoff = 16,
+    cutoff_other = 23
+  ) +
+  labs(
+    title = 'Cutoff Scores for CESD Total Scores',
+    caption = 'Cutoffs are 16 and/or 23\nSee references for literature on cutoff scores.'
+  )
+```
+
+### CESD Internal Reliability
+
+```{r}
+cesd_alpha <-
+  cesd_complete %>%
+  select(c1:c16_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+cesd_dep_alpha <-
+  cesd_complete %>%
+  select(c1:c20) %>%
+  psych::alpha(check.keys = TRUE)
+
+cesd_pos_aff_alpha <-
+  cesd_complete %>%
+  select(c4_r, c8_r, c12_r, c16_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+
+cesd_alpha_table <- tibble(
+  scale = c('CESD', 'CESD - Depressive Symptoms',
+            'CESD - Positive Affect'),
+  alpha = c(round(cesd_alpha$total$raw_alpha, 3),
+            round(cesd_dep_alpha$total$raw_alpha, 3),
+            round(cesd_pos_aff_alpha$total$raw_alpha, 3)
+  )
+)
+
+cesd_alpha_table %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for CESD Entire Scale & Subscales'
+  )
+```
+
+# COVID-19
+
+```{r}
+ciq <- 
+	no_test %>%
+	select(
+	  id,
+	  bsi20,
+	  bsi21,
+	  bsi22
+	) %>% 
+  rename(
+    ciq1 = bsi20,
+    ciq2 = bsi21,
+    ciq3 = bsi22
+  ) %>% 
+  mutate(
+    across(
+        .cols = c(ciq1, ciq2, ciq3),
+        .fns = ~case_when(
+          .x == 1 ~ 1,
+          .x == 2 ~ 2,
+          .x == 3 ~ 3,
+          .x == 4 ~ 4,
+          .x == 5 ~ 5,
+          .x == 6 ~ 6,
+          .x == 7 ~ 7,
+          .x == 8 ~ -77,
+          TRUE ~ NA_real_
+        )
+      ),
+	  ciq3_r = case_when(
+          ciq3 == 1 ~ 7,
+          ciq3 == 2 ~ 6,
+          ciq3 == 3 ~ 5,
+          ciq3 == 4 ~ 4,
+          ciq3 == 5 ~ 3,
+          ciq3 == 6 ~ 2,
+          ciq3 == 7 ~ 1,
+          ciq3 == -77 ~ -77,
+          TRUE ~ NA_real_
+        )
+    ) %>%
+    relocate(
+      ciq3_r, .before = ciq3
+    )
+```
+
+## CIQ
+
+### CIQ Description
+
+-   Variables for BSI COVID-19 items
+
+    -   `ciq1`, `ciq2`, `ciq3`
+
+    -   Variable Scale
+
+        -   1 - "Not true of me at all"
+
+        -   2
+
+        -   3
+
+        -   4
+
+        -   5
+
+        -   6
+
+        -   7 - "Very true of me"
+
+-   Total score should range from 3 to 21
+
+-   Reverse Scoring
+
+    -   item `ciq3` should be reverse scored
+
+-   Reference: @conway2020social
+
+### CIQ Descriptive Statistics
+
+ciq1: I have become depressed because of the Coronavirus (COVID-19).
+
+```{r}
+ciq %>%
+  prop_fun_plot(
+    x = ciq1,
+    decline = TRUE
+  )
+```
+
+ciq2: The Coronavirus (COVID-19) outbreak has impacted my psychological health negatively.
+
+```{r}
+ciq %>%
+  prop_fun_plot(
+    x = ciq2,
+    decline = TRUE
+  )
+```
+
+ciq3: The Coronavirus (COVID-19) pandemic has NOT made me feel any worse than I did.
+
+```{r}
+ciq %>% 
+  prop_fun_plot(
+    x = ciq3_r,
+    decline = TRUE
+  )
+```
+
+### CIQ Missing Data
+
+```{r, warning = FALSE, message = FALSE}
+ciq %>%
+  select(id,
+         ciq1:ciq3_r) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 3
+  )
+```
+
+### CIQ Code For Calculations
+
+```{r, warning = FALSE, message = FALSE}
+ciq_calc <-
+  ciq %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+### CIQ Composite Score Calculations
+
+```{r}
+ciq_complete <- 
+  ciq_calc %>% 
+  composite_total_avg_fun(
+    id = c('id', 'ciq3'),
+    max_value = 7,
+    n_items = 3
+  ) %>% 
+  rename(
+    ciq_psych_total = sum_values,
+    ciq_psych_avg = mean_values
+    )
+```
+
+### CIQ Scale Distribution
+
+```{r}
+ciq_complete %>%
+  composite_hist(
+    x = ciq_psych_total,
+    bins = 10
+    ) +
+  labs(title = 'Distribution for CIQ Psychological Scale')
+```
+
+### CIQ Internal Reliability
+
+```{r}
+ciq_alpha <-
+  ciq_complete %>%
+  select(ciq1, ciq2, ciq3) %>%
+  psych::alpha(check.keys = TRUE)
+
+ciq_alpha_table <- tibble(
+  Scale = 'CIQ - Psychological Scale',
+  Alpha = round(ciq_alpha$total$raw_alpha, 3)
+)
+  
+ciq_alpha_table %>%
+ gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for CIQ - Psychological Scale'
+  )
+```
+
+# Substance use
+
+## DAST
+
+### DAST Data Manipulation
+
+```{r}
+dast <-
+  no_test %>%
+  select(
+    id,
+    matches('^d\\d')
+    )
+
+dast <-
+  dast %>%
+  mutate(
+    preg_screen = case_when(
+      d00 == 1 ~ 'pregnant',
+      d00 == 2 ~ 'not_pregnant',
+      TRUE ~ NA_character_
+    ),
+    d00 = case_when(
+      d00 == 1 ~ 1,
+      d00 == 2 ~ 0,
+      TRUE ~ NA_real_
+    )
+  ) %>%
+  relocate(preg_screen, .before = d00)
+
+dast <-
+  dast %>%  
+  mutate(
+    across(
+      .cols = c(d1a:d20),
+      ~case_when(
+        .x == 1 ~ 1,
+        .x == 2 ~ 0,
+        .x == 3 ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      .cols = c(d4, d5),
+      .fns = ~if_else(
+        .x == 0, 1, 0
+      ),
+      .names = '{.col}_r'
+    )
+  )
+
+```
+
+### DAST Description
+
+-   Variables for DAST scale
+
+    -   `d00`, `d1a`, `d2a`, `d2b`, `d3`, `d4`, `d5`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`
+
+    -   Variable scale
+
+        -   1 - "Yes"
+
+        -   0 - "No"
+
+    -   Total scores should range from `0` to `20`
+
+    -   Reverse scoring
+
+        -   Items `d4` and `d5` are reverse coded
+
+        -   both were renamed to `d4_r` and `d5_r` respectively
+
+    -   `d2a` and `d2b` are skip logic questions based on responses for `d1a`
+
+        -   `d1a = 1` moved on to respond to `d2a`
+
+        -   `d1a = 0` or `d1a = -77` moved on to respond to `d2b`
+
+-   Subscales
+
+    -   No subscales were created for this measure as there was a lack of evidence supporting a subscale structure
+
+-   Missing Data Rule:
+
+    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+
+-   Reference: @gavin1989diagnostic
+
+### DAST Item Description
+
+-   d00: Screener for whether the TC is currently pregnant or not ()
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = preg_screen,
+    decline = TRUE
+  )
+```
+
+-   d1a: Have you used drugs other than those required for medical reasons in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d1a,
+    decline = TRUE
+  )
+```
+
+-   d2a: Have you abused prescription drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d2a,
+    decline = TRUE
+  )
+```
+
+-   d2b: Have you abused prescription drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d2b,
+    decline = TRUE
+  )
+```
+
+-   d3: Have you abused more than one drug at a time in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d3,
+    decline = TRUE
+  )
+```
+
+-   d4: Could you get through the week without using drugs in the last 6 months? (Reverse Coded)
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d4_r,
+    decline = TRUE
+  )
+```
+
+-   d5: Were you always able to stop using drugs when you wanted to in the last 6 months? (Reverse Coded)
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d5_r,
+    decline = TRUE
+  )
+```
+
+-   d6: Have you ever had "blackouts" or "flashbacks" as a result of drug use in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d6,
+    decline = TRUE
+  )
+```
+
+-   d7: Have you ever felt bad or guilty about your drug use in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d7,
+    decline = TRUE
+  )
+```
+
+-   d8: Has your partner/spouse (or parents) ever complained about your involvement with drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d8,
+    decline = TRUE
+  )
+```
+
+-   d9: Has (your) drug abuse created problems between you and your partner/spouse or your parents in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d9,
+    decline = TRUE
+  )
+```
+
+-   d10: Have you lost friends because of your use of drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d10,
+    decline = TRUE
+  )
+```
+
+-   d11: Have you neglected your family because of your use of drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d11,
+    decline = TRUE
+  )
+```
+
+-   d12: Have you been in trouble at work because of your use of drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d12,
+    decline = TRUE
+  )
+```
+
+-   d13: Have you lost a job because of drug abuse in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d13,
+    decline = TRUE
+  )
+```
+
+-   d14: Have you gotten into fights when under the influence of drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d14,
+    decline = TRUE
+  )
+```
+
+-   d15: Have you engaged in illegal activities in order to obtain drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d15,
+    decline = TRUE
+  )
+```
+
+-   d16: Have you been arrested for possession of illegal drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d16,
+    decline = TRUE
+  )
+```
+
+-   d17: Have you experienced withdrawal symptoms (felt sick) when you stopped taking drugs in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d17,
+    decline = TRUE
+  )
+```
+
+-   d18: Have you had medical problems as a result of your drug use(e.g., memory loss, hepatitis, convulsions, bleeding, etc.) in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d18,
+    decline = TRUE
+  )
+```
+
+-   d19: Have you gone to anyone for help for a drug problem in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d19,
+    decline = TRUE
+  )
+```
+
+-   d20: Have you been involved in a treatment program especially related to drug use in the last 6 months?
+
+```{r}
+dast %>%
+  prop_fun_plot(
+    x = d20,
+    decline = TRUE
+  )
+```
+
+### DAST Missing Data
+
+```{r}
+dast %>%
+  select(-preg_screen,
+         -d00,
+         -d4,
+         -d5) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 21
+  ) %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DAST Missing Data',
+    subtitle = 'By Participant'
+  )
+  
+```
+
+### DAST Code For Calculations
+
+```{r}
+dast_calc <-
+  dast %>% 
+  select(-preg_screen,
+         -d00,
+         -d4,
+         -d5) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 21
+  ) %>%
+  full_join(dast, by = 'id') %>% 
+    filter(
+    is.na(miss_pct) |
+      miss_pct < 20
+         ) %>%
+  mutate(
+    across(
+      .cols = c(d1a:d5_r),
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+### DAST Composite & Subscale Score Creation
+
+```{r}
+dast_complete <-
+  dast_calc %>%
+  select(-missing_n,
+         -miss_pct) %>%
+  index_total_fun(
+    id = c('id',
+           'preg_screen',
+           'd00',
+           'd4',
+           'd5')
+  ) %>%
+  rename(
+    dast_total = sum_values
+  )
+```
+
+### DAST Scale & Subscale Distributions
+
+```{r}
+dast_complete %>%
+  composite_hist(
+    x = dast_total
+  ) +
+  labs(
+    title = 'Distribution of Total Scores for DAST Measure'
+  )
+```
+
+### DAST Severity
+
+```{r}
+dast_complete %>%
+  severity_plot(
+  x = dast_total,
+  bins = 20,
+  low_xmin = 1,
+  low_xmax = 5.5,
+  medium_xmin = 5.5,
+  medium_xmax = 10.5,
+  large_xmin = 10.5,
+  large_xmax = 15.5,
+  critical_xmin = 15.5,
+  critical_xmax = 20) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 3,
+    y = -1.5,
+    label = 'Low'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 8,
+    y = -1.5,
+    label = 'Intermediate'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 13,
+    y = -1.5,
+    label = 'Substantial'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 18,
+    y = -1.5,
+    label = 'Severe'
+  ) +
+  labs(
+    title = 'Severity Categories',
+    subtitle = 'Based on DAST',
+    caption = 'Cutoffs are:\nLow = 1-5,\nIntermediate = 6-10,\nSubstantial = 11-15,\nSevere = 16-20'
+  )
+```
+
+### DAST Internal Reliability
+
+```{r}
+dast_alpha <-
+  dast_complete %>%
+  select(
+    -id:-d00,
+    -d4,
+    -d5,
+    -dast_total
+         ) %>%
+  psych::alpha(check.keys = TRUE)
+
+
+dast_alpha_table <-
+  tibble(
+  Scale = 'DAST',
+  Alpha = round(dast_alpha$total$raw_alpha, 3)
+)
+
+dast_alpha_table %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for DAST Scale'
+  )
+
+```
+
+### Creating New Cleaned Dataset 3
+
+```{r}
+# twp <- 
+  # left_join(twp, dast_calc)
+```
+
+## BCAP
+
+### BCAP Data Manipulation
+
+```{r}
+bcap <-
+  no_test %>%
+  select(
+    id,
+    matches('^q\\d'),
+    -q1461
+    )
+
+bcap <-
+  bcap %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == 1 ~ 1,
+        .x == 2 ~ 0,
+        .x == 3 ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      .cols = c(q1, q2, q23, q29),
+      .fns = ~case_when(
+        .x == 1 ~ 0,
+        .x == 0 ~ 1,
+        TRUE ~ .x
+      ),
+      .names = '{.col}_r'
+    )
+  )
+```
+
+### BCAP Description
+
+-   Variables for the BCAP measure
+
+    -   `q1`,`q2`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q9`, `q10`, `q11`, `q12`, `q13`, `q14`, `q15`, `q16`, `q17`, `q18`, `q19`, `q20`, `q21`, `q22`, `q23`, `q24`, `q25`, `q26`, `q27`, `q28`, `q29`, `q30`, `q31`, `q32`, `q33`, `q34`
+    -   Variable Scale
+        -   1 - "Agree"
+
+        -   0 - "Disagree"
+
+        -   -77 - "Decline to respond"
+    -   Total scores should range from 0 to 24
+        -   total scale score is the BCAP risk scale with all the items that are not part of the lie and random responding subscales
+
+        -   `q1`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q10`, `q11`, `q12`, `q13`, `q14`, `q16`, `q17`, `q19`, `q20`, `q22`, `q23`, `q24`, `q25`, `q27`, `q29`, `q30`, `q31`, `q32`, `q33`
+    -   Reverse coding
+        -   Items `q1`, `q2`, `q23`, and `q29` should be reverse coded
+
+-   Subscales
+
+    -   Happiness (reverse coded)
+
+        -   `q1`, `q23`, `q29`
+
+    -   Feelings of persecution
+
+        -   `q3`, `q25`, `q33`
+
+    -   Loneliness
+
+        -   `q5`, `q12`, `q22`, `q31`
+
+    -   Family conflict
+
+        -   `q6`, `q13`, `q17`
+
+    -   Rigidity
+
+        -   `q7`, `q14`, `q20`, `q32`
+
+    -   Distress
+
+        -   `q8`, `q11`, `q16`, `q19`, `q27`
+
+    -   Poverty
+
+        -   `q10`, `q30`
+
+-   Additional subscales to remove invalid cases
+
+    -   Lie
+
+        -   `q4`, `q9`, `q15`, `q21`, `q26`, `q34`
+
+    -   Random responding
+
+        -   `q2`, `q18`, `q28`
+
+-   Missing Data Rule:
+
+    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+
+-   Reference: @ondersma2005brief
+
+### BCAP Item Descriptive Statistics
+
+-   q1: I am a happy person (reversed coded)
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q1_r,
+    decline = TRUE
+  )
+```
+
+-   q2: I know what is the right and wrong way to act (reverse coded)
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q2_r,
+    decline = TRUE
+  )
+```
+
+-   q3: People have caused me a lot of pain
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q3,
+    decline = TRUE
+  )
+```
+
+-   q4: I sometimes act without thinking
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q4,
+    decline = TRUE
+  )
+```
+
+-   q5: I am often lonely inside
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q5,
+    decline = TRUE
+  )
+```
+
+-   q6: My family fights a lot
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q6,
+    decline = TRUE
+  )
+```
+
+-   q7: Everything in a home should always be in its place
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q7,
+    decline = TRUE
+  )
+```
+
+-   q8: I often feel very upset
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q8,
+    decline = TRUE
+  )
+```
+
+-   q9: Sometimes I have bad thoughts
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q9,
+    decline = TRUE
+  )
+```
+
+-   q10: I sometimes worry that I will not have enough to eat
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q10,
+    decline = TRUE
+  )
+```
+
+-   q11: I am easily upset by my problems
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q11,
+    decline = TRUE
+  )
+```
+
+-   q12: Sometimes I feel all alone in the world
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q12,
+    decline = TRUE
+  )
+```
+
+-   q13: My family has problems getting along
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q13,
+    decline = TRUE
+  )
+```
+
+-   q14: Children should never disobey
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q14,
+    decline = TRUE
+  )
+```
+
+-   q15: I sometimes lose my temper
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q15,
+    decline = TRUE
+  )
+```
+
+-   q16: I often feel worthless
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q16,
+    decline = TRUE
+  )
+```
+
+-   q17: My family has many problems
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q17,
+    decline = TRUE
+  )
+```
+
+-   q18: It is okay to let a child stay in dirty diapers for a while
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q18,
+    decline = TRUE
+  )
+```
+
+-   q19: I am often upset and do not know why
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q19,
+    decline = TRUE
+  )
+```
+
+-   q20: Children should be quiet and listen
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q20,
+    decline = TRUE
+  )
+```
+
+-   q21: I sometimes fail to keep all of my promises
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q21,
+    decline = TRUE
+  )
+```
+
+-   q22: I often feel very alone
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q22,
+    decline = TRUE
+  )
+```
+
+-   q23: My life is good (reverse coded)
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q23_r,
+    decline = TRUE
+  )
+```
+
+-   q24: I am often upset
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q24,
+    decline = TRUE
+  )
+```
+
+-   q25: Other people have made my life unhappy
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q25,
+    decline = TRUE
+  )
+```
+
+-   q26: I sometimes say bad words
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q26,
+    decline = TRUE
+  )
+```
+
+-   q27: I am often depressed
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q27,
+    decline = TRUE
+  )
+```
+
+-   q28: Children should not learn how to swim
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q28,
+    decline = TRUE
+  )
+```
+
+-   q29: My life is happy (reverse coded)
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q29_r,
+    decline = TRUE
+  )
+```
+
+-   q30: I sometimes worry that my needs will not be met
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q30,
+    decline = TRUE
+  )
+```
+
+-   q31: I often feel alone
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q31,
+    decline = TRUE
+  )
+```
+
+-   q32: A child needs very strict rules
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q32,
+    decline = TRUE
+  )
+```
+
+-   q33: Other people have made my life hard
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q33,
+    decline = TRUE
+  )
+```
+
+-   q34: People sometimes take advantage of me
+
+```{r}
+bcap %>%
+  prop_fun_plot(
+    x = q34,
+    decline = TRUE
+  )
+```
+
+### BCAP Missing Data
+
+```{r}
+bcap %>%
+    pct_miss_fun(
+      id = 'id', #this needs to be changed to remove non-reverse-scored items
+      n_items = 34 
+    ) %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'BCAP Missing Data',
+    subtitle = 'By Participant'
+  )
+```
+
+### BCAP Code For Calculations
+
+```{r}
+bcap_calc <-
+  bcap %>%
+    pct_miss_fun(
+      id = 'id',
+      n_items = 34
+    ) %>%
+    full_join(bcap,
+              by = 'id') %>%
+    filter(
+      is.na(miss_pct) |
+        miss_pct < 20
+      ) %>%
+  mutate(
+    across(
+      .cols = c(-id, -miss_pct, -missing_n),
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+### BCAP Composite & Subscale Score Calculations
+
+```{r}
+bcap_complete <-
+  bcap_calc %>%
+  select(
+    -missing_n,
+    -miss_pct
+         ) %>% 
+    # index_total_fun(
+    #   id = 'id'
+    # ) %>%
+  subscale_create(
+  total_only = TRUE,
+  scale1 = c('q1_r', 'q23_r', 'q29_r',
+             'q3', 'q25', 'q33',
+             'q5', 'q12', 'q22', 'q31',
+             'q6', 'q13', 'q17',
+             'q7', 'q14', 'q20', 'q32',
+             'q8', 'q11', 'q16', 'q19', 'q27',
+             'q10', 'q30'),
+  scale2 = c('q1_r', 'q23_r', 'q29_r'),
+  scale3 = c('q3', 'q25', 'q33'),
+  scale4 = c('q5', 'q12', 'q22', 'q31'),
+  scale5 = c('q6', 'q13', 'q17'),
+  scale6 = c('q7', 'q14', 'q20', 'q32'),
+  scale7 = c('q8', 'q11', 'q16', 'q19', 'q27'),
+  scale8 = c('q10', 'q30'),
+  scale9 = c('q4', 'q9', 'q15', 'q21', 'q26', 'q34'),
+  scale10 = c('q2_r', 'q18', 'q28')
+  ) %>% 
+    rename(
+      bcap_risk_total = total1,
+    bcap_happy_total = total2,
+    bcap_feel_pers_total = total3,
+    bcap_lonely_total = total4,
+    bcap_fam_conf_total = total5,
+    bcap_rigid_total = total6,
+    bcap_distress_total = total7,
+    bcap_poverty_total = total8,
+    bcap_lie_total = total9,
+    bcap_random_total = total10
+    )
+```
+
+### BCAP Scale & Subscale Distributions
+
+```{r}
+bcap_complete %>%
+  composite_hist(
+    x = bcap_risk_total
+  ) +
+  labs(
+    title = 'Distribution of Total Scores for BCAP Risk Scale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_happy_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Happiness Subscale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_feel_pers_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Feelings of Persecution Subscale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_lonely_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Loneliness Subscale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_fam_conf_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Family Conflict Subscale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_rigid_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Rigidity Subscale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_distress_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Distress Subscale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_poverty_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Poverty Subscale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_lie_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Lying Subscale'
+  )
+
+bcap_complete %>% 
+  composite_hist(
+    x = bcap_random_total,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distribution For BCAP Random Responding Subscale'
+  )
+```
+
+### BCAP Cutoffs
+
+```{r}
+bcap_complete %>%
+  cutoff_plot(
+    x = bcap_risk_total,
+    cutoff = 9,
+    cutoff_other = 12
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Scale',
+    caption = 'Cutoffs are 9 and 12\nSee references for literature on cutoff scores.'
+  )
+
+bcap_complete %>% 
+  cutoff_plot(
+    x = bcap_lie_total,
+    cutoff = 4
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Lie Subscale',
+    caption = 'If 4 or more (score of 4) items are endorsed,\ncase may be invalid'
+  )
+
+bcap_complete %>% 
+  cutoff_plot(
+    x = bcap_random_total,
+    cutoff = 0
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Random Responding Subscale',
+    caption = 'If any of these items are endorsed (score > 0),\ncase may be invalid'
+  )
+```
+
+### BCAP Internal Reliability
+
+```{r}
+bcap_alpha <- 
+  bcap_complete %>% 
+  select(
+    q1_r,
+    q2_r,
+    q3:q22,
+    q23_r,
+    q24:q28,
+    q29_r,
+    q30:q34
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_risk_alpha <-
+  bcap_complete %>%
+  select(
+    q1_r,
+    q3,
+    q5:q8,
+    q10:q14,
+    q16:q17,
+    q19:q20,
+    q22,
+    q23_r,
+    q24:q25,
+    q27,
+    q29_r,
+    q30:q33
+    ) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_happy_alpha <- 
+  bcap_complete %>% 
+  select(q1_r, q23_r, q29_r) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_feel_pers_alpha <- 
+  bcap_complete %>% 
+  select(q3, q25, q33) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_lonely_alpha <- 
+  bcap_complete %>% 
+  select(q5, q12, q22, q31) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_fam_conf_alpha <- 
+  bcap_complete %>% 
+  select(q6, q13, q17) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_rigid_alpha <-
+  bcap_complete %>% 
+  select(q7, q14, q20, q32) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_distress_alpha <- 
+  bcap_complete %>% 
+  select(q8, q11, q16, q19, q27) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_poverty_alpha <- 
+  bcap_complete %>% 
+  select(q10, q30) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_lie_alpha <-
+  bcap_complete %>% 
+  select(q4, q9, q15, q21, q26, q34) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_random_alpha <-
+  bcap_complete %>% 
+  select(q2_r, q19, q28) %>% 
+  psych::alpha(check.keys = TRUE)
+
+bcap_alpha_table <-
+  tibble(
+    Scale = c('BCAP Complete Scale', 'BCAP Risk Scale',
+              'Happiness Subscale', 'Feelings of Persecution Subscale',
+              'Loneliness Subscale', 'Family Conflict Subscale',
+              'Rigidity Subscale', 'Distress Subscale',
+              'Poverty Subscale',
+              'Lying Subscale', 'Random Responding Subscale'),
+    Alpha = c(round(bcap_alpha$total$raw_alpha, 3),
+              round(bcap_risk_alpha$total$raw_alpha, 3),
+              round(bcap_happy_alpha$total$raw_alpha, 3),
+              round(bcap_feel_pers_alpha$total$raw_alpha, 3),
+              round(bcap_lonely_alpha$total$raw_alpha, 3),
+              round(bcap_fam_conf_alpha$total$raw_alpha, 3), 
+              round(bcap_rigid_alpha$total$raw_alpha, 3), 
+              round(bcap_distress_alpha$total$raw_alpha, 3),
+              round(bcap_poverty_alpha$total$raw_alpha, 3), 
+              round(bcap_lie_alpha$total$raw_alpha, 3),
+              round(bcap_random_alpha$total$raw_alpha, 3))
+  )
+
+bcap_alpha_table %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Alpha Values for BCAP Scale & Subscales'
+  )
+
+```
+
+### Creating New Cleaned Dataset 4
+
+```{r}
+# twp <-
+# twp %>%
+# left_join(
+#   bcap_subscale,
+#   by = 'id'
+#   )
+```
+
+## DYADC
+
+### DYADC Data Manipulation
+
+```{r}
+dyadc <-
+  no_test %>% 
+  select(
+    id,
+    dyadc_screener,
+    matches(
+      '^e\\d'
+      )
+    ) %>% 
+  mutate(
+    dyadc_screen = case_when(
+      dyadc_screener == 1 ~ 'yes_relationship',
+      dyadc_screener == 2 ~ 'no_relationship'
+    )
+  ) %>% 
+  select(-dyadc_screener)
+
+dyadc <-
+  dyadc %>%
+  mutate(
+    across(
+      .cols = c(e1:e15),
+      .fns = ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ 2,
+        .x == 4 ~ 3,
+        .x == 5 ~ 4,
+        .x == 6 ~ 5,
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_
+      )
+    ),
+    across(
+      .cols = c(e16, e17, e20:e22),
+      .fns = ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ 2,
+        .x == 4 ~ 3,
+        .x == 5 ~ 4,
+        .x == 6 ~ 5,
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_
+      )
+    ),
+    e18 = case_when(
+      e18 == 1 ~ 5,
+      e18 == 2 ~ 4,
+      e18 == 3 ~ 3,
+      e18 == 4 ~ 2,
+      e18 == 5 ~ 1,
+      e18 == 6 ~ 0,
+      e18 == 7 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    e19 = case_when(
+      e19 == 1 ~ 5,
+      e19 == 2 ~ 4,
+      e19 == 3 ~ 3,
+      e19 == 4 ~ 2,
+      e19 == 5 ~ 1,
+      e19 == 6 ~ 0,
+      e19 == 7 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    across(
+      .cols = c(e23:e24),
+      .fns = ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ 2,
+        .x == 4 ~ 3,
+        .x == 5 ~ 4,
+        .x == 6 ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      .cols = c(e25:e28),
+      .fns = ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ 2,
+        .x == 4 ~ 3,
+        .x == 5 ~ 4,
+        .x == 6 ~ 5,
+        .x == 7 ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      .cols = c(e29, e30),
+      .fns = ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    e31 = case_when(
+      e31 == 1 ~ 0,
+      e31 == 2 ~ 1,
+      e31 == 3 ~ 2,
+      e31 == 4 ~ 3,
+      e31 == 5 ~ 4,
+      e31 == 6 ~ 5,
+      e31 == 7 ~ 6,
+      e31 == 8 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    e32 = case_when(
+      e32 == 1 ~ 5,
+      e32 == 2 ~ 4,
+      e32 == 3 ~ 3,
+      e32 == 4 ~ 2,
+      e32 == 5 ~ 1,
+      e32 == 6 ~ 0,
+      e32 == 7 ~ -77,
+      TRUE ~ NA_real_
+    )
+  )
+```
+
+### DYADC Description
+
+-   Variables for DYADC scale
+
+    -   `e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`, `e14`, `e15`, `e16`, `e17`, `e18`, `e19`, `e20`, `e21`, `e22`, `e23`, `e24`, `e25`, `e26`, `e27`, `e28`, `e29`, `e30`, `e31`, `e32`
+
+-   Variable Scale
+
+    -   For items `e1` to `e15`
+
+        -   5 - "Always Agree"
+
+        -   4 - "Almost Always Agree"
+
+        -   3 - "Occasionally Disagree"
+
+        -   2 - "Frequently Disagree"
+
+        -   1 - "Almost Always Disagree"
+
+        -   0 - "Always Disagree"
+
+        -   -77 - "Declined to Respond"
+
+    -   Items `e16` to `e22`, except `e18` and `e19` are reverse scored
+
+        -   0 - "All the time"
+
+        -   1 - "Most of the time"
+
+        -   2 - "More often than not"
+
+        -   3 - "Occasionally"
+
+        -   4 - "Rarely"
+
+        -   5 - "Never"
+
+        -   -77 -"Declined to Respond"
+
+    -   Items `e23` and `e24` are both on the following scale
+
+        -   4 - "Every day"
+
+        -   3 - "Almost every day"
+
+        -   2 - "Occasionally"
+
+        -   1 - "Rarely"
+
+        -   0 - "Never"
+
+        -   -77 - "Declined to Respond"
+
+    -   Items `e25` to `e28`
+
+        -   0 - "Never"
+
+        -   1 - "Less than once a month"
+
+        -   2 - "Once or twice a month"
+
+        -   3 - "Once or twice a week"
+
+        -   4 - "Once a day"
+
+        -   5 - "More often"
+
+        -   -77 - "Declined to Respond"
+
+    -   Items `e29` and `e30`
+
+        -   0 - "Yes"
+
+        -   1 - "No"
+
+    -   `e31`
+
+        -   0 - "Extremely Unhappy"
+
+        -   1 - "Fairly Unhappy"
+
+        -   2 - "A Little Unhappy"
+
+        -   3 - "Happy"
+
+        -   4 - "Very Happy"
+
+        -   5 - "Extremely Happy"
+
+        -   6 - "Perfect"
+
+        -   -77 - "Declined to Respond"
+
+    -   `e32`
+
+        -   5 - "I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
+
+        -   4 - "I want very much for my relationship to succeed, and will do all I can to see that it does."
+
+        -   3 - "I want very much for my relationship to succeed, and will do my fair share to see that it does."
+
+        -   2 - "It would be nice if my relationship succeeded, but I can't do much more than I'm doing now to help it succeed."
+
+        -   1 - "It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going."
+
+        -   0 - "My relationship can never succeed, and there is no more that I can do to keep the relationship going."
+
+        -   -77 - "Declined to Respond"
+
+-   Total scores should range from 0 to 151
+
+-   Reverse Coding
+
+    -   `e18` and `e19` are reverse coded
+
+-   Subscales
+
+    -   Dyadic Consensus
+
+        -   `e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`
+
+    -   Affective Expression
+
+        -   `e4`, `e6`, `e29`, `e30`
+
+    -   Dyadic Satisfaction
+
+        -   `e16`, `e17`, `e18`, `e19`, `e20`, `e21`, `e22`, `e23`, `e31`, `e32`
+
+    -   Dyadic Cohesion
+
+        -   `e24`, `e25`, `e26`, `e27`, `e28`
+
+-   Missing Data Rule:
+
+    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+
+-   Reference: @spanier1976measuring
+
+### DYADC Item Descriptive Statistics
+
+Most people have disagreements in their relationships. Please indicate below the approximate extent of agreement or disagreement between you and your partner for each item on the following list **thinking about the [past 6 months]{.underline}**. Please [circle one number]{.underline} for each question (please do not circle in between two numbers).
+
+-   e1: Handling family finances
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e1,
+    decline = TRUE
+  )
+```
+
+-   e2: Matters of recreation
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e2,
+    decline = TRUE
+  )
+```
+
+-   e3: Religious matters
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e3,
+    decline = TRUE
+  )
+```
+
+-   e4: Demonstrations of affection
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e4,
+    decline = TRUE
+  )
+```
+
+-   e5: Friends
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e5,
+    decline = TRUE
+  )
+```
+
+-   e6: Sex relations
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e6,
+    decline = TRUE
+  )
+```
+
+-   e7: Conventionality (correct or proper behavior)
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e7,
+    decline = TRUE
+  )
+```
+
+-   e8: Philosophy of life (the way you live your life)
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e8,
+    decline = TRUE
+  )
+```
+
+-   e9: Ways of dealing with parents or in-laws
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e9,
+    decline = TRUE
+  )
+```
+
+-   e10: Aims, goals, and things believed important
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e10,
+    decline = TRUE
+  )
+```
+
+-   e11: Amount of time spent together
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e11,
+    decline = TRUE
+  )
+```
+
+-   e12: Making major decisions
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e12,
+    decline = TRUE
+  )
+```
+
+-   e13: Household tasks
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e13,
+    decline = TRUE
+  )
+```
+
+-   e14: Leisure time and activities
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e14,
+    decline = TRUE
+  )
+```
+
+-   e15: Career decisions
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e15,
+    decline = TRUE
+  )
+```
+
+**Thinking about the past 6 months, how often...**
+
+-   e16: do you discuss or have you considered divorce, separation, or terminating your relationship?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e16,
+    decline = TRUE
+  )
+```
+
+-   e17: do you or your partner leave the house after a fight?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e17,
+    decline = TRUE
+  )
+```
+
+-   e18: in general, how often do you think that things between you and your partner are going well? (reverse coded)
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e18,
+    decline = TRUE
+  )
+```
+
+-   e19: do you confide in your partner? (reverse coded)
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e19,
+    decline = TRUE
+  )
+```
+
+-   e20: do you ever regret that you are dating/married/living together?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e20,
+    decline = TRUE
+  )
+```
+
+-   e21: do you and your partner quarrel?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e21,
+    decline = TRUE
+  )
+```
+
+-   e22: do you and your partner "get on each other's nerves"?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e22,
+    decline = TRUE
+  )
+```
+
+**In the past 6 months, how often...**
+
+-   e23: do you kiss your partner?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e23,
+    decline = TRUE
+  )
+```
+
+-   e24: do you and your partner engage in outside interests together?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e24,
+    decline = TRUE
+  )
+```
+
+**Thinking about the past 6 months, how often do you...**
+
+-   e25: have an interesting chat?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e25,
+    decline = TRUE
+  )
+```
+
+-   e26: laugh together?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e26,
+    decline = TRUE
+  )
+```
+
+-   e27: calmly discuss something?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e27,
+    decline = TRUE
+  )
+```
+
+-   e28: work together on a project?
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e28,
+    decline = TRUE
+  )
+```
+
+**Please indicate if items below were problems in your relationships in the past few weeks.**
+
+-   e29: being too tired for sex.
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e29,
+    decline = TRUE
+  )
+```
+
+-   e30: not showing love.
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e30,
+    decline = TRUE
+  )
+```
+
+-   e31: Please circle the number that best describes the degree of happiness in your relationship.
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e31,
+    decline = TRUE
+  )
+```
+
+-   e32: Which of the following statements best describes how you feel about the future of your relationship? Please **circle one answer** only.
+
+```{r}
+dyadc %>% 
+  prop_fun_plot(
+    x = e32,
+    decline = TRUE
+  )
+```
+
+### DYADC Missing Data
+
+```{r}
+dyadc %>%
+  pct_miss_fun(
+    id = c('id', 'dyadc_screen'),
+    n_items = 32
+  ) %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DYADC Missing Data',
+    subtitle = 'By Participant'
+  )
+```
+
+### DYADC Code For Calculations
+
+```{r}
+dyadc_calc <-
+  dyadc %>%
+  pct_miss_fun(
+    id = c('id', 'dyadc_screen'),
+    n_items = 32
+  ) %>%
+  full_join(dyadc,
+            by = 'id') %>%
+  filter(
+    is.na(miss_pct) |
+    miss_pct < 20
+    ) %>%
+  mutate(
+    across(
+      .cols = c(e1:e32),
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+### DYADC Composite & Subscale Score Calculations
+
+```{r}
+dyadc_complete <-
+  dyadc_calc %>%
+    select(
+      -missing_n,
+      -miss_pct
+           ) %>%
+    composite_total_avg_fun(
+      id = c('id', 'dyadc_screen'),
+      n_items = 32
+    ) %>%
+    rename(
+      dyadc_total = sum_values,
+      dyadc_avg = mean_values
+    )
+
+dyadc_complete <-
+  dyadc_complete %>%
+    subscale_create(
+      total_only = FALSE,
+      scale1 = c('e1', 'e2', 'e3', 'e4', 'e5',
+                 'e6', 'e7', 'e8', 'e9', 'e10',
+                 'e11', 'e12', 'e13'),
+      scale1_nitems = 13,
+      scale2 = c('e4', 'e6',
+                 'e29', 'e30'),
+      scale2_nitems = 4,
+      scale3 = c('e16', 'e17', 'e18', 'e19', 'e20',
+                 'e21', 'e22', 'e23', 'e31', 'e32'),
+      scale3_nitems = 10,
+      scale4 = c('e24', 'e25', 'e26', 'e27', 'e28'),
+      scale4_nitems = 5
+    ) %>%
+    rename(
+      dyadc_con_total = total1,
+      dyadc_con_avg = avg1,
+      dyadc_aff_exp_total = total2,
+      dyadc_aff_exp_avg = avg2,
+      dyadc_satis_total = total3,
+      dyadc_satis_avg = avg3,
+      dyadc_cohes_total = total4,
+      dyadc_cohes_avg = avg4
+    )
+```
+
+### DYADC Scale & Subscale Distributions
+
+```{r}
+dyadc_complete %>%
+  composite_hist(
+    x = dyadc_total
+  ) +
+  labs(
+    title = 'Distribution for DYADC Scale'
+  )
+
+dyadc_complete %>%
+  composite_hist(
+    x = dyadc_con_total
+  ) +
+  labs(
+    title = 'Distribution for DYADC Consensus Subscale'
+  )
+
+dyadc_complete %>%
+  composite_hist(
+    x = dyadc_aff_exp_total,
+    bins = 10
+  ) +
+  labs(
+    title = 'Distribution for DYADC Affectional Expression Subscale'
+  )
+
+dyadc_complete %>%
+  composite_hist(
+    x = dyadc_satis_total
+  ) +
+  labs(
+    title = 'Distribution for DYADC Satisfaction Subscale'
+  )
+
+dyadc_complete %>%
+  composite_hist(
+    x = dyadc_cohes_total
+  ) +
+  labs(
+    title = 'Distribution for DYADC Cohesion Subscale'
+  )
+```
+
+### DYADC Cutoffs
+
+```{r}
+dyadc_complete %>%
+  cutoff_plot(
+    x = dyadc_total,
+    cutoff = 92,
+    cutoff_other = 107
+  ) +
+  labs(
+    title = 'Cutoff Values for DYADC Scale',
+    caption = 'Cutoffs are 92 and 107\nSee references for literature on cutoff scores.'
+  )
+```
+
+### DYADC Internal Reliability
+
+```{r}
+dyadc_alpha <-
+  dyadc_complete %>% 
+  select(
+    e1:e32
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_con_alpha <-
+  dyadc_complete %>% 
+  select(
+    e1:e13
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_aff_exp_alpha <-
+  dyadc_complete %>% 
+  select(
+    e4, e6, e29, e30
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_satis_alpha <-
+  dyadc_complete %>% 
+  select(
+    e16:e23,
+    e31,
+    e32
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_cohes_alpha <-
+  dyadc_complete %>% 
+  select(
+    e24:e28
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+dyadc_alpha_table <- 
+  tibble(
+    Scale = c('DYADC',
+              'DYADC - Consensus',
+              'DYADC - Affectional Expression',
+              'DYADC - Satisfaction',
+              'DYADC - Cohesion'
+      
+    ),
+    Alpha = c(round(dyadc_alpha$total$raw_alpha, 3),
+              round(dyadc_con_alpha$total$raw_alpha, 3),
+              round(dyadc_aff_exp_alpha$total$raw_alpha, 3),
+              round(dyadc_satis_alpha$total$raw_alpha, 3),
+              round(dyadc_cohes_alpha$total$raw_alpha, 3))
+  )
+
+dyadc_alpha_table %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'Alpha Values for DYADC Scale & Subscales'
+  )
+```
+
+### Creating New Cleaned Dataset 5
+
+## CTS2S Short Form
+
+### CTS2S Data Manipulation
+
+```{r}
+cts <-
+  no_test %>%
+  select(
+    id,
+    cts_screen,
+    matches('^ct\\d')
+  )
+
+cts <-
+  cts %>%
+  mutate(
+    cts_screen = case_when(
+      cts_screen == 1 ~ 'in_relationship',
+      cts_screen == 2 ~ 'no_relationship',
+      TRUE ~ NA_character_
+    ),
+    across(
+      .cols = c(ct1:ct20),
+      .fns = ~case_when(
+        .x == 1 ~ 1,
+        .x == 2 ~ 2,
+        .x == 3 ~ 3,
+        .x == 4 ~ 4,
+        .x == 5 ~ 5,
+        .x == 6 ~ 6,
+        .x == 7 ~ 7,
+        .x == 8 ~ 8,
+        .x == 9 ~ -77,
+        TRUE ~ NA_real_
+      )
+    )
+  )
+```
+
+### CTS2S Description
+
+-   Variables in CTS2S
+
+    -   `ct1`, `ct2`, `ct3`, `ct4`, `ct5`, `ct6`, `ct7`, `ct8`, `ct9`, `ct10`, `ct11`, `ct12`, `ct13`, `ct14`, `ct15`, `ct16`, `ct17`, `ct18`, `ct19`, `ct20`
+
+-   Variable Scale
+
+    -   1 - "Once in the past year"
+
+    -   2 - "Twice in the past year"
+
+    -   3 - "3-5 times in the past year"
+
+    -   4 - "6-10 times in the past year"
+
+    -   5 - "11-20 times in the past year"
+
+    -   6 - "More than 20 times in the past year"
+
+    -   7 - "Not in the past year, but it did happen before"
+
+    -   8 - "This has never happened"
+
+    -   -77 - "Declined to Respond"
+
+-   Subscales (Individual/Participant/TC)
+
+    -   Psychological Aggression
+
+        -   `ct3`, `ct13`
+
+    -   Physical Injury
+
+        -   `ct5`, `ct15`
+
+    -   Assault
+
+        -   `ct9`, `ct11`
+
+    -   Sexual Cohesion
+
+        -   `ct17`, `ct19`
+
+    -   Negotiation
+
+        -   `ct1`, `ct7`
+
+-   Subscales (Partner)
+
+    -   Psychological Aggression
+
+        -   `ct4`, `ct14`
+
+    -   Physical Injury
+
+        -   `ct6`, `ct16`
+
+    -   Assault
+
+        -   `ct10`, `ct12`
+
+    -   Sexual Cohesion
+
+        -   `ct18`, `ct20`
+
+    -   Negotiation
+
+        -   `ct2`, `ct8`
+
+-   CTS2S should not have a calculated total/average composite score
+
+-   CTS2S has three different ways of scoring (Prevalence, Severity, Mutuality)
+
+    -   Prevalence
+
+        -   assessed for both individual/participant/TC and partner
+
+        -   assessed by whether any behavior within each subscale occurred in the past year
+
+    -   Severity
+
+        -   assessed for both individual/participant/TC and partner
+
+        -   assessed as either no instance of the behavior, minor instance of the behavior, or severe instance of the behavior for each subscale
+
+        -   0 - "No"
+
+        -   1 - "Minor"
+
+        -   2 - "Severe"
+
+    -   Mutuality
+
+        -   assessed by combining responses from both individual/participant/TC and partner
+
+        -   assessed as either none, male/partner only, female/individual/participant/TC only, both
+
+        -   0 - "None"
+
+        -   1 - "Partner only"
+
+        -   2 - "Individual/Participant/TC only"
+
+        -   3 - "Both"
+
+-   Missing Data Rule:
+
+    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+
+-   Reference: @straus2004short
+
+### CTS2S Item Description
+
+No matter how well a couple gets along, there are times when they disagree, get annoyed with the other person, want different things from each other, or just have spats or fights because they are in a bad mood, are tired or for some other reason. Couples also have many different ways of trying to settle their differences. This is a list of things that might happen when you have differences. Please mark how many times you did each to these things in the past year, and how many times your partner did them in the past year. If you or your partner did not do one of these things in the past year, but it happened before that, mark a "7" on your answer sheet for that question. If it never happened, mark an "8" on your answer sheet.
+
+-   ct1: I explained my side or suggested a compromise for a disagreement with my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct1,
+    decline = TRUE
+  )
+```
+
+-   ct2: My partner explained his or her side or suggested a compromise for a disagreement with me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct2,
+    decline = TRUE
+  )
+```
+
+-   ct3: I insulted or swore or shouted or yelled at my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct3,
+    decline = TRUE
+  )
+```
+
+-   ct4: My partner insulted or swore or shouted or yelled at me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct4,
+    decline = TRUE
+  )
+```
+
+-   ct5: I had a sprain, bruise, or small cut, or felt pain the next day because of a fight with my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct5,
+    decline = TRUE
+  )
+```
+
+-   ct6: My partner had a sprain, bruise, or small cut or felt pain the next day because of a fight with me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct6,
+    decline = TRUE
+  )
+```
+
+-   ct7: I showed respect for, or showed that I cared about my partner's feelings about an issue
+
+    we disagreed on
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct7,
+    decline = TRUE
+  )
+```
+
+-   ct8: My partner showed respect for, or showed that he or she cared about my feeling about an issue we disagreed on
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct8,
+    decline = TRUE
+  )
+```
+
+-   ct9: I pushed, shoved, or slapped my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct9,
+    decline = TRUE
+  )
+```
+
+-   ct10: My partner pushed, shoved, or slapped me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct10,
+    decline = TRUE
+  )
+```
+
+-   ct11: I punched or kicked or beat-up my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct11,
+    decline = TRUE
+  )
+```
+
+-   ct12: My partner punched or kicked or beat-me-up
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct12,
+    decline = TRUE
+  )
+```
+
+-   ct13: I destroyed something belonging to my partner or threatened to hit my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct13,
+    decline = TRUE
+  )
+```
+
+-   ct14: My partner destroyed something belonging to me or threatened to hit me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct14,
+    decline = TRUE
+  )
+```
+
+-   ct15: I went see a doctor (M.D.) or needed to see a doctor because of a fight with my partner
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct15,
+    decline = TRUE
+  )
+```
+
+-   ct16: My partner went to see a doctor (M.D.) or needed to see a doctor because of a fight with me
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct16,
+    decline = TRUE
+  )
+```
+
+-   ct17: I used force (like hitting, holding down, or using a weapon) to make my partner have sex
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct17,
+    decline = TRUE
+  )
+```
+
+-   ct18: My partner used force (like hitting, holding down, or using a weapon) to make me have sex
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct18,
+    decline = TRUE
+  )
+```
+
+-   ct19: I insisted on sex when my partner did not want to or insisted on sex without a condom (but did not use physical force)
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct19,
+    decline = TRUE
+  )
+```
+
+-   ct20: My partner insisted on sex when I did not want to or insisted on sex without a condom (but did not use physical force)
+
+```{r}
+cts %>% 
+  prop_fun_plot(
+    x = ct20,
+    decline = TRUE
+  )
+```
+
+### CTS2S Missing Data
+
+```{r}
+cts %>%
+  pct_miss_fun(
+    id = c('id', 'cts_screen'),
+    n_items = 20
+  ) %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'CTS2S Missing Data',
+    subtitle = 'By Participant'
+  )
+```
+
+### CTS2S Code For Calculations
+
+```{r}
+cts_calc <-
+  cts %>%
+  pct_miss_fun(
+    id = c('id', 'cts_screen'),
+    n_items = 20
+  ) %>%
+  full_join(cts,
+            by = 'id') %>%
+  filter(
+    is.na(miss_pct) |
+      miss_pct < 20
+         ) %>%
+  mutate(
+    across(
+      .cols = c(ct1:ct20),
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+cts_calc <- 
+  cts_calc %>% 
+  mutate(
+    across(
+      .cols = c(ct1, ct2, ct7, ct8),
+      .fns = ~case_when(
+        .x == 1 ~ 1,
+        .x == 2 ~ 2,
+        .x == 3 ~ 4,
+        .x == 4 ~ 8,
+        .x == 5 ~ 16,
+        .x == 6 ~ 20,
+        .x == 7 ~ 0,
+        .x == 8 ~ 0,
+        TRUE ~ NA_real_
+      ),
+      .names = '{col}_midpoint'
+    )
+  )
+```
+
+### CTS2S Composite & Subscale Score Calculations
+
+```{r}
+cts_complete <-
+  cts_calc %>%
+  select(
+    -missing_n,
+    -miss_pct
+  ) %>%
+    mutate(
+      across(
+          .cols = c(ct1:ct20),
+          .fns = ~case_when(
+            .x %in% c(1, 2, 3, 4, 5, 6) ~ 1,
+            .x %in% c(7, 8) ~ 0,
+            TRUE ~ NA_real_
+          ),
+          .names = '{col}_dum'
+        )
+    )
+
+cts_complete <-
+  cts_complete %>%
+    subscale_create(
+      total_only = TRUE,
+      scale1 = c('ct3_dum', 'ct13_dum'),
+      scale2 = c('ct4_dum', 'ct14_dum'),
+      scale3 = c('ct5_dum', 'ct15_dum'),
+      scale4 = c('ct6_dum', 'ct16_dum'),
+      scale5 = c('ct9_dum', 'ct11_dum'),
+      scale6 = c('ct10_dum', 'ct12_dum'),
+      scale7 = c('ct17_dum', 'ct19_dum'),
+      scale8 = c('ct18_dum', 'ct20_dum'),
+      scale9 = c('ct1_midpoint', 'ct7_midpoint'),
+      scale10 = c('ct2_midpoint', 'ct8_midpoint')
+    ) %>%
+    rename(
+      cts_psy_agg_ind_sev = total1,
+      cts_psy_agg_part_sev = total2,
+      cts_injury_ind_sev = total3,
+      cts_injury_part_sev = total4,
+      cts_assault_ind_sev = total5,
+      cts_assault_part_sev = total6,
+      cts_sex_ind_sev = total7,
+      cts_sex_part_sev = total8,
+      cts_negotiate_ind = total9,
+      cts_negotiate_part = total10
+    )
+
+cts_complete <-
+  cts_complete %>%
+    mutate(
+      cts_psy_agg_ind_prev = if_else(cts_psy_agg_ind_sev == 0, 0, 1),
+      cts_psy_agg_part_prev = if_else(cts_psy_agg_part_sev == 0, 0, 1),
+      cts_injury_ind_prev = if_else(cts_injury_ind_sev == 0, 0, 1),
+      cts_injury_part_prev = if_else(cts_injury_part_sev == 0, 0, 1),
+      cts_assault_ind_prev = if_else(cts_assault_ind_sev == 0, 0, 1),
+      cts_assault_part_prev = if_else(cts_assault_part_sev == 0, 0, 1),
+      cts_sex_ind_prev = if_else(cts_sex_ind_sev == 0, 0, 1),
+      cts_sex_part_prev = if_else(cts_sex_part_sev == 0, 0, 1),
+      cts_psy_agg_mutual = case_when(
+        (cts_psy_agg_ind_prev == 1 &
+          cts_psy_agg_part_prev == 1) ~ 3,
+        (cts_psy_agg_ind_prev == 0 &
+           cts_psy_agg_part_prev == 1) ~ 1,
+        (cts_psy_agg_ind_prev == 1 &
+           cts_psy_agg_part_prev == 0) ~ 2,
+        (cts_psy_agg_ind_prev == 0 &
+           cts_psy_agg_part_prev == 0) ~ 0
+      ),
+      cts_injury_mutual = case_when(
+        (cts_injury_ind_prev == 1 &
+           cts_injury_part_prev == 1) ~ 3,
+        (cts_injury_ind_prev == 0 &
+           cts_injury_part_prev == 1) ~ 1,
+        (cts_injury_ind_prev == 1 &
+           cts_injury_part_prev == 0) ~ 2,
+        (cts_injury_ind_prev == 0 &
+           cts_injury_part_prev == 0) ~ 0
+      ),
+      cts_assault_mutual = case_when(
+        (cts_assault_ind_prev == 1 &
+           cts_assault_part_prev == 1) ~ 3,
+        (cts_assault_ind_prev == 0 &
+           cts_assault_part_prev == 1) ~ 1,
+        (cts_assault_ind_prev == 1 &
+           cts_assault_part_prev == 0) ~ 2,
+        (cts_assault_ind_prev == 0 &
+           cts_assault_part_prev == 0) ~ 0
+      ),
+      cts_sex_mutual = case_when(
+        (cts_sex_ind_prev == 1 &
+           cts_sex_part_prev == 1) ~ 3,
+        (cts_sex_ind_prev == 0 &
+           cts_sex_part_prev == 1) ~ 1,
+        (cts_sex_ind_prev == 1 &
+           cts_sex_part_prev == 0) ~ 2,
+        (cts_sex_ind_prev == 0 &
+           cts_sex_part_prev == 0) ~ 0
+      )
+    )
+```
+
+### CTS2S Severity Distributions (Individual \[TC\])
+
+```{r}
+cts_complete %>%
+  mutate(
+    cts_psy_agg_ind_sev = case_when(
+      cts_psy_agg_ind_sev == 0 ~ 'No Psychological Aggression',
+      cts_psy_agg_ind_sev == 1 ~ 'Minor Psychological Aggression',
+      cts_psy_agg_ind_sev == 2 ~ 'Severe Psychological Aggression'
+    ),
+    cts_psy_agg_ind_sev = as.factor(cts_psy_agg_ind_sev),
+    cts_psy_agg_ind_sev = relevel(cts_psy_agg_ind_sev, 'No Psychological Aggression')
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_ind_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Individual (TC) Psychological Aggression Severity',
+       x = '')
+
+cts_complete %>%
+  mutate(
+    cts_injury_ind_sev = case_when(
+      cts_injury_ind_sev == 0 ~ 'No Injury',
+      cts_injury_ind_sev == 1 ~ 'Minor Injury',
+      cts_injury_ind_sev == 2 ~ 'Severe Injury'
+    ),
+    cts_injury_ind_sev = as.factor(cts_injury_ind_sev),
+    cts_injury_ind_sev = relevel(cts_injury_ind_sev, 'No Injury')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_ind_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Individual (TC) Physical Injury Severity',
+       x = '')
+
+cts_complete %>%
+  mutate(
+    cts_assault_ind_sev = case_when(
+      cts_assault_ind_sev == 0 ~ 'No Assault',
+      cts_assault_ind_sev == 1 ~ 'Minor Assault',
+      cts_assault_ind_sev == 2 ~ 'Severe Assault'
+    ),
+    cts_assault_ind_sev = as.factor(cts_assault_ind_sev),
+    cts_assault_ind_sev = relevel(cts_assault_ind_sev, 'No Assault')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_ind_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Individual (TC) Assault Severity',
+       x = '')
+
+cts_complete %>%
+  mutate(
+    cts_sex_ind_sev = case_when(
+      cts_sex_ind_sev == 0 ~ 'No Sexual Cohesion',
+      cts_sex_ind_sev == 1 ~ 'Minor Sexual Cohesion',
+      cts_sex_ind_sev == 2 ~ 'Severe Sexual Cohesion'
+    ),
+    cts_sex_ind_sev = as.factor(cts_sex_ind_sev),
+    cts_sex_ind_sev = relevel(cts_sex_ind_sev, 'No Sexual Cohesion')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_ind_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Individual (TC) Sexual Cohesion Severity',
+       x = '')
+```
+
+### CTS2S Severity Distributions (Partner)
+
+```{r}
+
+cts_complete %>%
+  mutate(
+    cts_psy_agg_part_sev = case_when(
+      cts_psy_agg_part_sev == 0 ~ 'No Psychological Aggression',
+      cts_psy_agg_part_sev == 1 ~ 'Minor Psychological Aggression',
+      cts_psy_agg_part_sev == 2 ~ 'Severe Psychological Aggression'
+    ),
+    cts_psy_agg_part_sev = as.factor(cts_psy_agg_part_sev),
+    cts_psy_agg_part_sev = relevel(cts_psy_agg_part_sev, 'No Psychological Aggression')
+    ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_part_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Partner Psychological Aggression Severity',
+       x = '')
+
+cts_complete %>%
+  mutate(
+    cts_injury_part_sev = case_when(
+      cts_injury_part_sev == 0 ~ 'No Injury',
+      cts_injury_part_sev == 1 ~ 'Minor Injury',
+      cts_injury_part_sev == 2 ~ 'Severe Injury'
+    ),
+    cts_injury_part_sev = as.factor(cts_injury_part_sev),
+    cts_injury_part_sev = relevel(cts_injury_part_sev, 'No Injury')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_part_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Partner Physical Injury Severity',
+       x = '')
+
+cts_complete %>%
+  mutate(
+    cts_assault_part_sev = case_when(
+      cts_assault_part_sev == 0 ~ 'No Assault',
+      cts_assault_part_sev == 1 ~ 'Minor Assault',
+      cts_assault_part_sev == 2 ~ 'Severe Assault'
+    ),
+    cts_assault_part_sev = as.factor(cts_assault_part_sev),
+    cts_assault_part_sev = relevel(cts_assault_part_sev, 'No Assault')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_part_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Partner Assault Severity',
+       x = '')
+
+cts_complete %>%
+  mutate(
+    cts_sex_part_sev = case_when(
+      cts_sex_part_sev == 0 ~ 'No Sexual Cohesion',
+      cts_sex_part_sev == 1 ~ 'Minor Sexual Cohesion',
+      cts_sex_part_sev == 2 ~ 'Severe Sexual Cohesion'
+    ),
+    cts_sex_part_sev = as.factor(cts_sex_part_sev),
+    cts_sex_part_sev = relevel(cts_sex_part_sev, 'No Sexual Cohesion')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_part_sev
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Partner Sexual Cohesion Severity',
+       x = '')
+```
+
+### CTS2S Prevalence Distributions
+
+```{r}
+cts_complete %>%
+  pivot_longer(
+    cols = c(cts_psy_agg_ind_prev, cts_psy_agg_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_psy_agg_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_psy_agg_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Distribution of Psychological Aggression Prevalence')
+
+cts_complete %>%
+  pivot_longer(
+    cols = c(cts_injury_ind_prev, cts_injury_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_injury_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_injury_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Distribution of Physical Injury Prevalence')
+
+cts_complete %>%
+  pivot_longer(
+    cols = c(cts_assault_ind_prev, cts_assault_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_assault_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_assault_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Distribution of Assault Prevalence')
+
+cts_complete %>%
+  pivot_longer(
+    cols = c(cts_sex_ind_prev, cts_sex_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_sex_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_sex_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Distribution of Sexual Cohesion Prevalence')
+```
+
+### CTS2S Mutuality Distributions
+
+```{r}
+cts_complete %>%
+  mutate(
+    cts_psy_agg_mutual = case_when(
+      cts_psy_agg_mutual == 0 ~ 'Neither',
+      cts_psy_agg_mutual == 1 ~ 'Male Only',
+      cts_psy_agg_mutual == 2 ~ 'Female Only',
+      cts_psy_agg_mutual == 3 ~ 'Both'
+    ),
+    cts_psy_agg_mutual = as.factor(cts_psy_agg_mutual),
+    cts_psy_agg_mutual = relevel(cts_psy_agg_mutual, 'Neither')
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_mutual
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Mutual Psychological Aggression')
+
+cts_complete %>%
+  mutate(
+    cts_injury_mutual = case_when(
+      cts_injury_mutual == 0 ~ 'Neither',
+      cts_injury_mutual == 1 ~ 'Male Only',
+      cts_injury_mutual == 2 ~ 'Female Only',
+      cts_injury_mutual == 3 ~ 'Both'
+    ),
+    cts_injury_mutual = as.factor(cts_injury_mutual),
+    cts_injury_mutual = relevel(cts_injury_mutual, 'Neither')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_mutual
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Mutual Injury')
+
+cts_complete %>%
+  mutate(
+    cts_assault_mutual = case_when(
+      cts_assault_mutual == 0 ~ 'Neither',
+      cts_assault_mutual == 1 ~ 'Male Only',
+      cts_assault_mutual == 2 ~ 'Female Only',
+      cts_assault_mutual == 3 ~ 'Both'
+    ),
+    cts_assault_mutual = as.factor(cts_assault_mutual),
+    cts_assault_mutual = relevel(cts_assault_mutual, 'Neither')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_mutual
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Mutual Assault')
+
+cts_complete %>%
+  mutate(
+    cts_sex_mutual = case_when(
+      cts_sex_mutual == 0 ~ 'Neither',
+      cts_sex_mutual == 1 ~ 'Male Only',
+      cts_sex_mutual == 2 ~ 'Female Only',
+      cts_sex_mutual == 3 ~ 'Both'
+    ),
+    cts_sex_mutual = as.factor(cts_sex_mutual),
+    cts_sex_mutual = relevel(cts_sex_mutual, 'Neither')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_mutual
+    )
+  ) +
+  geom_bar() +
+  labs(title = 'Distribution of Mutual Sexual Cohesion')
+```
+
+### CTS2S Negotiation Subscale Distribution
+
+```{r}
+cts_complete %>% 
+  composite_hist(
+    cts_negotiate_ind,
+    bins = 10
+  ) +
+  labs(title = 'CTS2S Negotiation Subscale Distribution',
+       subtitle = 'Individual (TC)')
+
+cts_complete %>% 
+  composite_hist(
+    cts_negotiate_part,
+    bins = 10
+  ) +
+  labs(title = 'CTS2S Negotiation Subscale Distribution',
+       subtitle = 'Partner')
+```
