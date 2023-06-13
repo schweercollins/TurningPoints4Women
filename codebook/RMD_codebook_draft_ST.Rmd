@@ -1,0 +1,699 @@
+---
+title: "TPW Codebook Draft"
+author: "Shaina Trevino"
+date: "2023-05-22"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    #html#toc_title: Contents
+    number_sections: true
+    #html#number_depth: 3
+    #qmd#colorlinks: true
+    #keep_tex: yes
+    #pdf#latex_engine: pdflatex
+    #error#includes: 
+      #error#in_header: styles.css
+#pdf#geometry: landscape
+bibliography: tpw_references.bib
+---
+
+
+```{r, include = FALSE}
+library(tidyverse)
+library(here)
+library(gt)
+
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE,
+                      echo = FALSE)
+
+theme_set(theme_light())
+
+#import included survey items
+data <- read_csv(here("do_not_push", "tpw_data_77included.csv"))
+
+#import df of calculated survey items
+complete <- read_csv(here("do_not_push", "tpw_data_calculated.csv"))
+
+#import raw qualtrics data for parsing question text
+qualtrics <- read_csv(here("do_not_push", "tpw_raw_qualtrics_5-30-23.csv"))
+
+source(here("functions", "codebook_fun.R"))
+```
+
+# Overview
+
+*INSERT BRIEF INFO ON STUDY, SAMPLE, AND AIMS*
+
+*Additional info to possibly include: global missing data info, links to supplemental materials, any disclaimers/info we think data users need to know to use these data accurately*
+
+*INSERT BRIEF DESCRIPTION OF DATA/CODEBOOK LAYOUT/FILE STRUCTURE (can complete once we have more sections and overall structure)*
+
+### Missing Data Rule
+
+-   For scales with [10 or more items]{.underline}, a composite score (average/total) is computed for each participant that have less than [20%]{.underline} of the items from that measure missing
+
+-   For scales with [7 to 9 items]{.underline}, a composite score (average/total) is computed for each participant that have less than [30%]{.underline} of the items from that measure missing
+
+-   For scales with [3 to 6 items]{.underline}, a composite score (average/total) is computed for each participant that have less than [33%]{.underline} of the items from that measure missing
+
+-   For scales with [only 2 items]{.underline}, composite scores (average/total) are calculated on a [case by case basis]{.underline}
+
+*INSERT REFERENCE LINK*
+
+# Mental Health
+
+*INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN*
+
+## Brief Symptom Inventory (BSI)
+
+### BSI Description
+
+The BSI is used to assess ... *INSERT TEXT DESCRIPTION ABOUT BSI MEASURE*
+
+For the present study, 19 items from the BSI were collected in order to calculate the Somatization, Anxiety, and Depression subscales. 
+
+Item numbers in this dataset may not match original item numbers from the BSI exactly (?)
+
+No items need to be reverse scored. Higher scores indicate more severe mental health symptoms. 
+
+The missing data rule was not applied since there is no missing data among BSI variables. 
+
+Reference: [@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F); [DOI](https://doi.org/10.1017/S0033291700048017)
+
+### BSI Variables
+
+#### Value Labels
+
+All BSI variables have the same response options
+
+```{r gt-theme-general}
+
+apply_tbl_theme <- function(table) {
+  table %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
+            locations = cells_body(columns = everything())) %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
+                         cell_fill(color = "lightgrey")),
+            locations = cells_column_labels()) %>% 
+  tab_options(column_labels.border.top.color = "black",
+              column_labels.border.bottom.color = "black",
+              table_body.border.bottom.color = "black",
+              table.border.top.color = "white",
+              heading.border.bottom.color = "black",
+              table_body.hlines.color = "white")%>% 
+  tab_options(table.align = "left")
+}
+
+#theme for value label tables
+apply_labtab_theme <- function(table) {
+  table %>% 
+  cols_align(columns = everything(), align = "center") %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
+            locations = cells_body(columns = everything())) %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
+                         cell_fill(color = "lightgrey")),
+            locations = cells_column_labels()) %>% 
+  tab_options(column_labels.border.top.color = "black",
+              column_labels.border.bottom.color = "black",
+              table_body.border.bottom.color = "black",
+              table.border.top.color = "white",
+              heading.border.bottom.color = "black",
+              table_body.hlines.color = "white") %>% 
+  tab_options(table.align = "left")
+}
+  
+```
+
+```{r BSI-label-table, results = 'asis'}
+
+bsi_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4"),
+  label = c("Not at all",
+            "A little bit",
+            "Moderately",
+            "Quite a bit",
+            "Very much")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+bsi_label_df <- setNames(bsi_label_df[-1, ], unlist(bsi_label_df[1, ]))
+
+
+#create table
+bsi_label_table <- bsi_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(bsi_label_table)
+
+
+```
+
+
+#### Survey Items
+
+All BSI survey items are presented in the following table
+
+```{r BSI-var-prep}
+# Pull question wording from qualtrics data
+bsi_word <- qualtrics %>% 
+  select(starts_with("BSI")) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+bsi_word_long <- bsi_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  slice(1:19)
+
+```
+
+
+```{r BSI-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+my_gt_table <- gt(bsi_word_long)
+
+# Table-specific formatting (col width, names)
+my_gt_table <- my_gt_table %>% 
+  cols_label(var_name = "Variable", 
+            description = "Description",
+            notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(my_gt_table)
+
+#WHEN RENDERING WITH PDF USE: 
+#my_gt_table
+```
+
+
+#### Scale and Subscales
+
+Information on total score and subscale variables are below. Variables were constructed by summing included items. 
+
+```{r bsi alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+bsi_alpha <-
+  complete %>%
+  select(bsi1:bsi19) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_som <-
+  complete %>%
+  select(bsi2:bsi3,
+         bsi10:bsi13,
+         bsi15) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_anx <-
+  complete %>%
+  select(bsi1, bsi5, bsi9, bsi16:bsi18) %>%
+  psych::alpha(check.keys = TRUE)
+
+bsi_alpha_dep <-
+  complete %>%
+  select(bsi4, bsi6:bsi8, bsi14, bsi19) %>%
+  psych::alpha(check.keys = TRUE)
+
+```
+
+```{r BSI-scale-table, results = 'asis'}
+# Create the table as a data frame
+bsi_scale_df <- data.frame(
+  var_name = c("bsi_total", "bsi_soma_total", "bsi_anx_total", "bsi_dep_total"),
+  scale = c("Total Score (19)", "Somatization (7)", "Anxiety (6)", "Depression (6)"),
+  scale_construction = c("`bsi1`, `bsi2`, `bsi3`, `bsi4`, `bsi5`, `bsi6`, `bsi7`, `bsi8`, `bsi9`, `bsi10`, `bsi11`, `bsi12`, `bsi13`, `bsi14`, `bsi15`, `bsi16`, `bsi17`, `bsi18`, `bsi19`",
+                           "`bsi2`, `bsi3`, `bsi10`, `bsi11`, `bsi12`, `bsi13`, `bsi15`",
+                           "`bsi1`, `bsi5`, `bsi9`, `bsi16`, `bsi17`, `bsi18`",
+                           "`bsi4`, `bsi6`, `bsi7`, `bsi8`, `bsi14`, `bsi19`"),
+  scale_range = c("0-76", "0-28", "0-24", "0-24"),
+  alpha = c(round(bsi_alpha$total$raw_alpha, 3), round(bsi_alpha_som$total$raw_alpha, 3), round(bsi_alpha_anx$total$raw_alpha, 3), round(bsi_alpha_dep$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+bsi_scale_table <- gt(bsi_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale (# of items)", 
+            scale_construction = "Scale Construction",
+            scale_range = "Range*",
+            alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(bsi_scale_table)
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item and total/subscale score
+
+```{r bsi-mean-items}
+# Create subset of BSI items
+data_subset <- complete %>%
+  select(bsi1:bsi19, bsi_total, bsi_soma_total, bsi_anx_total, bsi_dep_total)
+
+# Calculate the summary statistics for each variable
+summary_data <- lapply(data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+summary_data <- as.data.frame(summary_data)
+
+# Set items as first row
+summary_data <- rbind(names(summary_data), summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+tbl <- summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+tbl
+
+```
+
+
+#### Distributions
+
+Distributions are presented for the total score and each subscale
+
+```{r bsi-distributions, class.source='fold', echo = FALSE}
+complete %>%
+  composite_hist(
+    x = bsi_total
+  ) +
+  labs(title = 'Distribution of Total Scores for BSI Measure')
+
+complete %>%
+  composite_hist(x = bsi_soma_total) +
+  labs(title = 'Distribution for BSI Somatization Subscale')
+
+complete %>%
+  composite_hist(x = bsi_anx_total) +
+  labs(title = 'Distribution for BSI Anxiety Subscale')
+
+complete %>%
+  composite_hist(x = bsi_dep_total) +
+  labs(title = 'Distribution for BSI Depression Subscale')
+```
+
+
+## Center for Epidemiologic Studies Depression Scale (CES-D)
+
+### CES-D Description
+
+The CES-D is used to assess ... *INSERT TEXT DESCRIPTION ABOUT CES-D MEASURE*
+
+All 20 items from the CES-D were collected. Two subscales are included as variables, positive affect and depressive symptoms. Four items (`c4`, `c8`, `c12`, and `c16`) are/should be reverse scored which is noted in the variable table below. Higher scores indicate the presence of more symptoms.
+
+Four additional variables (`c21`-`c24`) were included in this section to assess suicidality. Variables `c22` and `c23` are only applicable if participants responded "Yes" to `c21`.  
+
+The missing data rule was not applied since all participants had less than 20% missing data. Missing data for each variable is presented in the summary information below. 
+
+Reference: [@radloff1977ces](https://journals.sagepub.com/doi/abs/10.1177/014662167700100306); [DOI](https://doi.org/10.1177%2F014662167700100306)
+
+-   Additional References:
+
+    -   Cutoff Information:  [@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4); [DOI](https://doi.org/10.1016/j.jad.2018.02.071)
+
+    -   Items for Potential Subscales:  [@canady2009measurement](https://connect.springerpub.com/content/sgrjnm/17/2/91.abstract); [DOI](10.1891/1061-3749.17.2.91)
+    
+### CES-D Variables
+
+#### Value Labels
+
+All CES-D survey items (`c1`-`c20`) have the same response options
+
+```{r CESD-label-table, results = 'asis'}
+
+cesd_label_df <- data.frame(
+  value = c("0", "1", "2", "3"),
+  label = c("Rarely or none of the time",
+            "Some or a little of the time",
+            "Occasionally or a moderate amount of time",
+            "Most or all of the time")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+cesd_label_df <- setNames(cesd_label_df[-1, ], unlist(cesd_label_df[1, ]))
+
+
+#create table
+cesd_label_table <- cesd_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cesd_label_table)
+
+
+```
+
+Additional variables on suicidality (`c21`-`c24`) share the same response options
+    
+```{r CESD-label-table2, results = 'asis'}
+
+cesd2_label_df <- data.frame(
+  value = c("0", "1", "2"),
+  label = c("No",
+            "Yes",
+            "Declined to Answer")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+cesd2_label_df <- setNames(cesd2_label_df[-1, ], unlist(cesd2_label_df[1, ]))
+
+
+#create table
+cesd2_label_table <- cesd2_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(150)) %>% 
+  apply_labtab_theme() 
+
+# Print the table
+print(cesd2_label_table)
+
+
+```
+
+#### Survey Items
+
+All CES-D survey items are presented in the following table
+
+```{r CESD-var-prep}
+# Pull question wording from qualtrics data
+cesd_word <- qualtrics %>% 
+  select(C1:C24) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+cesd_word_long <- cesd_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = case_when(var_name == "c4" ~ "This item should be reverse scored. `c4_r` is reverse scored",
+                           var_name == "c8" ~ "This item should be reverse scored. `c8_r` is reverse scored",
+                           var_name == "c12" ~ "This item should be reverse scored. `c12_r` is reverse scored",
+                           var_name == "c16" ~ "This item should be reverse scored. `c16_r` is reverse scored",
+                           
+                           var_name %in% c("c22", "c23") ~ "Skipped if `c21` = No",
+                           TRUE ~ as.character(""))) 
+
+```
+
+
+```{r CESD-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cesd_gt_table <- gt(cesd_word_long)
+
+# Table-specific formatting (col width, names)
+cesd_gt_table <- cesd_gt_table %>% 
+  cols_label(var_name = "Variable", 
+            description = "Description",
+            notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(250),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cesd_gt_table)
+
+```
+
+
+#### Scale and Subscales
+
+Information on aggregated scale and subscale variables are below. Total and subscale variables were constructed by summing corresponding items. 
+
+```{r cesd-alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+cesd_alpha <-
+  complete %>%
+  select(c1:c16_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+cesd_dep_alpha <-
+  complete %>%
+  select(c1:c20) %>%
+  psych::alpha(check.keys = TRUE)
+
+cesd_pos_aff_alpha <-
+  complete %>%
+  select(c4_r, c8_r, c12_r, c16_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+
+cesd_alpha_table <- tibble(
+  Scale = c('CESD', 'CESD - Depressive Symptoms',
+            'CESD - Positive Affect'),
+  Alpha = c(round(cesd_alpha$total$raw_alpha, 3),
+            round(cesd_dep_alpha$total$raw_alpha, 3),
+            round(cesd_pos_aff_alpha$total$raw_alpha, 3)
+  )
+)
+```
+
+```{r CESD-scale-table, results = 'asis'}
+# Create the table as a data frame
+cesd_scale_df <- data.frame(
+  var_name = c("cesd_total", "cesd_dep_symp_total", "cesd_pos_aff_total"),
+  scale = c("Total Score (20)", "Depression (16)", "Positive Affect (4)"),
+  scale_construction = c("`c1`, `c2`, `c3`, `c4`, `c5`, `c6`, `c7`, `c8`, `c9`, `c10`, `c11`, `c12`, `c13`, `c14`, `c15`, `c16`, `c17`, `c18`, `c19`, `c20`",
+                           "`c1`, `c2`, `c3`, `c5`, `c6`, `c7`, `c9`, `c10`, `c11`, `c13`, `c14`, `c15`, `c17`, `c18`, `c19`, `c20`",
+                           "`c4_r`, `c8_r`, `c12_r`, `c16_r`"),
+  scale_range = c("0-60", "0-48", "0-12"),
+  alpha = c(round(cesd_alpha$total$raw_alpha, 3), round(cesd_dep_alpha$total$raw_alpha, 3), round(cesd_pos_aff_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+cesd_scale_table <- gt(cesd_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale (# of items)", 
+            scale_construction = "Scale Construction",
+            scale_range = "Range*",
+            alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme()
+
+# Print the table
+print(cesd_scale_table)
+
+```
+
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item and total/subscale score
+
+```{r cesd-mean-items}
+# Create subset of CESD items
+data_subset_cesd <- complete %>%
+  select(c1:c3, c4, c5:c7, c8, c9:c11, c12, c13:c15, c16, c17:c20, cesd_total, cesd_dep_symp_total, cesd_pos_aff_total)
+
+# Calculate the summary statistics for each variable
+summary_data_cesd <- lapply(data_subset_cesd, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- sprintf("%.2f", round(sd(x, na.rm = TRUE), 2))
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+summary_df_cesd <- as.data.frame(summary_data_cesd) %>% 
+  rbind(names(summary_data_cesd)) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  select(`5`, everything())
+
+# Create the gt table
+cesd_tbl <- summary_df_cesd %>%
+  gt() %>%
+  cols_label(`5` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(`5` ~ px(160),
+             everything() ~ px(125)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cesd_tbl
+
+```
+    
+#### Distributions
+
+Distributions are presented for the total score and each subscale
+
+```{r cesd-distributions, class.source='fold', echo = FALSE}
+complete %>%
+  composite_hist(cesd_total) +
+  labs(
+    title = 'CESD Total Score Distribution'
+    )
+
+complete %>%
+  composite_hist(
+    cesd_dep_symp_total
+    ) +
+  labs(
+    title = 'Depressive Symptoms Subscale Distribution'
+    )
+
+complete %>%
+  composite_hist(
+    cesd_pos_aff_total,
+    bins = 10
+    ) +
+  labs(
+    title = 'Positive Affect Subscale Distribution'
+    )
+```
+
+#### Clinical Categories
+
+CES-D cutoff scores are presented below
+
+*INSERT MORE INFO ON CUTOFF SCORES* - what are they, how many of them; how are they used
+
+Reference: [@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4); [DOI](https://doi.org/10.1016/j.jad.2018.02.071)
+
+```{r cutoff-plot-function}
+#re-work JP cutoff function due to error "cant use `{{` in non-quoting function
+cutoff_plot2 <- function(data,
+                        x,
+                        cutoff = 0,
+                        cutoff_color = '#30123BFF',
+                        cutoff_other = NULL,
+                        cutoff_other_color = '#1AE4B6FF',
+                        cutoff_other2 = NULL,
+                        cutoff_other2_color = '#FABA39FF',
+                        bins = 20) {
+
+  library(magrittr)
+  library(dplyr)
+  library(ggplot2)
+
+  x <- enquo(x)
+
+  if (is.null(cutoff_other)) {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = 'black',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25)
+  } else if (is.null(cutoff_other2)) {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = 'black',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other,
+                 color = cutoff_other_color,
+                 linetype = 3,
+                 linewidth = 1.25)
+  } else {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = 'black',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other,
+                 color = cutoff_other_color,
+                 linetype = 3,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other2,
+                 color = cutoff_other2_color,
+                 linetype = 4,
+                 linewidth = 1.25)
+  }
+}
+```
+
+
+```{r cesd-clinical}
+complete %>%
+  cutoff_plot2(
+    x = cesd_total,
+    cutoff = 16,
+    cutoff_other = 23
+  ) +
+  labs(
+    title = 'Cutoff Scores for CESD Total Scores',
+    caption = 'Cutoffs are 16 and/or 23\nSee references for literature on cutoff scores.'
+  ) +
+  geom_text(aes(x = 16, y = 17, label = "cutoff1", vjust = -.25, hjust = 1.2)) +
+  geom_text(aes(x = 16, y = 17, label = "cutoff2", vjust = -.25, hjust = -1.5))
+```
+
+
+
