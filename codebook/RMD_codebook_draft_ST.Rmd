@@ -697,4 +697,214 @@ complete %>%
 ```
 
 
+## Coronavirus Impacts Scale (Psychological Subscale)
+
+### Coronavirus Impacts Scale Description
+
+The Coronavirus Impacts Scale is used to assess ... *INSERT TEXT DESCRIPTION ABOUT Coronavirus Impacts Scale MEASURE*
+  
+For the present study, 3 items from the Coronavirus Impacts Scale (Psychological Subscale) were collected in order to *INSERT TEXT*. 
+
+`ciq1` need to be reverse scored. Higher scores indicate *more severe mental health symptoms*. 
+
+The missing data rule was not applied since there is no missing data among CIS variables. 
+
+Reference: *[@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F); [DOI](https://doi.org/10.1017/S0033291700048017)*
+
+### Coronavirus Impacts Scale Variables
+
+#### Value Labels
+
+All Coronavirus Impacts Scale variables have the same response options
+
+
+
+```{r CIS-label-table, results = 'asis'}
+
+cis_label_df <- data.frame(
+  value = seq(1:7),
+  label = c("Not true of me at all",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Very true of me")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+cis_label_df <- setNames(cis_label_df[-1, ], unlist(cis_label_df[1, ]))
+
+
+#create table
+cis_label_table <- cis_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(c(1,7) ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cis_label_table)
+
+
+```
+
+#### Survey Items
+
+All CIS survey items are presented in the following table
+
+```{r CIS-var-prep}
+# Pull question wording from qualtrics data
+# CIS is from BIS question 20-22
+cis_word <- qualtrics %>% 
+  select(starts_with("BSI")) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+cis_word_long <- cis_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name),
+         notes = case_when(var_name == "bsi22" ~ "This item should be reverse scored. `ciq3_r` is reverse scored",
+                           TRUE ~ as.character("")
+                           )) %>% 
+  slice(20:22)
+
+
+
+
+```
+
+
+```{r cis-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cis_gt_table <- gt(cis_word_long)
+
+# Table-specific formatting (col width, names)
+cis_gt_table <- cis_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cis_gt_table)
+
+#WHEN RENDERING WITH PDF USE: 
+#cis_gt_table
+```
+
+
+#### Scale and Subscales
+
+Information on total score and subscale variables are below. Variables were constructed by summing included items. 
+
+
+```{r cis alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+cis_alpha <-
+  complete %>%
+  select(ciq1:ciq3_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+```
+
+```{r CIS-scale-table, results = 'asis'}
+# Create the table as a data frame
+cis_scale_df <- data.frame(
+  var_name = c("ciq_psych_total", "ciq_psych_avg"),
+  scale = c("Total Score", "Average Score"),
+  scale_construction = c("`ciq1`, `ciq2`, `ciq3_r`", "`ciq1`, `ciq2`, `ciq3_r`"),
+  scale_range = c("3-21", "1-7"),
+  alpha = c(round(cis_alpha$total$raw_alpha, 3), "")
+)
+
+# Create the gt table object
+cis_scale_table <- gt(cis_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(cis_scale_table)
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item and total/subscale score
+
+```{r cis-mean-items}
+# Create subset of BSI items
+cis_data_subset <- complete %>%
+  select(ciq1:ciq3_r, ciq_psych_total, ciq_psych_avg)
+
+# Calculate the summary statistics for each variable
+cis_summary_data <- lapply(cis_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cis_summary_data <- as.data.frame(cis_summary_data)
+
+# Set items as first row
+cis_summary_data <- rbind(names(cis_summary_data), cis_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cis_tbl <- cis_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cis_tbl
+
+```
+
+
+#### Distributions
+
+Distributions are presented for the total score and each subscale
+
+```{r csi-distributions, class.source='fold', echo = FALSE}
+complete %>%
+  composite_hist(
+    x = ciq_psych_total
+  ) +
+  labs(title = 'Distribution of Total Scores for CIS Measure')
+
+complete %>%
+  composite_hist(x = ciq_psych_avg) +
+  labs(title = 'Distribution for Average Score for CIS Measure')
+
+```
+
 
