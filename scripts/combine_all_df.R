@@ -657,6 +657,3 @@ already_born_data <-
 final_ex <-
   final %>%
   distinct()
-
-final %>% filter(id == "HR103") %>% View()
-final_ex %>% filter(id == "HR103") %>% View()
