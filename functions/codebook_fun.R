@@ -501,7 +501,7 @@ composite_hist <- function(
     ggplot(aes({{x}})) +
     geom_histogram(bins = {{bins}},
                    color = 'white',
-                   fill = 'black',
+                   fill = '#246B69',
                    alpha = .7)
 }
 
