@@ -502,7 +502,15 @@ composite_hist <- function(
     geom_histogram(bins = {{bins}},
                    color = 'white',
                    fill = '#246B69',
-                   alpha = .7)
+                   alpha = .7)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+    )
 }
 
 cutoff_plot <-
@@ -533,7 +541,14 @@ cutoff_plot <-
         geom_vline(xintercept = {{cutoff}},
                    color = {{cutoff_color}},
                    linetype = 2,
-                   size = 1.25)
+                   size = 1.25)+
+        theme(panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.background = element_rect(fill = "transparent"),
+              axis.line = element_line(colour = "black",size = .8),
+              axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+        )
     }
 
     else if(is.null(cutoff_other2)){
@@ -551,7 +566,14 @@ cutoff_plot <-
         geom_vline(xintercept = {{cutoff_other}},
                    color = {{cutoff_other_color}},
                    linetype = 3,
-                   size = 1.25)
+                   size = 1.25)+
+        theme(panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.background = element_rect(fill = "transparent"),
+              axis.line = element_line(colour = "black",size = .8),
+              axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+        )
     }
 
     else {
@@ -573,7 +595,14 @@ cutoff_plot <-
         geom_vline(xintercept = {{cutoff_other2}},
                    color = {{cutoff_other2_color}},
                    linetype = 4,
-                   size = 1.25)
+                   size = 1.25)+
+        theme(panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.background = element_rect(fill = "transparent"),
+              axis.line = element_line(colour = "black",size = .8),
+              axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+        )
     }
   }
 
@@ -667,8 +696,17 @@ severity_plot <- function(
     geom_histogram(
       bins = {{bins}},
       color = 'white',
-      fill = 'black',
+      fill = '#246B69',
       alpha = .7
+    )+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White", colour = "transparent"),
+          plot.title = element_text(size= 20),
     )
 
   plot_data <- ggplot_build(histo_plot)
@@ -698,7 +736,7 @@ severity_plot <- function(
   # ) +
   annotate(
     geom = 'rect',
-    fill = '#30123BFF',
+    fill = '#324B4A',
     alpha = .5,
     xmin = {{low_xmin}},
     xmax = {{low_xmax}},
@@ -707,7 +745,7 @@ severity_plot <- function(
   ) +
     annotate(
       geom = 'rect',
-      fill = '#1AE4B6FF',
+      fill = '#95B1AF',
       alpha = .5,
       xmin = {{medium_xmin}},
       xmax = {{medium_xmax}},
@@ -716,7 +754,7 @@ severity_plot <- function(
     ) +
     annotate(
       geom = 'rect',
-      fill = '#FABA39FF',
+      fill = '#8892BA',
       alpha = .5,
       xmin = {{large_xmin}},
       xmax = {{large_xmax}},
@@ -725,7 +763,7 @@ severity_plot <- function(
     ) +
     annotate(
       geom = 'rect',
-      fill = '#7A0403FF',
+      fill = '#546085',
       alpha = .5,
       xmin = {{critical_xmin}},
       xmax = {{critical_xmax}},
