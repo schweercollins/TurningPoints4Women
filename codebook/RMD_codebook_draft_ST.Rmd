@@ -500,11 +500,6 @@ cesd_alpha <-
   select(c1:c16_r) %>%
   psych::alpha(check.keys = TRUE)
 
-cesd_dep_alpha <-
-  complete %>%
-  select(c1:c20) %>%
-  psych::alpha(check.keys = TRUE)
-
 cesd_pos_aff_alpha <-
   complete %>%
   select(c4_r, c8_r, c12_r, c16_r) %>%
@@ -512,10 +507,9 @@ cesd_pos_aff_alpha <-
 
 
 cesd_alpha_table <- tibble(
-  Scale = c('CESD', 'CESD - Depressive Symptoms',
+  Scale = c('CESD',
             'CESD - Positive Affect'),
   Alpha = c(round(cesd_alpha$total$raw_alpha, 3),
-            round(cesd_dep_alpha$total$raw_alpha, 3),
             round(cesd_pos_aff_alpha$total$raw_alpha, 3)
   )
 )
@@ -524,13 +518,12 @@ cesd_alpha_table <- tibble(
 ```{r CESD-scale-table, results = 'asis'}
 # Create the table as a data frame
 cesd_scale_df <- data.frame(
-  var_name = c("cesd_total", "cesd_dep_symp_total", "cesd_pos_aff_total"),
-  scale = c("Total Score (20)", "Depression (16)", "Positive Affect (4)"),
+  var_name = c("cesd_raw", "cesd_pos_aff_total"),
+  scale = c("Depression Raw Score (20)", "Positive Affect (4)"),
   scale_construction = c("`c1`, `c2`, `c3`, `c4`, `c5`, `c6`, `c7`, `c8`, `c9`, `c10`, `c11`, `c12`, `c13`, `c14`, `c15`, `c16`, `c17`, `c18`, `c19`, `c20`",
-                           "`c1`, `c2`, `c3`, `c5`, `c6`, `c7`, `c9`, `c10`, `c11`, `c13`, `c14`, `c15`, `c17`, `c18`, `c19`, `c20`",
                            "`c4_r`, `c8_r`, `c12_r`, `c16_r`"),
-  scale_range = c("0-60", "0-48", "0-12"),
-  alpha = c(round(cesd_alpha$total$raw_alpha, 3), round(cesd_dep_alpha$total$raw_alpha, 3), round(cesd_pos_aff_alpha$total$raw_alpha, 3))
+  scale_range = c("0-60", "0-12"),
+  alpha = c(round(cesd_alpha$total$raw_alpha, 3), round(cesd_pos_aff_alpha$total$raw_alpha, 3))
 )
 
 # Create the gt table object
