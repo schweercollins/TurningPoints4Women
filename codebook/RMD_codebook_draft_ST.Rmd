@@ -1017,7 +1017,8 @@ dast_label_table_total <- dast_label_total %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(c(1:5) ~ px(151)) %>% 
+  cols_width(c(1, 2, 4, 5) ~ px(151),
+             3 ~ px(300)) %>% 
   apply_labtab_theme()
 
 # Print the table
