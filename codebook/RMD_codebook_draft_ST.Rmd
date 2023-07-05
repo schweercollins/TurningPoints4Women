@@ -96,7 +96,7 @@ The BSI is used to assess ... *INSERT TEXT DESCRIPTION ABOUT BSI MEASURE*
 
 For the present study, 19 items from the BSI were collected in order to calculate the Somatization, Anxiety, and Depression subscales. 
 
-Item numbers in this dataset may not match original item numbers from the BSI exactly (?)
+Item numbers in this dataset may not match original item numbers from the BSI exactly... *INSERT MORE INFO HERE*
 
 No items need to be reverse scored. Higher scores indicate more severe mental health symptoms. 
 
@@ -704,7 +704,7 @@ complete %>%
     caption = 'Cutoffs are 16 and/or 23\nSee references for literature on cutoff scores.'
   ) +
   geom_text(aes(x = 16, y = 17, label = "cutoff1", vjust = -.25, hjust = 1.2)) +
-  geom_text(aes(x = 16, y = 17, label = "cutoff2", vjust = -.25, hjust = -1.5))
+  geom_text(aes(x = 16, y = 17, label = "cutoff2", vjust = -.25, hjust = -2))
 ```
 
 
@@ -969,8 +969,6 @@ Reference: [@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.111
 
 All The Drug Abuse Screening Test variables have the same response options
 
-
-
 ```{r DAST-label-table, results = 'asis'}
 
 dast_label_df <- data.frame(
@@ -996,7 +994,9 @@ print(dast_label_table)
 
 
 ```
-Recoeded tatoal value lable 
+
+Recoded total value label 
+
 ```{r DAST-label-table-total, results = 'asis'}
 
 dast_label_total <- data.frame(
@@ -1044,7 +1044,7 @@ dast_word_long <- dast_word %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name),
          notes = case_when(var_name == "d4" ~ "This item should be reverse scored. `d4_r` is reverse scored",
-                           var_name == "d5" ~ "This item should be reverse scored. `d4_r` is reverse scored",
+                           var_name == "d5" ~ "This item should be reverse scored. `d5_r` is reverse scored",
                            TRUE ~ as.character("")
                            )) %>%
   slice(3:25)
@@ -1079,7 +1079,7 @@ print(dast_gt_table)
 
 #### Scale and Subscales
 
-No subscales were created for this measure as there was a lack of evidence supporting a subscale structurek
+No subscales were created for this measure as there was a lack of evidence supporting a subscale structure
 
 
 ```{r dast alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
@@ -1333,7 +1333,7 @@ Authors describe that internal reliability is not appropriate for the `CTS2` mea
 # Create the table as a data frame
 CTS2_scale_df <- data.frame(
   var_name = c("cts_psy_agg_ind_sev", "cts_injury_ind_sev", "cts_assault_ind_sev",   "cts_sex_ind_sev",       #TC   severity 
-                "cts_psy_agg_part_sev","cts_injury_part_sev", "cts_assault_part_sev","cts_sex_part_sev",      #Partner serverity 
+                "cts_psy_agg_part_sev","cts_injury_part_sev", "cts_assault_part_sev","cts_sex_part_sev",      #Partner severity 
 
                 "cts_psy_agg_ind_prev", "cts_injury_ind_prev", "cts_assault_ind_prev", "cts_sex_ind_prev", 
                 "cts_psy_agg_part_prev", "cts_injury_part_prev", "cts_assault_part_prev", "cts_sex_part_prev",
@@ -2686,7 +2686,6 @@ complete %>%
 complete %>%
   cutoff_plot2(
     x = dyadc_total,
-    cutoff = 92,
     cutoff_other = 107
   ) +
   labs(
