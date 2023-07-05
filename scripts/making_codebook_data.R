@@ -1,5 +1,3 @@
-# creating a new dataframe
-
 bsi
 cesd
 dast
