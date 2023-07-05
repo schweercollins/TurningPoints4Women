@@ -46,24 +46,22 @@ source(here("functions", "codebook_fun.R"))
 
 ```{r plot style, echo=FALSE}
 # Color palettes 
-Two_color = c("#246B69", "#604C41")
+ Two_color = c("#246B69", "#604C41")
 
 # Histogram style 
-hist_style <- geom_histogram(bins=20, color = "white", fill = "#246B69", alpha = 0.7)
-
-bar_style <- geom_bar(color = "white", fill = "#246B69", alpha = 0.7)
+# hist_style <- geom_histogram(bins=20, color = "white", fill = "#246B69", alpha = 0.7)
 
 
-# Plot Theme 
-THEME <- theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "transparent"),
-        axis.line = element_line(colour = "black",size = .8),
-        axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-        legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
-        )
+ bar_style <- geom_bar(color = "white", fill = "#246B69", alpha = 0.7)
 
-
+THEME <-     theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+    )
 ```
 
 # Overview
@@ -578,8 +576,7 @@ cesd_tbl <- summary_df_cesd %>%
   cols_label(`5` = "Variable",
              Range = "Range*",
              Missing = "% Missing") %>% 
-  cols_width(`5` ~ px(160),
-             everything() ~ px(125)) %>%
+  cols_width(2:5 ~ px(160)) %>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -632,11 +629,11 @@ Reference: [@henry2018determining](https://www.sciencedirect.com/science/article
 cutoff_plot2 <- function(data,
                         x,
                         cutoff = 0,
-                        cutoff_color = '#30123BFF',
+                        cutoff_color = '#324B4A',
                         cutoff_other = NULL,
-                        cutoff_other_color = '#1AE4B6FF',
+                        cutoff_other_color = '#95B1AF',
                         cutoff_other2 = NULL,
-                        cutoff_other2_color = '#FABA39FF',
+                        cutoff_other2_color = '#546085',
                         bins = 20) {
 
   library(magrittr)
@@ -650,7 +647,7 @@ cutoff_plot2 <- function(data,
       ggplot(aes(!!x)) +
       geom_histogram(bins = bins,
                      color = 'white',
-                     fill = 'black',
+                     fill = '#246B69',
                      alpha = .7) +
       geom_vline(xintercept = cutoff,
                  color = cutoff_color,
@@ -661,7 +658,7 @@ cutoff_plot2 <- function(data,
       ggplot(aes(!!x)) +
       geom_histogram(bins = bins,
                      color = 'white',
-                     fill = 'black',
+                     fill = '#246B69',
                      alpha = .7) +
       geom_vline(xintercept = cutoff,
                  color = cutoff_color,
@@ -715,17 +712,17 @@ complete %>%
 
 ### Coronavirus Impacts Scale Description
 
-*NOTE FOR DATA CLEANINING: the variable name should be cis, codebook should be change accordingly *
+*TODO: NOTE FOR DATA CLEANINING: the variable name should be cis, codebook should be change accordingly *
 
-The Coronavirus Impacts Scale is used to assess ... *INSERT TEXT DESCRIPTION ABOUT Coronavirus Impacts Scale MEASURE*
+The Coronavirus Impacts Scale is used to assess ... *TODO INSERT TEXT DESCRIPTION ABOUT Coronavirus Impacts Scale MEASURE*
   
-For the present study, 3 items from the Coronavirus Impacts Scale (Psychological Subscale) were collected in order to *INSERT TEXT*. 
+For the present study, 3 items from the Coronavirus Impacts Scale (Psychological Subscale) were collected in order to *TODO INSERT TEXT*. 
 
-`ciq1` need to be reverse scored. Higher scores indicate *more severe mental health symptoms*. 
+`ciq1` need to be reverse scored. Higher scores indicate *TODO more severe mental health symptoms*. 
 
 The missing data rule was not applied since there is no missing data among CIS variables. 
 
-Reference: *NEED REFERENCE *
+Reference: *TODO NEED REFERENCE *
 
 ### Coronavirus Impacts Scale Variables
 
@@ -757,8 +754,8 @@ cis_label_table <- cis_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(c(1,7) ~ px(180)) %>% 
-  cols_width(c(2:6) ~ px(50)) %>% 
+  cols_width(c(1,7) ~ px(180),
+             2:6 ~ px(79)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -795,7 +792,7 @@ cis_word_long <- cis_word %>%
 
 ```
 
-
+TODO: the variable name need to be change to ciq when make df 
 ```{r cis-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
 cis_gt_table <- gt(cis_word_long)
@@ -836,7 +833,7 @@ cis_alpha <-
 # Create the table as a data frame
 cis_scale_df <- data.frame(
   var_name = c("ciq_psych_total"),
-  scale = c("Total Score"),
+  scale = c("Total Score (3)"),
   scale_construction = c("`ciq1`, `ciq2`, `ciq3_r`"),
   scale_range = c("3-21"),
   alpha = c(round(cis_alpha$total$raw_alpha, 3))
@@ -850,9 +847,9 @@ cis_scale_table <- gt(cis_scale_df) %>%
              scale_construction = "Scale Construction",
              scale_range = "Range*",
              alpha = "Alpha") %>% 
-  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  cols_width(scale ~ px(151)) %>% 
   apply_tbl_theme() 
 
 # Print the table
@@ -911,25 +908,12 @@ cis_tbl
 Distributions are presented for the total score and each subscale
 
 ```{r csi-distributions, class.source='fold', echo = FALSE}
-# complete %>%
-#   composite_hist(
-#     x = ciq_psych_total
-#   ) +
-#   labs(title = 'Distribution of Total Scores for CIS Measure')
-
-ggplot(complete, aes(x=ciq_psych_total)) + 
-  labs(title = 'Distribution of Total Scores for CIS Measure') +
-  hist_style+
-  THEME
-
-# complete %>%
-#   composite_hist(x = ciq_psych_avg) +
-#   labs(title = 'Distribution for Average Score for CIS Measure',)
-
-ggplot(complete, aes(x=ciq_psych_avg)) + 
-  labs(title = 'Distribution of Average Scores for CIS Measure') +
-  hist_style+
-  THEME
+complete %>%
+  composite_hist(
+    x = ciq_psych_total,
+    bins = 10
+    ) +
+  labs(title = 'Distribution for CIQ Psychological Scale')
 ```
 
 
@@ -937,7 +921,7 @@ ggplot(complete, aes(x=ciq_psych_avg)) +
 
 ### The Drug Abuse Screening Test Description
 
-*ROW DATA INCORRECTLY CLEANED, WILL NEED RE_CLEAN!*
+*TODO: ROW DATA INCORRECTLY CLEANED, WILL NEED RE_CLEAN!*
 ```{r dast re-code}
 # This session should go together with the data cleaning 
 
@@ -968,11 +952,11 @@ complete <- complete %>%
 
 ```
 
-The The Drug Abuse Screening Test is used to assess ... *INSERT TEXT DESCRIPTION ABOUT DAST*
+The The Drug Abuse Screening Test is used to assess ... *TODO INSERT TEXT DESCRIPTION ABOUT DAST*
   
-For the present study, 22 items from the The Drug Abuse Screening Test (DAST) were collected in order to *INSERT TEXT*. 
+For the present study, 22 items from the The Drug Abuse Screening Test (DAST) were collected in order to *TODO INSERT TEXT*. 
 
-Two items (`d4` and `d5`) are/should to be reverse scored which is noted in the variable table below. *Higher scores indicate more severe mental health symptoms. *
+Two items (`d4` and `d5`) are/should to be reverse scored which is noted in the variable table below. *TODO Higher scores indicate more severe mental health symptoms. *
 
 The missing data rule was applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses) 
 
@@ -1012,7 +996,7 @@ print(dast_label_table)
 
 
 ```
-
+Recoeded tatoal value lable 
 ```{r DAST-label-table-total, results = 'asis'}
 
 dast_label_total <- data.frame(
@@ -1033,7 +1017,7 @@ dast_label_table_total <- dast_label_total %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(c(1,5) ~ px(150)) %>% 
+  cols_width(c(1:5) ~ px(151)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -1041,7 +1025,7 @@ print(dast_label_table_total)
 
 
 ```
-recoeded tatoal value lable 
+
 #### Survey Items
 
 All DAST survey items are presented in the following table
@@ -1062,8 +1046,8 @@ dast_word_long <- dast_word %>%
          notes = case_when(var_name == "d4" ~ "This item should be reverse scored. `d4_r` is reverse scored",
                            var_name == "d5" ~ "This item should be reverse scored. `d4_r` is reverse scored",
                            TRUE ~ as.character("")
-                           )) %>% 
-  slice(20:22)
+                           )) %>%
+  slice(3:25)
 
 
 
@@ -1110,12 +1094,13 @@ dast_alpha <-
 
 ```
 
+*TODO: need check the total *
 ```{r DAST-scale-table, results = 'asis'}
 # Create the table as a data frame
 dast_scale_df <- data.frame(
   var_name = c("dast_total"),
-  scale = c("Total Score"),
-  scale_construction = c("`d00`, `d1a`, `d2a`, `d2b`, `d3`, `d4`, `d5`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`"),
+  scale = c("Total Score (22)"),
+  scale_construction = c("`d00`, `d1a`, `d2a`, `d2b`, `d3`, `d4_r`, `d5_r`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`"),
   scale_range = c("0-20"),
   alpha = c(round(dast_alpha$total$raw_alpha, 3))
 )
@@ -1128,7 +1113,7 @@ dast_scale_table <- gt(dast_scale_df) %>%
              scale_construction = "Scale Construction",
              scale_range = "Range*",
              alpha = "Alpha") %>% 
-  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   cols_width(scale ~ px(135)) %>% 
   apply_tbl_theme() 
@@ -1189,20 +1174,51 @@ dast_tbl
 Distributions are presented for the total score and each subscale
 
 ```{r dast-distributions, class.source='fold', echo = FALSE}
-
-ggplot(complete, aes(x=dast_total)) + 
-
-  annotate(geom='rect', xmin = 1, xmax = 5.5, ymin = -Inf, ymax = Inf, fill = "#324B4A", alpha = .3, label = 'Low')+
-  annotate(geom='rect', xmin = 5.5, xmax = 10.5, ymin = -Inf, ymax = Inf, fill = "#95B1AF", alpha = 0.5)+
-  annotate(geom='rect', xmin = 10.5, xmax = 15.5, ymin = -Inf, ymax = Inf, fill = "#8892BA", alpha = 0.5)+
-  annotate(geom='rect', xmin = 15.5, xmax = 20, ymin = -Inf, ymax = Inf, fill = "#546085", alpha = 0.5)+
-  hist_style+
-  labs(title = 'Distribution of Total Scores for DAST Measure',
-       subtitle = 'Based on DAST',
-    caption = 'Cutoffs are:\nLow = 1-5,\nIntermediate = 6-10,\nSubstantial = 11-15,\nSevere = 16-20') +
-  THEME
-
-
+complete %>%
+  severity_plot(
+  x = dast_total,
+  bins = 20,
+  low_xmin = 1,
+  low_xmax = 5.5,
+  medium_xmin = 5.5,
+  medium_xmax = 10.5,
+  large_xmin = 10.5,
+  large_xmax = 15.5,
+  critical_xmin = 15.5,
+  critical_xmax = 20) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 3,
+    y = -1.5,
+    label = 'Low'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 8,
+    y = -1.5,
+    label = 'Intermediate'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 13,
+    y = -1.5,
+    label = 'Substantial'
+  ) +
+  annotate(
+    geom = 'text',
+    color = 'Black',
+    x = 18,
+    y = -1.5,
+    label = 'Severe'
+  ) +
+  labs(
+    title = 'Severity Categories',
+    subtitle = 'Based on DAST',
+    caption = 'Cutoffs are:\nLow = 1-5,\nIntermediate = 6-10,\nSubstantial = 11-15,\nSevere = 16-20'
+  )
 ```
 
 
@@ -1210,12 +1226,12 @@ ggplot(complete, aes(x=dast_total)) +
 
 ### Conflict Tactics Description
 
-The Conflict Tactics is used to assess ... *INSERT TEXT DESCRIPTION ABOUT Conflict Tactics MEASURE*
+The Conflict Tactics is used to assess ... *TODO INSERT TEXT DESCRIPTION ABOUT Conflict Tactics MEASURE*
 
 For the present study, 20 items from the Conflict Tactics were collected in order to calculate the Psychological Aggression, Physical Injury, Assault, Sexual Cohesion, Negotiation for TC and their partner respectively. 
 
 
-No items need to be reverse scored. *NEED REPLACE Higher scores indicate more severe mental health symptoms. *
+No items need to be reverse scored. *TODO NEED REPLACE Higher scores indicate more severe mental health symptoms. *
 
 The missing data rule was applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
 
@@ -1251,7 +1267,7 @@ CTS2_label_table <- CTS2_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  #cols_width(everything() ~ px(100)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -1326,15 +1342,15 @@ CTS2_scale_df <- data.frame(
                
                 "cts_negotiate_ind",    "cts_negotiate_part"),
 
-  scale = c("TC Psychological Aggression", "TC Physical Injury", "TC Assault", "TC Sexual Cohesion",
-            "Partner Psychological Aggression", "Partner Physical Injury", "Partner Assault", "Partner Sexual Cohesion",
+  scale = c("TC Psychological Aggression (2)", "TC Physical Injury (2)", "TC Assault (2)", "TC Sexual Cohesion (2)",
+            "Partner Psychological Aggression (2)", "Partner Physical Injury (2)", "Partner Assault (2)", "Partner Sexual Cohesion (2)",
 
-            "TC Psychological Aggression", "TC Physical Injury", "TC Assault", "TC Sexual Cohesion",
-            "Partner Psychological Aggression", "Partner Physical Injury", "Partner Assault", "Partner Sexual Cohesion",
+            "TC Psychological Aggression (2)", "TC Physical Injury (2)", "TC Assault (2)", "TC Sexual Cohesion (2)",
+            "Partner Psychological Aggression (2)", "Partner Physical Injury (2)", "Partner Assault (2)", "Partner Sexual Cohesion (2)",
             
-            "Psychological Aggression", "Physical Injury", "Assault", "Sexual Cohesion ",
+            "Psychological Aggression (4)", "Physical Injury (4)", "Assaul (4)t", "Sexual Cohesion (4)",
             
-            "TC Negotiation", "Partner Negotiation"
+            "TC Negotiation (2)", "Partner Negotiation (2)"
             ),
   score_method = c("Severity", "Severity", "Severity", "Severity",
                    "Severity", "Severity", "Severity", "Severity",
@@ -1372,7 +1388,7 @@ CTS2_scale_table <- gt(CTS2_scale_df) %>%
             scale_range = "Range*") %>% 
   tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(200)) %>% 
+  #cols_width(scale ~ px(200)) %>% 
   apply_tbl_theme() 
 
 # Print the table
@@ -1415,8 +1431,7 @@ cts2_tbl <- cts2_summary_data %>%
              Range = "Range*",
              Missing = "% Missing") %>% 
   cols_width(
-    `1` ~ px(180),
-    4 ~ px(160)) %>%
+    c(2,3,5) ~ px(115)) %>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -1431,6 +1446,7 @@ cts2_tbl
 #### Distributions
 
 Distributions are presented for the total score and each subscale
+
 ##### Serverity distributions 
 ```{r CTS2-Severity-TC-distributions, class.source='fold', echo = FALSE}
 # Psychological Aggression 
@@ -1443,13 +1459,17 @@ complete %>%
     ),
     cts_psy_agg_ind_sev = as.factor(cts_psy_agg_ind_sev),
     cts_psy_agg_ind_sev = relevel(cts_psy_agg_ind_sev, 'No Psychological Aggression')
-  )%>%
-  ggplot(aes(cts_psy_agg_ind_sev)) +
-  bar_style+
-  scale_x_discrete(labels=c("No Psychological\nAggression", "Minor Psychological\nAggression", "Severe Psychological\nAggression"))+
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_ind_sev
+    )
+  ) +
+  bar_style +
   labs(title = 'Distribution of Individual (TC) Psychological Aggression Severity',
-       x = '')+
+       x = '') + 
   THEME
+
 
 # Psychical Injury 
 complete %>%
@@ -1462,10 +1482,14 @@ complete %>%
     cts_injury_ind_sev = as.factor(cts_injury_ind_sev),
     cts_injury_ind_sev = relevel(cts_injury_ind_sev, 'No Injury')
   ) %>%
-  ggplot(aes(cts_injury_ind_sev)) +
-  bar_style+
+  ggplot(
+    aes(
+      cts_injury_ind_sev
+    )
+  ) +
+  bar_style +
   labs(title = 'Distribution of Individual (TC) Physical Injury Severity',
-       x = '') +
+       x = '') + 
   THEME
 
 # Assault 
@@ -1479,10 +1503,14 @@ complete %>%
     cts_assault_ind_sev = as.factor(cts_assault_ind_sev),
     cts_assault_ind_sev = relevel(cts_assault_ind_sev, 'No Assault')
   ) %>%
-  ggplot(aes(cts_assault_ind_sev)) +
-    bar_style+
+  ggplot(
+    aes(
+      cts_assault_ind_sev
+    )
+  ) +
+  bar_style +
   labs(title = 'Distribution of Individual (TC) Assault Severity',
-       x = '')+
+       x = '') + 
   THEME
 
 # Sexual Cohesion
@@ -1501,11 +1529,10 @@ complete %>%
       cts_sex_ind_sev
     )
   ) +
-  bar_style+
+  bar_style +
   labs(title = 'Distribution of Individual (TC) Sexual Cohesion Severity',
-       x = '') +
+       x = '') + 
   THEME
-# Negotiation 
 
 ```
 ```{r CTS2-Severity-Partner-distributions, class.source='fold', echo = FALSE}
@@ -1526,9 +1553,8 @@ complete %>%
     )
   ) +
   bar_style +
-  scale_x_discrete(labels=c("No Psychological\nAggression", "Minor Psychological\nAggression", "Severe Psychological\nAggression"))+
   labs(title = 'Distribution of Partner Psychological Aggression Severity',
-       x = '')+
+       x = '') + 
   THEME
 
 # Physical Injury
@@ -1551,6 +1577,8 @@ complete %>%
   labs(title = 'Distribution of Partner Physical Injury Severity',
        x = '') + 
   THEME
+
+
 # Assault
 complete %>%
   mutate(
@@ -1569,7 +1597,7 @@ complete %>%
   ) +
   bar_style +
   labs(title = 'Distribution of Partner Assault Severity',
-       x = '') +
+       x = '') + 
   THEME
 
 # Sexual Cohesion
@@ -1590,15 +1618,15 @@ complete %>%
   ) +
   bar_style +
   labs(title = 'Distribution of Partner Sexual Cohesion Severity',
-       x = '') +
+       x = '') + 
   THEME
 ```
+
 ##### Prevalence distributions
-*NA was removed when generating following Prevalence plot*
+*TODO NA was removed when generating following Prevalence plot*
 ```{r CTS2-Prevalence-distributions, class.source='fold', echo = FALSE}
 # Psychological Aggression 
 complete %>%
-  select(c(cts_psy_agg_ind_prev, cts_psy_agg_part_prev),)%>%
   pivot_longer(
     cols = c(cts_psy_agg_ind_prev, cts_psy_agg_part_prev),
     names_to = 'ind_part',
@@ -1655,7 +1683,7 @@ complete %>%
     aes(fill = ind_part),
     position = 'dodge'
   ) +
-  labs(title = 'Distribution of Physical Injury Prevalence')+
+  labs(title = 'Distribution of Physical Injury Prevalence') +
   scale_fill_manual(values = Two_color) +
   THEME
 
@@ -1686,7 +1714,7 @@ complete %>%
     aes(fill = ind_part),
     position = 'dodge'
   ) +
-  labs(title = 'Distribution of Assault Prevalence')+
+  labs(title = 'Distribution of Assault Prevalence') +
   scale_fill_manual(values = Two_color) +
   THEME
 
@@ -1705,7 +1733,7 @@ complete %>%
   ) %>%
   group_by(ind_part) %>%
   mutate(
-    sum_prev = sum(prevalence, na.rm = TRUE)
+    sum_prev = sum(prevalence, na.rm = T)
   ) %>%
   ungroup() %>%
   ggplot(
@@ -1717,10 +1745,11 @@ complete %>%
     aes(fill = ind_part),
     position = 'dodge'
   ) +
-  labs(title = 'Distribution of Sexual Cohesion Prevalence')+
+  labs(title = 'Distribution of Sexual Cohesion Prevalence') +
   scale_fill_manual(values = Two_color) +
   THEME
 ```
+
 ##### Mutuality distributions
 ```{r CTS2-Mutuality-distributions, class.source='fold', echo = FALSE}
 
@@ -1741,9 +1770,10 @@ complete %>%
       cts_psy_agg_mutual
     )
   ) +
-  labs(title = 'Distribution of Mutual Psychological Aggression')+
   bar_style +
+  labs(title = 'Distribution of Mutual Psychological Aggression') +
   THEME
+
 
 
 # Physical Injury
@@ -1763,9 +1793,11 @@ complete %>%
       cts_injury_mutual
     )
   ) +
-  labs(title = 'Distribution of Mutual Injury')+
   bar_style +
+  labs(title = 'Distribution of Mutual Injury') +
   THEME
+
+
 # Assault
 complete %>%
   mutate(
@@ -1783,8 +1815,8 @@ complete %>%
       cts_assault_mutual
     )
   ) +
-  labs(title = 'Distribution of Mutual Assault')+
   bar_style +
+  labs(title = 'Distribution of Mutual Assault') +
   THEME
 
 # Sexual Cohesion
@@ -1804,18 +1836,18 @@ complete %>%
       cts_sex_mutual
     )
   ) +
-  labs(title = 'Distribution of Mutual Sexual Cohesion')+
   bar_style +
+  labs(title = 'Distribution of Mutual Sexual Cohesion') +
   THEME
 ```
 
 
 ## Child Abuse (BCAP)
-<!-#TODO: change above name to actual scale name ->
+TODO: change above name to actual scale name
 
 ### BCAP Description
 
-The BCAP is used to assess ... *INSERT TEXT DESCRIPTION ABOUT BSI MEASURE*
+The BCAP is used to assess ... *TODO INSERT TEXT DESCRIPTION ABOUT BSI MEASURE*
 
 For the present study, 34 items from the BSI were collected in order to *TODO: INSERT TEXT  *
 
@@ -1899,8 +1931,7 @@ bcap_gt_table <- bcap_gt_table %>%
             description = "Description",
             notes = "Notes") %>% 
   apply_tbl_theme() %>% 
-  cols_width(notes ~ px(150),
-             var_name ~ px(100)) %>%
+  cols_width(var_name ~ px(100)) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
@@ -1997,8 +2028,18 @@ bcap_random_alpha <-
 # Create the table as a data frame
 bcap_scale_df <- data.frame(
   var_name = c("bcap_total", "bcap_risk", "bcap_happy_total", "bcap_feel_pers_total", "bcap_lonely_total", "bcap_fam_conf_total", "bcap_rigid_total","bcap_distress_total", "bcap_poverty_total", "bcap_lie_total", "bcap_random_total"),
-  scale = c("BCAP complete Scale", "BCAP Risk Scale", "Happiness", "Feelings of persecution", "Loneliness", "Family conflict", "Rigidity", "Distress", "Poverty", "Lie", "Random responding"),
-  scale_construction = c("`q1`,`q2`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q9`, `q10`, `q11`, `q12`, `q13`, `q14`, `q15`, `q16`, `q17`, `q18`, `q19`, `q20`, `q21`, `q22`, `q23`, `q24`, `q25`, `q26`, `q27`, `q28`, `q29`, `q30`, `q31`, `q32`, `q33`, `q34`", "`q1`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q10`, `q11`, `q12`, `q13`, `q14`, `q16`, `q17`, `q19`, `q20`, `q22`, `q23`, `q24`, `q25`, `q27`, `q29`, `q30`, `q31`, `q32`, `q33`", "`q1`, `q23`, `q29`", "`q3`, `q25`, `q33`", " `q5`, `q12`, `q22`, `q31`", "`q6`, `q13`, `q17`", "`q7`, `q14`, `q20`, `q32`", "`q8`, `q11`, `q16`, `q19`, `q27`", "`q10`, `q30`", "`q4`, `q9`, `q15`, `q21`, `q26`, `q34`,", "`q2`, `q18`, `q28`"),
+  scale = c("BCAP complete Scale (34)", "BCAP Risk Scale (26)", "Happiness (3)", "Feelings of persecution", "Loneliness (4)", "Family conflict (3)", "Rigidity (4)", "Distress (5)", "Poverty (2)", "Lie (6)", "Random responding (3)"),
+  scale_construction = c("`q1_r`,`q2_r`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q9`, `q10`, `q11`, `q12`, `q13`, `q14`, `q15`, `q16`, `q17`, `q18`, `q19`, `q20`, `q21`, `q22`, `q23_r`, `q24`, `q25`, `q26`, `q27`, `q28`, `q29_r`, `q30`, `q31`, `q32`, `q33`, `q34`", 
+                         "`q1_r`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q10`, `q11`, `q12`, `q13`, `q14`, `q16`, `q17`, `q19`, `q20`, `q22`, `q23_r`, `q24`, `q25`, `q27`, `q29_r`, `q30`, `q31`, `q32`, `q33`", 
+                         "`q1_r`, `q23_r`, `q29_r`", 
+                         "`q3`, `q25`, `q33`", 
+                         "`q5`, `q12`, `q22`, `q31`", 
+                         "`q6`, `q13`, `q17`", 
+                         "`q7`, `q14`, `q20`, `q32`", 
+                         "`q8`, `q11`, `q16`, `q19`, `q27`", 
+                         "`q10`, `q30`", 
+                         "`q4`, `q9`, `q15`, `q21`, `q26`, `q34`,", 
+                         "`q2`, `q18`, `q28`"),
   scale_range = c("","","","","","","","","","", ""), #TODO fill in range 
    alpha = c(round(bcap_alpha$total$raw_alpha, 3),
               round(bcap_risk_alpha$total$raw_alpha, 3),
@@ -2021,7 +2062,7 @@ bcap_scale_table <- gt(bcap_scale_df) %>%
             scale_construction = "Scale Construction",
             scale_range = "Range*",
             alpha = "Alpha") %>% 
-  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   cols_width(scale ~ px(135)) %>% 
   apply_tbl_theme() 
@@ -2096,7 +2137,6 @@ complete %>%
   )
 
 # Happiness 
-
 complete %>% 
   composite_hist(
     x = bcap_happy_total,
@@ -2106,6 +2146,7 @@ complete %>%
     title = 'Distribution For BCAP Happiness Subscale'
   )
 
+# Feelings
 complete %>% 
   composite_hist(
     x = bcap_feel_pers_total,
@@ -2113,10 +2154,9 @@ complete %>%
   ) +
   labs(
     title = 'Distribution For BCAP Feelings of Persecution Subscale'
-  )+
+  )
 
-  THEME
-
+# Loneliness
 complete %>% 
   composite_hist(
     x = bcap_lonely_total,
@@ -2124,9 +2164,9 @@ complete %>%
   ) +
   labs(
     title = 'Distribution For BCAP Loneliness Subscale'
-  )+
-  THEME
+  )
 
+# Family Conflict
 complete %>% 
   composite_hist(
     x = bcap_fam_conf_total,
@@ -2136,6 +2176,7 @@ complete %>%
     title = 'Distribution For BCAP Family Conflict Subscale'
   )
 
+# Rigidity
 complete %>% 
   composite_hist(
     x = bcap_rigid_total,
@@ -2145,6 +2186,7 @@ complete %>%
     title = 'Distribution For BCAP Rigidity Subscale'
   )
 
+# Distress
 complete %>% 
   composite_hist(
     x = bcap_distress_total,
@@ -2154,6 +2196,7 @@ complete %>%
     title = 'Distribution For BCAP Distress Subscale'
   )
 
+# Poverty
 complete %>% 
   composite_hist(
     x = bcap_poverty_total,
@@ -2163,6 +2206,7 @@ complete %>%
     title = 'Distribution For BCAP Poverty Subscale'
   )
 
+# Lying
 complete %>% 
   composite_hist(
     x = bcap_lie_total,
@@ -2171,7 +2215,8 @@ complete %>%
   labs(
     title = 'Distribution For BCAP Lying Subscale'
   )
-
+    
+# Random Responding 
 complete %>% 
   composite_hist(
     x = bcap_random_total,
@@ -2179,7 +2224,7 @@ complete %>%
   ) +
   labs(
     title = 'Distribution For BCAP Random Responding Subscale'
-  )
+  ) 
 ```
 
 ## Partner Relationships (DYADC)
@@ -2198,7 +2243,8 @@ The missing data rule was Applied. Calculations were completed only with partici
 Reference: [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug); 
 [DOI](https://doi.org/10.1207/s15374424jccp3402_9)
 Reference: [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
-### DYADC) Variables
+
+### DYADC Variables
 
 #### Value Labels
 
@@ -2227,7 +2273,7 @@ dyadc_label_table_1 <- dyadc_label_df_1 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ px(151)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -2258,13 +2304,13 @@ dyadc_label_table_2 <- dyadc_label_df_2 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ px(151)) %>% 
   apply_labtab_theme()
+
+
 
 # Print the table
 print(dyadc_label_table_2)
-
-
 ```
 
 Response options for items `e23` and `e24`
@@ -2289,13 +2335,11 @@ dyadc_label_table_3 <- dyadc_label_df_3 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ px(151)) %>% 
   apply_labtab_theme()
 
 # Print the table
 print(dyadc_label_table_3)
-
-
 ```
 
 Response options for items `e25` to `e28`
@@ -2321,7 +2365,7 @@ dyadc_label_table_4 <- dyadc_label_df_4 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ px(151)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -2349,7 +2393,7 @@ dyadc_label_table_5 <- dyadc_label_df_5 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ px(100)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -2381,7 +2425,7 @@ dyadc_label_table_6 <- dyadc_label_df_6 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ px(151)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -2413,7 +2457,7 @@ dyadc_label_table_7 <- dyadc_label_df_7 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ px(151)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -2474,81 +2518,41 @@ Information on total score and subscale variables are below. Variables were cons
 
 ```{r dyadc alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-# Total
-dyadc_alpha <- 
+dyadc_alpha <-
   complete %>% 
   select(
-    q1_r,
-    q2_r,
-    q3:q22,
-    q23_r,
-    q24:q28,
-    q29_r,
-    q30:q34
+    e1:e32
   ) %>% 
   psych::alpha(check.keys = TRUE)
 
-dyadc_risk_alpha <-
-  complete %>%
+dyadc_con_alpha <-
+  complete %>% 
   select(
-    q1_r,
-    q3,
-    q5:q8,
-    q10:q14,
-    q16:q17,
-    q19:q20,
-    q22,
-    q23_r,
-    q24:q25,
-    q27,
-    q29_r,
-    q30:q33
-    ) %>%
+    e1:e13
+  ) %>% 
   psych::alpha(check.keys = TRUE)
 
-dyadc_happy_alpha <- 
+dyadc_aff_exp_alpha <-
   complete %>% 
-  select(q1_r, q23_r, q29_r) %>% 
+  select(
+    e4, e6, e29, e30
+  ) %>% 
   psych::alpha(check.keys = TRUE)
 
-dyadc_feel_pers_alpha <- 
+dyadc_satis_alpha <-
   complete %>% 
-  select(q3, q25, q33) %>% 
+  select(
+    e16:e23,
+    e31,
+    e32
+  ) %>% 
   psych::alpha(check.keys = TRUE)
 
-dyadc_lonely_alpha <- 
+dyadc_cohes_alpha <-
   complete %>% 
-  select(q5, q12, q22, q31) %>% 
-  psych::alpha(check.keys = TRUE)
-
-dyadc_fam_conf_alpha <- 
-  complete %>% 
-  select(q6, q13, q17) %>% 
-  psych::alpha(check.keys = TRUE)
-
-dyadc_rigid_alpha <-
-  complete %>% 
-  select(q7, q14, q20, q32) %>% 
-  psych::alpha(check.keys = TRUE)
-
-dyadc_distress_alpha <- 
-  complete %>% 
-  select(q8, q11, q16, q19, q27) %>% 
-  psych::alpha(check.keys = TRUE)
-
-dyadc_poverty_alpha <- 
-  complete %>% 
-  select(q10, q30) %>% 
-  psych::alpha(check.keys = TRUE)
-
-dyadc_lie_alpha <-
-  complete %>% 
-  select(q4, q9, q15, q21, q26, q34) %>% 
-  psych::alpha(check.keys = TRUE)
-
-dyadc_random_alpha <-
-  complete %>% 
-  select(q2_r, q19, q28) %>% 
+  select(
+    e24:e28
+  ) %>% 
   psych::alpha(check.keys = TRUE)
 ```
 
@@ -2556,8 +2560,11 @@ dyadc_random_alpha <-
 # Create the table as a data frame
 dyadc_scale_df <- data.frame(
   var_name = c("dyadc_total", "dyadc_con_total", "dyadc_aff_exp_total", "dyadc_satis_total", "dyadc_cohes_total"),
-  scale = c("DYADC Total score (32) ", "Consensus", "Affectional Expression", "Satisfaction", "Cohesion"),
-  scale_construction = c("e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18_r, e19_r, e20, e21, e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32", "e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13", "e4, e6, e29, e30", "e16, e17, e18_r, e19_r, e20, e21, e22, e23, e31, e32", "e24, e2, e26, e27, e28"),
+  scale = c("DYADC Total score (32) ", "Consensus (13)", "Affectional Expression (4)", "Satisfaction (10)", "Cohesion (5)"),
+  scale_construction = c("`e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`, `e14`, `e15`, `e16`, `e17`, `e18_r`, `e19_r`, `e20`, `e21`, `e22`, `e23`, `e24`, `e25`, `e26`, `e27`, `e28`, `e29`, `e30`, `e31`, `e32`", 
+                         "`e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`", 
+                         "`e4`, `e6`, `e29`, `e30`", 
+                         "`e16`, `e17`, `e18_r`, `e19_r`, `e20`, `e21`, `e22`, `e23`, `e31`, `e32`", "`e24`, `e25`, `e26`, `e27`, `e28`"),
   scale_range = c("","","","",""), #TODO fill in range 
    alpha = c(round(dyadc_alpha$total$raw_alpha, 3),
               round(dyadc_con_alpha$total$raw_alpha, 3),
@@ -2574,7 +2581,7 @@ dyadc_scale_table <- gt(dyadc_scale_df) %>%
             scale_construction = "Scale Construction",
             scale_range = "Range*",
             alpha = "Alpha") %>% 
-  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   cols_width(scale ~ px(135)) %>% 
   apply_tbl_theme() 
@@ -2672,5 +2679,18 @@ complete %>%
   ) +
   labs(
     title = 'Distribution for DYADC Cohesion Subscale'
+  )
+```
+
+```{r dyadc-cutoff, class.source='fold', echo = FALSE}
+complete %>%
+  cutoff_plot2(
+    x = dyadc_total,
+    cutoff = 92,
+    cutoff_other = 107
+  ) +
+  labs(
+    title = 'Cutoff Values for DYADC Scale',
+    caption = 'Cutoffs are 92 and 107\nSee references for literature on cutoff scores.'
   )
 ```
