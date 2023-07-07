@@ -25,6 +25,7 @@ library(tidyverse)
 library(here)
 library(gt)
 library(ggplot2)
+library(scales)
 
 knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE,
@@ -52,7 +53,7 @@ source(here("functions", "codebook_fun.R"))
 # hist_style <- geom_histogram(bins=20, color = "white", fill = "#246B69", alpha = 0.7)
 
 
- bar_style <- geom_bar(color = "white", fill = "#246B69", alpha = 0.7)
+bar_style <- geom_bar(color = "white", fill = "#246B69", alpha = 0.7)
 
 THEME <-     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -96,7 +97,7 @@ The BSI is used to assess ... *INSERT TEXT DESCRIPTION ABOUT BSI MEASURE*
 
 For the present study, 19 items from the BSI were collected in order to calculate the Somatization, Anxiety, and Depression subscales. 
 
-Item numbers in this dataset may not match original item numbers from the BSI exactly... *INSERT MORE INFO HERE*
+Item numbers in this dataset may not match original item numbers from the BSI exactly (?)
 
 No items need to be reverse scored. Higher scores indicate more severe mental health symptoms. 
 
@@ -338,7 +339,8 @@ Distributions are presented for the total score and each subscale
 ```{r bsi-distributions, class.source='fold', echo = FALSE}
 complete %>%
   composite_hist(x = bsi_total) +
-  labs(title = 'Distribution of Total Scores for BSI Measure') 
+  labs(title = 'Distribution of Total Scores for BSI Measure')
+
 
 complete %>%
   composite_hist(x = bsi_soma_total) +
@@ -351,6 +353,7 @@ complete %>%
 complete %>%
   composite_hist(x = bsi_dep_total) +
   labs(title = 'Distribution for BSI Depression Subscale')
+
 ```
 
 
@@ -498,6 +501,11 @@ cesd_alpha <-
   select(c1:c16_r) %>%
   psych::alpha(check.keys = TRUE)
 
+cesd_dep_alpha <-
+  complete %>%
+  select(c1:c20) %>%
+  psych::alpha(check.keys = TRUE)
+
 cesd_pos_aff_alpha <-
   complete %>%
   select(c4_r, c8_r, c12_r, c16_r) %>%
@@ -505,9 +513,10 @@ cesd_pos_aff_alpha <-
 
 
 cesd_alpha_table <- tibble(
-  Scale = c('CESD',
+  Scale = c('CESD', 'CESD - Depressive Symptoms',
             'CESD - Positive Affect'),
   Alpha = c(round(cesd_alpha$total$raw_alpha, 3),
+            round(cesd_dep_alpha$total$raw_alpha, 3),
             round(cesd_pos_aff_alpha$total$raw_alpha, 3)
   )
 )
@@ -516,12 +525,13 @@ cesd_alpha_table <- tibble(
 ```{r CESD-scale-table, results = 'asis'}
 # Create the table as a data frame
 cesd_scale_df <- data.frame(
-  var_name = c("cesd_raw", "cesd_pos_aff_total"),
-  scale = c("Depression Raw Score (20)", "Positive Affect (4)"),
+  var_name = c("cesd_total", "cesd_dep_symp_total", "cesd_pos_aff_total"),
+  scale = c("Total Score (20)", "Depression (16)", "Positive Affect (4)"),
   scale_construction = c("`c1`, `c2`, `c3`, `c4`, `c5`, `c6`, `c7`, `c8`, `c9`, `c10`, `c11`, `c12`, `c13`, `c14`, `c15`, `c16`, `c17`, `c18`, `c19`, `c20`",
+                           "`c1`, `c2`, `c3`, `c5`, `c6`, `c7`, `c9`, `c10`, `c11`, `c13`, `c14`, `c15`, `c17`, `c18`, `c19`, `c20`",
                            "`c4_r`, `c8_r`, `c12_r`, `c16_r`"),
-  scale_range = c("0-60", "0-12"),
-  alpha = c(round(cesd_alpha$total$raw_alpha, 3), round(cesd_pos_aff_alpha$total$raw_alpha, 3))
+  scale_range = c("0-60", "0-48", "0-12"),
+  alpha = c(round(cesd_alpha$total$raw_alpha, 3), round(cesd_dep_alpha$total$raw_alpha, 3), round(cesd_pos_aff_alpha$total$raw_alpha, 3))
 )
 
 # Create the gt table object
@@ -652,7 +662,19 @@ cutoff_plot2 <- function(data,
       geom_vline(xintercept = cutoff,
                  color = cutoff_color,
                  linetype = 2,
-                 linewidth = 1.25)
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 20),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
   } else if (is.null(cutoff_other2)) {
     data %>%
       ggplot(aes(!!x)) +
@@ -667,7 +689,19 @@ cutoff_plot2 <- function(data,
       geom_vline(xintercept = cutoff_other,
                  color = cutoff_other_color,
                  linetype = 3,
-                 linewidth = 1.25)
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 20),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
   } else {
     data %>%
       ggplot(aes(!!x)) +
@@ -686,7 +720,19 @@ cutoff_plot2 <- function(data,
       geom_vline(xintercept = cutoff_other2,
                  color = cutoff_other2_color,
                  linetype = 4,
-                 linewidth = 1.25)
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 20),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
   }
 }
 ```
@@ -701,10 +747,11 @@ complete %>%
   ) +
   labs(
     title = 'Cutoff Scores for CESD Total Scores',
-    caption = 'Cutoffs are 16 and/or 23\nSee references for literature on cutoff scores.'
+    caption = 'Cutoffs are 16 and/or 23\nSee references for literature on cutoff scores.', 
+    y = "Number of Participants"
   ) +
-  geom_text(aes(x = 16, y = 17, label = "cutoff1", vjust = -.25, hjust = 1.2)) +
-  geom_text(aes(x = 16, y = 17, label = "cutoff2", vjust = -.25, hjust = -2))
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = 1.2)) +
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -1.5))
 ```
 
 
@@ -969,6 +1016,8 @@ Reference: [@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.111
 
 All The Drug Abuse Screening Test variables have the same response options
 
+
+
 ```{r DAST-label-table, results = 'asis'}
 
 dast_label_df <- data.frame(
@@ -994,9 +1043,7 @@ print(dast_label_table)
 
 
 ```
-
-Recoded total value label 
-
+Recoeded tatoal value lable 
 ```{r DAST-label-table-total, results = 'asis'}
 
 dast_label_total <- data.frame(
@@ -1017,8 +1064,7 @@ dast_label_table_total <- dast_label_total %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(c(1, 2, 4, 5) ~ px(151),
-             3 ~ px(300)) %>% 
+  cols_width(c(1:5) ~ px(151)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -1045,7 +1091,7 @@ dast_word_long <- dast_word %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name),
          notes = case_when(var_name == "d4" ~ "This item should be reverse scored. `d4_r` is reverse scored",
-                           var_name == "d5" ~ "This item should be reverse scored. `d5_r` is reverse scored",
+                           var_name == "d5" ~ "This item should be reverse scored. `d4_r` is reverse scored",
                            TRUE ~ as.character("")
                            )) %>%
   slice(3:25)
@@ -1080,7 +1126,7 @@ print(dast_gt_table)
 
 #### Scale and Subscales
 
-No subscales were created for this measure as there was a lack of evidence supporting a subscale structure
+No subscales were created for this measure as there was a lack of evidence supporting a subscale structurek
 
 
 ```{r dast alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
@@ -1145,12 +1191,17 @@ dast_summary_data <- lapply(dast_data_subset, function(x) {
 })
 
 # Convert summary_data to a data frame
-dast_summary_data <- as.data.frame(dast_summary_data)
+dast_summary_data <- as.data.frame(dast_summary_data) 
 
 # Set items as first row
-dast_summary_data <- rbind(names(dast_summary_data), dast_summary_data) %>% 
+dast_summary_data <- rbind(names(dast_summary_data),dast_summary_data) %>% 
   t() %>% 
-  as.data.frame()
+  as.data.frame() 
+
+dast_summary_data <- dast_summary_data %>%  mutate(Mean = case_when(Mean == "NaN" ~ "NA"),
+                                                   Range = case_when(Range == "Inf--Inf" ~ "NA"))
+
+
 
 # Create the gt table
 dast_tbl <- dast_summary_data %>%
@@ -1218,7 +1269,8 @@ complete %>%
   labs(
     title = 'Severity Categories',
     subtitle = 'Based on DAST',
-    caption = 'Cutoffs are:\nLow = 1-5,\nIntermediate = 6-10,\nSubstantial = 11-15,\nSevere = 16-20'
+    caption = 'Cutoffs are:\nLow = 1-5,\nIntermediate = 6-10,\nSubstantial = 11-15,\nSevere = 16-20',
+    y = 'Number of Participants'
   )
 ```
 
@@ -1334,7 +1386,7 @@ Authors describe that internal reliability is not appropriate for the `CTS2` mea
 # Create the table as a data frame
 CTS2_scale_df <- data.frame(
   var_name = c("cts_psy_agg_ind_sev", "cts_injury_ind_sev", "cts_assault_ind_sev",   "cts_sex_ind_sev",       #TC   severity 
-                "cts_psy_agg_part_sev","cts_injury_part_sev", "cts_assault_part_sev","cts_sex_part_sev",      #Partner severity 
+                "cts_psy_agg_part_sev","cts_injury_part_sev", "cts_assault_part_sev","cts_sex_part_sev",      #Partner serverity 
 
                 "cts_psy_agg_ind_prev", "cts_injury_ind_prev", "cts_assault_ind_prev", "cts_sex_ind_prev", 
                 "cts_psy_agg_part_prev", "cts_injury_part_prev", "cts_assault_part_prev", "cts_sex_part_prev",
@@ -1467,8 +1519,9 @@ complete %>%
     )
   ) +
   bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
   labs(title = 'Distribution of Individual (TC) Psychological Aggression Severity',
-       x = '') + 
+       y = "Number of Participants") + 
   THEME
 
 
@@ -1490,7 +1543,7 @@ complete %>%
   ) +
   bar_style +
   labs(title = 'Distribution of Individual (TC) Physical Injury Severity',
-       x = '') + 
+       y = "Number of Participants") + 
   THEME
 
 # Assault 
@@ -1511,7 +1564,7 @@ complete %>%
   ) +
   bar_style +
   labs(title = 'Distribution of Individual (TC) Assault Severity',
-       x = '') + 
+       y = 'Number of Participants') +
   THEME
 
 # Sexual Cohesion
@@ -1531,8 +1584,9 @@ complete %>%
     )
   ) +
   bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
   labs(title = 'Distribution of Individual (TC) Sexual Cohesion Severity',
-       x = '') + 
+       y = "Number of Participants") + 
   THEME
 
 ```
@@ -1555,7 +1609,7 @@ complete %>%
   ) +
   bar_style +
   labs(title = 'Distribution of Partner Psychological Aggression Severity',
-       x = '') + 
+       y = "Number of Participants") + 
   THEME
 
 # Physical Injury
@@ -1575,8 +1629,9 @@ complete %>%
     )
   ) +
   bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
   labs(title = 'Distribution of Partner Physical Injury Severity',
-       x = '') + 
+       y = "Number of Participants") + 
   THEME
 
 
@@ -1598,7 +1653,7 @@ complete %>%
   ) +
   bar_style +
   labs(title = 'Distribution of Partner Assault Severity',
-       x = '') + 
+       y = "Number of Participants") + 
   THEME
 
 # Sexual Cohesion
@@ -1618,8 +1673,9 @@ complete %>%
     )
   ) +
   bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
   labs(title = 'Distribution of Partner Sexual Cohesion Severity',
-       x = '') + 
+       y = "Number of Participants") + 
   THEME
 ```
 
@@ -1772,7 +1828,8 @@ complete %>%
     )
   ) +
   bar_style +
-  labs(title = 'Distribution of Mutual Psychological Aggression') +
+  labs(title = 'Distribution of Mutual Psychological Aggression',
+       y = "Number of Participants") +
   THEME
 
 
@@ -1795,7 +1852,8 @@ complete %>%
     )
   ) +
   bar_style +
-  labs(title = 'Distribution of Mutual Injury') +
+  labs(title = 'Distribution of Mutual Injury',
+       y = "Number of Participants") +
   THEME
 
 
@@ -1817,7 +1875,8 @@ complete %>%
     )
   ) +
   bar_style +
-  labs(title = 'Distribution of Mutual Assault') +
+  labs(title = 'Distribution of Mutual Assault',
+       y = "Number of Participants") +
   THEME
 
 # Sexual Cohesion
@@ -1838,7 +1897,8 @@ complete %>%
     )
   ) +
   bar_style +
-  labs(title = 'Distribution of Mutual Sexual Cohesion') +
+  labs(title = 'Distribution of Mutual Sexual Cohesion',
+       y = "Number of Participants") +
   THEME
 ```
 
@@ -2426,7 +2486,7 @@ dyadc_label_table_6 <- dyadc_label_df_6 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(151)) %>% 
+  cols_width(everything() ~ px(129)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -2687,6 +2747,7 @@ complete %>%
 complete %>%
   cutoff_plot2(
     x = dyadc_total,
+    cutoff = 92,
     cutoff_other = 107
   ) +
   labs(
