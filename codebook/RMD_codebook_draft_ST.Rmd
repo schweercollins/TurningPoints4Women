@@ -1130,12 +1130,71 @@ print(dast_scale_table)
 
 Descriptive statistics are presented below for each item and total/subscale score
 
-```{r dast-mean-items}
+For binary items: 
+
+```{r dast-binary-desc}
+# Create subset of DAST items
+dast_data_subset_binary <- complete %>%
+  select(d1a:d3, d6:d5_r)
+
+# Calculate the dichotomous summary statistics for each variable
+dast_summary_data_binary <- lapply(dast_data_subset_binary, function(x) {
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
+  #range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+dast_summary_data <- as.data.frame(dast_summary_data)
+
+# Set items as first row
+dast_summary_data_binary <- rbind(names(dast_summary_data_binary), dast_summary_data_binary) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+dast_tbl_binary <- dast_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             # No = "% No",
+             # Yes = "% Yes",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115),
+             num_no ~ px(100),
+             num_yes ~ px(100)) %>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  #tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no)))
+
+# Render the table
+dast_tbl_binary
+
+
+```
+
+For total score: 
+
+```{r dast-cont-desc}
 # Create subset of DAST items
 dast_data_subset <- complete %>%
-  select(d1a:d3, d6:d5_r, dast_total,dast_total_r)
+  select(dast_total)
 
-# Calculate the summary statistics for each variable
+# Calculate the dichotomous summary statistics for each variable
 dast_summary_data <- lapply(dast_data_subset, function(x) {
   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
   sd_val <- round(sd(x, na.rm = TRUE), 2)
