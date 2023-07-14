@@ -917,7 +917,7 @@ Descriptive statistics are presented below for each item and total/subscale scor
 ```{r cis-mean-items}
 # Create subset of BSI items
 cis_data_subset <- complete %>%
-  select(ciq1:ciq3_r, ciq_psych_total, ciq_psych_avg)
+  select(ciq1:ciq2, ciq3, ciq_psych_total, ciq_psych_avg)
 
 # Calculate the summary statistics for each variable
 cis_summary_data <- lapply(cis_data_subset, function(x) {
@@ -1187,7 +1187,7 @@ Descriptive statistics are presented below for each item and total/subscale scor
 ```{r dast-mean-items}
 # Create subset of DAST items
 dast_data_subset <- complete %>%
-  select(d1a:d3, d6:d5_r, dast_total,dast_total_r)
+  select(d1a:d20, dast_total)
 
 # Calculate the summary statistics for each variable
 dast_summary_data <- lapply(dast_data_subset, function(x) {
@@ -1204,10 +1204,11 @@ dast_summary_data <- as.data.frame(dast_summary_data)
 # Set items as first row
 dast_summary_data <- rbind(names(dast_summary_data),dast_summary_data) %>% 
   t() %>% 
-  as.data.frame() 
+  as.data.frame() %>%
+  mutate(Mean = if_else(Mean == "NaN", "NA", Mean)) %>%
+  mutate(Range = if_else(Range == "Inf--Inf", "NA", Range))
 
-dast_summary_data <- dast_summary_data %>%  mutate(Mean = case_when(Mean == "NaN" ~ "NA"),
-                                                   Range = case_when(Range == "Inf--Inf" ~ "NA"))
+ 
 
 
 
@@ -2155,13 +2156,8 @@ Descriptive statistics are presented below for each item and total/subscale scor
 ```{r bcap-mean-items}
 # Create subset of bcap items
 bcap_data_subset <- complete %>%
-  select( q1_r,
-    q2_r,
-    q3:q22,
-    q23_r,
-    q24:q28,
-    q29_r,
-    q30:q34,bcap_risk_total, bcap_happy_total, bcap_feel_pers_total, bcap_lonely_total, bcap_fam_conf_total, bcap_rigid_total, bcap_distress_total, bcap_poverty_total, bcap_lie_total, bcap_random_total)
+  select(
+    q1:q34,bcap_risk_total, bcap_happy_total, bcap_feel_pers_total, bcap_lonely_total, bcap_fam_conf_total, bcap_rigid_total, bcap_distress_total, bcap_poverty_total, bcap_lie_total, bcap_random_total)
 
 # Calculate the summary statistics for each variable
 bcap_summary_data <- lapply(bcap_data_subset, function(x) {
