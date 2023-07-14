@@ -754,7 +754,7 @@ complete %>%
     y = "Number of Participants"
   ) +
   geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = 1.2)) +
-  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -1.5))
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -1.8))
 ```
 
 
@@ -835,6 +835,7 @@ cis_word_long <- cis_word %>%
          notes = case_when(var_name == "bsi22" ~ "This item should be reverse scored. `ciq3_r` is reverse scored",
                            TRUE ~ as.character("")
                            )) %>% 
+  mutate(description = if_else(var_name == "bsi20", "I have become depressed because of the Coronavirus (COVID-19).", description)) %>%
   slice(20:22)
 
 
@@ -1093,20 +1094,20 @@ dast_word_long <- dast_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name),
-         description = case_when (var_name == "d00" ~ "Is TC currently pregnant?",
-                                  var_name == "d2a" ~ "Have you misused prescription drugs in the last 6 months?",
-                                  var_name == "d2b" ~ "Have you misused prescription drugs in the last 6 months?"),
          notes = case_when(var_name == "d4" ~ "This item should be reverse scored. `d4_r` is reverse scored",
                            var_name == "d5" ~ "This item should be reverse scored. `d4_r` is reverse scored",
                            TRUE ~ as.character("")
                            )
-         ) %>%
+         ) %>% 
+  mutate(description = if_else(var_name == "d00", "Is TC currently pregnant?", description)) %>%
   slice(4:25)
 
 
 
 
+
 ```
+
 
 
 ```{r dast-var-table, results ='asis'}
@@ -1352,8 +1353,14 @@ CTS2_word_long <- CTS2_word %>%
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>% 
+  mutate(description = if_else(var_name == "ct0", "Have you lived with any other children, under the age of 17, since the time of your last interview? Only think about children who you or your partner was responsible for parenting. Please do not include any children listed in the other sections or children that you have reported before.", 
+                               if_else(var_name == "ct000", "How many new children are you parenting since your last interview on (last interview date)?",
+                                       if_else(var_name ==  "cts screen", "Have you been in a (romantic) relationship in the past year?",
+                                               if_else(var_name == "cts parent screen", "Have you parented a child (under 18) in the past year?", description))))
+  ) %>%
   slice(1:26)
 
 ```
@@ -2555,6 +2562,8 @@ dyadc_word_long <- dyadc_word %>%
          notes = case_when(var_name == "e18" ~ "This item should be reverse scored. `e18_r` is reverse scored",
                            var_name == "e19" ~ "This item should be reverse scored. `e19_r` is reverse scored",
                            TRUE ~ as.character(""))) %>%
+   mutate(description = if_else(var_name == "e31", " Please indicate the number that best describes the degree of happiness in your relationship.",
+                               if_else(var_name == "e32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
   slice(1:32)
 
 
