@@ -1682,6 +1682,7 @@ complete %>%
     )
   ) +
   bar_style +
+   scale_x_discrete(labels = label_wrap(10)) +
   labs(title = 'Distribution of Partner Psychological Aggression Severity',
        y = "Number of Participants") + 
   THEME
