@@ -917,7 +917,7 @@ Descriptive statistics are presented below for each item and total/subscale scor
 ```{r cis-mean-items}
 # Create subset of BSI items
 cis_data_subset <- complete %>%
-  select(ciq1:ciq2, ciq3, ciq_psych_total, ciq_psych_avg)
+  select(ciq1:ciq2, ciq3, ciq_psych_total)
 
 # Calculate the summary statistics for each variable
 cis_summary_data <- lapply(cis_data_subset, function(x) {
@@ -1682,6 +1682,7 @@ complete %>%
     )
   ) +
   bar_style +
+   scale_x_discrete(labels = label_wrap(10)) +
   labs(title = 'Distribution of Partner Psychological Aggression Severity',
        y = "Number of Participants") + 
   THEME
@@ -2732,7 +2733,7 @@ Descriptive statistics are presented below for each item and total/subscale scor
 ```{r dyadc-mean-items}
 # Create subset of dyadc items
 dyadc_data_subset <- complete %>%
-  select(e1:e32, "dyadc_con_total", "dyadc_con_avg", "dyadc_aff_exp_total", "dyadc_aff_exp_avg", "dyadc_satis_total", "dyadc_satis_avg","dyadc_cohes_total", "dyadc_cohes_avg")
+  select(e1:e32, "dyadc_con_total")
 
 # Calculate the summary statistics for each variable
 dyadc_summary_data <- lapply(dyadc_data_subset, function(x) {
