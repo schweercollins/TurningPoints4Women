@@ -499,6 +499,7 @@ composite_hist <- function(
 
   {{data}} %>%
     ggplot(aes({{x}})) +
+    ylab ("Number of Participants") +
     geom_histogram(bins = {{bins}},
                    color = 'white',
                    fill = '#246B69',
@@ -509,7 +510,11 @@ composite_hist <- function(
           panel.border = element_blank(),
           axis.line = element_line(colour = "black",size = .8),
           axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-          legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 20),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
     )
 }
 
