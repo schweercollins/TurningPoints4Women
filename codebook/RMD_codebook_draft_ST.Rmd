@@ -1203,7 +1203,7 @@ dast_summary_data_binary <- lapply(dast_data_subset_binary, function(x) {
 })
 
 # Convert summary_data to a data frame
-dast_summary_data <- as.data.frame(dast_summary_data)
+dast_summary_data_binary <- as.data.frame(dast_summary_data_binary)
 
 # Set items as first row
 dast_summary_data_binary <- rbind(names(dast_summary_data_binary), dast_summary_data_binary) %>% 
@@ -1211,7 +1211,7 @@ dast_summary_data_binary <- rbind(names(dast_summary_data_binary), dast_summary_
   as.data.frame()
 
 # Create the gt table
-dast_tbl_binary <- dast_summary_data %>%
+dast_tbl_binary <- dast_summary_data_binary %>%
   gt() %>%
   cols_label(`1` = "Variable",
              num_no = "N",
