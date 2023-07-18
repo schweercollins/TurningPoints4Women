@@ -1197,7 +1197,6 @@ dast_summary_data_binary <- lapply(dast_data_subset_binary, function(x) {
   per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
   num_no <- sum(x == 0, na.rm = TRUE)
   num_yes <-sum(x == 1, na.rm = TRUE)
-  #range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
   miss_val <- round(mean(is.na(x)) * 100, 2)
   c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
@@ -1218,22 +1217,18 @@ dast_tbl_binary <- dast_summary_data_binary %>%
              per_no = "%",
              num_yes = "N",
              per_yes = "%",
-             # No = "% No",
-             # Yes = "% Yes",
              Missing = "% Missing") %>% 
   cols_width(everything() ~ px(115),
              num_no ~ px(100),
              num_yes ~ px(100)) %>%
   cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
-  #tab_footnote("*Range of data values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>%
   tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
   tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
   tab_style(style = list(cell_fill(color = "#9BB6D1")),
             locations = cells_column_spanners()) %>% 
   apply_tbl_theme() %>% 
   tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
-            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no)))
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
 
 # Render the table
 dast_tbl_binary
