@@ -61,7 +61,7 @@ THEME <-     theme(panel.grid.major = element_blank(),
           panel.border = element_blank(),
           axis.line = element_line(colour = "black",size = .8),
           axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-          legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+          legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 13),
     )
 ```
 
@@ -702,7 +702,7 @@ cutoff_plot2 <- function(data,
           legend.text = element_text(size = 10),
           legend.key = element_rect(fill = "White",
                                     colour = "transparent"),
-          plot.title = element_text(size= 20),
+          plot.title = element_text(size= 13),
           #scale_x_discrete(guide = guide_axis(n.dodge=3))
     )
   } else {
@@ -733,7 +733,7 @@ cutoff_plot2 <- function(data,
           legend.text = element_text(size = 10),
           legend.key = element_rect(fill = "White",
                                     colour = "transparent"),
-          plot.title = element_text(size= 20),
+          plot.title = element_text(size= 13),
           #scale_x_discrete(guide = guide_axis(n.dodge=3))
     )
   }
@@ -1025,7 +1025,7 @@ All The Drug Abuse Screening Test variables have the same response options
 ```{r DAST-label-table, results = 'asis'}
 
 dast_label_df <- data.frame(
-  value = seq(1:2),
+  value = c(0,1),
   label = c("Yes ",
             "No")) %>% 
   t() %>% 
@@ -1051,7 +1051,7 @@ Recoeded tatoal value lable
 ```{r DAST-label-table-total, results = 'asis'}
 
 dast_label_total <- data.frame(
-  value = seq(1:5),
+  value = seq(0,4),
   label = c("None",
             "Low",
             "Intermediate (likely meets DSM criteria)",
@@ -1294,7 +1294,7 @@ complete %>%
   severity_plot(
   x = dast_total,
   bins = 20,
-  low_xmin = 1,
+  low_xmin = 0,
   low_xmax = 5.5,
   medium_xmin = 5.5,
   medium_xmax = 10.5,
@@ -2673,18 +2673,25 @@ dyadc_gt_table <- gt(dyadc_word_long)
 
 # Table-specific formatting (col width, names)
 dyadc_gt_table <- dyadc_gt_table %>% 
+  apply_tbl_theme() %>% 
   tab_row_group(label = "Please indicate if items below were problems in your relationships in the past few weeks.", 
-                rows = 29:32) %>%
+                rows = 29:32,
+                id = "set4") %>%
   tab_row_group(label = "Thinking about the past 6 months,how often do you…", 
-                rows = 25:28) %>%
+                rows = 25:28,
+                id = "set3") %>%
   tab_row_group(label = "In the past 6 months, how often. . .", 
-                rows = 23:24) %>%
+                rows = 23:24,
+                id = "set2") %>%
   tab_row_group(label = "Thinking about the past 6 months, how often do you. . . ", 
-                rows = 1:22) %>%
+                rows = 1:22,
+                id = "set1")%>%
   cols_label(var_name = "Variable", 
             description = "Description",
             notes = "Notes") %>% 
-  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("set1", "set2", "set3", "set4"))) %>%
   cols_width(notes ~ px(150),
              var_name ~ px(100),
              value ~ px(225)) %>%
@@ -2695,6 +2702,8 @@ print(dyadc_gt_table)
 
 #WHEN RENDERING WITH PDF USE: 
 #dyadc_gt_table
+
+
 ```
 #### Scale and Subscales
 
