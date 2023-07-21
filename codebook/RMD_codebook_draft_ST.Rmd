@@ -1026,7 +1026,7 @@ All The Drug Abuse Screening Test variables have the same response options
 
 dast_label_df <- data.frame(
   value = seq(1:2),
-  label = c("Yes",
+  label = c("Yes ",
             "No")) %>% 
   t() %>% 
   as.data.frame()
@@ -1123,6 +1123,7 @@ dast_gt_table <- dast_gt_table %>%
   cols_width(notes ~ px(150),
              var_name ~ px(100)) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+ 
 
 # Print the table
 print(dast_gt_table)
@@ -2609,10 +2610,55 @@ dyadc_word_long <- dyadc_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         #description = case_when(var_name = )
+         value = case_when(row_number() <= 15  ~ "0 = Always Disagree 
+                                                 \n1 = Almost Always Disagree
+                                                 \n2 = Frequently Disagree
+                                                 \n3 = Occasionally Disagree
+                                                 \n4 = Almost Always Agree
+                                                 \n5 = Always Agree",
+                           row_number() %in% c(16, 17, 20:22) ~ "0 = All the time 
+                                                 \n1 = Most of the time
+                                                 \n2 = More often than not
+                                                 \n3 = Occasionally
+                                                 \n4 = Rarely
+                                                 \n5 = Never",
+                           row_number() %in% c(18,19) ~ "0 = Never
+                                                 \n1 = Rarely
+                                                \n2 = Occasionally
+                                                 \n3 = More often than not
+                                                 \n4 = Most of the time
+                                                 \n5 = All the time ",
+                           between(row_number(), 23, 24 ) ~ "0 = Never
+                                                 \n1 = Rarely
+                                                 \n2 = Occasionally
+                                                 \n3 = Almost every day
+                                                 \n4 = Every day",
+                           between(row_number(), 25,28) ~ "0 = Never
+                                                 \n1 = Less than once a month
+                                                 \n2 = Once or twice a month
+                                                 \n3 = Once or twice a week
+                                                 \n4 = Once a day
+                                                 \n5 = More often",
+                           row_number() %in% c(29,30) ~ "0 = Yes
+                                                 \n1 = No",
+                           row_number() %in% c(31) ~ "0 = Extremely Unhappy
+                                                 \n1 = Fairly Unhappy
+                                                 \n2 = A Little Unhappy
+                                                 \n3 = Happy
+                                                 \n4 = Very Happy
+                                                 \n5 = Extremely Happy
+                                                 \n6 = Perfect",
+                           row_number() >= 32 ~ "0 =	My relationship can never succeed, and there is no more that I can do to keep the relationship going.
+                                                 \n1 =	It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going.
+                                                 \n2 =	It would be nice if my relationship succeeded, but I can’t do much more than I’m doing now to help it succeed.
+                                                 \n3 =	I want very much for my relationship to succeed, and will do my fair share to see that it does.
+                                                 \n4 =	I want very much for my relationship to succeed, and will do all I can to see that it does.
+                                                 \n5 =	I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
+                           ),
          notes = case_when(var_name == "e18" ~ "This item should be reverse scored. `e18_r` is reverse scored",
                            var_name == "e19" ~ "This item should be reverse scored. `e19_r` is reverse scored",
-                           TRUE ~ as.character(""))) %>%
+                           TRUE ~ as.character(""))
+         ) %>%
    mutate(description = if_else(var_name == "e31", " Please indicate the number that best describes the degree of happiness in your relationship.",
                                if_else(var_name == "e32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
   slice(1:32)
@@ -2627,12 +2673,21 @@ dyadc_gt_table <- gt(dyadc_word_long)
 
 # Table-specific formatting (col width, names)
 dyadc_gt_table <- dyadc_gt_table %>% 
+  tab_row_group(label = "Please indicate if items below were problems in your relationships in the past few weeks.", 
+                rows = 29:32) %>%
+  tab_row_group(label = "Thinking about the past 6 months,how often do you…", 
+                rows = 25:28) %>%
+  tab_row_group(label = "In the past 6 months, how often. . .", 
+                rows = 23:24) %>%
+  tab_row_group(label = "Thinking about the past 6 months, how often do you. . . ", 
+                rows = 1:22) %>%
   cols_label(var_name = "Variable", 
             description = "Description",
             notes = "Notes") %>% 
   apply_tbl_theme() %>% 
   cols_width(notes ~ px(150),
-             var_name ~ px(100)) %>%
+             var_name ~ px(100),
+             value ~ px(225)) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
