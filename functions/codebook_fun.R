@@ -513,7 +513,7 @@ composite_hist <- function(
           legend.text = element_text(size = 10),
           legend.key = element_rect(fill = "White",
                                     colour = "transparent"),
-          plot.title = element_text(size= 20),
+          plot.title = element_text(size= 13),
           #scale_x_discrete(guide = guide_axis(n.dodge=3))
     )
 }
@@ -552,7 +552,7 @@ cutoff_plot <-
               panel.background = element_rect(fill = "transparent"),
               axis.line = element_line(colour = "black",size = .8),
               axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 13),
         )
     }
 
@@ -577,7 +577,7 @@ cutoff_plot <-
               panel.background = element_rect(fill = "transparent"),
               axis.line = element_line(colour = "black",size = .8),
               axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 13),
         )
     }
 
@@ -606,7 +606,7 @@ cutoff_plot <-
               panel.background = element_rect(fill = "transparent"),
               axis.line = element_line(colour = "black",size = .8),
               axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 20),
+              legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 13),
         )
     }
   }
@@ -711,7 +711,7 @@ severity_plot <- function(
           axis.text = element_text(size = 10), axis.title = element_text(size = 10),
           legend.text = element_text(size = 10),
           legend.key = element_rect(fill = "White", colour = "transparent"),
-          plot.title = element_text(size= 20),
+          plot.title = element_text(size= 13),
     )
 
   plot_data <- ggplot_build(histo_plot)
