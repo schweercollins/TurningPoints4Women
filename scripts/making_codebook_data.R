@@ -1,139 +1,126 @@
-bsi
-cesd
-dast
-bcap
-dyadc
-ciq
-cts
+bsi <- bsi %>% distinct(id, .keep_all = TRUE)
+cesd <- cesd %>% distinct(id, .keep_all = TRUE)
+dast <- dast %>% distinct(id, .keep_all = TRUE)
+bcap <- bcap %>% distinct(id, .keep_all = TRUE)
+dyadc <- dyadc %>% distinct(id, .keep_all = TRUE)
+ciq <- ciq %>% distinct(id, .keep_all = TRUE)
+cts <- cts %>% distinct(id, .keep_all = TRUE)
+arq <- arq %>% distinct(id, .keep_all = TRUE)
+prss <- prss %>% distinct(id, .keep_all = TRUE)
+ssq <- ssq %>% distinct(id, .keep_all = TRUE)
+elf <- elf %>% distinct(id, .keep_all = TRUE)
+ell <- ell %>% distinct(id, .keep_all = TRUE)
+mhc <- mhc %>% distinct(id, .keep_all = TRUE)
+flo <- flo %>% distinct(id, .keep_all = TRUE)
+itq <- itq %>% distinct(id, .keep_all = TRUE)
+sex <- sex %>% distinct(id, .keep_all = TRUE)
+sf12 <- sf12 %>% distinct(id, .keep_all = TRUE)
+cint <- cint %>% distinct(id, .keep_all = TRUE)
 
-data <-
-  left_join(
-  bsi,
-  cesd,
-  by = 'id'
-  )
+data <- left_join(bsi, cesd, by = "id")
+data <- left_join(data, dast, by = "id")
+data <- left_join(data, bcap, by = "id")
+data <- left_join(data, dyadc, by = "id")
+data <- left_join(data, ciq, by = "id")
+data <- left_join(data, cts, by = "id")
+data <- left_join(data, arq, by = "id")
+data <- left_join(data, prss, by = "id")
+data <- left_join(data, ssq, by = "id")
+data <- left_join(data, elf, by = "id")
+data <- left_join(data, ell, by = "id")
+data <- left_join(data, mhc, by = "id")
+data <- left_join(data, flo, by = "id")
+data <- left_join(data, itq, by = "id")
+data <- left_join(data, sex, by = "id")
+data <- left_join(data, sf12, by = "id")
+data <- left_join(data, cint, by = "id")
 
+names(data)
 
-data <-
-left_join(
-    data,
-    dast,
-    by = 'id'
-  )
-
-data <-
-  left_join(
-    data,
-    bcap,
-    by = 'id'
-  )
-
-data <-
-  left_join(
-    data,
-    dyadc,
-    by = 'id'
-  )
-
-data <-
-  left_join(
-    data,
-    cts,
-    by = 'id'
-  )
-
-data <-
-  left_join(
-    data,
-    ciq,
-    by = 'id'
-  )
-
-data <- data %>%
-  distinct(id, .keep_all = TRUE)
-
-write.csv(data,
-          'data_77included.csv')
-
-bsi_complete <- bsi_complete %>%
-  relocate(id, .before = bsi1)
-
-bsi_complete %>%
-  distinct(id, .keep_all = TRUE)
-
-cesd_complete %>%
-  distinct(id, .keep_all = TRUE)
-
-dast_complete %>%
-  distinct(id, .keep_all = TRUE)
-
-bcap_complete %>%
-  distinct(id, .keep_all = TRUE)
-
-dyadc_complete %>%
-  distinct(id, .keep_all = TRUE)
-
-cts_complete %>%
-  distinct(id, .keep_all = TRUE)
-
-ciq_complete %>%
-  distinct(id, .keep_all = TRUE)
-
-glimpse(bsi_complete)
-glimpse(cesd_complete)
-glimpse(ciq_complete)
-glimpse(bcap_complete)
-glimpse(cts_complete)
-glimpse(dyadc_complete)
-glimpse(dast_complete)
+# write.csv(data, "do_not_push/round_two_measures_data.csv")
 
 
-data_complete <-
-  left_join(
-    bsi_complete,
-    cesd_complete,
-    by = 'id'
-    ) %>%
-  relocate(id, .before = bsi1)
+bsi_calc <- bsi_calc %>% distinct(id, .keep_all = TRUE)
+cesd_calc <- cesd_calc %>% distinct(id, .keep_all = TRUE)
+dast_calc <- dast_calc %>% distinct(id, .keep_all = TRUE)
+bcap_calc <- bcap_calc %>% distinct(id, .keep_all = TRUE)
+dyadc_calc <- dyadc_calc %>% distinct(id, .keep_all = TRUE)
+ciq_calc <- ciq_calc %>% distinct(id, .keep_all = TRUE)
+cts_calc <- cts_calc %>% distinct(id, .keep_all = TRUE)
+arq_calc <- arq_calc %>% distinct(id, .keep_all = TRUE)
+prss_calc <- prss_calc %>% distinct(id, .keep_all = TRUE)
+ssq_calc <- ssq_calc %>% distinct(id, .keep_all = TRUE)
+elf_calc <- elf_calc %>% distinct(id, .keep_all = TRUE)
+ell_calc <- ell_calc %>% distinct(id, .keep_all = TRUE)
+ell_count_calc <- ell_count_calc %>% distinct(id, .keep_all = TRUE)
+mhc_calc <- mhc_calc %>% distinct(id, .keep_all = TRUE)
+flo_calc <- flo_calc %>% distinct(id, .keep_all = TRUE)
+itq_calc <- itq_calc %>% distinct(id, .keep_all = TRUE)
+sex_calc <- sex_calc %>% distinct(id, .keep_all = TRUE)
+sf12_calc <- sf12_calc %>% distinct(id, .keep_all = TRUE)
+cint_calc <- cint_calc %>% distinct(id, .keep_all = TRUE)
 
-data_complete <-
-  left_join(
-    data_complete,
-    ciq_complete,
-    by = 'id'
-  )
+data_calc <- left_join(bsi_calc, cesd_calc, by = "id")
+data_calc <- left_join(data_calc, dast_calc, by = "id")
+data_calc <- left_join(data_calc, bcap_calc, by = "id")
+data_calc <- left_join(data_calc, dyadc_calc, by = "id")
+data_calc <- left_join(data_calc, ciq_calc, by = "id")
+data_calc <- left_join(data_calc, cts_calc, by = "id")
+data_calc <- left_join(data_calc, arq_calc, by = "id")
+data_calc <- left_join(data_calc, prss_calc, by = "id")
+data_calc <- left_join(data_calc, ssq_calc, by = "id")
+data_calc <- left_join(data_calc, elf_calc, by = "id")
+data_calc <- left_join(data_calc, ell_calc, by = "id")
+data_calc <- left_join(data_calc, ell_count_calc, by = "id")
+data_calc <- left_join(data_calc, mhc_calc, by = "id")
+data_calc <- left_join(data_calc, flo_calc, by = "id")
+data_calc <- left_join(data_calc, itq_calc, by = "id")
+data_calc <- left_join(data_calc, sex_calc, by = "id")
+data_calc <- left_join(data_calc, sf12_calc, by = "id")
+data_calc <- left_join(data_calc, cint_calc, by = "id")
 
-data_complete <-
-  left_join(
-    data_complete,
-    bcap_complete,
-    by = 'id'
-    )
+names(data_calc)
 
-data_complete <-
-  left_join(
-    data_complete,
-    cts_complete,
-    by = 'id'
-    )
+# write.csv(data_calc, "do_not_push/round_two_measures_data_calc.csv")
 
-data_complete <-
-  left_join(
-    data_complete,
-    dyadc_complete,
-    by = 'id'
-  )
 
-data_complete <-
-  left_join(
-    data_complete,
-    dast_complete,
-    by = 'id'
-  )
+bsi_complete <- bsi_complete %>% distinct(id, .keep_all = TRUE)
+cesd_complete <- cesd_complete %>% distinct(id, .keep_all = TRUE)
+dast_complete <- dast_complete %>% distinct(id, .keep_all = TRUE)
+bcap_complete <- bcap_complete %>% distinct(id, .keep_all = TRUE)
+dyadc_complete <- dyadc_complete %>% distinct(id, .keep_all = TRUE)
+ciq_complete <- ciq_complete %>% distinct(id, .keep_all = TRUE)
+cts_complete <- cts_complete %>% distinct(id, .keep_all = TRUE)
+# arq_complete <- arq_complete %>% distinct(id, .keep_all = TRUE)
+prss_complete <- prss_complete %>% distinct(id, .keep_all = TRUE)
+ssq_complete <- ssq_complete %>% distinct(id, .keep_all = TRUE)
+elf_complete <- elf_complete %>% distinct(id, .keep_all = TRUE)
+ell_complete <- ell_complete %>% distinct(id, .keep_all = TRUE)
+ell_count_complete <- ell_count_complete %>% distinct(id, .keep_all = TRUE)
+mhc_complete <- mhc_complete %>% distinct(id, .keep_all = TRUE)
+flo_complete <- flo_complete %>% distinct(id, .keep_all = TRUE)
+itq_complete <- itq_complete %>% distinct(id, .keep_all = TRUE)
+# sex_complete <- sex_complete %>% distinct(id, .keep_all = TRUE)
+sf12_complete <- sf12_complete %>% distinct(id, .keep_all = TRUE)
+cint_complete <- cint_complete %>% distinct(id, .keep_all = TRUE)
 
-data_complete <-
-  data_complete %>%
-  distinct(id, .keep_all = TRUE)
+data_complete <- left_join(bsi_complete, cesd_complete, by = "id")
+data_complete <- left_join(data_complete, dast_complete, by = "id")
+data_complete <- left_join(data_complete, bcap_complete, by = "id")
+data_complete <- left_join(data_complete, dyadc_complete, by = "id")
+data_complete <- left_join(data_complete, ciq_complete, by = "id")
+data_complete <- left_join(data_complete, cts_complete, by = "id")
+# data_complete <- left_join(data_complete, arq_complete, by = "id")
+data_complete <- left_join(data_complete, prss_complete, by = "id")
+data_complete <- left_join(data_complete, ssq_complete, by = "id")
+data_complete <- left_join(data_complete, elf_complete, by = "id")
+data_complete <- left_join(data_complete, ell_complete, by = "id")
+data_complete <- left_join(data_complete, ell_count_complete, by = "id")
+data_complete <- left_join(data_complete, mhc_complete, by = "id")
+data_complete <- left_join(data_complete, flo_complete, by = "id")
+data_complete <- left_join(data_complete, itq_complete, by = "id")
+# data_complete <- left_join(data_complete, sex_complete, by = "id")
+data_complete <- left_join(data_complete, sf12_complete, by = "id")
+data_complete <- left_join(data_complete, cint_complete, by = "id")
 
-write.csv(data_complete,
-          'data_calculated.csv')
+# write.csv(data_complete, "do_not_push/round_two_measures_data_complete.csv")
