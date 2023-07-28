@@ -2209,11 +2209,67 @@ print(bcap_scale_table)
 
 Descriptive statistics are presented below for each item and total/subscale score
 
+For binary items
+```{r bcap-binary-desc}
+
+# Create subset of BCAP items
+bcap_data_subset_binary <- complete %>%
+  select(q1_r,
+         q2_r,
+         q3:q22,
+         q23_r,
+         q24:q28,
+         q29_r,
+         q30:q34)
+
+# Calculate the dichotomous summary statistics for each variable
+bcap_summary_data_binary <- lapply(bcap_data_subset_binary, function(x) {
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+bcap_summary_data_binary <- as.data.frame(bcap_summary_data_binary)
+
+# Set items as first row
+bcap_summary_data_binary <- rbind(names(bcap_summary_data_binary), bcap_summary_data_binary) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+bcap_tbl_binary <- bcap_summary_data_binary %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115),
+             num_no ~ px(100),
+             num_yes ~ px(100)) %>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "Disagree", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Agree", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+bcap_tbl_binary
+```
+
 ```{r bcap-mean-items}
 # Create subset of bcap items
 bcap_data_subset <- complete %>%
   select(
-    q1:q34,bcap_risk_total, bcap_happy_total, bcap_feel_pers_total, bcap_lonely_total, bcap_fam_conf_total, bcap_rigid_total, bcap_distress_total, bcap_poverty_total, bcap_lie_total, bcap_random_total)
+    bcap_risk_total, bcap_happy_total, bcap_feel_pers_total, bcap_lonely_total, bcap_fam_conf_total, bcap_rigid_total, bcap_distress_total, bcap_poverty_total, bcap_lie_total, bcap_random_total)
 
 # Calculate the summary statistics for each variable
 bcap_summary_data <- lapply(bcap_data_subset, function(x) {
