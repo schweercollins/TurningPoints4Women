@@ -94,19 +94,26 @@ arq_miss %>%
     subtitle = "By Participant"
   )
 
+arq_miss %>%
+  filter(
+    miss_pct > 33
+  )
+
+arq_remove <- arq_miss %>% filter(miss_pct > 33) %>% pull(id)
+
 map2(
   arq_calc %>%
-    filter(!id %in% arq_miss$id) %>%
+    filter(!id %in% arq_remove) %>%
     select(-id) %>%
     drop_na(),
   arq_calc %>%
-    filter(!id %in% arq_miss$id) %>%
+    filter(!id %in% arq_remove) %>%
     select(-id) %>%
     drop_na() %>%
     names(),
   ~ggplot(
     arq_calc %>%
-      filter(!id %in% arq_miss$id) %>%
+      filter(!id %in% arq_remove) %>%
       select(-id) %>%
       drop_na(),
     aes(
@@ -271,7 +278,7 @@ ssq_miss %>%
     subtitle = "By Participant"
   )
 
-ssq_remove <- ssq_miss %>% filter(miss_pct >= 20) %>% pull(id)
+ssq_remove <- ssq_miss %>% filter(miss_pct >= 30) %>% pull(id)
 
 
 ssq_complete <-
@@ -1532,8 +1539,8 @@ sf12 <- bio %>%
     across(
       c(r2:r8),
       ~case_when(
-        .x == 1 ~ 0,
-        .x == 2 ~ 1,
+        .x == 1 ~ 1,
+        .x == 2 ~ 0,
         .x == 3 ~ -77,
         TRUE ~ NA_real_
       )

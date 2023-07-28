@@ -18,6 +18,8 @@ format:
     number-depth: 3
     colorlinks: true
 bibliography: C:/Users/cpppe/Desktop/github_projects/TurningPoints4Women/tpw_references.bib
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r, include = FALSE}
@@ -472,7 +474,7 @@ ciq_alpha_table %>%
 
 -   Missing Data Rule:
 
-    -   Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+    -   Applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses)
 
 -   Reference: @gavin1989diagnostic
 
