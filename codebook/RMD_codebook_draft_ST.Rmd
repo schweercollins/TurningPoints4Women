@@ -2779,5 +2779,7 @@ complete %>%
   labs(
     title = 'Cutoff Values for DYADC Scale',
     caption = 'Cutoffs are 92 and 107\nSee references for literature on cutoff scores.'
-  )
+  )+
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = -6)) +
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -9.25))
 ```
