@@ -2209,11 +2209,67 @@ print(bcap_scale_table)
 
 Descriptive statistics are presented below for each item and total/subscale score
 
+For binary items
+```{r bcap-binary-desc}
+
+# Create subset of BCAP items
+bcap_data_subset_binary <- complete %>%
+  select(q1_r,
+         q2_r,
+         q3:q22,
+         q23_r,
+         q24:q28,
+         q29_r,
+         q30:q34)
+
+# Calculate the dichotomous summary statistics for each variable
+bcap_summary_data_binary <- lapply(bcap_data_subset_binary, function(x) {
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+bcap_summary_data_binary <- as.data.frame(bcap_summary_data_binary)
+
+# Set items as first row
+bcap_summary_data_binary <- rbind(names(bcap_summary_data_binary), bcap_summary_data_binary) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+bcap_tbl_binary <- bcap_summary_data_binary %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115),
+             num_no ~ px(100),
+             num_yes ~ px(100)) %>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "Disagree", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Agree", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+bcap_tbl_binary
+```
+
 ```{r bcap-mean-items}
 # Create subset of bcap items
 bcap_data_subset <- complete %>%
   select(
-    q1:q34,bcap_risk_total, bcap_happy_total, bcap_feel_pers_total, bcap_lonely_total, bcap_fam_conf_total, bcap_rigid_total, bcap_distress_total, bcap_poverty_total, bcap_lie_total, bcap_random_total)
+    bcap_risk_total, bcap_happy_total, bcap_feel_pers_total, bcap_lonely_total, bcap_fam_conf_total, bcap_rigid_total, bcap_distress_total, bcap_poverty_total, bcap_lie_total, bcap_random_total)
 
 # Calculate the summary statistics for each variable
 bcap_summary_data <- lapply(bcap_data_subset, function(x) {
@@ -2375,223 +2431,8 @@ Reference: [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](ht
 
 #### Value Labels
 
-Multiple response options applied for DYADC
+Multiple response options applied for DYADC, value labes can be found in survey items
 
-Response options for items `e1` to `e15`.
-```{r dyadc-label-table, results = 'asis'}
-
-dyadc_label_df_1 <- data.frame(
-  value = c("0", "1", "2", "3", "4", "5"),
-  label = c("Always Disagree",
-            "Almost Always Disagree",
-            "Frequently Disagree", 
-            "Occasionally Disagree",
-            "Almost Always Agree", 
-            "Always Agree")
-) %>% 
-  t() %>% 
-  as.data.frame()
-
-dyadc_label_df_1 <- setNames(dyadc_label_df_1[-1, ], unlist(dyadc_label_df_1[1, ]))
-
-
-#create table
-dyadc_label_table_1 <- dyadc_label_df_1 %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(151)) %>% 
-  apply_labtab_theme()
-
-# Print the table
-print(dyadc_label_table_1)
-
-
-```
-Response options for items `e16` to `e22`, except `e18` and `e19` are reverse scored
-```{r dyadc-label-table_2, results = 'asis'}
-
-dyadc_label_df_2 <- data.frame(
-  value = c("0", "1", "2", "3", "4", "5"),
-  label = c("Never",
-            "Rarely",
-            "Occasionally", 
-            "More often than not",
-            "Most of the time", 
-            "All the time")
-) %>% 
-  t() %>% 
-  as.data.frame()
-
-dyadc_label_df_2 <- setNames(dyadc_label_df_2[-1, ], unlist(dyadc_label_df_2[1, ]))
-
-
-#create table
-dyadc_label_table_2 <- dyadc_label_df_2 %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(151)) %>% 
-  apply_labtab_theme()
-
-
-
-# Print the table
-print(dyadc_label_table_2)
-```
-
-Response options for items `e23` and `e24`
-```{r dyadc-label-table_3, results = 'asis'}
-
-dyadc_label_df_3 <- data.frame(
-  value = c("0", "1", "2", "3", "4"),
-  label = c("Never",
-            "Rarely", 
-            "Occasionally",
-            "Almost every day", 
-            "Every day")
-) %>% 
-  t() %>% 
-  as.data.frame()
-
-dyadc_label_df_3 <- setNames(dyadc_label_df_3[-1, ], unlist(dyadc_label_df_3[1, ]))
-
-
-#create table
-dyadc_label_table_3 <- dyadc_label_df_3 %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(151)) %>% 
-  apply_labtab_theme()
-
-# Print the table
-print(dyadc_label_table_3)
-```
-
-Response options for items `e25` to `e28`
-```{r dyadc-label-table_4, results = 'asis'}
-
-dyadc_label_df_4 <- data.frame(
-  value = c("0", "1", "2", "3", "4", "5"),
-  label = c("Never",
-            "Less than once a month", 
-            "Once or twice a month",
-            "Once or twice a week", 
-            "Once a day",
-            "More often")
-) %>% 
-  t() %>% 
-  as.data.frame()
-
-dyadc_label_df_4 <- setNames(dyadc_label_df_4[-1, ], unlist(dyadc_label_df_4[1, ]))
-
-
-#create table
-dyadc_label_table_4 <- dyadc_label_df_4 %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(151)) %>% 
-  apply_labtab_theme()
-
-# Print the table
-print(dyadc_label_table_4)
-
-
-```
-
-Response options for items `e29` and `e30`
-```{r dyadc-label-table_5, results = 'asis'}
-
-dyadc_label_df_5 <- data.frame(
- value = c("0", "1"),
-  label = c("Yes",
-            "No")
-) %>% 
-  t() %>% 
-  as.data.frame()
-
-dyadc_label_df_5 <- setNames(dyadc_label_df_5[-1, ], unlist(dyadc_label_df_5[1, ]))
-
-
-#create table
-dyadc_label_table_5 <- dyadc_label_df_5 %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(100)) %>% 
-  apply_labtab_theme()
-
-# Print the table
-print(dyadc_label_table_5)
-
-
-```
-Response options for items `e31`
-```{r dyadc-label-table_6, results = 'asis'}
-
-dyadc_label_df_6 <- data.frame(
-  value = c("0", "1", "2", "3", "4", "5", "6"),
-  label = c("Extremely Unhappy",
-            "Fairly Unhappy", 
-            "A Little Unhappy",
-            "Happy",
-            "Very Happy",
-            "Extremely Happy",
-            "Perfect")
-) %>% 
-  t() %>% 
-  as.data.frame()
-
-dyadc_label_df_6 <- setNames(dyadc_label_df_6[-1, ], unlist(dyadc_label_df_6[1, ]))
-
-
-#create table
-dyadc_label_table_6 <- dyadc_label_df_6 %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(129)) %>% 
-  apply_labtab_theme()
-
-# Print the table
-print(dyadc_label_table_6)
-
-
-```
-
-Response options for items `e32`
-```{r dyadc-label-table_7, results = 'asis'}
-
-dyadc_label_df_7 <- data.frame(
-  value = c("0", "1", "2", "3", "4", "5"),
-  label = c("My relationship can never succeed, and there is no more that I can do to keep the relationship going.", 
-            "It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going.",
-            "It would be nice if my relationship succeeded, but I can't do much more than I'm doing now to help it succeed.",
-            "I want very much for my relationship to succeed, and will do my fair share to see that it does.",
-            "I want very much for my relationship to succeed, and will do all I can to see that it does.",
-            "I want desperately for my relationship to succeed, and would go to almost any length to see that it does.")
-) %>% 
-  t() %>% 
-  as.data.frame()
-
-dyadc_label_df_7 <- setNames(dyadc_label_df_7[-1, ], unlist(dyadc_label_df_7[1, ]))
-
-
-#create table
-dyadc_label_table_7 <- dyadc_label_df_7 %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(151)) %>% 
-  apply_labtab_theme()
-
-# Print the table
-print(dyadc_label_table_7)
-
-
-```
 #### Survey Items
 
 All dyadc survey items are presented in the following table
@@ -2788,11 +2629,64 @@ print(dyadc_scale_table)
 #### Descriptive Statistics
 
 Descriptive statistics are presented below for each item and total/subscale score
+For binary items
+```{r dyadc-binary-desc}
+
+# Create subset of BCAP items
+dyadc_data_subset_binary <- complete %>%
+  select(e29, e30)
+
+# Calculate the dichotomous summary statistics for each variable
+dyadc_summary_data_binary <- lapply(dyadc_data_subset_binary, function(x) {
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+dyadc_summary_data_binary <- as.data.frame(dyadc_summary_data_binary)
+
+# Set items as first row
+dyadc_summary_data_binary <- rbind(names(dyadc_summary_data_binary), dyadc_summary_data_binary) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+dyadc_tbl_binary <- dyadc_summary_data_binary %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115),
+             num_no ~ px(100),
+             num_yes ~ px(100)) %>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+dyadc_tbl_binary
+```
+
 
 ```{r dyadc-mean-items}
 # Create subset of dyadc items
 dyadc_data_subset <- complete %>%
-  select(e1:e32, "dyadc_con_total")
+  select(e1:e28, e31:e32, dyadc_total,
+         dyadc_con_total, ,dyadc_aff_exp_total,
+         dyadc_satis_total, dyadc_cohes_total)  
+
 
 # Calculate the summary statistics for each variable
 dyadc_summary_data <- lapply(dyadc_data_subset, function(x) {
@@ -2885,5 +2779,7 @@ complete %>%
   labs(
     title = 'Cutoff Values for DYADC Scale',
     caption = 'Cutoffs are 92 and 107\nSee references for literature on cutoff scores.'
-  )
+  )+
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = -6)) +
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -9.25))
 ```
