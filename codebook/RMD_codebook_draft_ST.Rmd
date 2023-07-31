@@ -67,11 +67,11 @@ THEME <-     theme(panel.grid.major = element_blank(),
 
 # Overview
 
-*INSERT BRIEF INFO ON STUDY, SAMPLE, AND AIMS*
+*<MARIA>INSERT BRIEF INFO ON STUDY, SAMPLE, AND AIMS*
 
 *Additional info to possibly include: global missing data info, links to supplemental materials, any disclaimers/info we think data users need to know to use these data accurately*
 
-*INSERT BRIEF DESCRIPTION OF DATA/CODEBOOK LAYOUT/FILE STRUCTURE (can complete once we have more sections and overall structure)*
+*<SHAINA>INSERT BRIEF DESCRIPTION OF DATA/CODEBOOK LAYOUT/FILE STRUCTURE (can complete once we have more sections and overall structure)*
 
 ### Missing Data Rule
 
@@ -83,25 +83,25 @@ THEME <-     theme(panel.grid.major = element_blank(),
 
 -   For scales with [only 2 items]{.underline}, composite scores (average/total) are calculated on a [case by case basis]{.underline}
 
-*INSERT REFERENCE LINK*
+*<MARIA>INSERT REFERENCE LINK (from JP?)*
 
 # Mental Health
 
-*INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN*
+*<MARIA>INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN (why distinct from others)*
 
 ## Brief Symptom Inventory (BSI)
 
 ### BSI Description
 
-The BSI is used to assess ... *INSERT TEXT DESCRIPTION ABOUT BSI MEASURE*
+The BSI is a brief self-report scale used to assess psychological symptoms in adolescents and adults.
 
 For the present study, 19 items from the BSI were collected in order to calculate the Somatization, Anxiety, and Depression subscales. 
 
-Item numbers in this dataset may not match original item numbers from the BSI exactly (?)
+Item numbers in this dataset may not match original item numbers from the BSI exactly *<MARIA> is this correct - what other info do we need to include about mismatch between ours and original measure?*
 
 No items need to be reverse scored. Higher scores indicate more severe mental health symptoms. 
 
-The missing data rule was not applied since there is no missing data among BSI variables. 
+The missing data rule was not applied since there are no missing data among BSI variables. 
 
 Reference: [@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F); [DOI](https://doi.org/10.1017/S0033291700048017)
 
@@ -182,7 +182,7 @@ print(bsi_label_table)
 
 #### Survey Items
 
-All BSI survey items are presented in the following table
+BSI survey items are presented in the following table
 
 ```{r BSI-var-prep}
 # Pull question wording from qualtrics data
@@ -334,7 +334,7 @@ tbl
 
 #### Distributions
 
-Distributions are presented for the total score and each subscale
+Distributions are presented below for the total score and each subscale
 
 ```{r bsi-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -361,13 +361,13 @@ complete %>%
 
 ### CES-D Description
 
-The CES-D is used to assess ... *INSERT TEXT DESCRIPTION ABOUT CES-D MEASURE*
+The CES-D is self-report scale used to assess major dimensions of depression. 
 
-All 20 items from the CES-D were collected. Two subscales are included as variables, positive affect and depressive symptoms. Four items (`c4`, `c8`, `c12`, and `c16`) are/should be reverse scored which is noted in the variable table below. Higher scores indicate the presence of more symptoms.
+All 20 items from the CES-D were collected and two subscales were calculated: positive affect and depressive symptoms. Four items (`c4`, `c8`, `c12`, and `c16`) should be reverse scored which is noted in the variable table below and the reverse scored variables are provided (`c4_r`, `c8_r`, `c12_r`, and `c16_r`). Higher scores indicate the presence of more symptoms.
 
 Four additional variables (`c21`-`c24`) were included in this section to assess suicidality. Variables `c22` and `c23` are only applicable if participants responded "Yes" to `c21`.  
 
-The missing data rule was not applied since all participants had less than 20% missing data. Missing data for each variable is presented in the summary information below. 
+The missing data rule was not applied since all participants had less than 20% missing data. Missing data for each variable is presented in the descriptive statistics table below. 
 
 Reference: [@radloff1977ces](https://journals.sagepub.com/doi/abs/10.1177/014662167700100306); [DOI](https://doi.org/10.1177%2F014662167700100306)
 
@@ -602,7 +602,7 @@ cesd_tbl
     
 #### Distributions
 
-Distributions are presented for the total score and each subscale
+Distributions are presented below for the total score and each subscale
 
 ```{r cesd-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -633,7 +633,7 @@ complete %>%
 
 CES-D cutoff scores are presented below
 
-*INSERT MORE INFO ON CUTOFF SCORES* - what are they, how many of them; how are they used
+*<MARIA>INSERT MORE INFO ON 16/23 CUTOFF SCORES - what are they (what should plot labels be)?, how should they be used*
 
 Reference: [@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4); [DOI](https://doi.org/10.1016/j.jad.2018.02.071)
 
@@ -753,8 +753,8 @@ complete %>%
     caption = 'Cutoffs are 16 and/or 23\nSee references for literature on cutoff scores.', 
     y = "Number of Participants"
   ) +
-  geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = 1.2)) +
-  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -1.8))
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = 1.2)) + ###MARIA INSERT CUTOFF LABEL
+  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -1.8))  ##MARIA INSERT CUTOFF LABEL
 ```
 
 
@@ -956,7 +956,7 @@ cis_tbl
 
 #### Distributions
 
-Distributions are presented for the total score and each subscale
+Distributions are presented below for the total score and each subscale
 
 ```{r csi-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -1009,7 +1009,7 @@ For the present study, 22 items from the The Drug Abuse Screening Test (DAST) we
 
 Two items (`d4` and `d5`) are/should to be reverse scored which is noted in the variable table below. *TODO Higher scores indicate more severe mental health symptoms. *
 
-The missing data rule was applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses) 
+The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses) 
 
 Reference: [@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1360-0443.1989.tb03463.x);[DOI](https://doi.org/10.1111/j.1360-0443.1989.tb03463.x)
 
@@ -1287,7 +1287,7 @@ dast_tbl
 
 #### Distributions
 
-Distributions are presented for the total score and each subscale
+Distributions are presented below for the total score and each subscale
 
 ```{r dast-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -1350,7 +1350,7 @@ For the present study, 20 items from the Conflict Tactics were collected in orde
 
 No items need to be reverse scored. *TODO NEED REPLACE Higher scores indicate more severe mental health symptoms. *
 
-The missing data rule was applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses)
+The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses)
 
 Reference: [@straus2004short](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract); [DOI](10.1891/vivi.19.5.507.63686)
 
@@ -1568,7 +1568,7 @@ cts2_tbl
 
 #### Distributions
 
-Distributions are presented for the total score and each subscale
+Distributions are presented below for the total score and each subscale
 
 ##### Serverity distributions 
 ```{r CTS2-Severity-TC-distributions, class.source='fold', echo = FALSE}
@@ -1985,7 +1985,7 @@ For the present study, 34 items from the BSI were collected in order to *TODO: I
 
 Four items (`q1`, `q2`, `q23`, and `q29`) are/should be reverse scored which is noted in the variable table below. *TODO: NEED CHANGE THE TEXT: Higher scores indicate more severe mental health symptoms. *
 
-The missing data rule was Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses) 
+The missing data rule was Applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses) 
 
 Reference: [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug); 
 [DOI](https://doi.org/10.1207/s15374424jccp3402_9)
@@ -2251,7 +2251,7 @@ bcap_tbl
 
 #### Distributions
 
-Distributions are presented for the total score and each subscale
+Distributions are presented below for the total score and each subscale
 
 ```{r bcap-distributions, class.source='fold', echo = FALSE}
 #Risk 
@@ -2365,7 +2365,7 @@ For the present study, 32 items from the BSI were collected in order to *TODO: I
 
 Two items `e18` and `e19` are/should be reverse scored which is noted in the variable table below. *TODO: NEED CHANGE THE TEXT: Higher scores indicate more severe mental health symptoms. *
 
-The missing data rule was Applied. Calculations were completed only with participants that had less then 20% missing data (this includes `-77` responses) 
+The missing data rule was Applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses) 
 
 Reference: [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug); 
 [DOI](https://doi.org/10.1207/s15374424jccp3402_9)
@@ -2830,7 +2830,7 @@ dyadc_tbl
 
 #### Distributions
 
-Distributions are presented for the total score and each subscale
+Distributions are presented below for the total score and each subscale
 
 ```{r dyadc-distributions, class.source='fold', echo = FALSE}
 complete %>%
