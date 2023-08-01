@@ -112,7 +112,7 @@ The BSI is a brief self-report scale used to assess psychological symptoms in ad
 
 For the present study, 19 items from the BSI were collected in order to calculate the Somatization, Anxiety, and Depression subscales. 
 
-Item numbers in this dataset may not match original item numbers from the BSI exactly *<MARIA> is this correct - what other info do we need to include about mismatch between ours and original measure?*
+Item numbers in this data set may not match original item numbers from the BSI exactly *<MARIA> is this correct - what other info do we need to include about mismatch between ours and original measure?*
 
 No items need to be reverse scored. Higher scores indicate more severe mental health symptoms. 
 
@@ -2007,9 +2007,9 @@ complete %>%
 
 The BCAP is a self-report inventory used to assess parental child abuse risk.
 
-For the present study, *<SHAINA> CONFIRM* 34 items from the BSI were collected and <*SHAINA/MARIA> CONFIRM* all 9 subscales were computed: Happiness, Feelings of Persecution, Loneliness, Family Conflict, Rigidity, Distress, Financial Insecurity, Lie, and Random Responding. 
+For the present study, *<SHAINA> CONFIRM* 34 items from the BCAP were collected and *<SHAINA/MARIA> CONFIRM* all 9 subscales were computed: Happiness, Feelings of Persecution, Loneliness, Family Conflict, Rigidity, Distress, Financial Insecurity, Lie, and Random Responding. 
 
-Four items (`q1`, `q2`, `q23`, and `q29`) should be reverse scored which is noted in the variable table below and the reverse scored variables are provided (`q1_r`, `q2_r`, `q23_r`, and `cq29_r`). Higher scores on the BCAP indicates increased risk. 
+Four items (`q1`, `q2`, `q23`, and `q29`) should be reverse scored which is noted in the variable table below and the reverse scored variables are provided (`q1_r`, `q2_r`, `q23_r`, and `q29_r`). Higher scores on the BCAP indicates increased risk. 
 
 *<SHAINA> CONFIRM>* The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses).
 
@@ -2101,7 +2101,7 @@ print(bcap_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below. *<SHAINA> INSERT Variables were constructed by ... *
+Information on the total score and subscale variables are below. *<SHAINA/MARIA> INSERT Variables were constructed by ... *
 
 ```{r bcap alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -2441,32 +2441,31 @@ complete %>%
   ) 
 ```
 
-## Partner Relationships (DYADC)
-<!-#TODO: change above name to actual scale name ->
+## Dyadic Adjustment Scale (DYADC)
 
 ### DYADC Description
 
-The DYADC is used to assess ... #TODO: *INSERT TEXT DESCRIPTION ABOUT BSI MEASURE*
+The DYADC is a self-report measure used to assess dyadic adjustment (e.g., interpersonal tensions, dyadic satisfaction, dyadic functioning). 
 
-For the present study, 32 items from the BSI were collected in order to *TODO: INSERT TEXT  *
+For the present study, all 32 items from the DYADC were collected, and the total score and all subscales are included: Consensus, Affective Expression, Satisfaction, and Cohesion.
 
-Two items `e18` and `e19` are/should be reverse scored which is noted in the variable table below. *TODO: NEED CHANGE THE TEXT: Higher scores indicate more severe mental health symptoms. *
+Two items `e18` and `e19` should be reverse scored which is noted in the variable table below and the reverse scored variables are provided (`e18_r` and `e19_r`). Higher scores indicate more positive dyadic adjustment.
 
-The missing data rule was Applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses) 
+*<SHAINA> CONFIRM* The missing data rule was Applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses) 
 
 Reference: [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug); 
 [DOI](https://doi.org/10.1207/s15374424jccp3402_9)
-Reference: [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
+*<SHIANA> EXPLAIN WHAT 2ND REF IS FOR* Reference: [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
 
 ### DYADC Variables
 
 #### Value Labels
 
-Multiple response options applied for DYADC, value labes can be found in survey items
+The DYADC has multiple response options, value labels for each variable can be found in the survey items table below. 
 
 #### Survey Items
 
-All dyadc survey items are presented in the following table
+All DYADC survey items are presented in the following table:
 
 ```{r dyadc-var-prep}
 # Pull question wording from qualtrics data
@@ -2577,9 +2576,10 @@ print(dyadc_gt_table)
 
 
 ```
+
 #### Scale and Subscales
 
-Information on total score and subscale variables are below. Variables were constructed by summing included items. 
+Information on total score and subscale variables are below. *<SHAINA/MARIA> INSERT Variables were constructed by ...*
 
 ```{r dyadc alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -2625,7 +2625,7 @@ dyadc_cohes_alpha <-
 # Create the table as a data frame
 dyadc_scale_df <- data.frame(
   var_name = c("dyadc_total", "dyadc_con_total", "dyadc_aff_exp_total", "dyadc_satis_total", "dyadc_cohes_total"),
-  scale = c("DYADC Total score (32) ", "Consensus (13)", "Affectional Expression (4)", "Satisfaction (10)", "Cohesion (5)"),
+  scale = c("DYADC Total score (32) ", "Consensus (13)", "Affective Expression (4)", "Satisfaction (10)", "Cohesion (5)"),
   scale_construction = c("`e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`, `e14`, `e15`, `e16`, `e17`, `e18_r`, `e19_r`, `e20`, `e21`, `e22`, `e23`, `e24`, `e25`, `e26`, `e27`, `e28`, `e29`, `e30`, `e31`, `e32`", 
                          "`e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`", 
                          "`e4`, `e6`, `e29`, `e30`", 
@@ -2659,8 +2659,54 @@ print(dyadc_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and total/subscale score
-For binary items
+Descriptive statistics are presented below for each item, total, and subscale score.
+
+For continuous items: 
+
+```{r dyadc-mean-items}
+# Create subset of dyadc items
+dyadc_data_subset <- complete %>%
+  select(e1:e28, e31:e32, dyadc_total,
+         dyadc_con_total, ,dyadc_aff_exp_total,
+         dyadc_satis_total, dyadc_cohes_total)  
+
+
+# Calculate the summary statistics for each variable
+dyadc_summary_data <- lapply(dyadc_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+dyadc_summary_data <- as.data.frame(dyadc_summary_data)
+
+# Set items as first row
+dyadc_summary_data <- rbind(names(dyadc_summary_data), dyadc_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+dyadc_tbl <- dyadc_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(1 ~ px(165),2:5 ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+dyadc_tbl
+
+```
+
+For binary items:
+
 ```{r dyadc-binary-desc}
 
 # Create subset of BCAP items
@@ -2710,52 +2756,9 @@ dyadc_tbl_binary <- dyadc_summary_data_binary %>%
 dyadc_tbl_binary
 ```
 
-
-```{r dyadc-mean-items}
-# Create subset of dyadc items
-dyadc_data_subset <- complete %>%
-  select(e1:e28, e31:e32, dyadc_total,
-         dyadc_con_total, ,dyadc_aff_exp_total,
-         dyadc_satis_total, dyadc_cohes_total)  
-
-
-# Calculate the summary statistics for each variable
-dyadc_summary_data <- lapply(dyadc_data_subset, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
-  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
-})
-
-# Convert summary_data to a data frame
-dyadc_summary_data <- as.data.frame(dyadc_summary_data)
-
-# Set items as first row
-dyadc_summary_data <- rbind(names(dyadc_summary_data), dyadc_summary_data) %>% 
-  t() %>% 
-  as.data.frame()
-
-# Create the gt table
-dyadc_tbl <- dyadc_summary_data %>%
-  gt() %>%
-  cols_label(`1` = "Variable",
-             Range = "Range*",
-             Missing = "% Missing") %>% 
-  cols_width(1 ~ px(165),2:5 ~ px(115)) %>%
-  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
-  tab_footnote("*Range of data values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>%
-  apply_tbl_theme()
-
-# Render the table
-dyadc_tbl
-
-```
-
 #### Distributions
 
-Distributions are presented below for the total score and each subscale
+Distributions are presented below for the total score and each subscale:
 
 ```{r dyadc-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -2800,6 +2803,14 @@ complete %>%
   )
 ```
 
+#### Clinical Categories
+
+The distribution for the total score alongside clinical cutoffs are presented below.
+
+*<MARIA>INSERT MORE INFO ON CUTOFF SCORES - what are they (what should plot labels be)?, how should they be used*
+
+Reference: *<SHAINA/MARIA> INSERT REFERENCE FOR DYADC CUTOFF SCORES*
+
 ```{r dyadc-cutoff, class.source='fold', echo = FALSE}
 complete %>%
   cutoff_plot2(
@@ -2814,25 +2825,24 @@ complete %>%
   geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = -6)) +
   geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -9.25))
 ```
+
 ## Attachment Relationships Questionnaire (ARQ)
 
 ### ARQ Description
 
-The ARQ is used to assess ... *INSERT TEXT DESCRIPTION ABOUT ARQ MEASURE*
+The ARQ is a self-report measure used to categorize attachment styles in adulthood. *<MARIA> CONFIRM THIS IS CORRECT*
   
-  For the present study, 5 items from the ARQ were collected in order to *INSERT TEXT*
+For the present study, all 5 items from the ARQ were collected in order to construct *<MARIA> INSERT INFO ABOUT ARQ CATEGORIES/SUBSCALES*
 
-
-No items need to be reverse scored. *TODO: CHANGE TEXTHigher scores indicate more severe mental health symptoms *. The missing data rule applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses) 
+No items need to be reverse scored. *<MARIA/SHAINA> Higher scores indicate... OR only categories? *. The missing data rule applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses) 
 
 Reference: [@bartholomew1991attachment](https://psycnet.apa.org/record/1991-33075-001);[DOI](https://doi.org/10.1037/0022-3514.61.2.226)
+
 ### ARQ Variables
 
 #### Value Labels
 
 ARQ variables have the multiple response options
-
-
 
 ```{r ARQ-label-table, results = 'asis'}
 
