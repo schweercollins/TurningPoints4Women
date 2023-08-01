@@ -49,7 +49,10 @@ theme_set(theme_light())
 data <- read_csv(here("do_not_push", "tpw_data_77included.csv"))
 
 #import df of calculated survey items
-complete <- read_csv(here("do_not_push", "tpw_data_calculated.csv"))
+complete <- read_csv(here("do_not_push", "round_two_measures_data_calc.csv"))
+
+#import second df
+# complete2 <- read_csv(here("do_not_push","round_two_measures_data_calc.csv"))
 
 #import raw qualtrics data for parsing question text
 qualtrics <- read_csv(here("do_not_push", "tpw_raw_qualtrics_5-30-23.csv"))
@@ -2811,3 +2814,181 @@ complete %>%
   geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = -6)) +
   geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -9.25))
 ```
+## Attachment Relationships Questionnaire (ARQ)
+
+### ARQ Description
+
+The ARQ is used to assess ... *INSERT TEXT DESCRIPTION ABOUT ARQ MEASURE*
+  
+  For the present study, 5 items from the ARQ were collected in order to *INSERT TEXT*
+
+
+No items need to be reverse scored. *TODO: CHANGE TEXTHigher scores indicate more severe mental health symptoms *. The missing data rule applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses) 
+
+Reference: [@bartholomew1991attachment](https://psycnet.apa.org/record/1991-33075-001);[DOI](https://doi.org/10.1037/0022-3514.61.2.226)
+### ARQ Variables
+
+#### Value Labels
+
+ARQ variables have the multiple response options
+
+
+
+```{r ARQ-label-table, results = 'asis'}
+
+arq_label_df <- data.frame(
+  value = c("A", "B", "C", "D"),
+  label = c("It is easy for me to become emotionally close to others. I am comfortable dependingon them and having them depend on me. I don't worry about being alone or havingothers not accept me.",
+            "I am uncomfortable getting close to others. I want emotionally close relationships, but Ifind it difficult to trust others completely, or to depend on them. I worry that I will be hurt ifI allow myself to become too close to others.",
+            "I want to be completely emotionally intimate with others, but I often find that others arereluctant to get as close as I would like. I am uncomfortable being without closerelationships, but I sometimes worry that others don't value me as much as I value them.",
+            "I am comfortable without close emotional relationships. It is very important to me tofeel independent and self-sufficient, and I prefer not to depend on others or have othersdepend on me.")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+arq_label_df <- setNames(arq_label_df[-1, ], unlist(arq_label_df[1, ]))
+
+
+#create table
+arq_label_table <- arq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(arq_label_table)
+
+
+```
+
+```{r ARQ-label-table-2, results = 'asis'}
+
+arq_label_df <- data.frame(
+  value = c("1", "2", "3", "4", "5", "6", "7"),
+  label = c("Disagree Strongly",
+            "",
+            "",
+            "Neutral/Mixed",
+            "",
+            "",
+            "Agree Strongly")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+arq_label_df <- setNames(arq_label_df[-1, ], unlist(arq_label_df[1, ]))
+
+
+#create table
+arq_label_table <- arq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(arq_label_table)
+
+
+```
+#### Survey Items
+
+All ARQ survey items are presented in the following table
+
+```{r ARQ-var-prep}
+# Pull question wording from qualtrics data
+arq_word <- qualtrics %>% 
+  select(RQ1,RQA,	RQB, RQC, RQD) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+arq_word_long <- arq_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  mutate(description = if_else(var_name == "rq1", "Please tell me which one style best describes you or is the closest to the way you are. A. It is easy for me to become emotionally close to others. I am comfortable depending on them and having them depend on me. I don’t worry about being alone or having others not accept me. B. I am uncomfortable getting close to others. I want emotionally close relationships, but I find it difficult to trust others completely, or to depend on them. I worry that I will be hurt if I allow myself to become too close to others. C. I want to be completely emotionally intimate with others, but I often find that others are reluctant to get as close as I would like. I am uncomfortable being without close relationships, but I sometimes worry that others don’t value me as much as I value them. D. I am comfortable without close emotional relationships. It is very important to me to feel independent and self-sufficient, and I prefer not to depend on others or have others depend on me.", description))
+
+```
+
+
+```{r arq-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+arq_gt_table <- gt(arq_word_long)
+
+# Table-specific formatting (col width, names)
+arq_gt_table <- arq_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(arq_gt_table)
+
+#WHEN RENDERING WITH PDF USE: 
+#my_gt_table
+```
+
+
+#### Scale and Subscales
+
+Information on total score and subscale variables are below. Variables were constructed by summing included items. 
+
+```{r arq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+arq_alpha <-
+  complete2 %>%
+  select(rq1,rqa,	rqb, rqc, rqd) %>%
+  psych::alpha(check.keys = TRUE)
+```
+Attachment Groups: Secure, Dismissing, Preoccupied, Fearful
+
+
+```{r ARQ-scale-table, results = 'asis'}
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item and total/subscale score
+
+
+#### Distributions
+
+Distributions are presented for the total score and each subscale
+#TODO: JP's graph is count on x axis 
+```{r ARQ-distributions, class.source='fold', echo = FALSE}
+complete %>%
+  composite_hist(x = rq1) +
+  labs(title = 'Distribution of rq1')
+
+complete %>%
+  composite_hist(x = rqa) +
+  labs(title = 'Distribution of rqa')
+
+complete %>%
+  composite_hist(x = rqb) +
+  labs(title = 'Distribution of rqb')
+
+complete %>%
+  composite_hist(x = rqc) +
+  labs(title = 'Distribution of rqc')
+
+complete %>%
+  composite_hist(x = rqd) +
+  labs(title = 'Distribution of rqd')
+```
+
