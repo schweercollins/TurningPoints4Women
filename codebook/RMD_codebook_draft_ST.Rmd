@@ -32,7 +32,7 @@ bibliography: tpw_references.bib
 
 
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 library(tidyverse)
 library(here)
 library(gt)
@@ -49,10 +49,10 @@ theme_set(theme_light())
 data <- read_csv(here("do_not_push", "tpw_data_77included.csv"))
 
 #import df of calculated survey items
-complete <- read_csv(here("do_not_push", "round_two_measures_data_calc.csv"))
+complete_rnd2 <- read_csv(here("do_not_push", "round_two_measures_data_calc.csv"))
 
-#import second df
-# complete2 <- read_csv(here("do_not_push","round_two_measures_data_calc.csv"))
+#import first "complete" file
+complete <- read_csv(here("do_not_push","tpw_data_calculated.csv"))
 
 #import raw qualtrics data for parsing question text
 qualtrics <- read_csv(here("do_not_push", "tpw_raw_qualtrics_5-30-23.csv"))
@@ -60,7 +60,7 @@ qualtrics <- read_csv(here("do_not_push", "tpw_raw_qualtrics_5-30-23.csv"))
 source(here("functions", "codebook_fun.R"))
 ```
 
-```{r plot style, echo=FALSE}
+```{r plot-style, echo=FALSE}
 # Color palettes 
  Two_color = c("#246B69", "#604C41")
 
@@ -2948,10 +2948,11 @@ Information on total score and subscale variables are below. Variables were cons
 ```{r arq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
 arq_alpha <-
-  complete2 %>%
+  complete_rnd2 %>%
   select(rq1,rqa,	rqb, rqc, rqd) %>%
   psych::alpha(check.keys = TRUE)
 ```
+
 Attachment Groups: Secure, Dismissing, Preoccupied, Fearful
 
 
@@ -2971,23 +2972,23 @@ Descriptive statistics are presented below for each item and total/subscale scor
 Distributions are presented for the total score and each subscale
 #TODO: JP's graph is count on x axis 
 ```{r ARQ-distributions, class.source='fold', echo = FALSE}
-complete %>%
+complete_rnd2 %>%
   composite_hist(x = rq1) +
   labs(title = 'Distribution of rq1')
 
-complete %>%
+complete_rnd2 %>%
   composite_hist(x = rqa) +
   labs(title = 'Distribution of rqa')
 
-complete %>%
+complete_rnd2 %>%
   composite_hist(x = rqb) +
   labs(title = 'Distribution of rqb')
 
-complete %>%
+complete_rnd2 %>%
   composite_hist(x = rqc) +
   labs(title = 'Distribution of rqc')
 
-complete %>%
+complete_rnd2 %>%
   composite_hist(x = rqd) +
   labs(title = 'Distribution of rqd')
 ```
