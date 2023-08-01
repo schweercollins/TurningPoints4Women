@@ -1,13 +1,25 @@
 ---
-title: "TPW Codebook Draft"
-author: "Shaina Trevino"
-date: "2023-05-22"
+title: "Turning Points Codebook"
+# author: 
+#   - name: "Maria L. Schweer-Collins, PhD"
+#     email: "mschweer@uoregon.edu"
+#     affiliations:
+#       - name: 'University of Oregon'
+#         city: 'Eugene'
+#         state: 'OR'
+#   - name: "Shaina Trevino, PhD"
+#     email: "strevino@uoregon.edu"
+#   - name: "Jonathan A. Pedroza, PhD"
+#     email: "cpppedroza@gmail.com"
+#   - name: "Min Zhang"
+date: "2023-07-31"
 output: 
   html_document:
     toc: true
-    toc_depth: 3
+    toc_depth: 4
+    toc_float: true
     #html#toc_title: Contents
-    number_sections: true
+    #number_sections: true
     #html#number_depth: 3
     #qmd#colorlinks: true
     #keep_tex: yes
@@ -85,7 +97,7 @@ THEME <-     theme(panel.grid.major = element_blank(),
 
 *<MARIA>INSERT REFERENCE LINK (from JP?)*
 
-# Mental Health
+# Mental Health Measures
 
 *<MARIA>INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN (why distinct from others)*
 
@@ -109,7 +121,7 @@ Reference: [@derogatis1983brief](https://www.cambridge.org/core/journals/psychol
 
 #### Value Labels
 
-All BSI variables have the same response options
+All BSI variables have the same response options.
 
 ```{r gt-theme-general}
 
@@ -182,7 +194,7 @@ print(bsi_label_table)
 
 #### Survey Items
 
-BSI survey items are presented in the following table
+BSI survey items are presented in the following table:
 
 ```{r BSI-var-prep}
 # Pull question wording from qualtrics data
@@ -227,7 +239,7 @@ print(my_gt_table)
 
 #### Scale and Subscales
 
-Information on total score and subscale variables are below. Variables were constructed by summing included items. 
+Information on the total score and subscale variables are below. Variables were constructed by summing included items. 
 
 ```{r bsi alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -290,7 +302,7 @@ print(bsi_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and total/subscale score
+Descriptive statistics are presented below for each item, total, and subscale score:
 
 ```{r bsi-mean-items}
 # Create subset of BSI items
@@ -334,7 +346,7 @@ tbl
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale
+Distributions are presented below for the total score and each subscale:
 
 ```{r bsi-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -381,7 +393,7 @@ Reference: [@radloff1977ces](https://journals.sagepub.com/doi/abs/10.1177/014662
 
 #### Value Labels
 
-All CES-D survey items (`c1`-`c20`) have the same response options
+All CES-D survey items (`c1`-`c20`) have the same response options.
 
 ```{r CESD-label-table, results = 'asis'}
 
@@ -412,7 +424,7 @@ print(cesd_label_table)
 
 ```
 
-Additional variables on suicidality (`c21`-`c24`) share the same response options
+Additional variables on suicidality (`c21`-`c24`) share the same response options.
     
 ```{r CESD-label-table2, results = 'asis'}
 
@@ -444,7 +456,7 @@ print(cesd2_label_table)
 
 #### Survey Items
 
-All CES-D survey items are presented in the following table
+All CES-D survey items are presented in the following table:
 
 ```{r CESD-var-prep}
 # Pull question wording from qualtrics data
@@ -495,7 +507,7 @@ print(cesd_gt_table)
 
 #### Scale and Subscales
 
-Information on aggregated scale and subscale variables are below. Total and subscale variables were constructed by summing corresponding items. 
+Information on the aggregated scale and subscale variables are below. Total and subscale variables were constructed by summing corresponding items. 
 
 ```{r cesd-alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -560,7 +572,7 @@ print(cesd_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and total/subscale score
+Descriptive statistics are presented below for each item, total, and subscale score:
 
 ```{r cesd-mean-items}
 # Create subset of CESD items
@@ -602,7 +614,7 @@ cesd_tbl
     
 #### Distributions
 
-Distributions are presented below for the total score and each subscale
+Distributions are presented below for the total score and each subscale:
 
 ```{r cesd-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -631,7 +643,7 @@ complete %>%
 
 #### Clinical Categories
 
-CES-D cutoff scores are presented below
+The distribution for CES-D scores alongside clinical cutoffs are presented below.
 
 *<MARIA>INSERT MORE INFO ON 16/23 CUTOFF SCORES - what are they (what should plot labels be)?, how should they be used*
 
@@ -758,33 +770,30 @@ complete %>%
 ```
 
 
-## Coronavirus Impacts Scale (Psychological Subscale)
+## Coronavirus Impacts Questionnaire (CIQ)
 
-### Coronavirus Impacts Scale Description
+### CIQ Description
 
-*TODO: NOTE FOR DATA CLEANINING: the variable name should be cis, codebook should be change accordingly *
-
-The Coronavirus Impacts Scale is used to assess ... *TODO INSERT TEXT DESCRIPTION ABOUT Coronavirus Impacts Scale MEASURE*
+The CIQ is self-report survey used to assess the financial, resource, and psychological impacts of COVID-19. 
   
-For the present study, 3 items from the Coronavirus Impacts Scale (Psychological Subscale) were collected in order to *TODO INSERT TEXT*. 
+For the present study, 3 items from the CIQ were collected in order to construct the psychological impacts scale.
 
-`ciq1` need to be reverse scored. Higher scores indicate *TODO more severe mental health symptoms*. 
+`ciq1` need to be reverse scored. Higher scores indicate increased psychological impacts of COVID-19. 
 
-The missing data rule was not applied since there is no missing data among CIS variables. 
+The missing data rule was not applied since there is no missing data among CIQ variables. 
 
-Reference: *TODO NEED REFERENCE *
+Reference: [@conway2020social](https://psyarxiv.com/z2x9a/)
 
-### Coronavirus Impacts Scale Variables
+
+### CIQ Variables
 
 #### Value Labels
 
-All Coronavirus Impacts Scale variables have the same response options
+All CIQ variables have the same response options.
 
+```{r ciq-label-table, results = 'asis'}
 
-
-```{r CIS-label-table, results = 'asis'}
-
-cis_label_df <- data.frame(
+ciq_label_df <- data.frame(
   value = seq(1:7),
   label = c("Not true of me at all",
             "",
@@ -796,11 +805,11 @@ cis_label_df <- data.frame(
   t() %>% 
   as.data.frame()
 
-cis_label_df <- setNames(cis_label_df[-1, ], unlist(cis_label_df[1, ]))
+ciq_label_df <- setNames(ciq_label_df[-1, ], unlist(ciq_label_df[1, ]))
 
 
 #create table
-cis_label_table <- cis_label_df %>%
+ciq_label_table <- ciq_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
@@ -809,24 +818,24 @@ cis_label_table <- cis_label_df %>%
   apply_labtab_theme()
 
 # Print the table
-print(cis_label_table)
+print(ciq_label_table)
 
 
 ```
 
 #### Survey Items
 
-All CIS survey items are presented in the following table
+All CIQ survey items are presented in the following table:
 
-```{r CIS-var-prep}
+```{r ciq-var-prep}
 # Pull question wording from qualtrics data
-# CIS is from BIS question 20-22
-cis_word <- qualtrics %>% 
+# ciq is from BIS question 20-22
+ciq_word <- qualtrics %>% 
   select(starts_with("BSI")) %>% 
   slice(1)
 
 #create table with variable name, description, and notes
-cis_word_long <- cis_word %>% 
+ciq_word_long <- ciq_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
                values_to = "description") %>% 
@@ -836,20 +845,21 @@ cis_word_long <- cis_word %>%
                            TRUE ~ as.character("")
                            )) %>% 
   mutate(description = if_else(var_name == "bsi20", "I have become depressed because of the Coronavirus (COVID-19).", description)) %>%
+  mutate(var_name = case_when(var_name == "bsi20" ~ "ciq1",
+                              var_name == "bsi21" ~ "ciq2",
+                              var_name == "bsi22" ~ "ciq3",
+                              TRUE ~ var_name)) %>% 
   slice(20:22)
-
-
-
 
 ```
 
-TODO: the variable name need to be change to ciq when make df 
-```{r cis-var-table, results ='asis'}
+
+```{r ciq-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
-cis_gt_table <- gt(cis_word_long)
+ciq_gt_table <- gt(ciq_word_long)
 
 # Table-specific formatting (col width, names)
-cis_gt_table <- cis_gt_table %>% 
+ciq_gt_table <- ciq_gt_table %>% 
   cols_label(var_name = "Variable", 
              description = "Description",
              notes = "Notes") %>% 
@@ -859,39 +869,39 @@ cis_gt_table <- cis_gt_table %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
-print(cis_gt_table)
+print(ciq_gt_table)
 
 #WHEN RENDERING WITH PDF USE: 
-#cis_gt_table
+#ciq_gt_table
 ```
 
 
 #### Scale and Subscales
 
-Information on total score and subscale variables are below. Variables were constructed by summing included items. 
+Information on the total score and subscale variables are below. Variables were constructed by summing included items. 
 
 
-```{r cis alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+```{r ciq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-cis_alpha <-
+ciq_alpha <-
   complete %>%
   select(ciq1:ciq3_r) %>%
   psych::alpha(check.keys = TRUE)
 
 ```
 
-```{r CIS-scale-table, results = 'asis'}
+```{r ciq-scale-table, results = 'asis'}
 # Create the table as a data frame
-cis_scale_df <- data.frame(
+ciq_scale_df <- data.frame(
   var_name = c("ciq_psych_total"),
   scale = c("Total Score (3)"),
   scale_construction = c("`ciq1`, `ciq2`, `ciq3_r`"),
   scale_range = c("3-21"),
-  alpha = c(round(cis_alpha$total$raw_alpha, 3))
+  alpha = c(round(ciq_alpha$total$raw_alpha, 3))
 )
 
 # Create the gt table object
-cis_scale_table <- gt(cis_scale_df) %>%
+ciq_scale_table <- gt(ciq_scale_df) %>%
   cols_align(columns = c("scale_range"), align = "center") %>% 
   cols_label(var_name = "Variable Name",
              scale = "Scale (# of items)", 
@@ -904,7 +914,7 @@ cis_scale_table <- gt(cis_scale_df) %>%
   apply_tbl_theme() 
 
 # Print the table
-print(cis_scale_table)
+print(ciq_scale_table)
 
 ```
 
@@ -912,15 +922,15 @@ print(cis_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and total/subscale score
+Descriptive statistics are presented below for each item and the total score:
 
-```{r cis-mean-items}
+```{r ciq-mean-items}
 # Create subset of BSI items
-cis_data_subset <- complete %>%
+ciq_data_subset <- complete %>%
   select(ciq1:ciq2, ciq3, ciq_psych_total)
 
 # Calculate the summary statistics for each variable
-cis_summary_data <- lapply(cis_data_subset, function(x) {
+ciq_summary_data <- lapply(ciq_data_subset, function(x) {
   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
   sd_val <- round(sd(x, na.rm = TRUE), 2)
   range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
@@ -929,15 +939,15 @@ cis_summary_data <- lapply(cis_data_subset, function(x) {
 })
 
 # Convert summary_data to a data frame
-cis_summary_data <- as.data.frame(cis_summary_data)
+ciq_summary_data <- as.data.frame(ciq_summary_data)
 
 # Set items as first row
-cis_summary_data <- rbind(names(cis_summary_data), cis_summary_data) %>% 
+ciq_summary_data <- rbind(names(ciq_summary_data), ciq_summary_data) %>% 
   t() %>% 
   as.data.frame()
 
 # Create the gt table
-cis_tbl <- cis_summary_data %>%
+ciq_tbl <- ciq_summary_data %>%
   gt() %>%
   cols_label(`1` = "Variable",
              Range = "Range*",
@@ -949,14 +959,14 @@ cis_tbl <- cis_summary_data %>%
   apply_tbl_theme()
 
 # Render the table
-cis_tbl
+ciq_tbl
 
 ```
 
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale
+The distribution for the total score is presented below:
 
 ```{r csi-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -970,9 +980,10 @@ complete %>%
 
 ## The Drug Abuse Screening Test (DAST)
 
-### The Drug Abuse Screening Test Description
+### DAST Description
 
-*TODO: ROW DATA INCORRECTLY CLEANED, WILL NEED RE_CLEAN!*
+*<MIN/SHAINA>TODO: ROW DATA INCORRECTLY CLEANED, WILL NEED RE_CLEAN!*
+
 ```{r dast re-code}
 # This session should go together with the data cleaning 
 
@@ -1003,13 +1014,15 @@ complete <- complete %>%
 
 ```
 
-The The Drug Abuse Screening Test is used to assess ... *TODO INSERT TEXT DESCRIPTION ABOUT DAST*
+*<SHAINA> TODO: CHECK AFTER DATA IS CLEANED*
+
+The DAST is a self-report instrument used to assess problems related to substance use.
   
-For the present study, 22 items from the The Drug Abuse Screening Test (DAST) were collected in order to *TODO INSERT TEXT*. 
+For the present study, 22 items from the DAST were collected and a total score was constructed. No subscales were created for this measure as there was a lack of evidence supporting a subscale structure.  
 
-Two items (`d4` and `d5`) are/should to be reverse scored which is noted in the variable table below. *TODO Higher scores indicate more severe mental health symptoms. *
+Two items (`d4` and `d5`) should to be reverse scored which is noted in the variable table below and the reverse scored variables are provided (`d4_r` and `d5_r`). Higher scores indicate more problems related to substance use.
 
-The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses) 
+*<SHAINA> TODO: CONFIRM THIS IS CORRECT AND IF SHOULD BE APPLIED IN TABLES BELOW - specify -77* The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses) 
 
 Reference: [@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1360-0443.1989.tb03463.x);[DOI](https://doi.org/10.1111/j.1360-0443.1989.tb03463.x)
 
@@ -1018,9 +1031,7 @@ Reference: [@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.111
 
 #### Value Labels
 
-All The Drug Abuse Screening Test variables have the same response options
-
-
+All The Drug Abuse Screening Test variables have the same response options.
 
 ```{r DAST-label-table, results = 'asis'}
 
@@ -1047,7 +1058,10 @@ print(dast_label_table)
 
 
 ```
-Recoeded tatoal value lable 
+
+*<MARIA> TODO: CONFIRM THIS TABLE SHOULD BE INCLUDED AND WHAT VARIABLES THEY APPLY TO*
+Recoded total value label 
+
 ```{r DAST-label-table-total, results = 'asis'}
 
 dast_label_total <- data.frame(
@@ -1079,7 +1093,7 @@ print(dast_label_table_total)
 
 #### Survey Items
 
-All DAST survey items are presented in the following table
+All DAST survey items are presented in the following table:
 
 ```{r DAST-var-prep}
 # Pull question wording from qualtrics data
@@ -1101,10 +1115,6 @@ dast_word_long <- dast_word %>%
          ) %>% 
   mutate(description = if_else(var_name == "d00", "Is TC currently pregnant?", description)) %>%
   slice(4:25)
-
-
-
-
 
 ```
 
@@ -1135,8 +1145,7 @@ print(dast_gt_table)
 
 #### Scale and Subscales
 
-No subscales were created for this measure as there was a lack of evidence supporting a subscale structurek
-
+Information on the total score is below. The total score was constructed by summing all items. 
 
 ```{r dast alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -1150,7 +1159,8 @@ dast_alpha <-
 
 ```
 
-*TODO: need check the total *
+*<MIN> DATA CLEANING TODO: need check the total *
+
 ```{r DAST-scale-table, results = 'asis'}
 # Create the table as a data frame
 dast_scale_df <- data.frame(
@@ -1183,7 +1193,7 @@ print(dast_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and total/subscale score
+Descriptive statistics are presented below for each item and the total score.
 
 For binary items: 
 
@@ -1237,7 +1247,7 @@ dast_tbl_binary
 
 ```
 
-For total score: 
+For the total score: 
 
 ```{r dast-cont-desc}
 # Create subset of DAST items
@@ -1287,7 +1297,17 @@ dast_tbl
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale
+The distribution for the total score is presented below:
+
+*<MIN> TODO: ADD DISTRIBUTION PLOT FOR TOTAL DAST SCORE HERE*
+
+#### Clinical Categories
+
+The distribution for the total score alongside clinical severity categories are presented below.
+
+*<MARIA>INSERT MORE INFO ON SEVERITY CUTOFF SCORES - what do they categorize?, how should they be used*
+
+Reference: *<SHAINA/MARIA> INSERT REFERENCE FOR DAST SCORES - MARIA, WHAT IS REFERENCE?*
 
 ```{r dast-distributions, class.source='fold', echo = FALSE}
 complete %>%
@@ -1339,30 +1359,31 @@ complete %>%
 ```
 
 
-## Conflict Tactics Scales (CTS2)
+## Conflict Tactics Scales (CTS)
 
-### Conflict Tactics Description
+### CTS Description
 
-The Conflict Tactics is used to assess ... *TODO INSERT TEXT DESCRIPTION ABOUT Conflict Tactics MEASURE*
+The CTS is a self-report measure used to assess tactics used when there is conflict in a relationship.
 
-For the present study, 20 items from the Conflict Tactics were collected in order to calculate the Psychological Aggression, Physical Injury, Assault, Sexual Cohesion, Negotiation for TC and their partner respectively. 
+For the present study, all 20 items from the CTS short form were collected, and all scales (Negotiation, Physical Assault, and Psychological Aggression) and supplemental scales (Assault and Sexual Coercion) were calculated. 
 
+Authors describe that internal reliability is not appropriate for the CTS measure. CTS should not have a calculated total/average composite score. Instead, CTS has three different ways of scoring (Prevalence, Severity, Mutuality). 
 
-No items need to be reverse scored. *TODO NEED REPLACE Higher scores indicate more severe mental health symptoms. *
+No items need to be reverse scored. *<MARIA> TODO: How to word directionality with current values/labels. (e.g., Higher scores indicate ..." *
 
-The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses)
+*<SHAINA> TODO: CONFIRM & CHECK CALC CODE* The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses)
 
 Reference: [@straus2004short](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract); [DOI](10.1891/vivi.19.5.507.63686)
 
-### CTS2 Variables
+### CTS Variables
 
 #### Value Labels
 
-All CTS2 variables have the same response options
+All CTS variables have the same response options.
 
-```{r CTS2-label-table, results = 'asis'}
+```{r CTS-label-table, results = 'asis'}
 
-CTS2_label_df <- data.frame(
+CTS_label_df <- data.frame(
   value = c( "1", "2", "3", "4", "5", "6", "7", "8"),
   label = c("Once in the past year",
             "Twice in the past year",
@@ -1376,11 +1397,11 @@ CTS2_label_df <- data.frame(
   t() %>% 
   as.data.frame()
 
-CTS2_label_df <- setNames(CTS2_label_df[-1, ], unlist(CTS2_label_df[1, ]))
+CTS_label_df <- setNames(CTS_label_df[-1, ], unlist(CTS_label_df[1, ]))
 
 
 #create table
-CTS2_label_table <- CTS2_label_df %>%
+CTS_label_table <- CTS_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
@@ -1388,23 +1409,23 @@ CTS2_label_table <- CTS2_label_df %>%
   apply_labtab_theme()
 
 # Print the table
-print(CTS2_label_table)
+print(CTS_label_table)
 
 
 ```
 
 #### Survey Items
 
-All CTS2 survey items are presented in the following table
+All CTS survey items are presented in the following table:
 
-```{r CTS2-var-prep}
+```{r CTS-var-prep}
 # Pull question wording from qualtrics data
-CTS2_word <- qualtrics %>% 
+CTS_word <- qualtrics %>% 
   select(starts_with("CT")) %>% 
   slice(1)
 
 #create table with variable name, description, and notes
-CTS2_word_long <- CTS2_word %>% 
+CTS_word_long <- CTS_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
                values_to = "description") %>% 
@@ -1422,9 +1443,9 @@ CTS2_word_long <- CTS2_word %>%
 ```
 
 
-```{r CTS2-var-table, results ='asis'}
+```{r CTS-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
-my_gt_table <- gt(CTS2_word_long)
+my_gt_table <- gt(CTS_word_long)
 
 # Table-specific formatting (col width, names)
 my_gt_table <- my_gt_table %>% 
@@ -1445,16 +1466,13 @@ print(my_gt_table)
 
 #### Scale and Subscales
 
-Information on total score and subscale variables are below. Variables were constructed by summing included items. 
-Authors describe that internal reliability is not appropriate for the `CTS2` measure. 
-`CTS2` should not have a calculated total/average composite score
-`CTS2` has three different ways of scoring (Prevalence, Severity, Mutuality)
+Information on total score and subscale variables are below. Prevalence scales are calculated ... *<MARIA> INSERT INFO ON COMPOSITE SCORE CREATION*. Severity scores are calculated ... *<MARIA> INSERT INFO ON COMPOSITE SCORE CREATION*. Mutuatlity scores are created by ... *<MARIA> INSERT INFO ON COMPOSITE SCORE CREATION* 
 
-*NEED fill Range*
+*<SHAINA/MIN> TODO: NEED fill Range once we understand how composite scores were created*
 
-```{r CTS2-scale-table, results = 'asis'}
+```{r CTS-scale-table, results = 'asis'}
 # Create the table as a data frame
-CTS2_scale_df <- data.frame(
+CTS_scale_df <- data.frame(
   var_name = c("cts_psy_agg_ind_sev", "cts_injury_ind_sev", "cts_assault_ind_sev",   "cts_sex_ind_sev",       #TC   severity 
                 "cts_psy_agg_part_sev","cts_injury_part_sev", "cts_assault_part_sev","cts_sex_part_sev",      #Partner serverity 
 
@@ -1502,7 +1520,7 @@ CTS2_scale_df <- data.frame(
 
 
 # Create the gt table object
-CTS2_scale_table <- gt(CTS2_scale_df) %>%
+CTS_scale_table <- gt(CTS_scale_df) %>%
   cols_align(columns = c("scale_range"), align = "center") %>% 
   cols_label(var_name = "Variable Name",
             scale = "Scale (# of items)", 
@@ -1515,7 +1533,7 @@ CTS2_scale_table <- gt(CTS2_scale_df) %>%
   apply_tbl_theme() 
 
 # Print the table
-print(CTS2_scale_table)
+print(CTS_scale_table)
 
 ```
 
@@ -1523,15 +1541,15 @@ print(CTS2_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and subscale score
+Descriptive statistics are presented below for each item and subscale score:
 
-```{r CTS2-mean-items}
-# Create subset of CTS2 items
-cts2_data_subset <- complete %>%
+```{r CTS-mean-items}
+# Create subset of CTS items
+cts_data_subset <- complete %>%
   select(ct1:ct20, starts_with("cts"))
 
 # Calculate the summary statistics for each variable
-cts2_summary_data <- lapply(cts2_data_subset, function(x) {
+cts_summary_data <- lapply(cts_data_subset, function(x) {
   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
   sd_val <- round(sd(x, na.rm = TRUE), 2)
   range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
@@ -1540,15 +1558,15 @@ cts2_summary_data <- lapply(cts2_data_subset, function(x) {
 })
 
 # Convert cts2_summary_data to a data frame
-cts2_summary_data <- as.data.frame(cts2_summary_data)
+cts_summary_data <- as.data.frame(cts_summary_data)
 
 # Set items as first row
-cts2_summary_data <- rbind(names(cts2_summary_data), cts2_summary_data) %>% 
+cts_summary_data <- rbind(names(cts_summary_data), cts_summary_data) %>% 
   t() %>% 
   as.data.frame()
 
 # Create the gt table
-cts2_tbl <- cts2_summary_data %>%
+cts_tbl <- cts_summary_data %>%
   gt() %>%
   cols_label(`1` = "Variable",
              Range = "Range*",
@@ -1562,16 +1580,17 @@ cts2_tbl <- cts2_summary_data %>%
 
    
 # Render the table
-cts2_tbl
+cts_tbl
 
 ```
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale
+Distributions are presented below for each subscale
 
-##### Serverity distributions 
-```{r CTS2-Severity-TC-distributions, class.source='fold', echo = FALSE}
+##### Severity distributions 
+
+```{r CTS-Severity-TC-distributions, class.source='fold', echo = FALSE}
 # Psychological Aggression 
 complete %>%
   mutate(
@@ -1660,7 +1679,9 @@ complete %>%
   THEME
 
 ```
-```{r CTS2-Severity-Partner-distributions, class.source='fold', echo = FALSE}
+
+
+```{r CTS-Severity-Partner-distributions, class.source='fold', echo = FALSE}
 # Psychological Aggression 
 complete %>%
   mutate(
@@ -1751,8 +1772,10 @@ complete %>%
 ```
 
 ##### Prevalence distributions
-*TODO NA was removed when generating following Prevalence plot*
-```{r CTS2-Prevalence-distributions, class.source='fold', echo = FALSE}
+
+*<MIN> TODO NA was removed when generating following Prevalence plot*
+
+```{r CTS-Prevalence-distributions, class.source='fold', echo = FALSE}
 # Psychological Aggression 
 complete %>%
   pivot_longer(
@@ -1879,7 +1902,8 @@ complete %>%
 ```
 
 ##### Mutuality distributions
-```{r CTS2-Mutuality-distributions, class.source='fold', echo = FALSE}
+
+```{r CTS-Mutuality-distributions, class.source='fold', echo = FALSE}
 
 # Psychological Aggression 
 complete %>%
@@ -1974,27 +1998,26 @@ complete %>%
 ```
 
 
-## Child Abuse (BCAP)
-TODO: change above name to actual scale name
+## Brief Child Abuse Potential Inventory (BCAP)
 
 ### BCAP Description
 
-The BCAP is used to assess ... *TODO INSERT TEXT DESCRIPTION ABOUT BSI MEASURE*
+The BCAP is a self-report inventory used to assess parental child abuse risk.
 
-For the present study, 34 items from the BSI were collected in order to *TODO: INSERT TEXT  *
+For the present study, *<SHAINA> CONFIRM* 34 items from the BSI were collected and <*SHAINA/MARIA> CONFIRM* all 9 subscales were computed: Happiness, Feelings of Persecution, Loneliness, Family Conflict, Rigidity, Distress, Financial Insecurity, Lie, and Random Responding. 
 
-Four items (`q1`, `q2`, `q23`, and `q29`) are/should be reverse scored which is noted in the variable table below. *TODO: NEED CHANGE THE TEXT: Higher scores indicate more severe mental health symptoms. *
+Four items (`q1`, `q2`, `q23`, and `q29`) should be reverse scored which is noted in the variable table below and the reverse scored variables are provided (`q1_r`, `q2_r`, `q23_r`, and `cq29_r`). Higher scores on the BCAP indicates increased risk. 
 
-The missing data rule was Applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses) 
+*<SHAINA> CONFIRM>* The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses).
 
 Reference: [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug); 
 [DOI](https://doi.org/10.1207/s15374424jccp3402_9)
 
-### Child Abuse (BCAP) Variables
+### BCAP Variables
 
 #### Value Labels
 
-All BCAP variables have the same response options
+All BCAP variables have the same response options.
 
 ```{r BCAP-label-table, results = 'asis'}
 
@@ -2025,7 +2048,7 @@ print(bcap_label_table)
 
 #### Survey Items
 
-All BCAP survey items are presented in the following table
+All BCAP survey items are presented in the following table:
 
 ```{r bcap-var-prep}
 # Pull question wording from qualtrics data
@@ -2072,9 +2095,10 @@ print(bcap_gt_table)
 #WHEN RENDERING WITH PDF USE: 
 #bcap_gt_table
 ```
+
 #### Scale and Subscales
 
-Information on total score and subscale variables are below. Variables were constructed by summing included items. 
+Information on the total score and subscale variables are below. *<SHAINA> INSERT Variables were constructed by ... *
 
 ```{r bcap alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -2160,7 +2184,7 @@ bcap_random_alpha <-
 # Create the table as a data frame
 bcap_scale_df <- data.frame(
   var_name = c("bcap_total", "bcap_risk", "bcap_happy_total", "bcap_feel_pers_total", "bcap_lonely_total", "bcap_fam_conf_total", "bcap_rigid_total","bcap_distress_total", "bcap_poverty_total", "bcap_lie_total", "bcap_random_total"),
-  scale = c("BCAP complete Scale (34)", "BCAP Risk Scale (26)", "Happiness (3)", "Feelings of persecution", "Loneliness (4)", "Family conflict (3)", "Rigidity (4)", "Distress (5)", "Poverty (2)", "Lie (6)", "Random responding (3)"),
+  scale = c("BCAP complete Scale (34)", "BCAP Risk Scale (26)", "Happiness (3)", "Feelings of persecution", "Loneliness (4)", "Family conflict (3)", "Rigidity (4)", "Distress (5)", "Financial Insecurity (2)", "Lie (6)", "Random responding (3)"),
   scale_construction = c("`q1_r`,`q2_r`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q9`, `q10`, `q11`, `q12`, `q13`, `q14`, `q15`, `q16`, `q17`, `q18`, `q19`, `q20`, `q21`, `q22`, `q23_r`, `q24`, `q25`, `q26`, `q27`, `q28`, `q29_r`, `q30`, `q31`, `q32`, `q33`, `q34`", 
                          "`q1_r`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q10`, `q11`, `q12`, `q13`, `q14`, `q16`, `q17`, `q19`, `q20`, `q22`, `q23_r`, `q24`, `q25`, `q27`, `q29_r`, `q30`, `q31`, `q32`, `q33`", 
                          "`q1_r`, `q23_r`, `q29_r`", 
@@ -2203,13 +2227,15 @@ bcap_scale_table <- gt(bcap_scale_df) %>%
 print(bcap_scale_table)
 
 ```
+
 ### Summary Statistics
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and total/subscale score
+Descriptive statistics are presented below for each item, total, and subscale score.
 
-For binary items
+For binary items: 
+
 ```{r bcap-binary-desc}
 
 # Create subset of BCAP items
@@ -2265,6 +2291,8 @@ bcap_tbl_binary <- bcap_summary_data_binary %>%
 bcap_tbl_binary
 ```
 
+For continuous total and subscale scores: 
+
 ```{r bcap-mean-items}
 # Create subset of bcap items
 bcap_data_subset <- complete %>%
@@ -2307,7 +2335,7 @@ bcap_tbl
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale
+Distributions are presented below for the total score and each subscale:
 
 ```{r bcap-distributions, class.source='fold', echo = FALSE}
 #Risk 
