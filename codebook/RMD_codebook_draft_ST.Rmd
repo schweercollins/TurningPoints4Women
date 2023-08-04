@@ -2913,7 +2913,7 @@ All ARQ survey items are presented in the following table
 ```{r ARQ-var-prep}
 # Pull question wording from qualtrics data
 arq_word <- qualtrics %>% 
-  select(RQ1,RQA,	RQB, RQC, RQD) %>% 
+  select(RQ1,RQA, RQB, RQC, RQD) %>% 
   slice(1)
 
 #create table with variable name, description, and notes
@@ -2976,30 +2976,68 @@ Attachment Groups: Secure, Dismissing, Preoccupied, Fearful
 
 Descriptive statistics are presented below for each item and total/subscale score
 
+```{r ARQ-mean-items}
+# Create subset of BSI items
+arq_data_subset <- complete_rnd2 %>%
+  select(rq1,rqa,	rqb, rqc, rqd)
+
+# Calculate the summary statistics for each variable
+arq_summary_data <- lapply(arq_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+arq_summary_data <- as.data.frame(arq_summary_data)
+
+# Set items as first row
+arq_summary_data <- rbind(names(arq_summary_data), arq_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+arq_tbl <- arq_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+arq_tbl
+
+```
 
 #### Distributions
 
 Distributions are presented for the total score and each subscale
-#TODO: JP's graph is count on x axis 
+*TODO: JP's graphs are count on x axis *
 ```{r ARQ-distributions, class.source='fold', echo = FALSE}
 complete_rnd2 %>%
-  composite_hist(x = rq1) +
-  labs(title = 'Distribution of rq1')
+  composite_hist(x = rq1, bins = 4) +
+  labs(title = 'Distribution of rq1') #TODO: Shaina could you decide on #of bins?
 
 complete_rnd2 %>%
-  composite_hist(x = rqa) +
+  composite_hist(x = rqa, bins = 10) +
   labs(title = 'Distribution of rqa')
 
 complete_rnd2 %>%
-  composite_hist(x = rqb) +
+  composite_hist(x = rqb, bins = 10) +
   labs(title = 'Distribution of rqb')
 
 complete_rnd2 %>%
-  composite_hist(x = rqc) +
+  composite_hist(x = rqc, bins = 10) +
   labs(title = 'Distribution of rqc')
 
 complete_rnd2 %>%
-  composite_hist(x = rqd) +
+  composite_hist(x = rqd, bins = 10) +
   labs(title = 'Distribution of rqd')
 ```
 
