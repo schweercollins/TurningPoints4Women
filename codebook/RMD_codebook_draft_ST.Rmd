@@ -3046,9 +3046,9 @@ complete_rnd2 %>%
 
 ### PRSS Description
 
-The PRSS is a 4-item questionnaire designed to measure adult attachment style.
+The PRSS is a 5-item questionnaire designed to measure *insert text*
 
-For the present study, 4 items from the PRSS were collected in order to #TODO: insert text here
+For the present study, 5 items from the PRSS were collected in order to *TODO: insert text here*
 
   No items need to be reverse scored. *TODO: need change text here Higher scores indicate more severe mental health symptoms. *
 
@@ -3083,7 +3083,7 @@ prss_label_table <- prss_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ px(150)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -3097,7 +3097,7 @@ print(prss_label_table)
 PRSS survey items are presented in the following table:
   
 ```{r prss-var-prep}
-# Pull question wording from qualtrics data
+# Pull question wording from Qualtrics data
 prss_word <- qualtrics %>% 
   select(starts_with("ps")) %>% 
   slice(1)
@@ -3109,17 +3109,19 @@ prss_word_long <- prss_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         notes = as.character(""))
+         notes = as.character(""))%>%
+  slice(9:13)
 
 ```
 
 
 ```{r prss-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
-my_gt_table <- gt(prss_word_long)
+# this sould be ps9-ps13
+prss_gt_table <- gt(prss_word_long)
 
 # Table-specific formatting (col width, names)
-my_gt_table <- my_gt_table %>% 
+prss_gt_table <- prss_gt_table %>% 
   cols_label(var_name = "Variable", 
              description = "Description",
              notes = "Notes") %>% 
@@ -3129,7 +3131,7 @@ my_gt_table <- my_gt_table %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
-print(my_gt_table)
+print(prss_gt_table)
 
 #WHEN RENDERING WITH PDF USE: 
 #my_gt_table
@@ -3143,28 +3145,29 @@ Information on the total score and subscale variables are below. Variables were 
 #Calculate internal reliability 
 prss_alpha <-
   complete_rnd2 %>%
-  select(ps9:ps13) %>%  # TODO: I wasn't sure why JP only use item from 9 - 13
+  select(ps9:ps13) %>%  
   psych::alpha(check.keys = TRUE)
 
+prss_alpha_table <- tibble(
+  Scale = "Posttraumatic Risk Seeking Scale",
+  Alpha = round(prss_alpha$total$raw_alpha, 3)
+)
+
+
+prss_alpha_table %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'Alpha Values for PRSS Scale'
+  )
 ```
 
 ```{r PRSS-scale-table, results = 'asis'}
-
-
-```
-### Summary Statistics
-
-#### Descriptive Statistics
-
-Descriptive statistics are presented below for each item, total, and subscale score:
-  
-```{r prss-mean-items}
 # Create subset of prss items
 prss_data_subset <- complete_rnd2 %>%
-  select(starts_with("ps"), id)
+  select(ps9:ps13, id)
 
 # Calculate total and average
-complete_rnd2 <-
+prss_data_subset <-
   prss_data_subset %>%
   composite_total_avg_fun(
     id = 'id',
@@ -3179,19 +3182,54 @@ complete_rnd2 <-
   rename(
     prss_total = sum_values,
     prss_avg = mean_values
-  ) %>%
-  mutate(
-    across(
-      c(
-        prss_total,
-        prss_avg
-      ),
-      ~case_when(
-        id %in% prss_remove ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
+  ) 
+  # mutate(
+  #   across(
+  #     c(
+  #       prss_total,
+  #       prss_avg
+  #     ),
+  #     ~case_when(
+  #       id %in% prss_remove ~ NA_real_,
+  #       TRUE ~ .x
+  #     )
+  #   )
+  # )
+
+# Create the table as a data frame
+prss_scale_df <- data.frame(
+  var_name = c("prss_total"),
+  scale = c("PRSS Total score (5) "),
+  scale_construction = c("`ps9`, `ps10`, `ps11`, `ps12`, `ps13`"),
+  scale_range = c(""), #TODO fill in range 
+   alpha = c(round(prss_alpha$total$raw_alpha, 3))
   )
+
+# Create the gt table object
+prss_scale_df <- gt(prss_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale (# of items)", 
+            scale_construction = "Scale Construction",
+            scale_range = "Range*",
+            alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(prss_scale_df)
+
+
+```
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and subscale score:
+  
+```{r prss-mean-items}
 
 # Calculate the summary statistics for each variable
 prss_summary_data <- lapply(prss_data_subset, function(x) {
@@ -3203,12 +3241,12 @@ prss_summary_data <- lapply(prss_data_subset, function(x) {
 })
 
 # Convert summary_data to a data frame
-prss_summary_data <- as.data.frame(prss_summary_data)
+prss_summary_data <- as.data.frame(prss_summary_data)%>%select(-c(id))
 
 # Set items as first row
 prss_summary_data <- rbind(names(prss_summary_data), prss_summary_data) %>% 
   t() %>% 
-  as.data.frame()
+  as.data.frame() 
 
 # Create the gt table
 prss_tbl <- prss_summary_data %>%
@@ -3232,7 +3270,7 @@ prss_tbl
 Distributions are presented below for the total score and each subscale:
   
 ```{r PRSS-distributions, class.source='fold', echo = FALSE}
-complete_rnd2 %>%
+prss_data_subset %>%
   composite_hist(
     x = prss_avg
   ) +
