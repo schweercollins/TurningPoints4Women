@@ -3147,18 +3147,6 @@ prss_alpha <-
   complete_rnd2 %>%
   select(ps9:ps13) %>%  
   psych::alpha(check.keys = TRUE)
-
-prss_alpha_table <- tibble(
-  Scale = "Posttraumatic Risk Seeking Scale",
-  Alpha = round(prss_alpha$total$raw_alpha, 3)
-)
-
-
-prss_alpha_table %>% 
-  gt::gt() %>% 
-  gt::tab_header(
-    title = 'Alpha Values for PRSS Scale'
-  )
 ```
 
 ```{r PRSS-scale-table, results = 'asis'}
@@ -3278,3 +3266,259 @@ prss_data_subset %>%
 
 
 ```
+
+## Stigma & Shame Questionnaire (SSQ)
+
+### SSQ Description
+
+The SSQ is a 8-item questionnaire designed to measure *insert*.
+
+For the present study, 8 items from the SSQ were collected in order to #TODO: insert text here
+
+  No items need to be reverse scored. *TODO: need change text here Higher scores indicate more severe mental health symptoms. *
+
+The missing data rule was applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses)
+
+Reference: [ @feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686); [DOI](https://doi.org/10.1177/1077559505276686)
+
+
+### SSQ Variables
+
+#### Value Labels
+
+All SSQ variables have the same response options.
+
+
+```{r SSQ-label-table, results = 'asis'}
+
+ssq_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4"),
+  label = c("None of the time",
+            "A little of the time",
+            "Some of the time",
+            "Much of the time",
+            "Most of the time")) %>% 
+  t() %>% 
+  as.data.frame()
+
+ssq_label_df <- setNames(ssq_label_df[-1, ], unlist(ssq_label_df[1, ]))
+
+
+#create table
+ssq_label_table <- ssq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(ssq_label_table)
+
+
+```
+
+#### Survey Items
+
+SSQ survey items are presented in the following table:
+  
+```{r ssq-var-prep}
+# Pull question wording from qualtrics data
+ssq_word <- qualtrics %>% 
+  select(starts_with("ps")) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+ssq_word_long <- ssq_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  slice(1:8)
+
+
+```
+
+
+```{r ssq-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+ssq_gt_table <- gt(ssq_word_long)
+
+# Table-specific formatting (col width, names)
+ssq_gt_table <- ssq_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(ssq_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below. Variables were constructed by summing included items. 
+
+```{r ssq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+ssq_abuse_shame_alpha <- complete_rnd2 %>% 
+  select(
+    ps1:ps4
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+ssq_alpha <- complete_rnd2 %>% 
+  select(
+    ps1:ps8
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+```
+
+```{r SSQ-scale-table, results = 'asis'}
+# Create subset of ssq items
+ssq_data_subset <-
+  complete_rnd2 %>%
+  select(id,
+         ps1:ps8) %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c("ps1", "ps2", "ps3", "ps4"),
+    scale1_nitems = 4,
+    scale2 = c("ps1", "ps2", "ps3", "ps4",
+               "ps5", "ps6", "ps7", "ps8"),
+    scale2_nitems = 8
+  ) %>%
+  rename(
+    ssq_abuse_shame = total1,
+    ssq_total = total2
+  ) %>%
+  mutate(
+    across(
+      c(ssq_abuse_shame, ssq_total)), #, ~case_when(id %in% ssq_remove ~ NA_real_, TRUE ~ .x)),
+    ssq_total_cutoff = case_when(
+      ssq_total >= 16 ~ "high shame",
+      ssq_total <= 15 ~ "low shame"
+    )
+  )
+
+# Create the table as a data frame
+ssq_scale_df <- data.frame(
+  var_name = c("ssq_total", "ssq_abuse_shame"),
+  scale = c("SSQ Total score (8)", "Abuse-related Shame (4)"),
+  scale_construction = c("`ps1`, `ps2`, `ps3`, `ps4`,`ps5`, `ps6`, `ps7`, `ps8`",
+                         "`ps1`, `ps2`, `ps3`, `ps4`"),
+  scale_range = c("",""), #TODO fill in range 
+  alpha = c(round(ssq_alpha$total$raw_alpha, 3),
+            round(ssq_abuse_shame_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+ssq_scale_df <- gt(ssq_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(ssq_scale_df)
+
+
+```
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and subscale score:
+  
+```{r ssq-mean-items}
+# Calculate the summary statistics for each variable
+ssq_summary_data <- lapply(ssq_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+ssq_summary_data <- as.data.frame(ssq_summary_data)%>%select(-c(id))
+
+# Set items as first row
+ssq_summary_data <- rbind(names(ssq_summary_data), ssq_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+ssq_tbl <- ssq_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+ssq_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+  
+```{r ssq-distributions, class.source='fold', echo = FALSE}
+ssq_data_subset %>%
+  composite_hist(
+    x = ssq_total
+  ) +
+  labs(title = "Distribution of Total Scores for the Stigma & Shame Questionnaire")
+
+```
+
+#### Clinical Categories
+
+The distribution for the total score alongside clinical cutoffs are presented below.
+
+*<MARIA>INSERT MORE INFO ON CUTOFF SCORES - what are they (what should plot labels be)?, how should they be used*
+  
+  Reference: *<SHAINA/MARIA> INSERT REFERENCE FOR DYADC CUTOFF SCORES*
+  
+```{r ssq-cutoff, class.source='fold', echo = FALSE}
+
+ssq_data_subset %>% 
+  cutoff_plot2(
+    x = ssq_total,
+    cutoff = 16
+  ) +
+  labs(
+    title = "Cutoff Scores for SSQ Total Scores",
+    caption = "Cutoff is 16\nSee reference for literature on cutoff score."
+  )
+
+ssq_data_subset %>% 
+  cutoff_plot2(
+    x = ssq_abuse_shame,
+    cutoff = 3
+  ) +
+  labs(
+    title = "Cutoff Scores for SSQ Abuse-related Shame Scores",
+    caption = "Cutoff is 3\nSee reference for literature on cutoff score."
+  )
+```
+
