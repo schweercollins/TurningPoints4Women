@@ -3635,27 +3635,26 @@ eds <-
     matches(
       "^elf"
     )
-  ) 
+  ) %>% 
 #TODO: need to colculate total and average 
-  # composite_total_avg_fun(
-  #   id = c(
-  #     'id', "elf1_c", "elf2_c", "elf3_c", "elf7_c",
-  #     "elf12_c", "elf13_c", "elf15_c", "elf17_c", "elf18_c",
-  #     "elf19_c", "elf23_c", "elf26_c", "elf28_c", "elf30_c",
-  #     "elf34_c", "elf35_c", "elf36_c", "elf37_c"
-  #   ),
-  #   max_value = 4,
-  #   n_items = 21
-  # ) %>%
-  # distinct(
-  #   across(
-  #     .cols = everything()
-  #   )
-  # ) %>%
-  # rename(
-  #   elf_total = sum_values,
-  #   elf_avg = mean_values
-  # ) 
+composite_total_avg_fun(
+  id = c(
+    'id', "elf1_c", "elf2_c", "elf3_c", "elf7_c",
+    "elf12_c", "elf13_c", "elf15_c", "elf17_c", "elf18_c",
+    "elf19_c", "elf23_c", "elf26_c", "elf28_c", "elf30_c",
+    "elf34_c", "elf35_c", "elf36_c", "elf37_c"
+  ),
+  max_value = 4,
+  n_items = 21
+) %>%
+distinct(
+  across(
+    .cols = everything()
+  )
+) %>%
+rename(
+  elf_total = sum_values,
+  elf_avg = mean_values)
 
 ```
 #Calculate internal reliability 
