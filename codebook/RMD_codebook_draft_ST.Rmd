@@ -2833,9 +2833,11 @@ complete %>%
 
 The ARQ is a self-report measure used to categorize attachment styles in adulthood. *<MARIA> CONFIRM THIS IS CORRECT*
   
-For the present study, all 5 items from the ARQ were collected in order to construct *<MARIA> INSERT INFO ABOUT ARQ CATEGORIES/SUBSCALES*
+For the present study, all 5 items from the ARQ were collected in order to construct four attachment styles (secure, fearful, preoccupied, and dismissing).
 
-No items need to be reverse scored. *<MARIA/SHAINA> Higher scores indicate... OR only categories? *. The missing data rule applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses) 
+No items need to be reverse scored. Participants self-select one attachment style that best describes them in the first question `rq1`, then rate their agreement with each attachment style for `rqa` - `rqd`. Higher ratings indicate more agreement with the statement. 
+
+The missing data rule is applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses) 
 
 Reference: [@bartholomew1991attachment](https://psycnet.apa.org/record/1991-33075-001);[DOI](https://doi.org/10.1037/0022-3514.61.2.226)
 
@@ -2913,9 +2915,7 @@ All ARQ survey items are presented in the following table
 
 ```{r ARQ-var-prep}
 # Pull question wording from qualtrics data
-arq_word <- qualtrics %>% 
-  select(RQ1,RQA, RQB, RQC, RQD) %>% 
-  slice(1)
+ 
 
 #create table with variable name, description, and notes
 arq_word_long <- arq_word %>% 
@@ -2954,7 +2954,9 @@ print(arq_gt_table)
 
 #### Scale and Subscales
 
-Information on total score and subscale variables are below. Variables were constructed by summing included items. 
+Information on constructed attachment groups is presented below. The highest rating for attachment style was used to classify participants into one of four attachment groups (secure, dismissing, preoccupied, fearful). Model of the self (i.e., attachment anxiety) was calculated by summing secure and dismissing ratings then subtracting the sum of preoccupied and fearful items. Model of the other (i.e., attachment avoidance) was constructed by summing secure and preoccupied items and subtracting the sum of dismissing and fearful items. Higher scores on attachment models indicate more positive attachment models. *<MARIA> CONFIRM THIS IS CORRECT*
+
+*<SHAINA/MARIA> CONFIRM ALPHA IS NEEDED*
 
 ```{r arq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -2964,11 +2966,43 @@ arq_alpha <-
   psych::alpha(check.keys = TRUE)
 ```
 
-Attachment Groups: Secure, Dismissing, Preoccupied, Fearful
+```{r arq-subscales}
+#DATA CLEANING CODE - create arq categories
+vars_to_check <- c("rqa", "rqb", "rqc", "rqd")
 
+arq_subscale <- complete_rnd2 %>% 
+  mutate(max_var = apply(.[vars_to_check], 1, function(row) vars_to_check[which.max(row)])) %>% 
+  mutate(arq_group = case_when(max_var == "rqa" ~ "Secure",
+                               max_var == "rqb" ~ "Fearful",
+                               max_var == "rqc" ~ "Preoccupied",
+                               max_var == "rqd" ~ "Dismissive",
+                               TRUE ~ NA_character_),
+         arq_model_self = rowSums(data.frame(rqa, rqd), na.rm = TRUE) - rowSums(data.frame(rqc, rqb), na.rm = TRUE),
+    arq_model_other = rowSums(data.frame(rqa, rqc), na.rm = TRUE) - rowSums(data.frame(rqd, rqb), na.rm = TRUE)) %>%
+  mutate_at(vars(arq_model_self, arq_model_other), ~ if_else(is.na(arq_group), NA_real_, .)) %>% 
+  select(-max_var) 
+
+#missing ratings: 50, 116, and 123
+
+```
 
 ```{r ARQ-scale-table, results = 'asis'}
+# Create the table as a data frame
+arq_scale_df <- data.frame(
+  var_name = c("arq_group", "arq_model_self", "arq_model_other"),
+  scale = c("Attachment Group", "Model of Self", "Model of Other"),
+  scale_construction = c("Highest rating among `rqa`, `rqb`, `rqc`, `rqd`", "(`rqa` + `rqd`) - (`rqc` + `rqb`)", "(`rqa` + `rqc`) - (`rqd` + `rqb`)"))
 
+# Create the gt table object
+arq_scale_table <- gt(arq_scale_df) %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale Name", 
+            scale_construction = "Scale Construction") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(arq_scale_table)
 ```
 
 ### Summary Statistics
