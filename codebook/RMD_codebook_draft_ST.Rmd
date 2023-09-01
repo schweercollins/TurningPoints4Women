@@ -2915,7 +2915,9 @@ All ARQ survey items are presented in the following table
 
 ```{r ARQ-var-prep}
 # Pull question wording from qualtrics data
- 
+arq_word <- qualtrics %>% 
+  select(RQ1,RQA, RQB, RQC, RQD) %>% 
+  slice(1)
 
 #create table with variable name, description, and notes
 arq_word_long <- arq_word %>% 
@@ -3788,3 +3790,365 @@ Distributions are presented below for the total score and each subscale:
 #   labs(title = "Distribution of Total Scores for the Stigma & Shame Questionnaire")
 
 ```
+
+
+## Elliott Delinquency Scale Self Report (ELL)
+
+### ELL Description
+
+The Ell is a 39-item questionnaire designed to measure *insert*.
+
+For the present study, 39 items from the ELL were collected in order to #TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher scores indicate more severe mental health symptoms. *
+  
+The missing data rule was applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses)
+
+Reference: [ @feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686); [DOI](https://doi.org/10.1177/1077559505276686)
+
+
+### ELL Variables
+
+#### Value Labels
+
+All ELL variables have the same response options.
+
+
+```{r ELL-label-table, results = 'asis'}
+
+ell_label_df <- data.frame(
+  value = c("1", "2", "3", "4", "5", "6"),
+  label = c("Once a month",
+            "Once every 2-3 weeks",
+            "Once a week",
+            "2-3 times a dday",
+            "Once a day",
+            "2-3 times a day")) %>% 
+  t() %>% 
+  as.data.frame()
+
+ell_label_df <- setNames(ell_label_df[-1, ], unlist(ell_label_df[1, ]))
+
+
+#create table
+ell_label_table <- ell_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(ell_label_table)
+
+
+```
+
+#### Survey Items
+
+ELL survey items are presented in the following table:
+  
+```{r ell-var-prep}
+# Pull question wording from qualtrics data
+ell_word <- qualtrics %>% 
+  select(starts_with("ell"))%>%
+  select(-ends_with("a")) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+ell_word_long <- ell_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  mutate(description = gsub("ASSESSOR NOTE.*","",description))%>%
+  slice(1:39)
+
+```
+
+
+```{r elf-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+ell_gt_table <- gt(ell_word_long)
+
+# Table-specific formatting (col width, names)
+ell_gt_table <- ell_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) 
+
+# Print the table
+print(ell_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below. Variables were c
+onstructed by summing included items. 
+```{r ell df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+ell <-
+  complete_rnd2 %>%
+  select(
+    id,
+    starts_with("ell")
+  ) %>%
+  # rename(
+  #   ell35a  = x35a
+  # ) %>%
+  mutate(
+    across(
+      matches("a$"),
+      ~case_when(
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_,
+        is.na(.x) ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ell_calc <-
+  ell %>%
+  select(
+    id,
+    matches("a$")
+  ) %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    ),
+    across(
+      -id,
+      .names = "{.col}a"
+    ),
+    across(
+      c(
+        matches("a$"),
+        matches("aa$")
+      ),
+      ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ 2,
+        .x == 4 ~ 3,
+        .x == 5 ~ 4,
+        .x == 6 ~ 5,
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      c(
+        matches("aa$")
+      ),
+      ~case_when(
+        .x >= 4 ~ 4,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ell_count_calc <-
+  ell %>%
+  select(
+    id,
+    matches("\\d$")
+  ) %>%
+  mutate(
+    across(
+      -id,
+      ~case_when(
+        .x == 0 ~ 0,
+        .x > 0 ~ 1,
+        .x == -77 ~ NA_real_,
+        TRUE ~ NA_real_
+      )
+    )
+  )
+
+```
+
+```{r ell calculation, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+ell_complete <-
+  ell_calc %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c(
+      "ell4a", "ell5a", "ell6a", "ell8a", "ell9a",
+      "ell10a", "ell11a", "ell14a", "ell16a", "ell20a",
+      "ell21a", "ell22a", "ell24a", "ell25a", "ell27a", "ell29a",
+      "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
+    ),
+    scale2 = c(
+      "ell4aa", "ell5aa", "ell6aa", "ell8aa", "ell9aa",
+      "ell10aa", "ell11aa", "ell14aa", "ell16aa", "ell20aa",
+      "ell21aa", "ell22aa", "ell24aa", "ell25aa", "ell27aa", "ell29aa",
+      "ell31aa", "ell32aa", "ell33aa", "ell38aa", "ell39aa"
+    )
+  ) %>%
+  rename(
+    ell_raw_total = total1,
+    ell_censor_total = total2
+  )
+
+
+ell_count_complete <-
+  ell_count_calc %>%
+  composite_total_avg_fun(
+    id = c(
+      'id', "ell1", "ell2", "ell3", "ell7",
+      "ell12", "ell13", "ell15", "ell17", "ell18",
+      "ell19", "ell23", "ell26", "ell28", "ell30",
+      "ell34", "ell35", "ell36", "ell37"
+    ),
+    max_value = 1,
+    n_items = 21
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  rename(
+    ell_count_total = sum_values,
+    ell_count_avg = mean_values
+  ) %>%
+  mutate(
+    across(
+      c(
+        ell_count_total,
+        ell_count_avg
+      ),
+      ~case_when(
+      #  id %in% ell_count_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+```{r ell alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+#TODO: Shaina: JP doesn't include alpha in his script. Please review and delet if not needed
+
+
+```
+
+```{r ELL-scale-table, results = 'asis'}
+# Create the table as a data frame
+ell_scale_df <- data.frame(
+  var_name = c("ell_raw_total"),
+  scale = c("ELL score (Raw) (21)", "ELL Total (Censored) (21)", "ELL Total (Binary Count Data) (18)"),
+  scale_construction = c(" `ell4a`, `ell5a`, `ell6a`, `ell8a`, `ell9a`,
+      `ell10a`, `ell11a`, `ell14a`, `ell16a`, `ell20a`,
+      `ell21a`, `ell22a`, `ell24a`, `ell25a`, `ell27a`, `ell29a`,
+      `ell31a`, `ell32a`, `ell33a`, `ell38a`, `ell39a`", 
+      " `ell4aa`, `ell5aa`,`ell6aa`, `ell8aa`, `ell9aa`,
+      `ell10aa`, `ell11aa`, `ell14aa`, `ell16aa`, `ell20aa`,
+      `ell21aa`, `ell22aa`, `ell24aa`, `ell25aa`, `ell27aa`, `ell29aa`,
+      `ell31aa`, `ell32aa`, `ell33aa`, `ell38aa`, `ell39aa`",
+      "`ell1`, `ell2`, `ell3`, `ell7`,
+      `ell12`, `ell13`, `ell15`, `ell17`, `ell18`,
+      `ell19`, `ell23`, `ell26`, `ell28`, `ell30`,
+      `ell34`, `ell35`, `ell36`, `ell37`"),
+  scale_range = c("","","") #TODO fill in range 
+  #alpha = c(round(eds_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+ell_scale_df <- gt(ell_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             # alpha = "Alpha"
+             ) %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(ell_scale_df)
+
+
+```
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and subscale score:
+  
+```{r ell-mean-items}
+# Calculate the summary statistics for each variable
+ell_summary_data <- lapply(ell, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+ell_summary_data <- as.data.frame(ell_summary_data)%>%select(-c(id))
+
+# Set items as first row
+ell_summary_data <- rbind(names(ell_summary_data), ell_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+ell_tbl <- ell_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+ell_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+  
+```{r ell-distributions, class.source='fold', echo = FALSE}
+ell_complete %>%
+  composite_hist(
+    x = ell_raw_total
+  ) +
+  labs(title = 'Distribution of Total Scores for \nElliott Self Delinquency Scale (Raw)')
+
+ell_complete %>%
+  composite_hist(
+    x = ell_censor_total
+  ) +
+  labs(title = 'Distribution of Total Scores for \nElliott Self Delinquency Scale (Censored)')
+
+ell_count_complete %>%
+  composite_hist(
+    x = ell_count_total
+  ) +
+  labs(title = "Distribution of Total Scores for \nElliott Self Delinquency Scale (Binary Count Data)")
+```
+
