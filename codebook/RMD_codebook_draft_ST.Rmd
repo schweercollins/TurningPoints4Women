@@ -3811,7 +3811,8 @@ Reference: [ @feiring2005persistence](https://journals.sagepub.com/doi/abs/10.11
 
 #### Value Labels
 
-All ELL variables have the same response options.
+Variable Scale (for variables that end with a) and for any item that has been done 10 or more times. Variables are not ending with a are open ended. 
+TODO: Shaina: please review text above as I altered JP's text. 
 
 
 ```{r ELL-label-table, results = 'asis'}
@@ -3851,8 +3852,7 @@ ELL survey items are presented in the following table:
 ```{r ell-var-prep}
 # Pull question wording from qualtrics data
 ell_word <- qualtrics %>% 
-  select(starts_with("ell"))%>%
-  select(-ends_with("a")) %>% 
+  select(starts_with("ell"),-c(matches("aa$")))%>%
   slice(1)
 
 #create table with variable name, description, and notes
@@ -3898,7 +3898,8 @@ ell <-
   complete_rnd2 %>%
   select(
     id,
-    starts_with("ell")
+    starts_with("ell"),
+    -c(matches("aa$"))
   ) %>%
   # rename(
   #   ell35a  = x35a
