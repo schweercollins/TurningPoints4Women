@@ -4296,12 +4296,12 @@ mhc_miss <- mhc %>%
     n_items = 14
   )
 
-mhc_miss %>%
-  gt::gt() %>%
-  gt::tab_header(
-    title = 'Missing Data',
-    subtitle = 'By Each Participant'
-  )
+# mhc_miss %>%
+#   gt::gt() %>%
+#   gt::tab_header(
+#     title = 'Missing Data',
+#     subtitle = 'By Each Participant'
+#   )
 
 mhc_remove <- mhc_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
@@ -4449,7 +4449,7 @@ mhc_pwb_alpha <-
 # Create the table as a data frame
 mhc_scale_df <- data.frame(
   var_name = c("mhc_raw_total", "Positive Affect", "Social Well-being", "Psychological well-being"),
-  scale = c("MHC Total score (14)"),
+  scale = c("MHC Total score (14)", "Positive Affect (3)", "Social Well-being (4)", "Psychological well-being (6)"),
   scale_construction = c(" `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `h7`, `h8`, `h9`, `h10`, `h11`, `h12`, `h13`, `h14`",
                          "`h1`, `h2`,`h3`", "`h4`, `h5`, `h6`, `h7`, `h8`", "`h9`, `h10`, `h11`, `h12`, `h13`, `h14`"
                          ),
@@ -4550,3 +4550,272 @@ mhc_complete %>%
   ) +
   labs(title = 'Distribution of Total Scores for MHC-SF Psychological Well-being Subscale')
 ```
+
+
+## Flourishing Index 
+
+### FLO Description
+
+The Flourishing Index is a 12-item questionnaire designed to measure *insert*.
+
+For the present study, 12 items from the Flourishing Index were collected in order to #TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher scores indicate more severe mental health symptoms. *
+  
+The missing data rule was applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses)
+
+Reference: [@vanderweele2017promotion](https://www.pnas.org/doi/abs/10.1073/pnas.1702996114); [DOI](https://doi.org/10.1073/pnas.1702996114)
+
+
+### Flourishing Index  Variables
+
+#### Value Labels
+
+All Flourishing Index  variables have the same response options.
+
+
+```{r flo-label-table, results = 'asis'}
+
+flo_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
+  label = c("Not Satisfied At All",
+            "",
+            "",
+            "",
+            "",
+            "","","","","","Completely Satisfied")) %>% 
+  t() %>% 
+  as.data.frame()
+
+flo_label_df <- setNames(flo_label_df[-1, ], unlist(flo_label_df[1, ]))
+
+
+#create table
+flo_label_table <- flo_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(flo_label_table)
+
+
+```
+
+#### Survey Items
+
+Flourishing Index survey items are presented in the following table:
+  
+```{r flo-var-prep}
+# Pull question wording from qualtrics data
+flo_word <- qualtrics %>% 
+  select(I1:I12)%>%
+  slice(1)
+
+#create table with variable name, description, and notes
+flo_word_long <- flo_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  slice(1:12)
+```
+
+
+```{r flo-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+flo_gt_table <- gt(flo_word_long)
+
+# Table-specific formatting (col width, names)
+flo_gt_table <- flo_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(flo_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below. Variables were c
+onstructed by summing included items. 
+```{r flo df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+flo <-
+  complete_rnd2 %>%
+  select(
+    id,
+    i1:i12
+  ) %>%
+  subtract_scale(
+    id = "id",
+    value = 1
+  ) %>%
+  mutate(
+    across(
+      -id,
+      ~case_when(
+        .x == 11 ~ -77,
+        .x == 12 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+flo_calc <-
+  flo %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+flo_miss <- flo %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 12
+  )
+
+# flo_miss %>%
+#   gt::gt() %>%
+#   gt::tab_header(title = 'Missing Data',
+#                  subtitle = 'By Each Participant')
+
+flo_remove <- flo_miss %>% filter(miss_pct >= 20) %>% pull(id)
+```
+
+```{r flo calculation, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+flo_complete <-
+  flo_calc %>%
+  composite_total_avg_fun(
+    id = 'id',
+    max_value = 10,
+    n_items = 12
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  select(
+    -mean_values
+  ) %>%
+  rename(flo_total = sum_values) %>%
+  mutate(
+    across(
+      c(
+        flo_total
+      ),
+      ~case_when(
+        id %in% flo_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+```{r flo alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+flo_alpha <- flo_complete %>% 
+  select(i1:i12) %>% 
+  psych::alpha(check.keys = TRUE)
+
+
+```
+
+```{r flo-scale-table, results = 'asis'}
+# Create the table as a data frame
+flo_scale_df <- data.frame(
+  var_name = c("flo_total"),
+  scale = c("FLO Total score (14)"),
+  scale_construction = c(" `i1`, `i2`, `i3`, `i4`, `i5`, `i6`, `i7`, `i8`, `i9`, `i10`, `i11`, `i12`"),
+  scale_range = c(""), #TODO fill in range 
+  alpha = c(round(flo_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+flo_scale_df <- gt(flo_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             # alpha = "Alpha"
+             ) %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(flo_scale_df)
+
+
+```
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and subscale score:
+  
+```{r flo-mean-items}
+# Calculate the summary statistics for each variable
+flo_summary_data <- lapply(flo, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+flo_summary_data <- as.data.frame(flo_summary_data)%>%select(-c(id))
+
+# Set items as first row
+flo_summary_data <- rbind(names(flo_summary_data), flo_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+flo_tbl <- flo_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+flo_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+  
+```{r flo-distributions, class.source='fold', echo = FALSE}
+flo_complete %>%
+  composite_hist(
+    x = flo_total
+  ) +
+  labs(title = 'Distribution of Total Scores for Flourishing Index')
+```
+
