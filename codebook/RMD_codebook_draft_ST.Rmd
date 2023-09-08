@@ -4606,7 +4606,7 @@ print(flo_label_table)
 
 #### Survey Items
 
-Flourishing Index survey items are presented in the following table:
+ALL Flourishing Index variables have the same response options.
   
 ```{r flo-var-prep}
 # Pull question wording from qualtrics data
@@ -4741,7 +4741,7 @@ flo_alpha <- flo_complete %>%
 # Create the table as a data frame
 flo_scale_df <- data.frame(
   var_name = c("flo_total"),
-  scale = c("FLO Total score (14)"),
+  scale = c("FLO Total score (12)"),
   scale_construction = c(" `i1`, `i2`, `i3`, `i4`, `i5`, `i6`, `i7`, `i8`, `i9`, `i10`, `i11`, `i12`"),
   scale_range = c(""), #TODO fill in range 
   alpha = c(round(flo_alpha$total$raw_alpha, 3))
@@ -4756,7 +4756,7 @@ flo_scale_df <- gt(flo_scale_df) %>%
              scale_range = "Range*",
              # alpha = "Alpha"
              ) %>% 
-  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   cols_width(scale ~ px(135)) %>% 
   apply_tbl_theme() 
@@ -4818,4 +4818,556 @@ flo_complete %>%
   ) +
   labs(title = 'Distribution of Total Scores for Flourishing Index')
 ```
+
+
+## International Trauma Questionnaire - ITQ
+
+### ITQ Description
+
+The ITQ is a 9-item questionnaire designed to measure *insert*.
+
+For the present study, 9 items from the ITQ were collected in order to #TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher scores indicate more severe mental health symptoms. *
+  
+The missing data rule was applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses)
+
+Reference: [@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/10.1111/acps.12956?casa_token=K4GIoIIYOkwAAAAA%3ABuaGU3cOQZwsFiM78FxHp_PHTQXDc72xABnVp8nlMCYRCHzf4c0oOMropyrzVjdClA3pFA-m01heootZ); [DOI](https://doi.org/10.1111/acps.12956)
+
+
+### itq Variables
+
+#### Value Labels
+
+All ITQ variables have the same response options.
+
+
+```{r itq-label-table, results = 'asis'}
+
+itq_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4"),
+  label = c("Not at All",
+            "A Little Bit",
+            "Moderately",
+            "Quite a Bit",
+            "Extremely")) %>% 
+  t() %>% 
+  as.data.frame()
+
+itq_label_df <- setNames(itq_label_df[-1, ], unlist(itq_label_df[1, ]))
+
+
+#create table
+itq_label_table <- itq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(itq_label_table)
+
+
+```
+
+#### Survey Items
+
+All ITQ variables have the same response options.
+  
+```{r itq-var-prep}
+# Pull question wording from qualtrics data
+itq_word <- qualtrics %>% 
+  select(starts_with("itq"))%>%
+  slice(1)
+
+#create table with variable name, description, and notes
+itq_word_long <- itq_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  slice(1:9)
+```
+
+
+```{r itq-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+itq_gt_table <- gt(itq_word_long)
+
+# Table-specific formatting (col width, names)
+itq_gt_table <- itq_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(itq_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below. Variables were c
+onstructed by summing included items. 
+```{r itq df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+itq <-
+  complete_rnd2 %>%
+  select(
+    id,
+    itq1:itq9
+    )
+ 
+
+
+# already cleaned but might need code for cleanning script 
+#   subtract_scale(
+#     id = "id",
+#     value = 1
+#   ) %>%
+#   mutate(
+#     across(
+#       -id,
+#       ~case_when(
+#         .x == 5 ~ -77,
+#         .x == 6 ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
+
+itq_calc <- itq %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+itq_calc <- itq_calc %>%
+  mutate(
+    itq_ad_dx = case_when(
+      (itq1 > 2 | itq2 > 2) &
+        (itq7 > 2 | itq8 > 2 | itq9 > 2) ~ "diagnosis_met",
+      (itq1 <= 2 | itq2 <= 2) &
+        (itq7 <= 2 | itq8 <= 2 | itq9 <= 2) ~ "diagnosis_not_met",
+      TRUE ~ "conditions_not_met"
+    ),
+    itq_nsc_dx = case_when(
+      (itq3 > 2 | itq4 > 2) &
+        (itq7 > 2 | itq8 > 2 | itq9 > 2) ~ "diagnosis_met",
+      (itq3 <= 2 | itq4 <= 2) &
+        (itq7 <= 2 | itq8 <= 2 | itq9 <= 2) ~ "diagnosis_not_met",
+      TRUE ~ "conditions_not_met"
+    ),
+    itq_dr_dx = case_when(
+      (itq5 > 2 | itq6 > 2) &
+        (itq7 > 2 | itq8 > 2 | itq9 > 2) ~ "diagnosis_met",
+      (itq5 <= 2 | itq6 <= 2) &
+        (itq7 <= 2 | itq8 <= 2 | itq9 <= 2) ~ "diagnosis_not_met",
+      TRUE ~ "conditions_not_met"
+    ),
+    itq_dso_dx = case_when(
+      (itq_ad_dx == "diagnosis_met" &
+         itq_nsc_dx == "diagnosis_met" &
+         itq_dr_dx == "diagnosis_met") ~ "diagnosis_met",
+      TRUE ~ "diagnosis_not_met"
+    )
+  )
+
+itq_complete <-
+  itq_calc %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c("itq1", "itq2"),
+    scale2 = c("itq3", "itq4"),
+    scale3 = c("itq5", "itq6")
+  ) %>%
+  rename(
+    itq_ad_total = total1,
+    itq_nsc_total = total2,
+    itq_dr_total = total3
+  ) %>%
+  mutate(
+    itq_dso = (itq_ad_total + itq_nsc_total + itq_dr_total),
+    across(
+      c(
+        itq_ad_total,
+        itq_nsc_total,
+        itq_dr_total
+      )
+      # ~case_when(
+      # id %in% itq_remove ~ NA_real_,
+      # TRUE ~ .x
+      # )
+    )
+  )
+```
+
+```{r itq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+itq_alpha <- itq_complete %>% 
+  select(itq1:itq9) %>% 
+  psych::alpha(check.keys = TRUE)
+
+
+```
+
+```{r itq-scale-table, results = 'asis'}
+
+
+# Create the table as a data frame
+itq_scale_df <- data.frame(
+  var_name = c("Affective Dysregulation Subscale (2)", "Negative Self-Concept Subscale (2)", 
+               "Disturbances in Relationships Subscale (2)", "DSO (6)"),
+  scale = c("itq_ad_total", "itq_nsc_total", "itq_dr_total", "itq_dso"),
+  scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`", 
+                         "`itq1`, `itq2`, `itq3`, `itq4`, `itq5`,`itq6`"),
+  scale_range = c("","","",""), #TODO fill in range 
+  alpha = c("","","","")
+)
+
+# Create the gt table object
+itq_scale_df <- gt(itq_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             # alpha = "Alpha"
+             ) %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(itq_scale_df)
+
+
+```
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and subscale score:
+  
+```{r itq-mean-items}
+# Calculate the summary statistics for each variable
+itq_summary_data <- lapply(itq_complete, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+itq_summary_data <- as.data.frame(itq_summary_data)%>%select(-c(id))
+
+# Set items as first row
+itq_summary_data <- rbind(names(itq_summary_data), itq_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+itq_tbl <- itq_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+itq_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+  
+```{r itq-distributions, class.source='fold', echo = FALSE}
+itq_complete %>%
+  composite_hist(
+    x = itq_ad_total,
+    bins = 15
+  ) +
+  labs(title = "Distribution of Total Scores for the Affective Dysregulation Subscale\nin the International Trauma Questionnaire")
+
+itq_complete %>%
+  composite_hist(
+    x = itq_nsc_total,
+    bins = 15
+  ) +
+  labs(title = "Distribution of Total Scores for the Negative Self-Concept Subscale\nin the International Trauma Questionnaire")
+
+itq_complete %>%
+  composite_hist(
+    x = itq_dr_total,
+    bins = 15
+  ) +
+  labs(title = "Distribution of Total Scores for the Disturbances in Relationships Subscale\nin the International Trauma Questionnaire")
+
+
+itq_complete %>%
+  composite_hist(
+    x = itq_dso,
+    bins = 15
+  ) +
+  labs(title = "Distribution of Total Scores for the DSO Subscale\nin the International Trauma Questionnaire")
+```
+
+
+## Sexual History Survey - Sex
+
+### Sex Description
+
+The SEX is a *insert*.
+
+For the present study, 30 items from the SEX were collected in order to #TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher scores indicate more severe mental health symptoms. *
+  
+The missing data rule was applied. Calculations were completed for participants with 33% or less missing data (this includes -77 responses)
+
+Reference: [@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/10.1111/acps.12956?casa_token=K4GIoIIYOkwAAAAA%3ABuaGU3cOQZwsFiM78FxHp_PHTQXDc72xABnVp8nlMCYRCHzf4c0oOMropyrzVjdClA3pFA-m01heootZ); [DOI](https://doi.org/10.1111/acps.12956)
+
+
+### sex Variables
+
+#### Value Labels
+
+All SEX variables have the same response options.
+
+
+```{r sex-label-table, results = 'asis'}
+
+sex_label_df <- data.frame(
+  value = c("0", "1"),
+  label = c("",
+            "")) %>% 
+  t() %>% 
+  as.data.frame()
+
+sex_label_df <- setNames(sex_label_df[-1, ], unlist(sex_label_df[1, ]))
+
+
+#create table
+sex_label_table <- sex_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(sex_label_table)
+
+
+```
+
+#### Survey Items
+
+All SEX variables have the same response options.
+  
+```{r sex-var-prep}
+# Pull question wording from qualtrics data
+sex_word <- qualtrics %>% 
+  select(S1:S48)%>%
+  slice(1)
+
+
+#create table with variable name, description, and notes
+sex_word_long <- sex_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         value = case_when(var_name == "s1" ~ "1 = Yes
+                                                  \n2 = No
+                                                  \n3 = Decline",
+                           var_name == "s1a" ~ "1 = cisgender female
+                                                \n2 = female
+                                                \n3 = cisgender male
+                                                \n4 = male
+                                                \n5 = trans female
+                                                \n6 = tras male
+                                                \n7 = non-binary
+                                                \n8 = self-identify",
+                           var_name %in% c("s3", "s4", "s6", "s13", "s22", "s23", "s26", "s35", "s38", "s39", "s40", "s44", "s45") ~ "1 = Yes
+                                                              \n2 = No
+                                                              \n3 = Decline",
+                           var_name == "s9" ~ "1 = a great deal
+                           \n2 = quite a lot
+                           \n3 = some
+                           \n4 = not much
+                           \n5 = very little
+                           \n6 = Decline",
+                           var_name == "s10" ~ "1 = heterosexual
+                           \n2 = gay_lesbian
+                           \n3 = bisexual
+                           \n4 = other
+                           \n5 = Decline",
+                           var_name == "s11" ~ "1 = Never,
+                           \n2 ~ Rarely
+                                 \n3 = Sometimes
+                                 \n4 = Often
+                                 \n5 = Very Often
+                                 \n6 = Decline",
+                           var_name == "s12" ~ "1 = Very Comfortable
+                                 \n2 = Somewhat Comfortable
+                                 \n3 = Neutral
+                                 \n4 = Somewhat",
+                           var_name == "s14" ~ "1 = Friend
+                                 \n2 = Romantic Partner
+                                 \n3 = Sister/Brother
+                                 \n4 = Other Relative
+                                 \n5 = Counselor/Teacher/Doctor
+                                 \n6 = Parent
+                                 \n7 = Other
+                                 \n8 = Decline",
+                           var_name == "s16" ~ "1 = Never
+                                 \n2 = Rarely
+                                 \n3 = Sometimes
+                                 \n4 = Often
+                                 \n5 = Very Often
+                                 \n6 = Decline",
+                           var_name %in% c("s17", "s18", "s19") ~ "1 = Very Comfortable
+                                 \n2 = Somewhat Comfortable
+                                 \n3 = Neutral
+                                 \n4 = Somewhat uncomfortable
+                                 \n5 = Very uncomfortable
+                                 \n6 = Decline",
+                           var_name == "s20" ~ "1 = Very confident
+                                 \n2 = Somewhat confident
+                                 \n3 = A little confident
+                                 \n4 = Not at all confident
+                                 \n5 = Decline",
+                           var_name == "s21" ~ "1 = Always or almost always
+                                 \n2 = Often
+                                 \n3 = About  half the time
+                                 \n4 = Occasionally
+                                 \n5 = Never or almost never
+                                 \n6 = Decline",
+                           var_name == "s24" ~ "1 = Yes, I had a std (positive diagnosis)
+                                 \n2 = No STD (negative diagnosis)
+                                 \n3 = Don't know yet; waiting for results
+                                 \n4 = Decline",
+                           var_name == "s28" ~ "1 = Yes
+                                 \n2 = No
+                                 \n3 = Decline
+                                 \n4 = Pregnant prior to last 6 months; knew pregnant prior to 6 month period",
+                           var_name == "s29" ~ "1 = Went to dr; positive diagnosis
+                                 \n2 = Went to dr; negative diagnosis
+                                 \n3 = Went to dr; don't know
+                                 \n4 = Took home test; positive
+                                 \n5 = Took home test; negative
+                                 \n6 = Took home test; don't know
+                                 \n7 = Did nothing; period started
+                                 \n8 = Did nothing, don't know
+                                 \n9 = Decline",
+                           var_name == "s33" ~ "1 = Always or almost always
+                                 \n2 = Often
+                                 \n3 = About half the time
+                                 \n4 = Occasionally
+                                 \n5 = Never or almost never
+                                 \n6 = Decline",
+                           var_name == "s34" ~ "1 = Never 0%
+                                 \n2 = Rarely 1-15%
+                                 \n3 = Occasionally 15-40%
+                                 \n4 = About half the time 40-60%
+                                 \n5 = Usually 60-85%
+                                 \n6 = Most of the time 85-99%
+                                 \n7 = Every single time 100%
+                                 \n8 = Decline",
+                           var_name == "s36" ~ "1 = Always or almost always
+                                 \n2 = Often
+                                 \n3 = About half the time
+                                 \n4 = Occasionally
+                                 \n5 = Never or almost never
+                                 \n6 = Decline",
+                           var_name == "s37" ~ "1 = Always or almost always
+                                 \n2 = Often
+                                 \n3 = About half the time
+                                 \n4 = Occasionally
+                                 \n5 = Never or almost never
+                                 \n6 = Decline",
+                           var_name == "s43" ~ "1 = Never 0%
+                                 \n2 = Rarely 1-15%
+                                 \n3 = Occasionally 15-40%
+                                 \n4 = About half the time 40-60%
+                                 \n5 = Usually 60-85%
+                                 \n6 = Most of the time 85-99%
+                                 \n7 = Every single time 100%
+                                 \n8 = Decline
+                                 \n9 = Don't know
+                                 \n10 = Not using birth control; currently pregnant",
+                           var_name == "s46" ~ "1 = Yes, had oral sex without dental dam
+                                 \n2 = No, oral sex and always used dental dam
+                                 \n3 = Decline",
+                           TRUE ~ as.character("")
+         ),
+         notes = as.character("")
+         
+  ) %>%
+  mutate(description = ifelse(var_name == "s2", "When did you start seeing your current partner? ",
+         ifelse(var_name == "s2a", "02a. How long, not counting time when you were broken up, have you and your partner been together? __ __ years",
+                              ifelse(var_name == "s2b", "	02b. __ __ months",
+                                     ifelse(var_name == "s2c", "02c. __ __ days",
+                                            ifelse(var_name == "s10", "Do you feel that you are: ",
+                                                   ifelse(var_name == "s10_4_text", "Do you feel that you are:",
+                                                          ifelse(var_name == "s13", "Do you have anyone else, not including your closest friends, that you talk to when you have a question or concern regarding birth control or safe sex practices?",
+                                                                 ifelse(var_name == "s14", "Is that person a friend, relative, partner, or someone else?",
+                                                                        ifelse(var_name == "s14_8_text", "Is that person a friend, relative, partner, or someone else?",
+                                                                               ifelse(var_name == "s18", "How comfortable do you feel discussing the use of birth control or contraceptives to prevent pregnancy with someone you might have sex with?",
+                                                                                      ifelse(var_name == "s28", "Were there any times during the last 6 months that you thought you might be pregnant? (Assessor select the 4th option \"I became pregnant prior to this last 6 months...\" if the participant was recently or is currently pregnant)",
+                                                                                             ifelse(var_name == "s29", "What happened?",
+                                                                                                    ifelse(var_name == "s30", "How many times, in the last six months, have you had sexual relations? __ __ __ times",
+                                                                                                           ifelse(var_name == "s38", "In the last 6 months, have you had sexual relations with someone who injects drugs? ",
+                                                                                                                  ifelse(var_name == "s43", "In the last 6 months, when you've had intercourse with a male partner, what percentage of the time did you or your partner USE a birth control method specifically to prevent pregnancy?", description
+                                                                                                                         ))))))))))))))))
+
+  
+
+
+
+```
+
+
+```{r sex-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+sex_gt_table <- gt(sex_word_long)
+
+# Table-specific formatting (col width, names)
+sex_gt_table <- sex_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(sex_gt_table)
+
+
+```
+
 
