@@ -3672,7 +3672,6 @@ eds <-
       "^elf"
     )
   ) %>% 
-#TODO: need to colculate total and average 
 composite_total_avg_fun(
   id = c(
     'id', "elf1_c", "elf2_c", "elf3_c", "elf7_c",
@@ -5183,7 +5182,7 @@ print(sex_label_table)
 
 #### Survey Items
 
-All SEX variables have the same response options.
+All SEX variables are presented below. Variable without value are open end questions. 
   
 ```{r sex-var-prep}
 # Pull question wording from qualtrics data
@@ -5371,3 +5370,302 @@ print(sex_gt_table)
 ```
 
 
+## CINT
+
+### CINT Description
+
+The CINT is TODO: insert. 
+
+All <TODO:insert> items from the 
+
+
+TThe missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses)
+Reference: [@](); [DOI]()
+
+  
+### CINT Variables
+
+#### Value Labels
+
+All CINT survey items response options are below.
+
+pct0, pct1, pct2a, pct2b, pct2c, pct2d, pct3a, pct3b, pct3c, pct3d
+```{r CINT-label-table, results = 'asis'}
+
+cint_label_df <- data.frame(
+  value = c("1", "0"),
+  label = c("Yes",
+            "No")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+cint_label_df <- setNames(cint_label_df[-1, ], unlist(cint_label_df[1, ]))
+
+
+#create table
+cint_label_table <- cint_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cint_label_table)
+
+
+```
+
+
+
+
+
+#### Survey Items
+
+All CINT survey items are presented in the following table:
+  
+```{r cint-var-prep}
+# Pull question wording from qualtrics data
+cint_word <- qualtrics %>% 
+  select(PCT0:PCT3e) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+
+cint_word_long <- cint_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate_all(~gsub("READ:", "", .)) %>%
+  mutate(description = str_replace(description, "^\\d[a-z]+\\.\\s*|^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")
+         ) %>%
+  mutate(description = if_else(var_name == "pct0", "Has TC reported any pregnancies?",
+                               if_else(var_name == "pct2e", "During which pregnancy or pregnancies did this occur? ",
+                                       if_else(var_name == "pct3e", "During which pregnancy or pregnancies did this occur? ", description))))
+  
+
+
+
+```
+
+
+```{r cint-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cint_gt_table <- gt(cint_word_long)
+
+# Table-specific formatting (col width, names)
+cint_gt_table <- cint_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(250),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cint_gt_table)
+
+```
+
+
+#### Scale and Subscales
+
+Information on the aggregated scale and subscale variables are below. Total and subscale variables were constructed by summing corresponding items. 
+
+
+```{r cint-alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+cint_alpha <-
+  complete_rnd2 %>%
+  select( pct1, pct2a, pct2b, pct2c, pct2d, pct3a, pct3b, pct3c, pct3d) %>% #TODO: Shaina, could you double check if the calculation is right
+   filter(complete.cases(.)) %>%
+  psych::alpha(check.keys = TRUE)
+
+
+```
+
+```{r cint-scale-table, results = 'asis'}
+# Create the table as a data frame
+# TODO: should the calculation use revers score?
+cint_scale_df <- data.frame(
+  var_name = c("cint_total"),
+  scale = c("Total Score (9)"),
+  scale_construction = c( "`pct1`, `pct2a`, `pct2b`, `pct2c`, `pct2d`, `pct3a`, `pct3b`, `pct3c`, `pct3d`"),
+  scale_range = c(""),
+  alpha = c(round(cint_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+cint_scale_table <- gt(cint_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme()
+
+# Print the table
+print(cint_scale_table)
+
+```
+
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and subscale score:
+
+```{r cint-mean-items}
+# Create subset of cint items
+data_subset_cint <- complete_rnd2 %>%
+  select( pct1, pct2a, pct2b, pct2c, pct2d, pct3a, pct3b, pct3c, pct3d)
+
+# Calculate the summary statistics for each variable
+summary_data_cint <- lapply(data_subset_cint, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- sprintf("%.2f", round(sd(x, na.rm = TRUE), 2))
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+summary_df_cint <- as.data.frame(summary_data_cint) %>% 
+  rbind(names(summary_data_cint)) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  select(`5`, everything())
+
+# Create the gt table
+cint_tbl <- summary_df_cint %>%
+  gt() %>%
+  cols_label(`5` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(2:5 ~ px(160)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cint_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+```{r cint-calculation, class.source='fold', echo = FALSE}
+cint <- complete_rnd2 %>%
+  select(
+    id,
+    pct0:pct3e
+  ) %>%
+  mutate(
+    pct0 = case_when(
+      pct0 == 1 ~ "Yes",
+      pct0 == 2 ~ "No",
+      TRUE ~ NA_character_
+    ),
+    across(
+      c(
+        pct1:pct2d,
+        pct3a:pct3d
+      ),
+      ~case_when(
+        .x == 1 ~ 1,
+        .x == 2 ~ 0,
+        .x == 3 ~ -77,
+        TRUE ~ NA_real_
+      )
+    )
+  )
+
+cint_calc <- cint %>%
+  mutate(
+    across(
+        -c(id, pct0, pct1, pct2e, pct3e),
+        ~case_when(
+          .x == -77 ~ NA_real_,
+          TRUE ~ .x
+        )
+    )
+  )
+
+cint_miss <- cint_calc %>%
+  pct_miss_fun(
+    id = c(
+      "id",
+      "pct0",
+      "pct1",
+      "pct2e",
+      "pct3e"
+    ),
+    n_items = 8
+  )
+
+# cint_miss %>%
+#   gt::gt() %>%
+#   gt::tab_header(
+#     title = "Missing Data",
+#     subtitle = "By Each Participant"
+#   )
+
+cint_remove <- cint_miss %>% filter(miss_pct >= 30) %>% pull(id)
+
+cint_complete <- cint_calc %>%
+  composite_total_avg_fun(
+    id = c(
+      "id",
+      "pct0",
+      "pct1",
+      "pct2e",
+      "pct3e"
+    ),
+    max_value = 1,
+    n_items = 8
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  select(
+    -mean_values
+  ) %>%
+  rename(
+    cint_total = sum_values
+    ) %>%
+  mutate(
+    across(
+      c(
+        cint_total
+      ),
+      ~case_when(
+        id %in% cint_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+```{r cint-distributions, class.source='fold', echo = FALSE}
+cint_complete %>%
+  composite_hist(
+    x = cint_total,
+    bins = 10
+  ) +
+  labs(
+    title = "Distribution of Total Scores for the CINT"
+  )
+```
