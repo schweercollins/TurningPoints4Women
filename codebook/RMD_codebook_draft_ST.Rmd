@@ -5149,38 +5149,7 @@ Reference: [@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/
 
 ### sex Variables
 
-#### Value Labels
-
-All SEX variables have the same response options.
-
-
-```{r sex-label-table, results = 'asis'}
-
-sex_label_df <- data.frame(
-  value = c("0", "1"),
-  label = c("",
-            "")) %>% 
-  t() %>% 
-  as.data.frame()
-
-sex_label_df <- setNames(sex_label_df[-1, ], unlist(sex_label_df[1, ]))
-
-
-#create table
-sex_label_table <- sex_label_df %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
-  apply_labtab_theme()
-
-# Print the table
-print(sex_label_table)
-
-
-```
-
-#### Survey Items
+#### Value Labels and Survey Items
 
 All SEX variables are presented below. Variable without value are open end questions. 
   
@@ -5370,7 +5339,7 @@ print(sex_gt_table)
 ```
 
 
-## CINT
+## pregnancy childbirth trauma question
 
 ### CINT Description
 
@@ -5380,7 +5349,8 @@ All <TODO:insert> items from the
 
 
 TThe missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses)
-Reference: [@](); [DOI]()
+
+Reference: [@saxbe_birth_2018](https://psycnet.apa.org/doiLanding?doi=10.1037%2Ffam0000365); [DOI](https://doi.org/10.1037/fam0000365)
 
   
 ### CINT Variables
@@ -5485,18 +5455,32 @@ cint_alpha <-
    filter(complete.cases(.)) %>%
   psych::alpha(check.keys = TRUE)
 
+cint_alpha_Preg <-
+  complete_rnd2 %>%
+  select( pct1, pct2a, pct2b, pct2c, pct2d) %>% #TODO: Shaina, could you double check if the calculation is right
+   filter(complete.cases(.)) %>%
+  psych::alpha(check.keys = TRUE)
 
+cint_alpha_Child <-
+  complete_rnd2 %>%
+  select( pct1, pct3a, pct3b, pct3c, pct3d) %>% #TODO: Shaina, could you double check if the calculation is right
+   filter(complete.cases(.)) %>%
+  psych::alpha(check.keys = TRUE)
 ```
 
+TODO: the Preg & Child sub-scale will need calculate in cleaning script
 ```{r cint-scale-table, results = 'asis'}
 # Create the table as a data frame
 # TODO: should the calculation use revers score?
 cint_scale_df <- data.frame(
-  var_name = c("cint_total"),
-  scale = c("Total Score (9)"),
-  scale_construction = c( "`pct1`, `pct2a`, `pct2b`, `pct2c`, `pct2d`, `pct3a`, `pct3b`, `pct3c`, `pct3d`"),
-  scale_range = c(""),
-  alpha = c(round(cint_alpha$total$raw_alpha, 3))
+  var_name = c("cint_total", "", ""), # TODO: the scale need to be calculated in cleaning file
+  scale = c("Total Score (9)","Pregnancy Trauma (3)","Childbirth Trauma (3)"),
+  scale_construction = c( "`pct1`, `pct2a`, `pct2b`, `pct2c`, `pct2d`, `pct3a`, `pct3b`, `pct3c`, `pct3d`", "`pct1`, `pct2a`, `pct2b`, `pct2c`, `pct2d`", "`pct1`,`pct3a`, `pct3b`, `pct3c`, `pct3d`"),
+  scale_range = c("","",""),
+  alpha = c(round(cint_alpha$total$raw_alpha, 3),
+            round(cint_alpha_Preg$total$raw_alpha, 3),
+            round(cint_alpha_Child$total$raw_alpha, 3)
+            )
 )
 
 # Create the gt table object
