@@ -1,0 +1,101 @@
+---
+title: "Dried Blood Spot Data Cleaning Script"
+author: "Shaina Trevino"
+date: "2023-09-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(readxl, here, tidyverse, openxlsx)
+
+```
+
+## Import
+
+```{r import}
+dbs_fp <- here("do_not_push", "TPW - Result Report - 27 June 2023.xlsx")
+
+#import raw data
+raw_cho_df <- read_excel(dbs_fp, sheet = "CHO") 
+
+raw_hdl_df <- read_excel(dbs_fp, sheet = "HDL") 
+
+raw_trg_df <- read_excel(dbs_fp, sheet = "TRG")
+
+raw_crp_df <- read_excel(dbs_fp, sheet = "CRP")
+
+raw_ebv_df <- read_excel(dbs_fp, sheet = "EBV")
+
+raw_a1c_df <- read_excel(dbs_fp, sheet = "A1c")
+
+raw_il6_df <- read_excel(dbs_fp, sheet = "IL6")
+
+```
+
+## Compute AL Indicators
+
+```{r al-vars}
+#CHO AL vars
+cho_df <- raw_cho_df %>% 
+  mutate(CHO_AL  = ifelse(PE_CHO >= 240, "Yes", "No"),
+         CHO_PAL = ifelse(PE_CHO >= quantile(PE_CHO, 0.75, na.rm = TRUE), "Yes", "No"))
+
+#CRP AL vars
+crp_df <- raw_crp_df %>% 
+  mutate(CRP_AL  = ifelse(as.numeric(PE_CRP) >= 0.3, "Yes", "No"),
+         CRP_PAL = ifelse(as.numeric(PE_CRP) >= quantile(as.numeric(PE_CRP), 0.75, na.rm = TRUE), "Yes", "No")) %>% 
+  mutate_at(vars(CRP_AL, CRP_PAL), ~ ifelse(Study_Sample_ID == "HR177", "No", .)) 
+
+#IL6 AL vars
+il6_df <- raw_il6_df %>% 
+  mutate(IL6_AL  = ifelse(PE_IL6 >= 6.1, "Yes", "No"),
+         IL6_PAL = ifelse(PE_IL6 >= quantile(PE_IL6, 0.75, na.rm = TRUE), "Yes", "No"))
+
+#HDL AL vars
+hdl_df <- raw_hdl_df %>% 
+  mutate(HDL_AL  = ifelse(PE_HDL <= 39, "Yes", "No"),
+         HDL_PAL = ifelse(PE_HDL >= quantile(PE_HDL, 0.75, na.rm = TRUE), "Yes", "No"))
+
+#TRG AL vars
+trg_df <- raw_trg_df %>% 
+  mutate(TRG_AL  = ifelse(PE_TRG >= 150, "Yes", "No"),
+         TRG_PAL = ifelse(PE_TRG >= quantile(PE_TRG, 0.75, na.rm = TRUE), "Yes", "No"))
+
+#A1C AL vars
+a1c_df <- raw_a1c_df %>% 
+  mutate(A1C_AL  = ifelse(HbA1c >= 6.5, "Yes", "No"),
+         AIC_PAL = ifelse(HbA1c >= quantile(HbA1c, 0.75, na.rm = TRUE), "Yes", "No"))
+
+#EBV AL vars
+ebv_df <- raw_ebv_df %>% 
+  mutate(#EBV_AL  = ifelse(PE_EBV >= #, "Yes", "No"),
+         EBV_PAL = ifelse(PE_EBV >= quantile(PE_EBV, 0.75, na.rm = TRUE), "Yes", "No"))
+
+```
+
+## Merge 
+
+Merge together all AL indicators and export
+
+```{r merge}
+
+full_df <- cho_df %>% 
+  left_join(crp_df, by = "Study_Sample_ID") %>% 
+  left_join(il6_df, by = "Study_Sample_ID") %>% 
+  left_join(hdl_df, by = "Study_Sample_ID") %>% 
+  left_join(trg_df, by = "Study_Sample_ID") %>% 
+  left_join(a1c_df, by = "Study_Sample_ID") %>% 
+  left_join(ebv_df, by = "Study_Sample_ID") 
+
+al_df <- full_df %>% 
+  select(Study_Sample_ID, ends_with("al"))
+
+#export as same format with new AL variables in respective tabs
+#write.xlsx(list("CHO" = cho_df, "HDL" = hdl_df, "TRG" = trg_df, "CRP" = crp_df, "EBV" = ebv_df, "A1c" = a1c_df, "IL6" = il6_df), file = "do_not_push/dbs_full.xlsx")
+
+```
+
