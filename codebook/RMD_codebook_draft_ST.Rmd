@@ -185,7 +185,7 @@ bsi_label_table <- bsi_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -293,7 +293,8 @@ bsi_scale_table <- gt(bsi_scale_df) %>%
             alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  cols_width(
+             scale_construction ~ pct(100)) %>% 
   apply_tbl_theme() 
 
 # Print the table
@@ -335,7 +336,7 @@ tbl <- summary_data %>%
   cols_label(`1` = "Variable",
              Range = "Range*",
              Missing = "% Missing") %>% 
-  cols_width(everything() ~ px(115)) %>%
+  cols_width(everything() ~ pct(100)) %>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -418,7 +419,7 @@ cesd_label_table <- cesd_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  #cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -448,7 +449,7 @@ cesd2_label_table <- cesd2_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(150)) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
   apply_labtab_theme() 
 
 # Print the table
@@ -563,7 +564,7 @@ cesd_scale_table <- gt(cesd_scale_df) %>%
             alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  cols_width(scale_construction ~ pct(100)) %>% 
   apply_tbl_theme()
 
 # Print the table
@@ -605,7 +606,8 @@ cesd_tbl <- summary_df_cesd %>%
   cols_label(`5` = "Variable",
              Range = "Range*",
              Missing = "% Missing") %>% 
-  cols_width(2:5 ~ px(160)) %>%
+  cols_width(`5` ~ px(170)) %>%
+  tab_options(table.width = pct(100))%>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -817,8 +819,8 @@ ciq_label_table <- ciq_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(c(1,7) ~ px(180),
-             2:6 ~ px(79)) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  #cols_width(everything() ~ pct(100)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -870,6 +872,7 @@ ciq_gt_table <- ciq_gt_table %>%
   apply_tbl_theme() %>% 
   cols_width(notes ~ px(150),
              var_name ~ px(100)) %>%
+   tab_options(table.width = pct(100))%>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
@@ -914,7 +917,11 @@ ciq_scale_table <- gt(ciq_scale_df) %>%
              alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(151)) %>% 
+  cols_width(var_name ~ pct(25),
+             scale ~ pct(25),
+             scale_construction ~ pct(25)
+             ) %>% 
+   tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
 # Print the table
@@ -956,7 +963,7 @@ ciq_tbl <- ciq_summary_data %>%
   cols_label(`1` = "Variable",
              Range = "Range*",
              Missing = "% Missing") %>% 
-  cols_width(everything() ~ px(130)) %>%
+  cols_width(everything() ~ pct(100)) %>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -1054,7 +1061,7 @@ dast_label_table <- dast_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(c(1,2) ~ px(180)) %>% 
+  cols_width(everything() ~ px(180)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -1086,7 +1093,8 @@ dast_label_table_total <- dast_label_total %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(c(1:5) ~ px(151)) %>% 
+  #cols_width(c(1:5) ~ px(151)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_labtab_theme()
 
 # Print the table
@@ -1136,6 +1144,7 @@ dast_gt_table <- dast_gt_table %>%
   apply_tbl_theme() %>% 
   cols_width(notes ~ px(150),
              var_name ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
  
 
@@ -1185,7 +1194,9 @@ dast_scale_table <- gt(dast_scale_df) %>%
              alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  cols_width(scale ~ px(150),
+             scale_construction ~ pct(50)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
 # Print the table
@@ -1233,9 +1244,7 @@ dast_tbl_binary <- dast_summary_data_binary %>%
              num_yes = "N",
              per_yes = "%",
              Missing = "% Missing") %>% 
-  cols_width(everything() ~ px(115),
-             num_no ~ px(100),
-             num_yes ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
   cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
   tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
   tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
@@ -1250,6 +1259,7 @@ dast_tbl_binary
 
 
 ```
+
 
 For the total score: 
 
@@ -1288,6 +1298,7 @@ dast_tbl <- dast_summary_data %>%
              Range = "Range",
              Missing = "% Missing") %>% 
   cols_width(everything() ~ px(115)) %>%
+  tab_options(table.width = pct(100))%>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -1410,6 +1421,7 @@ CTS_label_table <- CTS_label_df %>%
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
   #cols_width(everything() ~ px(100)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_labtab_theme()
 
 # Print the table
@@ -1459,6 +1471,7 @@ my_gt_table <- my_gt_table %>%
   apply_tbl_theme() %>% 
   cols_width(notes ~ px(150),
              var_name ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
@@ -1575,10 +1588,14 @@ cts_tbl <- cts_summary_data %>%
   cols_label(`1` = "Variable",
              Range = "Range*",
              Missing = "% Missing") %>% 
-  cols_width(
-    c(2,3,5) ~ px(115)) %>%
+  cols_width(`1` ~ pct(27)) %>%
+  tab_options(table.width = pct(100))%>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
+    fmt_missing(
+        columns = c("Mean","SD","Range", "Missing")
+        # missing_text = "missing"
+  )%>%
   tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 
@@ -2042,6 +2059,7 @@ bcap_label_table <- bcap_label_df %>%
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
   cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_labtab_theme()
 
 # Print the table
@@ -2090,7 +2108,11 @@ bcap_gt_table <- bcap_gt_table %>%
             description = "Description",
             notes = "Notes") %>% 
   apply_tbl_theme() %>% 
-  cols_width(var_name ~ px(100)) %>%
+  cols_width(notes ~ px(250),
+             var_name ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
+  #tab_options(table.width = pct(100))%>%
+  #cols_width(var_name ~ px(100)) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
@@ -2224,7 +2246,8 @@ bcap_scale_table <- gt(bcap_scale_df) %>%
             alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  cols_width(scale_construction ~ px(135)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
 # Print the table
@@ -2282,6 +2305,7 @@ bcap_tbl_binary <- bcap_summary_data_binary %>%
   cols_width(everything() ~ px(115),
              num_no ~ px(100),
              num_yes ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
   cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
   tab_spanner(label = "Disagree", columns = c(num_no, per_no)) %>% 
   tab_spanner(label = "Agree", columns = c(num_yes, per_yes)) %>% 
@@ -2845,7 +2869,7 @@ Reference: [@bartholomew1991attachment](https://psycnet.apa.org/record/1991-3307
 
 #### Value Labels
 
-ARQ variables have the multiple response options
+Response options for `rq1`
 
 ```{r ARQ-label-table, results = 'asis'}
 
@@ -2868,7 +2892,7 @@ arq_label_table <- arq_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(everything() ~ px(180)) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -2877,6 +2901,7 @@ print(arq_label_table)
 
 ```
 
+Response option for `rqa`, `rqb`, `rqc`, `rqd`. 
 ```{r ARQ-label-table-2, results = 'asis'}
 
 arq_label_df <- data.frame(
@@ -2927,7 +2952,7 @@ arq_word_long <- arq_word %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>% 
-  mutate(description = if_else(var_name == "rq1", "Please tell me which one style best describes you or is the closest to the way you are. A. It is easy for me to become emotionally close to others. I am comfortable depending on them and having them depend on me. I don’t worry about being alone or having others not accept me. B. I am uncomfortable getting close to others. I want emotionally close relationships, but I find it difficult to trust others completely, or to depend on them. I worry that I will be hurt if I allow myself to become too close to others. C. I want to be completely emotionally intimate with others, but I often find that others are reluctant to get as close as I would like. I am uncomfortable being without close relationships, but I sometimes worry that others don’t value me as much as I value them. D. I am comfortable without close emotional relationships. It is very important to me to feel independent and self-sufficient, and I prefer not to depend on others or have others depend on me.", description))
+  mutate(description = if_else(var_name == "rq1", "Please tell me which one style best describes you or is the closest to the way you are.", description))
 
 ```
 
