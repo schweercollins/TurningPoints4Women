@@ -1,0 +1,369 @@
+---
+title: "Biological Assessment Data Cleaning Script"
+author: "Shaina Trevino"
+date: "2023-09-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(rio, here, tidyverse)
+
+```
+
+## Import
+
+```{r import}
+#import raw data
+raw_bio_df <- import(here("do_not_push", "Biological_Assessment_final_raw_sample_data_NEVERDELETE.csv")) %>% 
+  janitor::clean_names()
+
+#import pulse data
+
+raw_pulse_df <- import(here("do_not_push", "HeartRate_coded.csv")) %>% 
+  janitor::clean_names()
+
+```
+
+## Tidy 
+
+Tidy data for archiving 
+
+1. Extract question text and variable name in separate df (for codebook) and remove from archived data
+
+1. Remove variables that will not be archived (e.g., qualtrics info)
+
+1. Re-order variables so questions that affect bio variables are together and presented first, the variables of interest are presented second (e.g., height, weight, lifestyle/covid questions)
+
+1. Correct variable types for calculations
+
+1. Rename variables based on construct name
+
+1. Specify missing data
+
+1. Check for data errors (data quality check of variables included in calculations) - impossible values
+ 
+  * `pef` and `fev` values 0 for one participant (HR219) --> changed to NA
+  * `pef` and `fev` values flipped for one participant (P821) --> swapped `pef` values with `fev` values
+  * `pef3` for HR214 should not have decimal
+  * `fev1a` for P866 is missing decimal
+  * `fev1c` is missing decimals for participants P856, P844, and HR119
+  * `b27` should be changed to NA for P803
+  
+1. Protect identifiability
+
+  * remove exact covid and diagnosis dates
+  * remove specific diagnosis names
+
+
+
+```{r tidy}
+#transform pulse data to merge
+pulse_td <- raw_pulse_df %>% 
+  rename(id = family) %>% 
+  select(id, pulse1, pulse2)
+  
+#extract question text and variable name for metadata
+bio_md <- raw_bio_df %>% 
+  slice(1) %>% 
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Question_Text")
+
+#correct complex data entry errors
+bio_df <- raw_bio_df %>% 
+  rename(id = recipient_first_name) %>%
+  mutate(
+    temp1 = ifelse(id == "P821", pef_1, fev1a),
+    temp2 = ifelse(id == "P821", pef2, fev1b),
+    temp3 = ifelse(id == "P821", pef3, fev1c),
+    pef_1  = ifelse(id == "P821", fev1a, pef_1),
+    pef2  = ifelse(id == "P821", fev1b, pef2),
+    pef3  = ifelse(id == "P821", fev1c, pef3),
+    fev1a = ifelse(id == "P821", temp1, fev1a),
+    fev1b = ifelse(id == "P821", temp2, fev1b),
+    fev1c = ifelse(id == "P821", temp3, fev1c),
+    temp_hr2 = ifelse(id == "HR216", fev1b, pef2),
+    temp_hr5 = ifelse(id == "HR216", pef2, fev1b),
+    pef3  = ifelse(id == "HR214", 246, pef3),
+    fev1a = ifelse(id == "P866", 2.16, fev1a),
+    fev1c = case_when(id == "P856" ~ "2.11",
+                      id == "P844" ~ "2.11", 
+                      id == "HR119" ~ "2.08",
+                      TRUE ~ fev1c),
+    b27 = ifelse(id == "P803", NA, b27)
+  ) %>%
+  select(-temp1, -temp2, -temp3, -pef2, -fev1b) %>% 
+  rename(pef2 = temp_hr2,
+         fev1b = temp_hr5)
+
+#remove excess variables from qualtrics, slice, re-order, rename, and create calculated variables
+bio_td <- bio_df %>% 
+  #select(-start_date:-recipient_last_name, -recipient_email:-user_language) %>% 
+  slice(-1:-2) %>% 
+  select(id, bp1a, bp1b, bp2a, bp2b, height_measure:fev1c, fev1b, pef2, r1:r12, q1:q14, b1:b29a, starts_with("x")) %>% 
+  mutate_if(is.character, ~na_if(., "")) %>% 
+  mutate_all(~ifelse(is.nan(.), NA, .)) %>% 
+  mutate_at(vars(starts_with("bp"), starts_with("pef"), starts_with("fev"), ends_with("measure")), as.numeric) %>%
+  mutate_at(vars(starts_with("pef"), starts_with("fev")), ~ ifelse(. == 0, NA, .)) %>% 
+  mutate_if(is.character, as.factor) %>% 
+  left_join(pulse_td) %>% 
+  mutate(bp_sys_avg = rowMeans(select(., bp1a, bp2a), na.rm = TRUE),
+         bp_dia_avg = rowMeans(select(., bp1b, bp2b), na.rm = TRUE),
+         bp_sys_cal = ifelse(bp_sys_avg >= 140, "Yes", "No"),
+         bp_dia_cal = ifelse(bp_dia_avg >= 90, "Yes", "No"),
+         bp_sys_pal = ifelse(bp_sys_avg >= quantile(bp_sys_avg, 0.75), "Yes", "No"),
+         bp_dia_pal = ifelse(bp_dia_avg >= quantile(bp_dia_avg, 0.75), "Yes", "No"),
+         pef_avg    = round(rowMeans(select(., starts_with("pef")), na.rm = TRUE), 1),
+         pef_cal    = ifelse(pef_avg <= 319, "Yes", "No"),
+         pef_pal    = ifelse(pef_avg >= quantile(pef_avg, 0.75, na.rm = TRUE), "Yes", "No"),
+         wth_ratio    = round(iliac_crest_measure / hip_measure, 3),
+         wth_cal = ifelse(wth_ratio >= 0.85, "Yes", "No"),
+         wth_pal = ifelse(wth_ratio >= quantile(wth_ratio, 0.75), "Yes", "No"),
+         bmi_score  = weight_measure / ((height_measure / 100)^2),
+         bmi_cal    = ifelse(bmi_score >= 30, "Yes", "No"),
+         bmi_pal    = ifelse(bmi_score >= quantile(bmi_score, 0.75), "Yes", "No"),
+         pulse_avg  = rowMeans(select(., pulse1, pulse2), na.rm = TRUE),
+         pulse_tavg = ifelse(!is.na(pulse1) & !is.na(pulse2), "Yes", "No"),
+         pulse_cal  = ifelse(pulse_avg >= 90, "Yes", "No"),
+         pulse_pal  = ifelse(pulse_avg >= quantile(pulse_avg, 0.75, na.rm = TRUE), "Yes", "No")) %>% 
+  rename(bp1 = bp1a,
+         bp2 = bp1b,
+         bp3 = bp2a,
+         bp4 = bp2b,
+         bmi1 = height_measure,
+         bmi2 = weight_measure,
+         wth1 = iliac_crest_measure,
+         wth2 = hip_measure,
+         pef1 = pef_1,
+         pef4 = fev1a,
+         pef5 = fev1b,
+         pef6 = fev1c,
+         b7c = b7b,
+         b7b = b7a_1_text,
+         b8c = b8b,
+         b8b = b8a_1_text,
+         b9d = b9c_3_text,
+         b10c = b10b,
+         b10b = b10a_1_text,
+         b11a = q291,
+         b11b = q291_1_text,
+         b11c = q292,
+         b14a = b14b) %>%
+  rename_at(vars(matches("^b[0-9]")), ~paste0("hbc", substr(., 2, nchar(.)))) %>%
+  rename_at(vars(matches("^r[0-9]")), ~paste0("rhs", substr(., 2, nchar(.)))) %>%
+  rename_at(vars(matches("^x[0-9]")), ~paste0("chc", substr(., 2, nchar(.)))) %>%
+  rename_at(vars(matches("^q[0-9]")), ~paste0("cev", substr(., 2, nchar(.)))) %>%
+  select(id, starts_with("bp"), starts_with("bmi"), starts_with("wth"), pef1, pef2, pef3, pef4, pef5, pef6, pef_avg, pef_cal, pef_pal, starts_with("pulse"), starts_with("rhs"), starts_with("cev"), starts_with("hbc"), starts_with("chc")) %>% 
+  mutate_at(vars(bmi1, bmi2, wth2, ), ~ round(., 1)) %>% 
+  mutate_at(vars(bmi_score, pef5), ~ round(., 2)) %>% 
+  mutate_at(vars(pef2, pef3), ~ round(.)) %>% 
+  mutate(rhs1 = gsub("\\d+ - ", "", rhs1),
+         chc20a = gsub("\\..*$", "", chc20a))
+
+#create RAND subscales
+rhs_calc <- bio_td %>% 
+  select(starts_with("rhs")) %>% 
+  mutate(rhs1_r = case_when(
+      rhs1 == 5 ~ 1,
+      rhs1 == 4 ~ 2,
+      rhs1 == 3 ~ 3,
+      rhs1 == 2 ~ 4,
+      rhs1 == 1 ~ 5,
+     # rhs1 == 6 ~ -77,
+      TRUE ~ NA_real_)) %>% 
+  mutate(across(starts_with("rhs"), ~if_else(.x %in% c("Decline to Answer", "Don't know"), NA_character_, .x))) %>%
+  mutate(
+    rhs1 = case_when(
+      rhs1 == 5 ~ 1,
+      rhs1 == 4 ~ 2,
+      rhs1 == 3 ~ 3,
+      rhs1 == 2 ~ 4,
+      rhs1 == 1 ~ 5,
+     # rhs1 == 6 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    across(
+      c(rhs2:rhs8),
+      ~case_when(
+        .x == "Yes" ~ 1,
+        .x == "No" ~ 0,
+       # .x == 3 ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      c(rhs9:rhs12),
+      ~case_when(
+        .x == 1 ~ 5,
+        .x == 2 ~ 4,
+        .x == 3 ~ 3,
+        .x == 4 ~ 2,
+        .x == 5 ~ 1,
+        .x == 6 ~ -77,
+        TRUE ~ NA_real_
+      )
+    )
+  )
+
+#take out identifiable cev and chc vars and rename sequentially for archived dataset
+#specify excluded variables
+excluded_vars <- c("cev2", "cev4", "cev13", "cev14", "chc1b", "chc1e", "chc1g", "chc2c", "chc2f", "chc2h", 
+                   "chc3d", "chc3f", "chc4d", "chc4f", "chc5b", "chc5e", "chc5g", "chc6c", "chc6e", "chc7b", 
+                   "chc7e", "chc7g", "chc8d", "chc8f", "chc9b", "chc9e", "chc9g", "chc10b", "chc10e", "chc10g", "chc11b",
+                   "chc11e", "chc11g", "chc12b", "chc12e", "chc12g", "chc13b", "chc13e", "chc13g", "chc14b", "chc14e",
+                   "chc14g", "chc15b", "chc15e", "chc15g", "chc16b", "chc16e", "chc16g", "chc17d", "chc17f", "chc18d",
+                   "chc18f", "chc19d", "chc19f", "chc20a_1_text", "chc20b", "chc20e", "chc20g")
+
+
+bio_td_archive <- bio_td %>% 
+  select(-one_of(excluded_vars)) %>% 
+  rename(cev1	=	cev1,
+         cev2	=	cev3,
+         cev3	=	cev5,
+         cev4	=	cev6,
+         cev5	=	cev7,
+         cev6	=	cev8,
+         cev7	=	cev9,
+         cev8	=	cev10,
+         cev9	=	cev11,
+         cev10	=	cev12,
+         chc1a	=	chc1a,
+         chc1b	=	chc1c,
+         chc1c	=	chc1d,
+         chc1d	=	chc1f,
+         chc2a	=	chc2a,
+         chc2b	=	chc2b,
+         chc2c	=	chc2d,
+         chc2d	=	chc2e,
+         chc2e	=	chc2g,
+         chc3a	=	chc3a,
+         chc3b	=	chc3b,
+         chc3c	=	chc3c,
+         chc3d	=	chc3e,
+         chc4a	=	chc4a,
+         chc4b	=	chc4b,
+         chc4c	=	chc4c,
+         chc4d	=	chc4e,
+         chc5a	=	chc5a,
+         chc5b	=	chc5c,
+         chc5c	=	chc5d,
+         chc5d	=	chc5f,
+         chc6a	=	chc6a,
+         chc6b	=	chc6b,
+         chc6c	=	chc6b_2,
+         chc6d	=	chc6d,
+         chc7a	=	chc7a,
+         chc7b	=	chc7c,
+         chc7c	=	chc7d,
+         chc7d	=	chc7f,
+         chc8a	=	chc8a,
+         chc8b	=	chc8b,
+         chc8c	=	chc8c,
+         chc8d	=	chc8e,
+         chc9a	=	chc9a,
+         chc9b	=	chc9c,
+         chc9c	=	chc9d,
+         chc9d	=	chc9f,
+         chc10a	=	chc10a,
+         chc10b	=	chc10c,
+         chc10c	=	chc10d,
+         chc10d	=	chc10f,
+         chc11a	=	chc11a,
+         chc11b	=	chc11c,
+         chc11c	=	chc11d,
+         chc11d	=	chc11f,
+         chc12a	=	chc12a,
+         chc12b	=	chc12c,
+         chc12c	=	chc12d,
+         chc12d	=	chc12f,
+         chc13a	=	chc13a,
+         chc13b	=	chc13c,
+         chc13c	=	chc13d,
+         chc13d	=	chc13f,
+         chc14a	=	chc14a,
+         chc14b	=	chc14c,
+         chc14c	=	chc14d,
+         chc14d	=	chc14f,
+         chc15a	=	chc15a,
+         chc15b	=	chc15c,
+         chc15c	=	chc15d,
+         chc15d	=	chc15f,
+         chc16a	=	chc16a,
+         chc16b	=	chc16c,
+         chc16c	=	chc16d,
+         chc16d	=	chc16f,
+         chc17a	=	chc17a,
+         chc17b	=	chc17b,
+         chc17c	=	chc17c,
+         chc17d	=	chc17e,
+         chc18a	=	chc18a,
+         chc18b	=	chc18b,
+         chc18c	=	chc18c,
+         chc18d	=	chc18e,
+         chc19a	=	chc19a,
+         chc19b	=	chc19b,
+         chc19c	=	chc19c,
+         chc19d	=	chc19e,
+         chc20a	=	chc20a,
+         chc20b	=	chc20c,
+         chc20c	=	chc20d,
+         chc20d	=	chc20f)
+
+
+
+#export for use before cleaned
+#export(bio_td, "bio_assessment_WIP_9_26_23.xlsx")
+
+
+```
+
+### Data Quality Check (delete before archiving)
+
+Check for data errors
+
++hbc and chc variables need deeper review that just checking descriptives
+
+```{r dq-check}
+check <- bio_td %>% select(id, starts_with("rhs"))
+
+psych::describe(check)
+
+#hbc and chc will need more in depth look - export to review in excel (list to correct dates - compare dates with original excel/csv file or on Qualtrics), list to remove identifiable text descriptions, etc.)
+
+hbc_vars <- bio_td %>% 
+  select(id, starts_with("hbc"))
+
+#export(hbc_vars, "hbc_vars_tocheck.xlsx")
+
+chc_vars <- bio_td %>% 
+  select(id, starts_with("chc"))
+
+#export(chc_vars, "chc_vars_tocheck.xlsx")
+
+```
+
+
+## DELETE - FREQUENCY FOR AL INDICATORS
+
+```{r results = 'asis'}
+#descriptives of AL indicators
+
+fts <- bio_td %>% 
+  select(ends_with("al")) %>% 
+  map(~table(., useNA = "always"))
+
+#print(fts)
+
+# Format and display the frequency tables using map
+library(kableExtra)
+formatted_tables <- map(fts, function(table_data) {
+  kable(table_data, format = "html") %>%
+    kable_styling(full_width = FALSE)
+})
+
+formatted_tables
+```
+
+
