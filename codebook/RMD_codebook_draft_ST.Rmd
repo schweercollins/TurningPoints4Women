@@ -80,6 +80,109 @@ THEME <-     theme(panel.grid.major = element_blank(),
     )
 ```
 
+```{r cutoff-plot-function}
+#re-work JP cutoff function due to error "cant use `{{` in non-quoting function
+cutoff_plot2 <- function(data,
+                        x,
+                        cutoff = 0,
+                        cutoff_color = '#324B4A',
+                        cutoff_other = NULL,
+                        cutoff_other_color = '#95B1AF',
+                        cutoff_other2 = NULL,
+                        cutoff_other2_color = '#546085',
+                        bins = 20) {
+
+  library(magrittr)
+  library(dplyr)
+  library(ggplot2)
+
+  x <- enquo(x)
+
+  if (is.null(cutoff_other)) {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = '#246B69',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 20),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  } else if (is.null(cutoff_other2)) {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = '#246B69',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other,
+                 color = cutoff_other_color,
+                 linetype = 3,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 13),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  } else {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = 'black',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other,
+                 color = cutoff_other_color,
+                 linetype = 3,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other2,
+                 color = cutoff_other2_color,
+                 linetype = 4,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 13),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  }
+}
+```
+
 # Overview
 
 *<MARIA>INSERT BRIEF INFO ON STUDY, SAMPLE, AND AIMS*
@@ -212,7 +315,8 @@ bsi_word_long <- bsi_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         notes = as.character("")) %>% 
+          notes = case_when(var_name == "bsi4" ~ "This item was not asked for TC incarcerated while assessment were conducted",
+                           TRUE ~ as.character(""))) %>% 
   slice(1:19)
 
 ```
@@ -280,7 +384,10 @@ bsi_scale_df <- data.frame(
                            "`bsi1`, `bsi5`, `bsi9`, `bsi16`, `bsi17`, `bsi18`",
                            "`bsi4`, `bsi6`, `bsi7`, `bsi8`, `bsi14`, `bsi19`"),
   scale_range = c("0-76", "0-28", "0-24", "0-24"),
-  alpha = c(round(bsi_alpha$total$raw_alpha, 3), round(bsi_alpha_som$total$raw_alpha, 3), round(bsi_alpha_anx$total$raw_alpha, 3), round(bsi_alpha_dep$total$raw_alpha, 3))
+  alpha = c(round(bsi_alpha$total$raw_alpha, 3), 
+            round(bsi_alpha_som$total$raw_alpha, 3), 
+            round(bsi_alpha_anx$total$raw_alpha, 3), 
+            round(bsi_alpha_dep$total$raw_alpha, 3))
 )
 
 # Create the gt table object
@@ -369,7 +476,15 @@ complete %>%
 complete %>%
   composite_hist(x = bsi_dep_total) +
   labs(title = 'Distribution for BSI Depression Subscale')
+```
 
+```{r bsi-clinical}
+bsi_complete %>%
+  cutoff_plot2(
+    x = bsi_total,
+    cutoff = 0
+  ) +
+  labs(title = 'Cutoff Value for BSI Measure')
 ```
 
 
@@ -433,7 +548,7 @@ Additional variables on suicidality (`c21`-`c24`) share the same response option
 ```{r CESD-label-table2, results = 'asis'}
 
 cesd2_label_df <- data.frame(
-  value = c("0", "1", "2"),
+  value = c("0", "1", "-77"),
   label = c("No",
             "Yes",
             "Declined to Answer")
@@ -645,6 +760,8 @@ complete %>%
   labs(
     title = 'Positive Affect Subscale Distribution'
     )
+
+
 ```
 
 #### Clinical Categories
@@ -655,108 +772,6 @@ The distribution for CES-D scores alongside clinical cutoffs are presented below
 
 Reference: [@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4); [DOI](https://doi.org/10.1016/j.jad.2018.02.071)
 
-```{r cutoff-plot-function}
-#re-work JP cutoff function due to error "cant use `{{` in non-quoting function
-cutoff_plot2 <- function(data,
-                        x,
-                        cutoff = 0,
-                        cutoff_color = '#324B4A',
-                        cutoff_other = NULL,
-                        cutoff_other_color = '#95B1AF',
-                        cutoff_other2 = NULL,
-                        cutoff_other2_color = '#546085',
-                        bins = 20) {
-
-  library(magrittr)
-  library(dplyr)
-  library(ggplot2)
-
-  x <- enquo(x)
-
-  if (is.null(cutoff_other)) {
-    data %>%
-      ggplot(aes(!!x)) +
-      geom_histogram(bins = bins,
-                     color = 'white',
-                     fill = '#246B69',
-                     alpha = .7) +
-      geom_vline(xintercept = cutoff,
-                 color = cutoff_color,
-                 linetype = 2,
-                 linewidth = 1.25)+
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_rect(fill = "transparent"),
-          panel.border = element_blank(),
-          axis.line = element_line(colour = "black",size = .8),
-          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-          legend.text = element_text(size = 10),
-          legend.key = element_rect(fill = "White",
-                                    colour = "transparent"),
-          plot.title = element_text(size= 20),
-          #scale_x_discrete(guide = guide_axis(n.dodge=3))
-    )
-  } else if (is.null(cutoff_other2)) {
-    data %>%
-      ggplot(aes(!!x)) +
-      geom_histogram(bins = bins,
-                     color = 'white',
-                     fill = '#246B69',
-                     alpha = .7) +
-      geom_vline(xintercept = cutoff,
-                 color = cutoff_color,
-                 linetype = 2,
-                 linewidth = 1.25) +
-      geom_vline(xintercept = cutoff_other,
-                 color = cutoff_other_color,
-                 linetype = 3,
-                 linewidth = 1.25)+
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_rect(fill = "transparent"),
-          panel.border = element_blank(),
-          axis.line = element_line(colour = "black",size = .8),
-          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-          legend.text = element_text(size = 10),
-          legend.key = element_rect(fill = "White",
-                                    colour = "transparent"),
-          plot.title = element_text(size= 13),
-          #scale_x_discrete(guide = guide_axis(n.dodge=3))
-    )
-  } else {
-    data %>%
-      ggplot(aes(!!x)) +
-      geom_histogram(bins = bins,
-                     color = 'white',
-                     fill = 'black',
-                     alpha = .7) +
-      geom_vline(xintercept = cutoff,
-                 color = cutoff_color,
-                 linetype = 2,
-                 linewidth = 1.25) +
-      geom_vline(xintercept = cutoff_other,
-                 color = cutoff_other_color,
-                 linetype = 3,
-                 linewidth = 1.25) +
-      geom_vline(xintercept = cutoff_other2,
-                 color = cutoff_other2_color,
-                 linetype = 4,
-                 linewidth = 1.25)+
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_rect(fill = "transparent"),
-          panel.border = element_blank(),
-          axis.line = element_line(colour = "black",size = .8),
-          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
-          legend.text = element_text(size = 10),
-          legend.key = element_rect(fill = "White",
-                                    colour = "transparent"),
-          plot.title = element_text(size= 13),
-          #scale_x_discrete(guide = guide_axis(n.dodge=3))
-    )
-  }
-}
-```
 
 
 ```{r cesd-clinical}
@@ -995,35 +1010,7 @@ complete %>%
 
 *<MIN/SHAINA>TODO: ROW DATA INCORRECTLY CLEANED, WILL NEED RE_CLEAN!*
 
-```{r dast re-code}
-# This session should go together with the data cleaning 
 
-# re-code total score 
-# RECODE AWH8DAST (0 = 0) (1 THRU 5 = 1) (6 THRU 10 = 2) (11 THRU 15 = 3) (16 THRU 20 = 4) INTO AWHPDASC
-# VALUE LABELS AWHPDASC
-# 0 'None'
-# 1 'Low'
-# 2 'Intermediate (likely meets DSM criteria)'
-# 3 'Substantial'
-# 4 'Severe'.
-
-complete$dast_total_r <- case_match(complete$dast_total,
-                1:5 ~ 1,
-                6:10 ~ 2,
-                11:15 ~ 3,
-                16:20 ~ 4, .default = complete$dast_total)
-
-complete <- complete %>%
-  mutate(dast_total_r = case_when(
-    dast_total == 0 ~ 0,
-    dast_total %in% 1:5 ~ 1,
-    dast_total %in% 6:10 ~ 2,
-    dast_total %in% 11:15 ~ 3,
-    dast_total %in% 16:20 ~ 4,
-    TRUE ~ NA_integer_
-  ))
-
-```
 
 *<SHAINA> TODO: CHECK AFTER DATA IS CLEANED*
 
@@ -1048,7 +1035,7 @@ All The Drug Abuse Screening Test variables have the same response options.
 
 dast_label_df <- data.frame(
   value = c(0,1),
-  label = c("Yes ",
+  label = c("Yes",
             "No")) %>% 
   t() %>% 
   as.data.frame()
@@ -1071,10 +1058,9 @@ print(dast_label_table)
 ```
 
 *<MARIA> TODO: CONFIRM THIS TABLE SHOULD BE INCLUDED AND WHAT VARIABLES THEY APPLY TO*
-Recoded total value label 
+Re-coded total value label `dast_total_r`
 
 ```{r DAST-label-table-total, results = 'asis'}
-
 dast_label_total <- data.frame(
   value = seq(0,4),
   label = c("None",

@@ -1,0 +1,688 @@
+---
+title: "Telephonw Assessment Data Cleanning"
+author: "Min Zhang"
+date: "2023-9-12"
+output: html_document
+---
+convert text to number 
+reverse score column 
+create sub-scale 
+-use his out put file 
+-sum/avg 
+```{r setup, include=FALSE}
+# loading Library 
+library(tidyverse)
+library(dplyr)
+library(here)
+#import raw survey items
+tpw_raw <- read.csv(here("data", "tpw_measure.csv")) %>%
+  select(-X) %>%
+  filter(start_date != "Start Date")
+
+source(here("codebook_fun.R"))
+
+# Scientific Notation 
+options(scipen = 2)
+
+tpw_archive <- tpw_raw %>%
+  select(id)
+```
+## Questions: 
+-Do we want add prompt for each measure? 
+- missing data rule should be in it's own section on top of code book? 
+- Should all missing value including (-88 question was not shown) count as missing; if not what if the question was not shown was triggered by decline to answer previous question 
+
+## Question for codebook: 
+Should I add skip rule to codebook? 
+Should I add a note for question that were not been asked due to TC incarcerated, I have note in this script, if we we share this note their ID will be linked to their incarcerated states, but no other identifiable information, is this a concern?  
+
+## BSI
+### BSI Select Variabls and Recode 
+```{r bsi}
+# Select bis questions and recede
+bsi <-
+  tpw_raw %>%
+  select(
+    id,
+    matches(
+      '^bsi'
+    ),
+    -bsi20, 
+    -bsi21,
+    -bsi22
+  ) %>%
+  mutate(across(-id, as.factor)) %>%
+    mutate(
+      across(
+        .cols = c(bsi1:bsi19),
+        .fns = ~case_when(
+         .x == "Not at all" ~ 0,
+         .x == "A little bit" ~ 1,
+         .x == "Moderately" ~ 2,
+         .x == "Quite a bit" ~ 3,
+         .x == "Very much" ~ 4,
+         .x == "Decline to Answer" ~ -77,
+         TRUE ~ NA_real_
+        )
+      )
+    ) 
+  
+```
+
+### BSI Missing Data 
+```{r bsi_missing }
+# correct missing value: Not Applicable = -88 = The subject was never asked a question for some reason (conditional question)
+bsi <- bsi %>% 
+  mutate(
+    bsi4 = case_when(
+      # for incarcerated TC, bsi4 wasn't shown 
+      id %in% c("HR211", "HR181", "P819") & is.na(bsi4) ~ -88,
+      TRUE ~ bsi4
+    )
+  )
+  
+bsi %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 19
+  )
+# No missing data found in the BSI measure. 
+```
+
+### BSI Calculations & Subscale
+```{r bsi_calculations}
+# Below is the code that treats -77, -88 values as NA
+bsi_calc <-
+  bsi %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        .x == -88 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+# BSI Composite & Subscale Score Creation 
+bsi_complete <-
+  bsi_calc %>%
+  composite_total_avg_fun(
+    id = 'id',
+    max_value = 4,
+    n_items = 19
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c('bsi2', 'bsi3', 'bsi10',
+               'bsi11', 'bsi12', 'bsi13', 'bsi15'),
+    scale2 = c('bsi1', 'bsi5', 'bsi9',
+               'bsi16', 'bsi17', 'bsi18'),
+    scale3 = c('bsi4', 'bsi6', 'bsi7',
+               'bsi8', 'bsi14', 'bsi19')
+  ) %>%
+  rename(
+    bsi_total = sum_values,
+    bsi_avg = mean_values,
+    bsi_soma_total = total1,
+    bsi_anx_total = total2,
+    bsi_dep_total = total3
+  ) %>%
+  select(-bsi_avg)
+```
+
+
+## CESD 
+### CESD Select Variabls and Recode 
+```{r cesd creation, warning = FALSE, message = FALSE}
+cesd <-
+tpw_raw %>%
+  select(
+    id,
+    matches(
+      '^c\\d'
+    )
+  ) %>%
+mutate(
+    across(
+      .cols = c(c1:c20),
+      .fns = ~case_when(
+        .x == "Rarely or none of the time (0-1 day)" ~ 0,
+        .x == "Some or a little of the time (1-2 days)" ~ 1,
+        .x == "Occasionally or a moderate amount of time (3-4 days)" ~ 2,
+        .x == "Most or all of the time (5-7 days)" ~ 3,
+        .x == "Decline to Answer" ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      .cols = c(c21:c24),
+      .fns = ~case_when(
+        .x == "Yes" ~ 1,
+        .x == "No" ~ 0,
+        .x == "Decline to Answer" ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    c4_r = case_when(
+      c4 == 0 ~ 3,
+      c4 == 1 ~ 2,
+      c4 == 2 ~ 1,
+      c4 == 3 ~ 0,
+      c4 == -77 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    c8_r = case_when(
+      c8 == 0 ~ 3,
+      c8 == 1 ~ 2,
+      c8 == 2 ~ 1,
+      c8 == 3 ~ 0,
+      c8 == -77 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    c12_r = case_when(
+      c12 == 0 ~ 3,
+      c12 == 1 ~ 2,
+      c12 == 2 ~ 1,
+      c12 == 3 ~ 0,
+      c12 == -77 ~ -77,
+      TRUE ~ NA_real_
+    ),
+    c16_r = case_when(
+      c16 == 0 ~ 3,
+      c16 == 1 ~ 2,
+      c16 == 2 ~ 1,
+      c16 == 3 ~ 0,
+      c16 == -77 ~ -77,
+      TRUE ~ NA_real_
+    )
+  )
+
+```
+
+### CESD Missing Data
+
+```{r CESD_missing }
+# correct missing value: Not Applicable = -88 = The subject was never asked a question for some reason (conditional question)
+# if response is No to item c21, then TC moved on to item c24
+cesd <- cesd %>%
+  mutate(c22 = ifelse(c21 == 0 | -77, -88, c22),
+         c23 = ifelse(c21 == 0 | -77, -88, c23),
+         # for incarcerated TC, c21-c24 wasn't shown 
+         c21 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c21) ~ -88,TRUE ~ c21),
+         c22 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c22) ~ -88,TRUE ~ c22),
+         c23 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c23) ~ -88,TRUE ~ c23),
+         c24 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c24) ~ -88,TRUE ~ c24)
+      )
+
+
+cesd %>%
+  select(id,
+         c1:c20,
+         c4_r:c16_r) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 20
+  ) 
+
+  
+  cesd %>%
+  select(id,
+         c21:c24) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 20
+  )
+  # No missing data found in the CESD measure. 
+```
+
+
+### CESD Calculations & Subscale
+```{r cesd_calculatio}
+# Below is the code that treat negative values (-77, -88) as NA
+cesd_calc <-
+  cesd %>%
+    mutate(
+      across(
+        .cols = -id,
+        .fns = ~case_when(
+          .x < 0 ~ NA_real_,
+          TRUE ~ .x
+        )
+      )
+    )
+
+# CESD Composite & Subscale Score Creation 
+cesd_complete <-
+  cesd_calc %>%
+  composite_total_avg_fun(
+    id = c('id',
+           'c4',
+           'c8',
+           'c12',
+           'c16',
+           'c21',
+           'c22',
+           'c23',
+           'c24'),
+    n_items = 20
+  ) %>%
+  subscale_create(
+    total_only = FALSE,
+    scale1 = c('c1', 'c2', 'c3', 'c5',
+               'c6', 'c9', 'c10', 'c11',
+               'c13', 'c14', 'c15', 'c17',
+               'c18', 'c19', 'c20'),
+    scale1_nitems = 15,
+    scale2 = c('c4_r', 'c8_r', 'c12_r', 'c16_r'),
+    scale2_nitems = 4
+  ) %>%
+  rename(
+    cesd_total = sum_values,
+    cesd_avg = mean_values,
+    cesd_dep_symp_total = total1,
+    cesd_dep_symp_avg = avg1,
+    cesd_pos_aff_total = total2,
+    cesd_pos_aff_avg = avg2
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  )%>%
+  select(-cesd_avg)
+
+```
+
+
+## CIQ
+### CIQ Select Variables and Recode 
+```{r ciq}
+ciq <- 
+	tpw_raw %>%
+	select(
+	  id,
+	  bsi20,
+	  bsi21,
+	  bsi22
+	) %>% 
+  rename(
+    ciq1 = bsi20,
+    ciq2 = bsi21,
+    ciq3 = bsi22
+  ) %>% 
+  mutate(
+    across(
+        .cols = c(ciq1, ciq2, ciq3),
+        .fns = ~case_when(
+          .x == "1 = not true of me at all" ~ 1,
+          .x == 2 ~ 2,
+          .x == 3 ~ 3,
+          .x == 4 ~ 4,
+          .x == 5 ~ 5,
+          .x == 6 ~ 6,
+          .x == "7 = very true of me" ~ 7,
+          .x == "Decline to Answer" ~ -77,
+          TRUE ~ NA_real_
+        )
+      ),
+	  ciq3_r = case_when(
+          ciq3 == 1 ~ 7,
+          ciq3 == 2 ~ 6,
+          ciq3 == 3 ~ 5,
+          ciq3 == 4 ~ 4,
+          ciq3 == 5 ~ 3,
+          ciq3 == 6 ~ 2,
+          ciq3 == 7 ~ 1,
+          ciq3 == -77 ~ -77,
+          TRUE ~ NA_real_
+        )
+    ) %>%
+    relocate(
+      ciq3_r, .before = ciq3
+    )
+```
+
+
+
+### CIQ Missing Data 
+No missing data found in the CIQ measure. 
+```{r, warning = FALSE, message = FALSE}
+ciq %>%
+  select(id,
+         ciq1:ciq3_r) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 3
+  )
+
+```
+
+
+### CIQ Calculations & Subscale
+```{r ciq_calculations}
+# Below is the code that treat -77 as NA
+ciq_calc <-
+  ciq %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+# CIQ Composite & Subscale Score Creation 
+ciq_complete <- 
+  ciq_calc %>% 
+  composite_total_avg_fun(
+    id = c('id', 'ciq3'),
+    max_value = 7,
+    n_items = 3
+  ) %>% 
+  rename(
+    ciq_psych_total = sum_values,
+    ciq_psych_avg = mean_values
+    ) %>%
+  # TODO: Maria/Shaina please confirm we don't need average for this measure
+  select(-ciq_psych_avg)
+```
+
+## DAST
+### DAST Select Variabls and Recode 
+```{r dast}
+# Select bis questions and recede
+dast <-
+  tpw_raw %>%
+  select(
+    id,
+    matches('^d\\d')
+    ) %>%
+  mutate(
+    across(
+      .cols = c(d00:d20),
+      .fns = ~case_when(
+        .x == "Yes" ~ 1,
+        .x == "No" ~ 0,
+        .x == "Decline to Answer" ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+        across(
+      .cols = c(d4, d5),
+      .fns = ~case_when(
+        .x == 1 ~ 0,
+        .x == 0 ~ 1,
+        .x == -77 ~ -77,
+        TRUE ~ NA_real_
+      ),
+      .names = '{.col}_r'
+    )
+  )
+
+```
+
+### DAST Missing Data 
+```{r dast_missing }
+# correct missing value: Not Applicable = -88 = The subject was never asked a question for some reason (conditional question)
+# if d00 is No-1, rest column should be NA(-88)
+# if D1A is No-0, or Decline to Answer(-77), d2a should be NA(-88)
+# if 2b is No-0 or Decline to Answer (-77), rest column should be NA(-88)
+
+
+# correct missing value: Not Applicable = -88 = The subject was never asked a question for some reason (conditional question)
+dast <- dast %>% 
+  #TODO:Maria please double check the skip rule that is correct
+  # for incarcerated TC, entire dast survey wasn't shown 
+  mutate_at(vars(d00:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ -88, TRUE ~ .)) %>%
+  # Skip rule: if d00 == 1 (TC is pregnant) the rest survey are skipped
+  mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(d00 == 1 ~ -88, TRUE ~ . )) %>%
+  # Skip rule: if d1a == 0 or -77 , d2a is skipped
+  mutate(d2a = case_when(d1a == 0 | d1a == -77 ~ -88, TRUE ~ d2a)) %>%
+  # Skip rule: if d1a == 1 (d2a is answered (1,0,-77)) d2b should be skipped 
+  mutate(d2b = case_when(d1a == 1 ~ -88, TRUE ~ d2b)) %>%
+  # Skip rule: if d2b == 0 or -77, rest question were skipped 
+  mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == -77 ~ -88, TRUE ~ . )) 
+
+
+
+dast %>%
+  select(#-preg_screen,
+         -d00,
+         -d4,
+         -d5) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 21
+  ) %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DAST Missing Data',
+    subtitle = 'By Participant'
+  )
+```
+
+### DAST Calculations & Subscale
+```{r dast_calculations}
+# Below is the code that treat negative values (-77, -88) as NA
+# Apply NA rule
+dast_calc <-
+  dast %>% 
+  select(-d00,
+         -d4,
+         -d5) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 21
+  ) %>%
+  full_join(dast, by = 'id') %>% 
+    filter(
+    is.na(miss_pct) |
+      miss_pct < 20
+         ) %>%
+  mutate(
+    across(
+      .cols = c(d1a:d5_r),
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+
+### DAST Composite & Subscale Score Creation 
+dast_complete <-
+  dast_calc %>%
+  select(-missing_n,
+         -miss_pct) %>%
+  index_total_fun(
+    id = c('id',
+           'd00',
+           'd4',
+           'd5')
+  ) %>%
+  rename(
+    dast_total = sum_values
+  )
+```
+
+### DAST recode total 
+```{r dast recode }
+# re-code total score 
+# RECODE AWH8DAST (0 = 0) (1 THRU 5 = 1) (6 THRU 10 = 2) (11 THRU 15 = 3) (16 THRU 20 = 4) INTO AWHPDASC
+# VALUE LABELS AWHPDASC
+# 0 'None'
+# 1 'Low'
+# 2 'Intermediate (likely meets DSM criteria)'
+# 3 'Substantial'
+# 4 'Severe'.
+
+dast_complete <- dast_complete %>%
+  mutate(dast_total_r = case_when(
+    dast_total == 0 ~ 0,
+    dast_total %in% 1:5 ~ 1,
+    dast_total %in% 6:10 ~ 2,
+    dast_total %in% 11:15 ~ 3,
+    dast_total %in% 16:20 ~ 4,
+    TRUE ~ NA_integer_
+  ))
+```
+
+
+## BCAP
+### BCAP Select Variables and Recode
+```{r bcap}
+# Select bis questions and recede
+bcap <-
+  tpw_raw %>%
+  select(id, matches('^q\\d'), -q1461) %>%
+ mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == "Agree" ~ 1,
+        .x == "Disagree" ~ 0,
+        .x == "Decline to Answer" ~ -77,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      .cols = c(q1, q2, q23, q29),
+      .fns = ~case_when(
+        .x == 1 ~ 0,
+        .x == 0 ~ 1,
+        TRUE ~ .x
+      ),
+      .names = '{.col}_r'
+    )
+  )
+```
+
+#### BCAP Missing Data 
+```{r bcap_missing}
+bcap %>%
+  select(-c(q1,q2,q23,q29)) %>%
+    pct_miss_fun(
+      id = 'id', 
+      n_items = 34 
+    ) %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'BCAP Missing Data',
+    subtitle = 'By Participant'
+  )
+```
+
+#### BCAP Calculations & Subscale
+```{r bcap_calculations}
+bcap_calc <-
+  bcap %>%
+    pct_miss_fun(
+      id = 'id',
+      n_items = 34
+    ) %>%
+    full_join(bcap,
+              by = 'id') %>%
+    filter(
+      is.na(miss_pct) |
+        miss_pct < 20
+      ) %>%
+  mutate(
+    across(
+      .cols = c(-id, -miss_pct, -missing_n),
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+bcap_complete <-
+  bcap_calc %>%
+  select(
+    -missing_n,
+    -miss_pct
+         ) %>% 
+    # index_total_fun(
+    #   id = 'id'
+    # ) %>%
+  subscale_create(
+  total_only = TRUE,
+  scale1 = c('q1_r', 'q23_r', 'q29_r',
+             'q3', 'q25', 'q33',
+             'q5', 'q12', 'q22', 'q31',
+             'q6', 'q13', 'q17',
+             'q7', 'q14', 'q20', 'q32',
+             'q8', 'q11', 'q16', 'q19', 'q27',
+             'q10', 'q30'),
+  scale2 = c('q1_r', 'q23_r', 'q29_r'),
+  scale3 = c('q3', 'q25', 'q33'),
+  scale4 = c('q5', 'q12', 'q22', 'q31'),
+  scale5 = c('q6', 'q13', 'q17'),
+  scale6 = c('q7', 'q14', 'q20', 'q32'),
+  scale7 = c('q8', 'q11', 'q16', 'q19', 'q27'),
+  scale8 = c('q10', 'q30'),
+  scale9 = c('q4', 'q9', 'q15', 'q21', 'q26', 'q34'),
+  scale10 = c('q2_r', 'q18', 'q28')
+  ) %>% 
+    rename(
+      bcap_risk_total = total1,
+    bcap_happy_total = total2,
+    bcap_feel_pers_total = total3,
+    bcap_lonely_total = total4,
+    bcap_fam_conf_total = total5,
+    bcap_rigid_total = total6,
+    bcap_distress_total = total7,
+    bcap_poverty_total = total8,
+    bcap_lie_total = total9,
+    bcap_random_total = total10
+    )
+
+```
+
+## DYADC 
+### DYADC Select Variables and Recode 
+```{r dyadc}
+dyadc <-
+  tpw_raw %>% 
+  select(
+    id,
+    dyadc_screener,
+    matches(
+      '^e\\d'
+      )
+    ) %>%
+  mutate(
+    across(
+      .cols = c(dyadc_screener),
+      .fns = ~case_when(
+        .x == "Yes" ~ 1,
+        .x == "No" ~ 0,
+        .x == "Decline to Answer" ~ -77,
+        TRUE ~ NA_real_
+      )
+    )
+  )
+
+```
+
+
+## Merge
+Merge together all measures 
+```{r merge}
+tpw_archive <- tpw_archive %>%
+  left_join(bsi_complete, by = "id") %>%
+  left_join(cesd_complete, by = "id") %>%
+  left_join(ciq_complete, by = "id") %>%
+  left_join(dast_complete, by = "id") %>%
+  mutate_if(is.numeric, round, digits=2)
+```

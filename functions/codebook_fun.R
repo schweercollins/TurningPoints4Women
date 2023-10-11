@@ -13,6 +13,7 @@ subtract_scale <-
   }
 
 # reverse scoring is messed up. It converts back to original qualtrics scale 1 - ...
+# Using reversd column could solve this problem
 composite_total_avg_fun <- function(
     data,
     id,
