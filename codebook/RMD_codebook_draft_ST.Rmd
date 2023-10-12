@@ -181,6 +181,42 @@ cutoff_plot2 <- function(data,
     )
   }
 }
+
+# gt-theme-general
+apply_tbl_theme <- function(table) {
+  table %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
+            locations = cells_body(columns = everything())) %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
+                         cell_fill(color = "#246B69", alpha = .7)),
+            locations = cells_column_labels()) %>% 
+  tab_options(column_labels.border.top.color = "black",
+              column_labels.border.bottom.color = "black",
+              table_body.border.bottom.color = "black",
+              table.border.top.color = "white",
+              heading.border.bottom.color = "black",
+              table_body.hlines.color = "white")%>% 
+  tab_options(table.align = "left")
+}
+
+#theme for value label tables
+apply_labtab_theme <- function(table) {
+  table %>% 
+  cols_align(columns = everything(), align = "center") %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
+            locations = cells_body(columns = everything())) %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
+                         cell_fill(color = "#246B69", alpha = .7)),
+            locations = cells_column_labels()) %>% 
+  tab_options(column_labels.border.top.color = "black",
+              column_labels.border.bottom.color = "black",
+              table_body.border.bottom.color = "black",
+              table.border.top.color = "white",
+              heading.border.bottom.color = "black",
+              table_body.hlines.color = "white") %>% 
+  tab_options(table.align = "left")
+}
+  
 ```
 
 # Overview
@@ -191,7 +227,25 @@ cutoff_plot2 <- function(data,
 
 *<SHAINA>INSERT BRIEF DESCRIPTION OF DATA/CODEBOOK LAYOUT/FILE STRUCTURE (can complete once we have more sections and overall structure)*
 
+### Missing Data 
+
+-   Truly missing = `NA` (blank in file or -99) = The question should have been asked of the respondent, but for a reason other than those listed below, no answer was given or recorded.
+
+  	This -99  is also given in the case of a computed subscale or total score or other summary when the percentage of missing data is outside what is allowable for missing data rules
+
+-   Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
+
+-   Don’t Know = -66 = The subject was unable to answer a question, either because he or she had no opinion or because the required information was not available (could not recall).
+
+-   Refusal/No Answer = -77 = The subject explicitly refused to answer a question or did not answer it when he or she should have.
+
+-   No Match = -88 = This situation arises when data are drawn from different sources (for example, a survey questionnaire and an administrative database), and information from one source cannot be located.
+
+-   Processing Error = -44 = For some reason, there is no answer to the question, although the subject provided one. This can result from interviewer error, incorrect coding, machine failure, or other problems
+
+
 ### Missing Data Rule
+For summary or subscale scores that are computed with individual items, any of the above reasons are included in computing the percent of missing data
 
 -   For scales with [10 or more items]{.underline}, a composite score (average/total) is computed for each participant that have less than [20%]{.underline} of the items from that measure missing
 
@@ -229,48 +283,11 @@ Reference: [@derogatis1983brief](https://www.cambridge.org/core/journals/psychol
 
 All BSI variables have the same response options.
 
-```{r gt-theme-general}
-
-apply_tbl_theme <- function(table) {
-  table %>% 
-  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
-            locations = cells_body(columns = everything())) %>% 
-  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
-                         cell_fill(color = "#9BB6D1")),
-            locations = cells_column_labels()) %>% 
-  tab_options(column_labels.border.top.color = "black",
-              column_labels.border.bottom.color = "black",
-              table_body.border.bottom.color = "black",
-              table.border.top.color = "white",
-              heading.border.bottom.color = "black",
-              table_body.hlines.color = "white")%>% 
-  tab_options(table.align = "left")
-}
-
-#theme for value label tables
-apply_labtab_theme <- function(table) {
-  table %>% 
-  cols_align(columns = everything(), align = "center") %>% 
-  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
-            locations = cells_body(columns = everything())) %>% 
-  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
-                         cell_fill(color = "#9BB6D1")),
-            locations = cells_column_labels()) %>% 
-  tab_options(column_labels.border.top.color = "black",
-              column_labels.border.bottom.color = "black",
-              table_body.border.bottom.color = "black",
-              table.border.top.color = "white",
-              heading.border.bottom.color = "black",
-              table_body.hlines.color = "white") %>% 
-  tab_options(table.align = "left")
-}
-  
-```
 
 ```{r BSI-label-table, results = 'asis'}
 
 bsi_label_df <- data.frame(
-  value = c("0", "1", "2", "3", "4"),
+  value = c("1", "2", "3", "4", "5"),
   label = c("Not at all",
             "A little bit",
             "Moderately",
@@ -302,6 +319,7 @@ print(bsi_label_table)
 
 BSI survey items are presented in the following table:
 
+During the past week, how much were you bothered by…
 ```{r BSI-var-prep}
 # Pull question wording from qualtrics data
 bsi_word <- qualtrics %>% 
@@ -314,8 +332,10 @@ bsi_word_long <- bsi_word %>%
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "During the past week,", ""),
+         description = str_replace(description, regex("how much were you bothered by", ignore_case = TRUE), ""),
          var_name = str_to_lower(var_name), 
-          notes = case_when(var_name == "bsi4" ~ "This item was not asked for TC incarcerated while assessment were conducted",
+          notes = case_when(var_name == "bsi4" ~ "This item was not asked for TC who were incarcerated while assessment were conducted",
                            TRUE ~ as.character(""))) %>% 
   slice(1:19)
 
@@ -374,7 +394,9 @@ bsi_alpha_dep <-
 
 ```
 
+
 ```{r BSI-scale-table, results = 'asis'}
+# TODO: Maria/Shania Please double check the score range since we changed the scale starting from 1 instead of 0. I wasn't sure if the range for total score should start from 0.  
 # Create the table as a data frame
 bsi_scale_df <- data.frame(
   var_name = c("bsi_total", "bsi_soma_total", "bsi_anx_total", "bsi_dep_total"),
@@ -383,7 +405,7 @@ bsi_scale_df <- data.frame(
                            "`bsi2`, `bsi3`, `bsi10`, `bsi11`, `bsi12`, `bsi13`, `bsi15`",
                            "`bsi1`, `bsi5`, `bsi9`, `bsi16`, `bsi17`, `bsi18`",
                            "`bsi4`, `bsi6`, `bsi7`, `bsi8`, `bsi14`, `bsi19`"),
-  scale_range = c("0-76", "0-28", "0-24", "0-24"),
+  scale_range = c("0-95", "0-35", "0-30", "0-30"),
   alpha = c(round(bsi_alpha$total$raw_alpha, 3), 
             round(bsi_alpha_som$total$raw_alpha, 3), 
             round(bsi_alpha_anx$total$raw_alpha, 3), 
@@ -478,8 +500,10 @@ complete %>%
   labs(title = 'Distribution for BSI Depression Subscale')
 ```
 
+#### Clinical cutoff
+TODO: Maria/Shaina, please confirm weather we need this section or not. 
 ```{r bsi-clinical}
-bsi_complete %>%
+complete %>%
   cutoff_plot2(
     x = bsi_total,
     cutoff = 0
@@ -517,7 +541,7 @@ All CES-D survey items (`c1`-`c20`) have the same response options.
 ```{r CESD-label-table, results = 'asis'}
 
 cesd_label_df <- data.frame(
-  value = c("0", "1", "2", "3"),
+  value = c("1", "2", "3", "4"),
   label = c("Rarely or none of the time",
             "Some or a little of the time",
             "Occasionally or a moderate amount of time",
@@ -548,10 +572,9 @@ Additional variables on suicidality (`c21`-`c24`) share the same response option
 ```{r CESD-label-table2, results = 'asis'}
 
 cesd2_label_df <- data.frame(
-  value = c("0", "1", "-77"),
+  value = c("0", "1"),
   label = c("No",
-            "Yes",
-            "Declined to Answer")
+            "Yes")
 ) %>% 
   t() %>% 
   as.data.frame()
@@ -596,7 +619,8 @@ cesd_word_long <- cesd_word %>%
                            var_name == "c12" ~ "This item should be reverse scored. `c12_r` is reverse scored",
                            var_name == "c16" ~ "This item should be reverse scored. `c16_r` is reverse scored",
                            
-                           var_name %in% c("c22", "c23") ~ "Skipped if `c21` = No",
+                           var_name %in% c("c22", "c23") ~ "Skipped if answered No for `c21`. \nThis item was not asked for TC who were incarcerated while assessment were conducted",
+                           var_name %in% c("c21","c24") ~ "This item was not asked for TC who were incarcerated while assessment were conducted",
                            TRUE ~ as.character(""))) %>%
   mutate(description = if_else(var_name == "c21", "In the past 6 months, have you ever thought about killing yourself?", description))
   
@@ -659,13 +683,14 @@ cesd_alpha_table <- tibble(
 ```{r CESD-scale-table, results = 'asis'}
 # Create the table as a data frame
 # TODO: should the calculation use revers score?
+#TODO: Total range should be changed since we change the scale starting from 1
 cesd_scale_df <- data.frame(
   var_name = c("cesd_total", "cesd_dep_symp_total", "cesd_pos_aff_total"),
   scale = c("Total Score (20)", "Depression (16)", "Positive Affect (4)"),
   scale_construction = c("`c1`, `c2`, `c3`, `c4`, `c5`, `c6`, `c7`, `c8`, `c9`, `c10`, `c11`, `c12`, `c13`, `c14`, `c15`, `c16`, `c17`, `c18`, `c19`, `c20`",
                            "`c1`, `c2`, `c3`, `c5`, `c6`, `c7`, `c9`, `c10`, `c11`, `c13`, `c14`, `c15`, `c17`, `c18`, `c19`, `c20`",
                            "`c4_r`, `c8_r`, `c12_r`, `c16_r`"),
-  scale_range = c("0-60", "0-48", "0-12"),
+  scale_range = c("0-80", "0-64", "0-16"),
   alpha = c(round(cesd_alpha$total$raw_alpha, 3), round(cesd_dep_alpha$total$raw_alpha, 3), round(cesd_pos_aff_alpha$total$raw_alpha, 3))
 )
 
@@ -835,7 +860,6 @@ ciq_label_table <- ciq_label_df %>%
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
   cols_width(everything() ~ pct(100)) %>% 
-  #cols_width(everything() ~ pct(100)) %>% 
   apply_labtab_theme()
 
 # Print the table
@@ -851,6 +875,7 @@ All CIQ survey items are presented in the following table:
 ```{r ciq-var-prep}
 # Pull question wording from qualtrics data
 # ciq is from BIS question 20-22
+# TODO: Check range of possible values 
 ciq_word <- qualtrics %>% 
   select(starts_with("BSI")) %>% 
   slice(1)
@@ -2450,6 +2475,40 @@ complete %>%
   labs(
     title = 'Distribution For BCAP Random Responding Subscale'
   ) 
+```
+####Clinical Cutoff
+TODO: Maria/Shaina, please confirm weather we need this section or not. 
+```{r}
+complete %>%
+  cutoff_plot2(
+    x = bcap_risk_total,
+    cutoff = 9,
+    cutoff_other = 12
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Scale',
+    caption = 'Cutoffs are 9 and 12\nSee references for literature on cutoff scores.'
+  )
+
+complete %>% 
+  cutoff_plot2(
+    x = bcap_lie_total,
+    cutoff = 4
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Lie Subscale',
+    caption = 'If 4 or more (score of 4) items are endorsed,\ncase may be invalid'
+  )
+
+complete %>% 
+  cutoff_plot2(
+    x = bcap_random_total,
+    cutoff = 0
+  ) +
+  labs(
+    title = 'Cutoff Values for BCAP Random Responding Subscale',
+    caption = 'If any of these items are endorsed (score > 0),\ncase may be invalid'
+  )
 ```
 
 ## Dyadic Adjustment Scale (DYADC)
