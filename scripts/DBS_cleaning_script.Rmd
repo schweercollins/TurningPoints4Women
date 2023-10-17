@@ -42,38 +42,113 @@ raw_il6_df <- read_excel(dbs_fp, sheet = "IL6")
 #CHO AL vars
 cho_df <- raw_cho_df %>% 
   mutate(CHO_AL  = ifelse(PE_CHO >= 240, 1, 0),
-         CHO_PAL = ifelse(PE_CHO >= quantile(PE_CHO, 0.75, na.rm = TRUE), 1, 0))
+         CHO_PAL = ifelse(PE_CHO >= quantile(PE_CHO, 0.75, na.rm = TRUE), 1, 0),
+         Plate_ID = case_when(Plate_ID == "TPW_CHO_Plate 1" ~ "1",
+                              Plate_ID == "TPW_CHO_Plate 2" ~ "2",
+                              Plate_ID == "TPW_CHO_Plate 3" ~ "3",
+                              Plate_ID == "TPW_CHO_Plate 4" ~ "4",
+                              TRUE ~ Plate_ID)) %>% 
+  rename(family = Study_Sample_ID,
+         cho_pe = PE_CHO,
+         cho_direct = Direct_CHO,
+         cho_plate = Plate_ID,
+         cho_date = Assay_Date) %>% 
+  janitor::clean_names()
 
 #CRP AL vars
 crp_df <- raw_crp_df %>% 
   mutate(CRP_AL  = ifelse(as.numeric(PE_CRP) >= 0.3, 1, 0),
-         CRP_PAL = ifelse(as.numeric(PE_CRP) >= quantile(as.numeric(PE_CRP), 0.75, na.rm = TRUE), 1, 0)) %>% 
-  mutate_at(vars(CRP_AL, CRP_PAL), ~ ifelse(Study_Sample_ID == "HR177", 0, .)) #force <10 to zero
+         CRP_PAL = ifelse(as.numeric(PE_CRP) >= quantile(as.numeric(PE_CRP), 0.75, na.rm = TRUE), 1, 0),
+         `Plate ID` = case_when(`Plate ID` == "TPW_CRP_PLATE 1" ~ "1",
+                                `Plate ID` == "TPW_CRP_PLATE 2" ~ "2",
+                                `Plate ID` == "TPW_CRP_DILUTION" ~ "5",
+                                TRUE ~ `Plate ID`),
+         Direct_CRP = ifelse(Study_Sample_ID == "HR177", "<10", round(as.numeric(Direct_CRP), 2)),
+         PE_CRP = ifelse(Study_Sample_ID == "HR177", "<10", round(as.numeric(PE_CRP), 2))) %>% 
+  mutate_at(vars(CRP_AL, CRP_PAL), ~ ifelse(Study_Sample_ID == "HR177", 0, .)) %>%  #force <10 to zero
+  rename(family = Study_Sample_ID,
+         crp_pe = PE_CRP,
+         crp_direct = Direct_CRP,
+         crp_plate = `Plate ID`,
+         crp_date = Assay_Date) %>% 
+  janitor::clean_names()
 
 #IL6 AL vars
 il6_df <- raw_il6_df %>% 
   mutate(IL6_AL  = ifelse(PE_IL6 >= 6.1, 1, 0),
-         IL6_PAL = ifelse(PE_IL6 >= quantile(PE_IL6, 0.75, na.rm = TRUE), 1, 0))
+         IL6_PAL = ifelse(PE_IL6 >= quantile(PE_IL6, 0.75, na.rm = TRUE), 1, 0),
+         Plate_ID = case_when(Plate_ID == "TPW_IL6_Plate_1" ~ "1",
+                              TRUE ~ Plate_ID)) %>% 
+  rename(family = Study_Sample_ID,
+         il6_pe = PE_IL6,
+         il6_direct = Direct_IL6,
+         il6_plate = Plate_ID,
+         il6_date = Assay_Date) %>% 
+  janitor::clean_names()
 
 #HDL AL vars
 hdl_df <- raw_hdl_df %>% 
   mutate(HDL_AL  = ifelse(PE_HDL <= 39, 1, 0),
-         HDL_PAL = ifelse(PE_HDL >= quantile(PE_HDL, 0.75, na.rm = TRUE), 1, 0))
+         HDL_PAL = ifelse(PE_HDL >= quantile(PE_HDL, 0.75, na.rm = TRUE), 1, 0),
+         Plate_ID = case_when(Plate_ID == "TPW_HDL_Plate 1" ~ "1",
+                              Plate_ID == "TPW_HDL_Plate 2" ~ "2",
+                              Plate_ID == "TPW_HDL_Plate 3" ~ "3",
+                              Plate_ID == "TPW_HDL_Plate 4" ~ "4",
+                              TRUE ~ Plate_ID)) %>% 
+  rename(family = Study_Sample_ID,
+         hdl_pe = PE_HDL,
+         hdl_direct = Direct_HDL,
+         hdl_plate = Plate_ID,
+         hdl_date = Assay_Date) %>% 
+  janitor::clean_names()
+  
 
 #TRG AL vars
 trg_df <- raw_trg_df %>% 
   mutate(TRG_AL  = ifelse(PE_TRG >= 150, 1, 0),
-         TRG_PAL = ifelse(PE_TRG >= quantile(PE_TRG, 0.75, na.rm = TRUE), 1, 0))
+         TRG_PAL = ifelse(PE_TRG >= quantile(PE_TRG, 0.75, na.rm = TRUE), 1, 0),
+         Plate_ID = case_when(Plate_ID == "TPW_TRG_Plate 1" ~ "1",
+                              Plate_ID == "TPW_TRG_Plate 2" ~ "2",
+                              Plate_ID == "TPW_TRG_Plate 3" ~ "3",
+                              Plate_ID == "TPW_TRG_Plate 4" ~ "4",
+                              TRUE ~ Plate_ID)) %>% 
+  rename(family = Study_Sample_ID,
+         trg_pe = PE_TRG,
+         trg_direct = Direct_TRG,
+         trg_plate = Plate_ID,
+         trg_date = Assay_Date) %>% 
+  janitor::clean_names()
 
 #A1C AL vars
 a1c_df <- raw_a1c_df %>% 
   mutate(A1C_AL  = ifelse(HbA1c >= 6.5, 1, 0),
-         AIC_PAL = ifelse(HbA1c >= quantile(HbA1c, 0.75, na.rm = TRUE), 1, 0))
+         AIC_PAL = ifelse(HbA1c >= quantile(HbA1c, 0.75, na.rm = TRUE), 1, 0),
+         Plate_ID = case_when(Plate_ID == "TPW_A1c_Plate_1" ~ "1",
+                              Plate_ID == "TPW_A1c_Plate_2" ~ "2",
+                              Plate_ID == "TPW_A1c_Plate_3" ~ "3",
+                              Plate_ID == "TPW_A1c_Plate_4" ~ "4",
+                              TRUE ~ Plate_ID)) %>% 
+  rename(family = Study_Sample_ID,
+         a1c_hb = HbA1c,
+         a1c_plate = Plate_ID,
+         a1c_date = Assay_Date) %>% 
+  janitor::clean_names()
 
 #EBV AL vars
 ebv_df <- raw_ebv_df %>% 
   mutate(#EBV_AL  = ifelse(PE_EBV >= #, 1, 0),
-         EBV_PAL = ifelse(PE_EBV >= quantile(PE_EBV, 0.75, na.rm = TRUE), 1, 0))
+         EBV_PAL = ifelse(PE_EBV >= quantile(PE_EBV, 0.75, na.rm = TRUE), 1, 0),
+         Plate_ID = case_when(Plate_ID == "TPW_EBV_Plate 1" ~ "1",
+                              Plate_ID == "TPW_EBV_Plate 2" ~ "2",
+                              Plate_ID == "TPW_EBV_Plate 3" ~ "3",
+                              Plate_ID == "TPW_EBV_Plate 4" ~ "4",
+                              TRUE ~ Plate_ID)) %>% 
+  rename(family = Study_Sample_ID,
+         ebv_pe = PE_EBV,
+         ebv_direct = Direct_EBV,
+         ebv_plate = Plate_ID,
+         ebv_date = Assay_Date) %>% 
+  janitor::clean_names()
 
 ```
 
@@ -95,7 +170,7 @@ al_df <- full_df %>%
   select(Study_Sample_ID, ends_with("al"))
 
 #export as same format with new AL variables in respective tabs
-write.xlsx(list("CHO" = cho_df, "HDL" = hdl_df, "TRG" = trg_df, "CRP" = crp_df, "EBV" = ebv_df, "A1c" = a1c_df, "IL6" = il6_df), file = "do_not_push/dbs_full.xlsx")
+#write.xlsx(list("CHO" = cho_df, "HDL" = hdl_df, "TRG" = trg_df, "CRP" = crp_df, "EBV" = ebv_df, "A1c" = a1c_df, "IL6" = il6_df), file = "do_not_push/dbs_full.xlsx")
 
 ```
 
