@@ -1472,3 +1472,463 @@ complete %>%
     y = 'Number of Participants'
   )
 ```
+
+
+
+
+## Conflict Tactics Scales (CTS)
+
+### CTS Description
+
+The CTS is a self-report measure used to assess tactics used when there
+is conflict in a relationship.
+
+For the present study, all 20 items from the CTS short form were
+collected, and all scales (Negotiation, Physical Assault, and
+Psychological Aggression) and supplemental scales (Assault and Sexual
+Coercion) were calculated.
+
+Authors describe that internal reliability is not appropriate for the
+CTS measure. CTS should not have a calculated total/average composite
+score. Instead, CTS has three different ways of scoring (Prevalence,
+Severity, Mutuality).
+
+No items need to be reverse scored. <MARIA> TODO: How to word
+directionality with current values/labels. (e.g., Higher scores indicate
+..."
+
+<SHAINA> TODO: CONFIRM & CHECK CALC CODE The missing data rule was
+applied. Calculations were completed only with participants that had
+less than 20% missing data (this includes `-77` responses)
+
+Reference:
+[\@straus2004short](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract);
+[DOI](10.1891/vivi.19.5.507.63686)
+
+### CTS Variables
+
+#### Value Labels
+
+All CTS variables have the same response options.
+
+```{r CTS-label-table, results = 'asis'}
+
+CTS_label_df <- data.frame(
+  value = c( "1", "2", "3", "4", "5", "6", "7", "8"),
+  label = c("This has never happened",
+            "Once in the past year",
+            "Twice in the past year",
+            "3-5 times in the past year",
+            "6-10 times in the past year",
+            "11-20 times in the past year",
+            "More than 20 times in the past year", 
+            "Not in the past year, but it did happen before"
+            )
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+CTS_label_df <- setNames(CTS_label_df[-1, ], unlist(CTS_label_df[1, ]))
+
+
+#create table
+CTS_label_table <- CTS_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(100)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(CTS_label_table)
+
+
+```
+
+#### Survey Items
+
+All CTS survey items are presented in the following table:
+Incarcerated TC weren't administered for this survey
+
+```{r CTS-var-prep}
+# Pull question wording from Qualtrics data
+CTS_word <- qualtrics %>% 
+  select(starts_with("CT"), -CT0, -CT000) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+CTS_word_long <- CTS_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  mutate(notes = if_else(var_name == "cts screen", "If TC answered No for this question the rest of survey will be skipped", notes),
+    description = if_else(var_name == "ct0", "Have you lived with any other children, under the age of 17, since the time of your last interview? Only think about children who you or your partner was responsible for parenting. Please do not include any children listed in the other sections or children that you have reported before.", 
+                               if_else(var_name == "ct000", "How many new children are you parenting since your last interview on (last interview date)?",
+                                       if_else(var_name ==  "cts screen", "Have you been in a (romantic) relationship in the past year?",
+                                               if_else(var_name == "cts parent screen", "Have you parented a child (under 18) in the past year?", description))))
+  ) %>%
+  slice(1:26)
+
+```
+
+Incarcerated TC weren't administered for this survey
+
+Please indicate how many times you did each of these things in the past year, and how many times you partner did them in the past year. 
+
+```{r CTS-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+my_gt_table <- gt(CTS_word_long)
+
+# Table-specific formatting (col width, names)
+my_gt_table <- my_gt_table %>% 
+  cols_label(var_name = "Variable", 
+            description = "Description",
+            notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(my_gt_table)
+
+#WHEN RENDERING WITH PDF USE: 
+#my_gt_table
+```
+
+#### Scale and Subscales
+
+Information on total score and subscale variables are below. Prevalence
+scales are calculated ... <MARIA> INSERT INFO ON COMPOSITE SCORE
+CREATION. Severity scores are calculated ... <MARIA> INSERT INFO ON
+COMPOSITE SCORE CREATION. Mutuatlity scores are created by ... <MARIA>
+INSERT INFO ON COMPOSITE SCORE CREATION
+
+<SHAINA/MIN> TODO: NEED fill Range once we understand how composite
+scores were created
+
+```{r CTS-scale-table, results = 'asis'}
+# Create the table as a data frame
+CTS_scale_df <- data.frame(
+  var_name = c("cts_psy_agg_ind_sev", "cts_injury_ind_sev", "cts_assault_ind_sev",   "cts_sex_ind_sev",       #TC   severity 
+                "cts_psy_agg_part_sev","cts_injury_part_sev", "cts_assault_part_sev","cts_sex_part_sev",      #Partner severity 
+
+                "cts_psy_agg_ind_prev", "cts_injury_ind_prev", "cts_assault_ind_prev", "cts_sex_ind_prev", 
+                "cts_psy_agg_part_prev", "cts_injury_part_prev", "cts_assault_part_prev", "cts_sex_part_prev",
+               
+                "cts_psy_agg_mutual", "cts_injury_mutual", "cts_assault_mutual", "cts_sex_mutual",
+               
+                "cts_negotiate_ind",    "cts_negotiate_part"),
+
+  scale = c("TC Psychological Aggression (2)", "TC Physical Injury (2)", "TC Assault (2)", "TC Sexual Cohesion (2)",
+            "Partner Psychological Aggression (2)", "Partner Physical Injury (2)", "Partner Assault (2)", "Partner Sexual Cohesion (2)",
+
+            "TC Psychological Aggression (2)", "TC Physical Injury (2)", "TC Assault (2)", "TC Sexual Cohesion (2)",
+            "Partner Psychological Aggression (2)", "Partner Physical Injury (2)", "Partner Assault (2)", "Partner Sexual Cohesion (2)",
+            
+            "Psychological Aggression (4)", "Physical Injury (4)", "Assaul (4)t", "Sexual Cohesion (4)",
+            
+            "TC Negotiation (2)", "Partner Negotiation (2)"
+            ),
+  score_method = c("Severity", "Severity", "Severity", "Severity",
+                   "Severity", "Severity", "Severity", "Severity",
+                   "Prevalence", "Prevalence", "Prevalence", "Prevalence", 
+                   "Prevalence", "Prevalence", "Prevalence", "Prevalence", 
+                   "Mutuality", "Mutuality", "Mutuality", "Mutuality",
+                   "", ""
+                   ),
+
+  scale_construction = c("`ct3`, `ct13`", "`ct5`, `ct15`", "`ct9`, `ct11`", "`ct17`, `ct19`", 
+                         "`ct4`, `ct14`", "`ct6`, `ct16`", "`ct10`, `ct12`", "`ct18`, `ct20`", 
+                         
+                         "`ct3`, `ct13`", "`ct5`, `ct15`", "`ct9`, `ct11`", "`ct17`, `ct19`", 
+                         "`ct4`, `ct14`", "`ct6`, `ct16`", "`ct10`, `ct12`", "`ct18`, `ct20`",
+                         
+                         "`ct3`, `ct13`, `ct4`, `ct14`","`ct5`, `ct15`, `ct6`, `ct16`",
+                         "`ct9`, `ct11`, `ct10`, `ct12`", "`ct17`, `ct19`, `ct18`, `ct20`",
+                         
+                         "`ct1`, `ct7`", "`ct2`, `ct8`"
+                         
+                         ),
+  scale_range = c("", "", "", "", "", "", "", "", "", "",
+                  "", "", "", "", "", "", "", "", "", "", 
+                  "", "")
+  )
+
+
+# Create the gt table object
+CTS_scale_table <- gt(CTS_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale (# of items)", 
+            score_method = "Score Method",
+            scale_construction = "Scale Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  #cols_width(scale ~ px(200)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(CTS_scale_table)
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item and subscale
+score:
+
+```{r CTS-mean-items}
+# Create subset of CTS items
+cts_data_subset <- complete %>%
+  select(ct1:ct20, starts_with("cts"))
+
+# Calculate the summary statistics for each variable
+cts_summary_data <- lapply(cts_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert cts2_summary_data to a data frame
+cts_summary_data <- as.data.frame(cts_summary_data)
+
+# Set items as first row
+cts_summary_data <- rbind(names(cts_summary_data), cts_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cts_tbl <- cts_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(`1` ~ pct(27)) %>%
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+    fmt_missing(
+        columns = c("Mean","SD","Range", "Missing")
+        # missing_text = "missing"
+  )%>%
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+   
+# Render the table
+cts_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for each subscale
+
+##### Severity distributions
+
+```{r CTS-Severity-TC-distributions, class.source='fold', echo = FALSE}
+# Psychological Aggression 
+p_cts_psy_agg_ind_sev <- complete %>%
+  mutate(
+    cts_psy_agg_ind_sev = case_when(
+      cts_psy_agg_ind_sev == 0 ~ 'No Psychological Aggression',  #TODO: <Maria> Can I short this to No Psy. Aggre. etc... 
+      cts_psy_agg_ind_sev == 1 ~ 'Minor Psychological Aggression',
+      cts_psy_agg_ind_sev == 2 ~ 'Severe Psychological Aggression'
+    ),
+    cts_psy_agg_ind_sev = as.factor(cts_psy_agg_ind_sev),
+    cts_psy_agg_ind_sev = relevel(cts_psy_agg_ind_sev, 'No Psychological Aggression')
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_ind_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10),guide = guide_axis(n.dodge=3)) +
+  labs(title = 'Individual (TC) Psychological Aggression Severity',
+       y = "Number of Participants") + 
+  THEME
+
+
+# Psychical Injury 
+p_cts_injury_ind_sev <- complete %>%
+  mutate(
+    cts_injury_ind_sev = case_when(
+      cts_injury_ind_sev == 0 ~ 'No Injury',
+      cts_injury_ind_sev == 1 ~ 'Minor Injury',
+      cts_injury_ind_sev == 2 ~ 'Severe Injury'
+    ),
+    cts_injury_ind_sev = as.factor(cts_injury_ind_sev),
+    cts_injury_ind_sev = relevel(cts_injury_ind_sev, 'No Injury')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_ind_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Individual (TC) Physical Injury Severity',
+       y = "Number of Participants") + 
+  THEME
+
+# Assault 
+p_cts_assault_ind_sev <- complete %>%
+  mutate(
+    cts_assault_ind_sev = case_when(
+      cts_assault_ind_sev == 0 ~ 'No Assault',
+      cts_assault_ind_sev == 1 ~ 'Minor Assault',
+      cts_assault_ind_sev == 2 ~ 'Severe Assault'
+    ),
+    cts_assault_ind_sev = as.factor(cts_assault_ind_sev),
+    cts_assault_ind_sev = relevel(cts_assault_ind_sev, 'No Assault')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_ind_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Individual (TC) Assault Severity',
+       y = 'Number of Participants') +
+  THEME
+
+# Sexual Cohesion
+p_cts_sex_ind_sev <- complete %>%
+  mutate(
+    cts_sex_ind_sev = case_when(
+      cts_sex_ind_sev == 0 ~ 'No Sexual Cohesion',
+      cts_sex_ind_sev == 1 ~ 'Minor Sexual Cohesion',
+      cts_sex_ind_sev == 2 ~ 'Severe Sexual Cohesion'
+    ),
+    cts_sex_ind_sev = as.factor(cts_sex_ind_sev),
+    cts_sex_ind_sev = relevel(cts_sex_ind_sev, 'No Sexual Cohesion')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_ind_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Individual (TC) Sexual Cohesion Severity',
+       y = "Number of Participants") + 
+  THEME
+
+#TODO: <Min FIX the x axis overlap>
+ggarrange(p_cts_psy_agg_ind_sev, p_cts_injury_ind_sev + rremove("ylab"), 
+          p_cts_assault_ind_sev, p_cts_sex_ind_sev + rremove("ylab")) %>%
+  annotate_figure(top = text_grob( "Distribution for CTS (TC) Subscals \n(x-axis and y-axis are in different scales)"))
+```
+
+
+
+```{r CTS-Severity-Partner-distributions, class.source='fold', echo = FALSE}
+# Psychological Aggression 
+p_cts_psy_agg_part_sev <- complete %>%
+  mutate(
+    cts_psy_agg_part_sev = case_when(
+      cts_psy_agg_part_sev == 0 ~ 'No Psychological Aggression',
+      cts_psy_agg_part_sev == 1 ~ 'Minor Psychological Aggression',
+      cts_psy_agg_part_sev == 2 ~ 'Severe Psychological Aggression'
+    ),
+    cts_psy_agg_part_sev = as.factor(cts_psy_agg_part_sev),
+    cts_psy_agg_part_sev = relevel(cts_psy_agg_part_sev, 'No Psychological Aggression')
+    ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_part_sev
+    )
+  ) +
+  bar_style +
+   scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Distribution of Partner Psychological Aggression Severity',
+       y = "Number of Participants") + 
+  THEME
+
+# Physical Injury
+p_cts_injury_part_sev <- complete %>%
+  mutate(
+    cts_injury_part_sev = case_when(
+      cts_injury_part_sev == 0 ~ 'No Injury',
+      cts_injury_part_sev == 1 ~ 'Minor Injury',
+      cts_injury_part_sev == 2 ~ 'Severe Injury'
+    ),
+    cts_injury_part_sev = as.factor(cts_injury_part_sev),
+    cts_injury_part_sev = relevel(cts_injury_part_sev, 'No Injury')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_part_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Distribution of Partner Physical Injury Severity',
+       y = "Number of Participants") + 
+  THEME
+
+
+# Assault
+p_cts_assault_part_sev <- complete %>%
+  mutate(
+    cts_assault_part_sev = case_when(
+      cts_assault_part_sev == 0 ~ 'No Assault',
+      cts_assault_part_sev == 1 ~ 'Minor Assault',
+      cts_assault_part_sev == 2 ~ 'Severe Assault'
+    ),
+    cts_assault_part_sev = as.factor(cts_assault_part_sev),
+    cts_assault_part_sev = relevel(cts_assault_part_sev, 'No Assault')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_part_sev
+    )
+  ) +
+  bar_style +
+    scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Distribution of Partner Assault Severity',
+       y = "Number of Participants") + 
+  THEME
+
+# Sexual Cohesion
+p_cts_sex_part_sev <- complete %>%
+  mutate(
+    cts_sex_part_sev = case_when(
+      cts_sex_part_sev == 0 ~ 'No Sexual Cohesion',
+      cts_sex_part_sev == 1 ~ 'Minor Sexual Cohesion',
+      cts_sex_part_sev == 2 ~ 'Severe Sexual Cohesion'
+    ),
+    cts_sex_part_sev = as.factor(cts_sex_part_sev),
+    cts_sex_part_sev = relevel(cts_sex_part_sev, 'No Sexual Cohesion')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_part_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Distribution of Partner Sexual Cohesion Severity',
+       y = "Number of Participants") + 
+  THEME
+
+# TODO: Min fix x axis overlap 
+ggarrange(p_cts_psy_agg_part_sev, p_cts_injury_part_sev + rremove("ylab"), 
+          p_cts_assault_part_sev, p_cts_sex_part_sev + rremove("ylab")) %>%
+  annotate_figure(top = text_grob( "Distribution for CTS Subscals \n(x-axis and y-axis are in different scales)"))
+```
+

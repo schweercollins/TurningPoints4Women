@@ -1226,62 +1226,62 @@ prss_miss %>%
 
 ### PRSS Calculation & Subscales 
 ```{r}
-prss_calc <-
-  prss %>%
-  mutate(
-    across(
-      .cols = -id,
-      .fns = ~case_when(
-        .x < 0 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
-
-prss_complete <-
-  prss_calc %>%
-  composite_total_avg_fun(
-    id = 'id',
-    max_value = 5,
-    n_items = 5
-  ) %>%
-  distinct(
-    across(
-      .cols = everything()
-    )
-  ) %>%
-  rename(
-    prss_total = sum_values,
-    prss_avg = mean_values
-  ) %>%
-  mutate(
-    across(
-      c(
-        prss_total,
-        prss_avg
-      ),
-      ~case_when(
-        id %in% prss_remove ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
+# prss_calc <-
+#   prss %>%
+#   mutate(
+#     across(
+#       .cols = -id,
+#       .fns = ~case_when(
+#         .x < 0 ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
+# 
+# prss_complete <-
+#   prss_calc %>%
+#   composite_total_avg_fun(
+#     id = 'id',
+#     max_value = 5,
+#     n_items = 5
+#   ) %>%
+#   distinct(
+#     across(
+#       .cols = everything()
+#     )
+#   ) %>%
+#   rename(
+#     prss_total = sum_values,
+#     prss_avg = mean_values
+#   ) %>%
+#   mutate(
+#     across(
+#       c(
+#         prss_total,
+#         prss_avg
+#       ),
+#       ~case_when(
+#         id %in% prss_remove ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
 ```
 
 ## Merge
 Merge together all measures 
 ```{r merge}
-# This file have missing rule applied, this means if the missing rule is trigered for a measure, then the entire measure questions will be NA for this individual. This is the data that I feed to codebook. Maria, please confirm this is how you want. 
+# This file have missing rule applied, this means if the missing rule is triggered for a measure, then the entire measure questions will be NA for this individual. This is the data that I feed to code book. Maria, please confirm this is how you want. 
 # all missing data are NA 
 tpw_archive_calc <- tpw_archive_id %>%
   left_join(bsi_complete, by = "id") %>%
   left_join(cesd_complete, by = "id") %>%
   left_join(ciq_complete, by = "id") %>%
   left_join(dast_complete, by = "id") %>%
-  #left_join(cts_complete, by = "id") %>%
-  # left_join(bcap_complete, by = "id") %>%
-  # left_join(dyadc_complete, by = "id") %>%
-  # left_join(arq_complete, by = "id") %>%
+  left_join(cts_complete, by = "id") %>%
+  left_join(bcap_complete, by = "id") %>%
+  left_join(dyadc_complete, by = "id") %>%
+  left_join(arq_complete, by = "id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
@@ -1291,10 +1291,10 @@ tpw_archive <- tpw_archive_id %>%
   left_join(cesd, by = "id") %>%
   left_join(ciq, by = "id") %>%
   left_join(dast, by = "id") %>%
-  # left_join(cts, by = "id") %>%
-  # left_join(bcap, by = "id") %>%
-  # left_join(dyadc, by = "id") %>%
-  # left_join(arq, by = "id") %>%
+   left_join(cts, by = "id") %>%
+  left_join(bcap, by = "id") %>%
+  left_join(dyadc, by = "id") %>%
+  left_join(arq, by = "id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 ```
