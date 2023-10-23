@@ -862,16 +862,16 @@ bcap_complete <-
   scale10 = c('q2_r', 'q18', 'q28')
   ) %>% 
     rename(
-      bcap_risk_total = total1,
-    bcap_happy_total = total2,
-    bcap_feel_pers_total = total3,
-    bcap_lonely_total = total4,
-    bcap_fam_conf_total = total5,
-    bcap_rigid_total = total6,
-    bcap_distress_total = total7,
-    bcap_poverty_total = total8,
-    bcap_lie_total = total9,
-    bcap_random_total = total10
+    bcap_risk = total1,
+    bcap_happy = total2,
+    bcap_feel_pers = total3,
+    bcap_lonely = total4,
+    bcap_fam_conf = total5,
+    bcap_rigid = total6,
+    bcap_distress = total7,
+    bcap_poverty = total8,
+    bcap_lie = total9,
+    bcap_random = total10
     )
 
 ```
@@ -1089,13 +1089,13 @@ dyadc_complete <-
       scale4_nitems = 5
     ) %>%
     rename(
-      dyadc_con_total = total1,
+      dyadc_con = total1,
       dyadc_con_avg = avg1,
-      dyadc_aff_exp_total = total2,
+      dyadc_aff_exp = total2,
       dyadc_aff_exp_avg = avg2,
-      dyadc_satis_total = total3,
+      dyadc_satis = total3,
       dyadc_satis_avg = avg3,
-      dyadc_cohes_total = total4,
+      dyadc_cohes = total4,
       dyadc_cohes_avg = avg4
     )
 ```
@@ -1281,7 +1281,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(cts_complete, by = "id") %>%
   left_join(bcap_complete, by = "id") %>%
   left_join(dyadc_complete, by = "id") %>%
-  left_join(arq_complete, by = "id") %>%
+  #left_join(arq_complete, by = "id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
@@ -1291,10 +1291,10 @@ tpw_archive <- tpw_archive_id %>%
   left_join(cesd, by = "id") %>%
   left_join(ciq, by = "id") %>%
   left_join(dast, by = "id") %>%
-   left_join(cts, by = "id") %>%
+  left_join(cts, by = "id") %>%
   left_join(bcap, by = "id") %>%
   left_join(dyadc, by = "id") %>%
-  left_join(arq, by = "id") %>%
+  #left_join(arq, by = "id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 ```
