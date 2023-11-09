@@ -237,7 +237,7 @@ know to use these data accurately*
 
 ### Missing Data
 
--   Truly missing = `NA` (blank in file or -99) = The question should
+-   Truly missing = `NA` (blank in file or -99): The question should
     have been asked of the respondent, but for a reason other than those
     listed below, no answer was given or recorded.
 
@@ -245,22 +245,22 @@ know to use these data accurately*
     score or other summary when the percentage of missing data is
     outside what is allowable for missing data rules
 
--   Not Applicable = -55 = The subject was never asked a question for
+-   Not Applicable = -55: The subject was never asked a question for
     some reason (conditional question)
 
--   Don't Know = -66 = The subject was unable to answer a question,
+-   Don't Know = -66: The subject was unable to answer a question,
     either because he or she had no opinion or because the required
     information was not available (could not recall).
 
--   Refusal/No Answer = -77 = The subject explicitly refused to answer a
+-   Refusal/No Answer = -77: The subject explicitly refused to answer a
     question or did not answer it when he or she should have.
 
--   No Match = -88 = This situation arises when data are drawn from
+-   No Match = -88: This situation arises when data are drawn from
     different sources (for example, a survey questionnaire and an
     administrative database), and information from one source cannot be
     located.
 
--   Processing Error = -44 = For some reason, there is no answer to the
+-   Processing Error = -44: For some reason, there is no answer to the
     question, although the subject provided one. This can result from
     interviewer error, incorrect coding, machine failure, or other
     problems
@@ -314,7 +314,7 @@ The missing data rule was not applied since there are no missing data
 among BSI variables.
 
 Reference:
-[\@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F);
+[@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F);
 [DOI](https://doi.org/10.1017/S0033291700048017)
 
 ### BSI Variables
@@ -574,17 +574,17 @@ than 20% missing data. Missing data for each variable is presented in
 the descriptive statistics table below.
 
 Reference:
-[\@radloff1977ces](https://journals.sagepub.com/doi/abs/10.1177/014662167700100306);
+[@radloff1977ces](https://journals.sagepub.com/doi/abs/10.1177/014662167700100306);
 [DOI](https://doi.org/10.1177%2F014662167700100306)
 
 -   Additional References:
 
     -   Cutoff Information:
-        [\@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4);
+        [@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4);
         [DOI](https://doi.org/10.1016/j.jad.2018.02.071)
 
     -   Items for Potential Subscales:
-        [\@canady2009measurement](https://connect.springerpub.com/content/sgrjnm/17/2/91.abstract);
+        [@canady2009measurement](https://connect.springerpub.com/content/sgrjnm/17/2/91.abstract);
         [DOI](10.1891/1061-3749.17.2.91)
 
 ### CES-D Variables
@@ -860,7 +860,7 @@ presented below.
 should plot labels be)?, how should they be used
 
 Reference:
-[\@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4);
+[@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4);
 [DOI](https://doi.org/10.1016/j.jad.2018.02.071)
 
 ```{r cesd-clinical}
@@ -897,7 +897,7 @@ psychological impacts of COVID-19.
 The missing data rule was not applied since there is no missing data
 among CIQ variables.
 
-Reference: [\@conway2020social](https://psyarxiv.com/z2x9a/)
+Reference: [@conway2020social](https://psyarxiv.com/z2x9a/)
 
 ### CIQ Variables
 
@@ -1125,7 +1125,7 @@ Calculations were completed only with participants that had less than
 20% missing data (this includes `-77` responses)
 
 Reference:
-[\@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1360-0443.1989.tb03463.x);[DOI](https://doi.org/10.1111/j.1360-0443.1989.tb03463.x)
+[@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1360-0443.1989.tb03463.x);[DOI](https://doi.org/10.1111/j.1360-0443.1989.tb03463.x)
 
 ### DAST Variables
 
@@ -1502,7 +1502,7 @@ applied. Calculations were completed only with participants that had
 less than 20% missing data (this includes `-77` responses)
 
 Reference:
-[\@straus2004short](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract);
+[@straus2004short](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract);
 [DOI](10.1891/vivi.19.5.507.63686)
 
 ### CTS Variables
@@ -2223,7 +2223,7 @@ completed only with participants that had less than 20% missing data
 (this includes `-77` responses).
 
 Reference:
-[\@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug);
+[@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug);
 [DOI](https://doi.org/10.1207/s15374424jccp3402_9)
 
 ### BCAP Variables
@@ -2438,7 +2438,7 @@ bcap_scale_table <- gt(bcap_scale_df) %>%
             alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale_construction ~ px(135)) %>% 
+  #cols_width(scale_construction ~ px(135)) %>% 
   tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
@@ -2544,6 +2544,7 @@ bcap_tbl <- bcap_summary_data %>%
              Range = "Range*",
              Missing = "% Missing") %>% 
   cols_width(1 ~ px(165),2:5 ~ px(115)) %>%
+    tab_options(table.width = pct(100))%>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -2734,10 +2735,10 @@ completed only with participants that had less than 20% missing data
 (this includes `-77` responses)
 
 Reference:
-[\@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug);
+[@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug);
 [DOI](https://doi.org/10.1207/s15374424jccp3402_9) <SHIANA> EXPLAIN WHAT
 2ND REF IS FOR Reference:
-[\@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
+[@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
 
 ### DYADC Variables
 
@@ -2934,7 +2935,8 @@ dyadc_scale_table <- gt(dyadc_scale_df) %>%
             alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  #cols_width(scale ~ px(135)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
 # Print the table
@@ -2986,6 +2988,7 @@ dyadc_tbl <- dyadc_summary_data %>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
+  tab_options(table.width = pct(100))%>%
   apply_tbl_theme()
 
 # Render the table
@@ -3038,7 +3041,8 @@ dyadc_tbl_binary <- dyadc_summary_data_binary %>%
             locations = cells_column_spanners()) %>% 
   apply_tbl_theme() %>% 
   tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
-            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_options(table.width = pct(100))
 
 # Render the table
 dyadc_tbl_binary
@@ -3121,3 +3125,2273 @@ complete %>%
   geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = -6)) +
   geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -9.25))
 ```
+
+
+
+## Attachment Relationships Questionnaire (ARQ)
+
+### ARQ Description
+
+The ARQ is a self-report measure used to categorize attachment styles in
+adulthood. <MARIA> CONFIRM THIS IS CORRECT
+
+For the present study, all 5 items from the ARQ were collected in order
+to construct four attachment styles (secure, fearful, preoccupied, and
+dismissing).
+
+No items need to be reverse scored. Participants self-select one
+attachment style that best describes them in the first question `rq1`,
+then rate their agreement with each attachment style for `rqa` - `rqd`.
+Higher ratings indicate more agreement with the statement.
+
+The missing data rule is applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses)
+
+Reference:
+[@bartholomew1991attachment](https://psycnet.apa.org/record/1991-33075-001);[DOI](https://doi.org/10.1037/0022-3514.61.2.226)
+
+### ARQ Variables
+
+#### Value Labels
+
+Response options for `rq1`
+
+```{r ARQ-label-table, results = 'asis'}
+
+arq_label_df <- data.frame(
+  value = c("A", "B", "C", "D"),
+  label = c("It is easy for me to become emotionally close to others. I am comfortable dependingon them and having them depend on me. I don't worry about being alone or havingothers not accept me.",
+            "I am uncomfortable getting close to others. I want emotionally close relationships, but Ifind it difficult to trust others completely, or to depend on them. I worry that I will be hurt ifI allow myself to become too close to others.",
+            "I want to be completely emotionally intimate with others, but I often find that others arereluctant to get as close as I would like. I am uncomfortable being without closerelationships, but I sometimes worry that others don't value me as much as I value them.",
+            "I am comfortable without close emotional relationships. It is very important to me tofeel independent and self-sufficient, and I prefer not to depend on others or have othersdepend on me.")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+arq_label_df <- setNames(arq_label_df[-1, ], unlist(arq_label_df[1, ]))
+
+
+#create table
+arq_label_table <- arq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ pct(100)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(arq_label_table)
+
+
+```
+
+Response option for `rqa`, `rqb`, `rqc`, `rqd`.
+
+```{r ARQ-label-table-2, results = 'asis'}
+
+arq_label_df <- data.frame(
+  value = c("1", "2", "3", "4", "5", "6", "7"),
+  label = c("Disagree Strongly",
+            "",
+            "",
+            "Neutral/Mixed",
+            "",
+            "",
+            "Agree Strongly")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+arq_label_df <- setNames(arq_label_df[-1, ], unlist(arq_label_df[1, ]))
+
+
+#create table
+arq_label_table <- arq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(arq_label_table)
+
+
+```
+
+#### Survey Items
+
+All ARQ survey items are presented in the following table
+
+```{r ARQ-var-prep}
+# Pull question wording from qualtrics data
+arq_word <- qualtrics %>% 
+  select(RQ1,RQA, RQB, RQC, RQD) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+arq_word_long <- arq_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  mutate(description = if_else(var_name == "rq1", "Please tell me which one style best describes you or is the closest to the way you are.", description))
+
+```
+
+```{r arq-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+arq_gt_table <- gt(arq_word_long)
+
+# Table-specific formatting (col width, names)
+arq_gt_table <- arq_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(arq_gt_table)
+
+#WHEN RENDERING WITH PDF USE: 
+#my_gt_table
+```
+
+#### Scale and Subscales
+
+Information on constructed attachment groups is presented below. The
+highest rating for attachment style was used to classify participants
+into one of four attachment groups (secure, dismissing, preoccupied,
+fearful). Model of the self (i.e., attachment anxiety) was calculated by
+summing secure and dismissing ratings then subtracting the sum of
+preoccupied and fearful items. Model of the other (i.e., attachment
+avoidance) was constructed by summing secure and preoccupied items and
+subtracting the sum of dismissing and fearful items. Higher scores on
+attachment models indicate more positive attachment models. <MARIA>
+CONFIRM THIS IS CORRECT
+
+<SHAINA/MARIA> CONFIRM ALPHA IS NEEDED
+
+```{r arq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+arq_alpha <-
+  complete %>%
+  select(rqa,	rqb, rqc, rqd) %>%
+  psych::alpha(check.keys = TRUE)
+```
+
+```{r arq-subscales}
+#DATA CLEANING CODE - create arq categories
+vars_to_check <- c("rqa", "rqb", "rqc", "rqd")
+
+arq_subscale <- complete %>% 
+  mutate(max_var = apply(.[vars_to_check], 1, function(row) vars_to_check[which.max(row)])) %>% 
+  mutate(arq_group = case_when(max_var == "rqa" ~ "Secure",
+                               max_var == "rqb" ~ "Fearful",
+                               max_var == "rqc" ~ "Preoccupied",
+                               max_var == "rqd" ~ "Dismissive",
+                               TRUE ~ NA_character_),
+         arq_model_self = rowSums(data.frame(rqa, rqd), na.rm = TRUE) - rowSums(data.frame(rqc, rqb), na.rm = TRUE),
+    arq_model_other = rowSums(data.frame(rqa, rqc), na.rm = TRUE) - rowSums(data.frame(rqd, rqb), na.rm = TRUE)) %>%
+  mutate_at(vars(arq_model_self, arq_model_other), ~ if_else(is.na(arq_group), NA_real_, .)) %>% 
+  select(-max_var) 
+
+#missing ratings: 50, 116, and 123
+
+```
+
+```{r ARQ-scale-table, results = 'asis'}
+# Create the table as a data frame
+arq_scale_df <- data.frame(
+  var_name = c("arq_group", "arq_model_self", "arq_model_other"),
+  scale = c("Attachment Group", "Model of Self", "Model of Other"),
+  scale_construction = c("Highest rating among `rqa`, `rqb`, `rqc`, `rqd`", "(`rqa` + `rqd`) - (`rqc` + `rqb`)", "(`rqa` + `rqc`) - (`rqd` + `rqb`)"))
+
+# Create the gt table object
+arq_scale_table <- gt(arq_scale_df) %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale Name", 
+            scale_construction = "Scale Construction") %>% 
+  tab_options(table.width = pct(100))%>%
+  #tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(arq_scale_table)
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item and
+total/subscale score
+
+```{r ARQ-mean-items}
+# Create subset of BSI items
+arq_data_subset <- complete %>%
+  select(rq1,rqa,	rqb, rqc, rqd)
+
+# Calculate the summary statistics for each variable
+arq_summary_data <- lapply(arq_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+arq_summary_data <- as.data.frame(arq_summary_data)
+
+# Set items as first row
+arq_summary_data <- rbind(names(arq_summary_data), arq_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+arq_tbl <- arq_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  tab_options(table.width = pct(100))%>%
+  apply_tbl_theme()
+
+# Render the table
+arq_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented for the total score and each subscale *TODO:
+JP's graphs are count on x axis*
+
+```{r ARQ-distributions, class.source='fold', echo = FALSE}
+p_rq1 <- complete %>%
+  select(rq1) %>%
+  mutate(
+    across(
+      .cols = rq1,
+      .fns = ~case_when(
+        .x == "A" ~ 1,
+        .x == "B" ~ 2,
+        .x == "C" ~ 3,
+        .x == "D" ~ 4,
+        TRUE ~ NA_real_
+      )
+    )
+    ) %>%
+  composite_hist(x = rq1, bins = 4) +
+  scale_x_continuous(breaks=c(1,2,3,4),
+    #breaks=c("1","2","3","4"),
+        labels=c("A","B", "C", "D")) +
+  labs(title = 'rq1') 
+
+p_rqa <- complete %>%
+  composite_hist(x = rqa, bins = 10) +
+  labs(title = 'rqa')
+
+p_rqb <- complete %>%
+  composite_hist(x = rqb, bins = 10) +
+  labs(title = 'rqb')
+
+p_rqc<-complete %>%
+  composite_hist(x = rqc, bins = 10) +
+  labs(title = 'rqc')
+
+p_rqd<-complete %>%
+  composite_hist(x = rqd, bins = 10) +
+  labs(title = 'rqd')
+
+ggarrange(p_rq1, p_rqa + rremove("ylab"),
+          p_rqb+ rremove("ylab"), p_rqc,
+          p_rqd + rremove("ylab")
+          ) %>%
+  annotate_figure(top = text_grob( "Distribution for ARQ \n(x-axis and y-axis are in different scales)"))
+```
+
+
+
+## Posttraumatic Risk Seeking Scale (PRSS)
+
+### PRSS Description
+
+The PRSS is a 5-item questionnaire designed to measure *insert text*
+
+For the present study, 5 items from the PRSS were collected in order to
+*TODO: insert text here*
+
+No items need to be reverse scored. *TODO: need change text here Higher
+scores indicate more severe mental health symptoms.*
+
+The missing data rule was applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses)
+
+Reference:
+[@kerig2019linking](https://onlinelibrary.wiley.com/doi/abs/10.1111/cpsp.12280);
+[DOI](https://doi.org/10.1111/cpsp.12280)
+
+### PRSS Variables
+
+#### Value Labels
+
+All PRSS variables have the same response options.
+
+```{r PRSS-label-table, results = 'asis'}
+
+prss_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4"),
+  label = c("None of the time",
+            "A little of the time",
+            "Some of the time",
+            "Much of the time",
+            "Most of the time")) %>% 
+  t() %>% 
+  as.data.frame()
+
+prss_label_df <- setNames(prss_label_df[-1, ], unlist(prss_label_df[1, ]))
+
+
+#create table
+prss_label_table <- prss_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(150)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(prss_label_table)
+
+
+```
+
+#### Survey Items
+
+PRSS survey items are presented in the following table:
+
+```{r prss-var-prep}
+# Pull question wording from Qualtrics data
+prss_word <- qualtrics %>% 
+  select(starts_with("ps")) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+prss_word_long <- prss_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character(""))%>%
+  slice(9:13)
+
+```
+
+```{r prss-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+# this sould be ps9-ps13
+prss_gt_table <- gt(prss_word_long)
+
+# Table-specific formatting (col width, names)
+prss_gt_table <- prss_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(prss_gt_table)
+
+#WHEN RENDERING WITH PDF USE: 
+#my_gt_table
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below.
+Variables were constructed by summing included items.
+
+```{r prss alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+prss_alpha <-
+  complete %>%
+  select(ps9:ps13) %>%  
+  psych::alpha(check.keys = TRUE)
+```
+
+```{r PRSS-scale-table, results = 'asis'}
+# Create subset of prss items
+prss_data_subset <- complete %>%
+  select(ps9:ps13, prss_total)
+
+
+# Create the table as a data frame
+prss_scale_df <- data.frame(
+  var_name = c("prss_total"),
+  scale = c("PRSS Total score (5) "),
+  scale_construction = c("`ps9`, `ps10`, `ps11`, `ps12`, `ps13`"),
+  scale_range = c("0-16"), #TODO maria double check range 
+   alpha = c(round(prss_alpha$total$raw_alpha, 3))
+  )
+
+# Create the gt table object
+prss_scale_df <- gt(prss_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale (# of items)", 
+            scale_construction = "Scale Construction",
+            scale_range = "Range*",
+            alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  #cols_width(scale ~ px(135)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_tbl_theme() 
+
+# Print the table
+print(prss_scale_df)
+
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+
+```{r prss-mean-items}
+
+# Calculate the summary statistics for each variable
+prss_summary_data <- lapply(prss_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+prss_summary_data <- as.data.frame(prss_summary_data)
+
+# Set items as first row
+prss_summary_data <- rbind(names(prss_summary_data), prss_summary_data) %>% 
+  t() %>% 
+  as.data.frame() 
+
+# Create the gt table
+prss_tbl <- prss_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  tab_options(table.width = pct(100))%>%
+  apply_tbl_theme()
+
+# Render the table
+prss_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r PRSS-distributions, class.source='fold', echo = FALSE}
+complete %>%
+  composite_hist(
+    x = prss_avg
+  ) +
+  labs(title = "Distribution of Average Scores for the PRSS")
+
+
+```
+
+
+## Stigma & Shame Questionnaire (SSQ)
+
+### SSQ Description
+
+The SSQ is a 8-item questionnaire designed to measure *insert*.
+
+For the present study, 8 items from the SSQ were collected in order to
+#TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher
+scores indicate more severe mental health symptoms.*
+
+The missing data rule was applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses)
+
+Reference:
+[@feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686);
+[DOI](https://doi.org/10.1177/1077559505276686)
+
+### SSQ Variables
+
+#### Value Labels
+
+All SSQ variables have the same response options.
+
+```{r SSQ-label-table, results = 'asis'}
+
+ssq_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4"),
+  label = c("None of the time",
+            "A little of the time",
+            "Some of the time",
+            "Much of the time",
+            "Most of the time")) %>% 
+  t() %>% 
+  as.data.frame()
+
+ssq_label_df <- setNames(ssq_label_df[-1, ], unlist(ssq_label_df[1, ]))
+
+
+#create table
+ssq_label_table <- ssq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(ssq_label_table)
+
+
+```
+
+#### Survey Items
+
+SSQ survey items are presented in the following table:
+
+```{r ssq-var-prep}
+# Pull question wording from qualtrics data
+ssq_word <- qualtrics %>% 
+  select(starts_with("ps")) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+ssq_word_long <- ssq_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  slice(1:8)
+
+
+```
+
+```{r ssq-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+ssq_gt_table <- gt(ssq_word_long)
+
+# Table-specific formatting (col width, names)
+ssq_gt_table <- ssq_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(ssq_gt_table)
+
+
+```
+
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below.
+Variables were constructed by summing included items.
+
+```{r ssq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+ssq_abuse_shame_alpha <- complete %>% 
+  select(
+    ps1:ps4
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+
+ssq_alpha <- complete %>% 
+  select(
+    ps1:ps8
+  ) %>% 
+  psych::alpha(check.keys = TRUE)
+```
+
+```{r SSQ-scale-table, results = 'asis'}
+# Create subset of ssq items
+ssq_data_subset <-
+  complete %>%
+  select(ps1:ps8, starts_with("ssq"))
+
+# Create the table as a data frame
+ssq_scale_df <- data.frame(
+  var_name = c("ssq_total", "ssq_abuse_shame"),
+  scale = c("SSQ Total score (8)", "Abuse-related Shame (4)"),
+  scale_construction = c("`ps1`, `ps2`, `ps3`, `ps4`,`ps5`, `ps6`, `ps7`, `ps8`",
+                         "`ps1`, `ps2`, `ps3`, `ps4`"),
+  scale_range = c("",""), #TODO fill in range 
+  alpha = c(round(ssq_alpha$total$raw_alpha, 3),
+            round(ssq_abuse_shame_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+ssq_scale_df <- gt(ssq_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(ssq_scale_df)
+
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+
+```{r ssq-mean-items}
+# Calculate the summary statistics for each variable
+ssq_summary_data <- lapply(ssq_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+ssq_summary_data <- as.data.frame(ssq_summary_data)
+
+# Set items as first row
+ssq_summary_data <- rbind(names(ssq_summary_data), ssq_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+ssq_tbl <- ssq_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  #cols_width(everything() ~ px(115)) %>%
+  
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+ssq_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r ssq-distributions, class.source='fold', echo = FALSE}
+ssq_data_subset %>%
+  composite_hist(
+    x = ssq_total
+  ) +
+  labs(title = "Distribution of Total Scores for the Stigma & Shame Questionnaire")
+
+```
+
+#### Clinical Categories
+
+The distribution for the total score alongside clinical cutoffs are
+presented below.
+
+<MARIA>INSERT MORE INFO ON CUTOFF SCORES - what are they (what should
+plot labels be)?, how should they be used
+
+Reference: <SHAINA/MARIA> INSERT REFERENCE FOR DYADC CUTOFF SCORES
+
+```{r ssq-cutoff, class.source='fold', echo = FALSE}
+
+p_ssq_total_clin <- ssq_data_subset %>% 
+  cutoff_plot2(
+    x = ssq_total,
+    cutoff = 16
+  ) +
+  labs(
+    title = "Total",
+    caption = "Cutoff is 16\nSee reference for literature on cutoff score."
+  )
+
+p_ssq_abuse_shame_clin <- ssq_data_subset %>% 
+  cutoff_plot2(
+    x = ssq_abuse_shame,
+    cutoff = 3
+  ) +
+  labs(
+    title = "Abuse-related Shame",
+    caption = "Cutoff is 3\nSee reference for literature on cutoff score."
+  )
+
+ggarrange(p_ssq_total_clin, p_ssq_abuse_shame_clin + rremove("ylab")
+          ) %>%
+  annotate_figure(top = text_grob( "Distribution for SSQ Clinical Cut-off \n(x-axis and y-axis are in different scales)"))
+```
+
+
+## Elliott Delinquency Scale (EDS) Friends/Peers report
+
+### EDS Description
+
+The EDS is a 39-item questionnaire designed to measure *insert*.
+
+For the present study, 39 items from the EDS were collected in order to
+#TODO: insert text here
+
+All 39 items need to be reverse scored. *TODO: need change text here
+Higher scores indicate more severe mental health symptoms.*
+
+The missing data rule was applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses)
+
+Reference:
+[@feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686);
+[DOI](https://doi.org/10.1177/1077559505276686)
+
+### EDS Variables
+
+#### Value Labels
+
+All EDS variables have the same response options.
+
+```{r EDS-label-table, results = 'asis'}
+
+eds_label_df <- data.frame(
+  value = c("4", "3", "2", "1", "0", "0 "),
+  label = c("All",
+            "Most",
+            "Some",
+            "Very Few",
+            "None",
+            "Does not apply")) %>% 
+  t() %>% 
+  as.data.frame()
+
+eds_label_df <- setNames(eds_label_df[-1, ], unlist(eds_label_df[1, ]))
+
+
+#create table
+eds_label_table <- eds_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(150)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(eds_label_table)
+
+
+```
+
+#### Survey Items
+
+EDS survey items are presented in the following table:
+
+```{r eds-var-prep}
+# Pull question wording from qualtrics data
+eds_word <- qualtrics %>% 
+  select(starts_with("elf")) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+eds_word_long <- eds_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name),
+          notes = ("")
+          # notes = paste0("This item should be reverse scored. `", var_name, "_c` is reverse scored")
+           ) %>% 
+  slice(1:39)
+# TODO: need double check reverse code variable name, it's inconsistant with other measure's reverse score name 
+
+```
+
+```{r eds-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+eds_gt_table <- gt(eds_word_long)
+
+# Table-specific formatting (col width, names)
+eds_gt_table <- eds_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+
+# Print the table
+print(eds_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below.
+Variables were c onstructed by summing included items.
+
+
+#Calculate internal reliability
+
+```{r eds alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+eds <-
+  complete %>%
+  select(
+    matches(
+      "^elf"
+    )
+  )
+#Calculate internal reliability 
+eds_alpha <- complete %>% 
+  select(elf1:elf39) %>%
+  drop_na() %>%  # TODO: Shaina: I don't know why does including NA doesn't work for the alpha function. 
+    psych::alpha(check.keys = TRUE)
+
+```
+
+TODO: all revers coded column is 0, need to double check, I used
+non-revers coded score for now
+
+```{r EDS-scale-table, results = 'asis'}
+
+
+# Create the table as a data frame
+eds_scale_df <- data.frame(
+  var_name = c("eds_total"),
+  scale = c("EDS Total score (39)"),
+  scale_construction = c("`elf1`, `elf2`, `elf3`, `elf4`, `elf5`, `elf6`, `elf7`, 
+  `elf8`, `elf9`, `elf10`, `elf11`, `elf12`, `elf13`, `elf14`, `elf15`, `elf16`, 
+  `elf17`, `elf18`, `elf19`, `elf20`, `elf21`, `elf22`, `elf23`, `elf24`, `elf25`, 
+  `elf26`, `elf27`, `elf28`, `elf29`, `elf30`, `elf31`, `elf32`, `elf33`, `elf34`, 
+                         `elf35`, `elf36`, `elf37`, `elf38`, `elf39`"),
+  scale_range = c("39-159"), #TODO fill in range 
+  alpha = c(round(eds_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+eds_scale_df <- gt(eds_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(eds_scale_df)
+
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+
+```{r eds-mean-items}
+# Calculate the summary statistics for each variable
+eds_summary_data <- lapply(eds, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+eds_summary_data <- as.data.frame(eds_summary_data)
+
+# Set items as first row
+eds_summary_data <- rbind(names(eds_summary_data), eds_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+# Create the gt table
+eds_tbl <- eds_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+ #cols_width(everything() ~ px(115)) %>%
+    tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+eds_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r eds-distributions, class.source='fold', echo = FALSE}
+
+eds %>%
+  composite_hist(
+    x = elf_total
+  ) +
+  labs(title = "Distribution of Total Scores for the Stigma & Shame Questionnaire")
+
+```
+
+
+
+## Elliott Delinquency Scale Self Report (ELL)
+
+### ELL Description
+
+The Ell is a 39-item questionnaire designed to measure *insert*.
+
+For the present study, 39 items from the ELL were collected in order to
+#TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher
+scores indicate more severe mental health symptoms.*
+
+The missing data rule was applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses)
+
+Reference:
+[@feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686);
+[DOI](https://doi.org/10.1177/1077559505276686)
+
+### ELL Variables
+
+#### Value Labels
+
+Variable Scale (for variables that end with a) and for any item that has
+been done 10 or more times.
+TODO: Shaina: please review text above as I altered JP's text.
+
+```{r ELL-label-table, results = 'asis'}
+ell_label_df <- data.frame(
+  value = c("1", "2", "3", "4", "5", "6"),
+  label = c("Once a month",
+            "Once every 2-3 weeks",
+            "Once a week",
+            "2-3 times a dday",
+            "Once a day",
+            "2-3 times a day")) %>% 
+  t() %>% 
+  as.data.frame()
+
+ell_label_df <- setNames(ell_label_df[-1, ], unlist(ell_label_df[1, ]))
+
+
+#create table
+ell_label_table <- ell_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(ell_label_table)
+
+
+```
+
+#### Survey Items
+
+ELL survey items are presented in the following table. Variables are not ending with a are open ended. Vairable end with a only been ask for item that has been done 10 or more times. 
+
+```{r ell-var-prep}
+# Pull question wording from qualtrics data
+ell_word <- qualtrics %>% 
+  select(starts_with("ell"))%>%
+  slice(1)
+
+#create table with variable name, description, and notes
+ell_word_long <- ell_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  mutate(description = gsub("ASSESSOR NOTE.*","",description))# %>%
+  # slice(1:78)
+
+```
+
+```{r ell-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+ell_gt_table <- gt(ell_word_long)
+
+# Table-specific formatting (col width, names)
+ell_gt_table <- ell_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) 
+
+# Print the table
+print(ell_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below.
+Variables were c onstructed by summing included items.
+
+```{r ell df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+ell <-
+  complete %>%
+  select(
+    starts_with("ell"),
+    -c(matches("aa$"))
+  ) %>%
+  # rename(
+  #   ell35a  = x35a
+  # ) %>%
+  mutate(
+    across(
+      matches("a$"),
+      ~case_when(
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_,
+        is.na(.x) ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ell_calc <-
+  ell %>%
+  select(
+    matches("a$")
+  ) %>%
+  mutate(
+    across(
+      #.cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .names = "{.col}a"
+    ),
+    across(
+      c(
+        matches("a$"),
+        matches("aa$")
+      ),
+      ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ 2,
+        .x == 4 ~ 3,
+        .x == 5 ~ 4,
+        .x == 6 ~ 5,
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      c(
+        matches("aa$")
+      ),
+      ~case_when(
+        .x >= 4 ~ 4,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ell_count_calc <-
+  ell %>%
+  select(
+   # id,
+    matches("\\d$")
+  ) %>%
+  mutate(
+    across(
+     # -id,
+      .cols = everything(),
+      ~case_when(
+        .x == 0 ~ 0,
+        .x > 0 ~ 1,
+        #.x < 0 ~ NA,
+        #TRUE ~ .x
+      )
+    )
+  )
+
+
+```
+
+```{r ell calculation, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+# ell_complete <-
+#   ell_calc %>%
+#   subscale_create(
+#     total_only = TRUE,
+#     scale1 = c(
+#       "ell4a", "ell5a", "ell6a", "ell8a", "ell9a",
+#       "ell10a", "ell11a", "ell14a", "ell16a", "ell20a",
+#       "ell21a", "ell22a", "ell24a", "ell25a", "ell27a", "ell29a",
+#       "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
+#     ),
+#     scale2 = c(
+#       "ell4aa", "ell5aa", "ell6aa", "ell8aa", "ell9aa",
+#       "ell10aa", "ell11aa", "ell14aa", "ell16aa", "ell20aa",
+#       "ell21aa", "ell22aa", "ell24aa", "ell25aa", "ell27aa", "ell29aa",
+#       "ell31aa", "ell32aa", "ell33aa", "ell38aa", "ell39aa"
+#     )
+#   ) %>%
+#   rename(
+#     ell_raw_total = total1,
+#     ell_censor_total = total2
+#   )
+# 
+# 
+# ell_count_complete <-
+#   ell_count_calc %>%
+#   composite_total_avg_fun(
+#     id = c(
+#       'id', "ell1", "ell2", "ell3", "ell7",
+#       "ell12", "ell13", "ell15", "ell17", "ell18",
+#       "ell19", "ell23", "ell26", "ell28", "ell30",
+#       "ell34", "ell35", "ell36", "ell37"
+#     ),
+#     max_value = 1,
+#     n_items = 21
+#   ) %>%
+#   distinct(
+#     across(
+#       .cols = everything()
+#     )
+#   ) %>%
+#   rename(
+#     ell_count_total = sum_values,
+#     ell_count_avg = mean_values
+#   ) %>%
+#   mutate(
+#     across(
+#       c(
+#         ell_count_total,
+#         ell_count_avg
+#       ),
+#       ~case_when(
+#       #  id %in% ell_count_remove ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
+```
+
+```{r ell alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+#TODO: Shaina: JP doesn't include alpha in his script. Please review and delet if not needed
+
+
+```
+
+```{r ELL-scale-table, results = 'asis'}
+# Create the table as a data frame
+ell_scale_df <- data.frame(
+  var_name = c("ell_raw_total"),
+  scale = c("ELL score (Raw) (21)", "ELL Total (Censored) (21)", "ELL Total (Binary Count Data) (18)"),
+  scale_construction = c(" `ell4a`, `ell5a`, `ell6a`, `ell8a`, `ell9a`,
+      `ell10a`, `ell11a`, `ell14a`, `ell16a`, `ell20a`,
+      `ell21a`, `ell22a`, `ell24a`, `ell25a`, `ell27a`, `ell29a`,
+      `ell31a`, `ell32a`, `ell33a`, `ell38a`, `ell39a`", 
+      " `ell4aa`, `ell5aa`,`ell6aa`, `ell8aa`, `ell9aa`,
+      `ell10aa`, `ell11aa`, `ell14aa`, `ell16aa`, `ell20aa`,
+      `ell21aa`, `ell22aa`, `ell24aa`, `ell25aa`, `ell27aa`, `ell29aa`,
+      `ell31aa`, `ell32aa`, `ell33aa`, `ell38aa`, `ell39aa`",
+      "`ell1`, `ell2`, `ell3`, `ell7`,
+      `ell12`, `ell13`, `ell15`, `ell17`, `ell18`,
+      `ell19`, `ell23`, `ell26`, `ell28`, `ell30`,
+      `ell34`, `ell35`, `ell36`, `ell37`"),
+  scale_range = c("","","") #TODO fill in range 
+  #alpha = c(round(eds_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+ell_scale_df <- gt(ell_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             # alpha = "Alpha"
+             ) %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_tbl_theme() 
+
+# Print the table
+print(ell_scale_df)
+
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+
+```{r ell-mean-items}
+# Calculate the summary statistics for each variable
+ell_summary_data <- lapply(ell, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+ell_summary_data <- as.data.frame(ell_summary_data)
+
+# Set items as first row
+ell_summary_data <- rbind(names(ell_summary_data), ell_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+ell_tbl <- ell_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  #cols_width(everything() ~ px(115)) %>%
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+ell_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r ell-distributions, class.source='fold', echo = FALSE}
+# ell_complete %>%
+#   composite_hist(
+#     x = ell_raw_total
+#   ) +
+#   labs(title = 'Distribution of Total Scores for \nElliott Self Delinquency Scale (Raw)')
+
+# ell_complete %>%
+#   composite_hist(
+#     x = ell_censor_total
+#   ) +
+#   labs(title = 'Distribution of Total Scores for \nElliott Self Delinquency Scale (Censored)')
+# 
+# ell_count_complete %>%
+#   composite_hist(
+#     x = ell_count_total
+#   ) +
+#   labs(title = "Distribution of Total Scores for \nElliott Self Delinquency Scale (Binary Count Data)")
+```
+
+    
+
+## Mental Health Contimuun - SF (MHC-SF)
+
+### MHC Description
+
+The MHC is a 14-item questionnaire designed to measure *insert*.
+
+For the present study, 14 items from the MHC were collected in order to
+#TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher
+scores indicate more severe mental health symptoms.*
+
+The missing data rule was not applied. 
+
+Reference: [@keyes2009brief]
+[@lamers2011evaluating](https://onlinelibrary.wiley.com/doi/abs/10.1002/jclp.20741);
+[DOI](https://doi.org/10.1002/jclp.20741)
+
+### MHC Variables
+
+#### Value Labels
+
+All MHC variables have the same response options.
+
+```{r MHC-label-table, results = 'asis'}
+
+mhc_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4", "5"),
+  label = c("Never",
+            "Once or Twice",
+            "About Once A Week",
+            "About 2 or 3 Times A Week",
+            "Almost Every Day",
+            "Every Day")) %>% 
+  t() %>% 
+  as.data.frame()
+
+mhc_label_df <- setNames(mhc_label_df[-1, ], unlist(mhc_label_df[1, ]))
+
+
+#create table
+mhc_label_table <- mhc_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(mhc_label_table)
+
+
+```
+
+#### Survey Items
+
+MHC survey items are presented in the following table:
+
+```{r mhc-var-prep}
+# Pull question wording from qualtrics data
+mhc_word <- qualtrics %>% 
+  select(starts_with("h"))%>%
+  slice(1)
+
+#create table with variable name, description, and notes
+mhc_word_long <- mhc_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) 
+```
+
+```{r elf-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+mhc_gt_table <- gt(mhc_word_long)
+
+# Table-specific formatting (col width, names)
+mhc_gt_table <- mhc_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(mhc_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below.
+Variables were c onstructed by summing included items.
+
+```{r mhc df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+mhc_complete <-
+  complete %>%
+  select(
+  #  id,
+
+    matches("^h"), 
+    mhc_total,mhc_pa,mhc_swb, mhc_pwb
+  )
+
+```
+
+
+```{r mhc alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+mhc_alpha <-
+  mhc_complete %>%
+  select(h1:h3) %>%
+  psych::alpha(check.keys = TRUE)
+
+
+mhc_pa_alpha <-
+  mhc_complete %>%
+  select(h1:h3) %>%
+  psych::alpha(check.keys = TRUE)
+
+mhc_swb_alpha <-
+  mhc_complete %>%
+  select(h4:h8) %>%
+  psych::alpha(check.keys = TRUE)
+
+mhc_pwb_alpha <-
+  mhc_complete %>%
+  select(h9:h14) %>%
+  psych::alpha(check.keys = TRUE)
+```
+
+```{r MHC-scale-table, results = 'asis'}
+# Create the table as a data frame
+mhc_scale_df <- data.frame(
+  var_name = c("mhc_raw_total", "mhc_pa_total", "mhc_swb_total", "mhc_pwb_total"),
+  scale = c("MHC Total score (14)", "Positive Affect (3)", "Social Well-being (4)", "Psychological well-being (6)"),
+  scale_construction = c(" `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `h7`, `h8`, `h9`, `h10`, `h11`, `h12`, `h13`, `h14`",
+                         "`h1`, `h2`,`h3`", "`h4`, `h5`, `h6`, `h7`, `h8`", "`h9`, `h10`, `h11`, `h12`, `h13`, `h14`"
+                         ),
+  scale_range = c(""), #TODO fill in range 
+  alpha = c(round(mhc_alpha$total$raw_alpha, 3),
+            round(mhc_pa_alpha$total$raw_alpha, 3),
+            round(mhc_swb_alpha$total$raw_alpha, 3),
+            round(mhc_pwb_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+mhc_scale_df <- gt(mhc_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             # alpha = "Alpha"
+             ) %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(mhc_scale_df)
+
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+
+```{r mhc-mean-items}
+# Calculate the summary statistics for each variable
+mhc_summary_data <- lapply(mhc_complete, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+mhc_summary_data <- as.data.frame(mhc_summary_data)
+
+# Set items as first row
+mhc_summary_data <- rbind(names(mhc_summary_data), mhc_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+mhc_tbl <- mhc_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+mhc_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r mhc-distributions, class.source='fold', echo = FALSE}
+
+p_mhc_total <- mhc_complete %>%
+  composite_hist(
+    x = mhc_total
+  ) +
+  labs(title = 'Total Scores')
+
+p_mhc_swb <- mhc_complete %>%
+  composite_hist(
+    x = mhc_pa
+  ) +
+  labs(title = 'Positive Affect Subscale')
+
+p_mhc_swb <- mhc_complete %>%
+  composite_hist(
+    x = mhc_swb
+  ) +
+  labs(title = 'Social Well-being Subscale')
+
+p_mhc_pwb <- mhc_complete %>%
+  composite_hist(
+    x = mhc_pwb
+  ) +
+  labs(title = 'Psychological Well-being Subscale')
+
+ggarrange(p_mhc_total, p_mhc_swb + rremove("ylab"), 
+          p_mhc_swb, p_mhc_pwb + rremove("ylab")
+          ) %>%
+  annotate_figure(top = text_grob( "Distribution for MHC-SF total and subscale \n(x-axis and y-axis are in different scales)"))
+```
+
+
+## Flourishing Index
+
+### FLO Description
+
+The Flourishing Index is a 12-item questionnaire designed to measure
+*insert*.
+
+For the present study, 12 items from the Flourishing Index were
+collected in order to #TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher
+scores indicate more severe mental health symptoms.*
+
+The missing data rule was applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses)
+
+Reference:
+[@vanderweele2017promotion](https://www.pnas.org/doi/abs/10.1073/pnas.1702996114);
+[DOI](https://doi.org/10.1073/pnas.1702996114)
+
+### Flourishing Index Variables
+
+#### Value Labels
+
+All Flourishing Index variables have the same response options.
+
+```{r flo-label-table, results = 'asis'}
+
+flo_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
+  label = c("Not Satisfied At All","","","", "","","","","","","Completely Satisfied"),
+  label2 = c("Extremely unhappy","","","", "","","","","","","Extremely Happy"),
+  label3 = c("Poor","","","", "","","","","","","Excellent"),
+  label4 = c("Not at all worthwhile","","","", "","","","","","","Completely Worthwhile"),
+  label5 = c("Strongly Disagree","","","", "","","","","","","Strongly Agree"),
+  label6 = c("Not true of me","","","", "","","","","","","Completely true of me"),
+  label7 = c("Worry all of the time","","","", "","","","","","","Do not ever worry")
+  ) %>% 
+  t() %>% 
+  as.data.frame()
+
+flo_label_df <- setNames(flo_label_df[-1, ], unlist(flo_label_df[1, ]))
+
+
+#create table
+flo_label_table <- flo_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>%
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(flo_label_table)
+
+
+```
+#### Survey Items
+
+ALL Flourishing Index variables have the same response options.
+
+```{r flo-var-prep}
+# Pull question wording from qualtrics data
+flo_word <- qualtrics %>% 
+  select(I1:I12)%>%
+  slice(1)
+
+#create table with variable name, description, and notes
+flo_word_long <- flo_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  slice(1:12)
+```
+
+```{r flo-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+flo_gt_table <- gt(flo_word_long)
+
+# Table-specific formatting (col width, names)
+flo_gt_table <- flo_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(flo_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below.
+Variables were constructed by summing included items.
+```{r  flo, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+flo_complete <- complete %>%
+  select(i1:i12, flo_total)
+```
+
+```{r flo alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+flo_alpha <- flo_complete %>% 
+  select(i1:i12) %>% 
+  psych::alpha(check.keys = TRUE)
+```
+
+```{r flo-scale-table, results = 'asis'}
+# Create the table as a data frame
+flo_scale_df <- data.frame(
+  var_name = c("flo_total"),
+  scale = c("FLO Total score (12)"),
+  scale_construction = c(" `i1`, `i2`, `i3`, `i4`, `i5`, `i6`, `i7`, `i8`, `i9`, `i10`, `i11`, `i12`"),
+  scale_range = c(""), #TODO fill in range 
+  alpha = c(round(flo_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+flo_scale_df <- gt(flo_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             # alpha = "Alpha"
+             ) %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(flo_scale_df)
+
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+
+```{r flo-mean-items}
+# Calculate the summary statistics for each variable
+flo_summary_data <- lapply(flo_complete, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+flo_summary_data <- as.data.frame(flo_summary_data)
+
+# Set items as first row
+flo_summary_data <- rbind(names(flo_summary_data), flo_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+flo_tbl <- flo_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+flo_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r flo-distributions, class.source='fold', echo = FALSE}
+flo_complete %>%
+  composite_hist(
+    x = flo_total
+  ) +
+  labs(title = 'Distribution of Total Scores for Flourishing Index')
+```
+
+
+
+## International Trauma Questionnaire - ITQ
+
+### ITQ Description
+
+The ITQ is a 9-item questionnaire designed to measure *insert*.
+
+For the present study, 9 items from the ITQ were collected in order to
+#TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher
+scores indicate more severe mental health symptoms.*
+
+The missing data rule was applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses)
+
+Reference:
+[@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/10.1111/acps.12956?casa_token=K4GIoIIYOkwAAAAA%3ABuaGU3cOQZwsFiM78FxHp_PHTQXDc72xABnVp8nlMCYRCHzf4c0oOMropyrzVjdClA3pFA-m01heootZ);
+[DOI](https://doi.org/10.1111/acps.12956)
+
+### ITQ Variables
+
+#### Value Labels
+
+All ITQ variables have the same response options.
+
+```{r itq-label-table, results = 'asis'}
+itq_label_df <- data.frame(
+  value = c("0", "1", "2", "3", "4"),
+  label = c("Not at All",
+            "A Little Bit",
+            "Moderately",
+            "Quite a Bit",
+            "Extremely")) %>% 
+  t() %>% 
+  as.data.frame()
+
+itq_label_df <- setNames(itq_label_df[-1, ], unlist(itq_label_df[1, ]))
+
+
+#create table
+itq_label_table <- itq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(itq_label_table)
+
+
+```
+
+#### Survey Items
+
+All ITQ variables have the same response options.
+
+```{r itq-var-prep}
+# Pull question wording from qualtrics data
+itq_word <- qualtrics %>% 
+  select(starts_with("itq"))%>%
+  slice(1)
+
+#create table with variable name, description, and notes
+itq_word_long <- itq_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>% 
+  slice(1:9)
+```
+
+```{r itq-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+itq_gt_table <- gt(itq_word_long)
+
+# Table-specific formatting (col width, names)
+itq_gt_table <- itq_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(itq_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below.
+Variables were constructed by summing included items.
+
+```{r itq df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+itq_complete <- complete %>%
+  select(
+    starts_with("itq") 
+    )
+```
+
+```{r itq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+itq_alpha <- itq_complete %>% 
+  select(itq1:itq9) %>% 
+  psych::alpha(check.keys = TRUE)
+```
+
+
+
+```{r itq-scale-table, results = 'asis'}
+# Create the table as a data frame
+itq_scale_df <- data.frame(
+  var_name = c("Affective Dysregulation Subscale (2)", "Negative Self-Concept Subscale (2)", 
+               "Disturbances in Relationships Subscale (2)", "DSO (6)"),
+  scale = c("itq_ad_total", "itq_nsc_total", "itq_dr_total", "itq_dso"),
+  scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`", 
+                         "`itq1`, `itq2`, `itq3`, `itq4`, `itq5`,`itq6`"),
+  scale_range = c("","","",""), #TODO fill in range 
+  alpha = c("","","","")
+)
+
+# Create the gt table object
+itq_scale_df <- gt(itq_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             # alpha = "Alpha"
+             ) %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(itq_scale_df)
+
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+
+```{r itq-mean-items}
+# Calculate the summary statistics for each variable
+itq_summary_data <- lapply(itq_complete, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+itq_summary_data <- as.data.frame(itq_summary_data)
+
+# Set items as first row
+itq_summary_data <- rbind(names(itq_summary_data), itq_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+itq_tbl <- itq_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+itq_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r itq-distributions, class.source='fold', echo = FALSE}
+p_itq_ad_total <- itq_complete %>%
+  composite_hist(
+    x = itq_ad_total,
+    bins = 15
+  ) +
+  labs(title = "Affective Dysregulation Subscale")
+
+p_itq_nsc_total <- itq_complete %>%
+  composite_hist(
+    x = itq_nsc_total,
+    bins = 15
+  ) +
+  labs(title = "Negative Self-Concept Subscale")
+
+p_itq_dr_total <- itq_complete %>%
+  composite_hist(
+    x = itq_dr_total,
+    bins = 15
+  ) +
+  labs(title = "Relationships Subscale")
+
+
+p_itq_dso <- itq_complete %>%
+  composite_hist(
+    x = itq_dso,
+    bins = 15
+  ) +
+  labs(title = "DSO Subscale")
+
+ggarrange(p_itq_ad_total, p_itq_nsc_total + rremove("ylab"),
+          p_itq_dr_total, p_itq_dso + rremove("ylab")
+          ) %>%
+  annotate_figure(top = text_grob( "Distribution for ITQ Subscale \n(x-axis and y-axis are in different scales)"))
+
+```
+
+
+## IBQ
+
+### IBQ Description
+
+The IBQis a 10-item questionnaire designed to measure *insert*.
+
+For the present study, 10 items from the IBQ were collected in order to
+#TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher
+scores indicate more severe mental health symptoms.*
+
+The missing data rule was applied. Calculations were completed for
+participants with 20% or less missing data (this includes -77 responses)
+
+Reference:
+<TODO: Maria, please add reference> 
+
+### IBQ Variables
+
+#### Value Labels
+
+IBQ variables response options for ibp1 - ibq9.
+
+```{r ibq-label-table, results = 'asis'}
+ibq_label_df <- data.frame(
+  value = c("0", "1"),
+  label = c("No",
+            "Yes")) %>% 
+  t() %>% 
+  as.data.frame()
+
+ibq_label_df <- setNames(ibq_label_df[-1, ], unlist(ibq_label_df[1, ]))
+
+
+#create table
+ibq_label_table <- ibq_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(ibq_label_table)
+```
+
+<TODO: Maria, Please review this table>
+```{r ibq-label-table2, results = 'asis'}
+ibq_label_df2 <- data.frame(
+  #value = c("0", "1"),
+  label = c("School/University/College",
+            "Juvenile Justice",
+            "Legal System",
+            "Police",
+            "Medical or Mental Health Clinic",
+            "Church",
+            "Foster Care",
+            "Child Welfare",
+            "Other, please describe:",
+            "Decline to Answer")) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+ibq_label_df2 <- setNames(ibq_label_df2[-1, ], unlist(ibq_label_df2[1, ]))
+
+
+#create table
+ibq_label_table2 <- ibq_label_df2 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(ibq_label_table2)
+```
+
+#### Survey Items
+
+All IBQ variables have the same response options.
+
+```{r ibq-var-prep}
+# Pull question wording from qualtrics data
+ibq_word <- qualtrics %>% 
+  select(starts_with("ibq"))%>%
+  slice(1)
+
+#create table with variable name, description, and notes
+ibq_word_long <- ibq_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")) %>%
+  mutate(description = if_else(var_name == "ibq10", "Please indicate all types of institutions involved.", description)) %>%
+  slice(1:10)
+```
+
+```{r ibq-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+ibq_gt_table <- gt(ibq_word_long)
+
+# Table-specific formatting (col width, names)
+ibq_gt_table <- ibq_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(ibq_gt_table)
+
+
+```
+
+#### Scale and Subscales
+
+Information on the total score and subscale variables are below.
+Variables were constructed by summing included items.
+
+```{r ibq df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+ibq_complete <- complete %>%
+  select(
+    starts_with("ibq") 
+    )
+```
+
+```{r ibq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+ibq_alpha <- ibq_complete %>% 
+  select(ibq1:ibq9) %>% 
+  psych::alpha(check.keys = TRUE)
+```
+
+
+
+```{r ibq-scale-table, results = 'asis'}
+# Create the table as a data frame
+ibq_scale_df <- data.frame(
+  var_name = c("IBQ Total Score(7)"),
+  scale = c("ibq_total"),
+  scale_construction = c("`ibq1`, `ibq2`, `ibq3`, `ibq4`, `ibq5`,`ibq6`, `ibp7`"),
+  scale_range = c("0-7"), #TODO fill in range 
+  alpha = c("")
+)
+
+# Create the gt table object
+ibq_scale_df <- gt(ibq_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             # alpha = "Alpha"
+             ) %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(ibq_scale_df)
+
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+<TODO: Maria: please review this table and see if there are anything you want me remove from this table>
+```{r ibq-mean-items}
+# Calculate the summary statistics for each variable
+ibq_summary_data <- lapply(ibq_complete, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+ibq_summary_data <- as.data.frame(ibq_summary_data)
+
+# Set items as first row
+ibq_summary_data <- rbind(names(ibq_summary_data), ibq_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+ibq_tbl <- ibq_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+ibq_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r ibq-distributions, class.source='fold', echo = FALSE}
+ibq_complete %>%
+  composite_hist(
+    x = ibq_total,
+    bins = 15
+  ) +
+  labs(title = "Distribution for IBQ Total Score ")
+
+```
+
+

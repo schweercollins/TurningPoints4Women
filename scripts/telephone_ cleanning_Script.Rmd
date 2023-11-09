@@ -36,7 +36,7 @@ create sub-scale
 -sum/avg 
 ! data order: original items; reverse coded items; total/subscales
 
-
+question: for NA/None answer option, should I recode them to -55 (e.g. ibq9/ cint63)
 
 ## BSI
 ### BSI Select Variabls and Recode 
@@ -58,13 +58,13 @@ bsi <-
       across(
         .cols = c(bsi1:bsi19),
         .fns = ~case_when(
-         .x == "Not at all" ~ 1,
-         .x == "A little bit" ~ 2,
-         .x == "Moderately" ~ 3,
-         .x == "Quite a bit" ~ 4,
-         .x == "Very much" ~ 5,
-         .x == "Decline to Answer" ~ -77,
-         TRUE ~ NA_real_
+         .x == "Not at all" ~ "1",
+         .x == "A little bit" ~ "2",
+         .x == "Moderately" ~ "3",
+         .x == "Quite a bit" ~ "4",
+         .x == "Very much" ~ "5",
+         .x == "Decline to Answer" ~ "-77",
+         TRUE ~ .x
         )
       )
     ) 
@@ -79,7 +79,7 @@ bsi <- bsi %>%
   mutate(
     bsi4 = case_when(
       # for incarcerated TC, bsi4 wasn't shown 
-      id %in% c("HR211", "HR181", "P819") & is.na(bsi4) ~ -55,
+      id %in% c("HR211", "HR181", "P819") & is.na(bsi4) ~ "-55",
       TRUE ~ bsi4
     )
   )
@@ -100,6 +100,7 @@ bsi %>%
 # Below is the code that treats -77, -55 values as NA
 bsi_calc <-
   bsi %>%
+  mutate(across(-id, as.numeric)) %>%
   mutate(
     across(
       .cols = -id,
@@ -159,32 +160,32 @@ mutate(
     across(
       .cols = c(c1:c20),
       .fns = ~case_when(
-        .x == "Rarely or none of the time (0-1 day)" ~ 1,
-        .x == "Some or a little of the time (1-2 days)" ~ 2,
-        .x == "Occasionally or a moderate amount of time (3-4 days)" ~ 3,
-        .x == "Most or all of the time (5-7 days)" ~ 4,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Rarely or none of the time (0-1 day)" ~ "1",
+        .x == "Some or a little of the time (1-2 days)" ~ "2",
+        .x == "Occasionally or a moderate amount of time (3-4 days)" ~ "3",
+        .x == "Most or all of the time (5-7 days)" ~ "4",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     across(
       .cols = c(c21:c24),
       .fns = ~case_when(
-        .x == "Yes" ~ 1,
-        .x == "No" ~ 0,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     across(
       .cols = c(c4, c8, c12, c16),
       .fns = ~case_when(
-        .x == 1 ~ 4,
-        .x == 2 ~ 3,
-        .x == 3 ~ 2,
-        .x == 4 ~ 1,
-        .x == -77 ~ -77,
-      TRUE ~ NA_real_
+        .x == "1" ~ "4",
+        .x == "2" ~ "3",
+        .x == "3" ~ "2",
+        .x == "4" ~ "1",
+        .x == "-77" ~ "-77",
+      TRUE ~ .x
       ),
       .names = '{.col}_r'
       )
@@ -198,13 +199,13 @@ There are missing data in CESD and missing rule is applied. #TODO: Shaina/Maria:
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 # if response is No to item c21, then TC moved on to item c24
 cesd <- cesd %>%
-  mutate(c22 = ifelse((c21 == 0 |c21 ==  -77), -55, c22),
-         c23 = ifelse((c21 == 0 |c21 ==  -77), -55, c23),
+  mutate(c22 = ifelse((c21 == 0 |c21 ==  "-77"), "-55", c22),
+         c23 = ifelse((c21 == 0 |c21 ==  "-77"), "-55", c23),
          # for incarcerated TC, c21-c24 wasn't shown 
-         c21 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c21) ~ -55,TRUE ~ c21),
-         c22 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c22) ~ -55,TRUE ~ c22),
-         c23 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c23) ~ -55,TRUE ~ c23),
-         c24 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c24) ~ -55,TRUE ~ c24)
+         c21 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c21) ~ "-55",TRUE ~ c21),
+         c22 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c22) ~ "-55",TRUE ~ c22),
+         c23 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c23) ~ "-55",TRUE ~ c23),
+         c24 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c24) ~ "-55",TRUE ~ c24)
       )
 
 
@@ -233,6 +234,7 @@ cesd_missing  %>%
 # Below is the code that treat negative values (-77, -55) as NA
 cesd_calc <-
   cesd %>%
+  mutate(across(-id, as.numeric)) %>%
     mutate(
       across(
         .cols = -id,
@@ -316,32 +318,32 @@ ciq <-
     ciq1 = bsi20,
     ciq2 = bsi21,
     ciq3 = bsi22
-  ) %>% 
+  ) %>%
   mutate(
     across(
         .cols = c(ciq1, ciq2, ciq3),
         .fns = ~case_when(
-          .x == "1 = not true of me at all" ~ 1,
-          .x == 2 ~ 2,
-          .x == 3 ~ 3,
-          .x == 4 ~ 4,
-          .x == 5 ~ 5,
-          .x == 6 ~ 6,
-          .x == "7 = very true of me" ~ 7,
-          .x == "Decline to Answer" ~ -77,
-          TRUE ~ NA_real_
+          .x == "1 = not true of me at all" ~ "1",
+          .x == "2" ~ "2",
+          .x == "3" ~ "3",
+          .x == "4" ~ "4",
+          .x == "5" ~ "5",
+          .x == "6" ~ "6",
+          .x == "7 = very true of me" ~ "7",
+          .x == "Decline to Answer" ~ "-77",
+          TRUE ~ .x
         )
       ),
 	  ciq3_r = case_when(
-          ciq3 == 1 ~ 7,
-          ciq3 == 2 ~ 6,
-          ciq3 == 3 ~ 5,
-          ciq3 == 4 ~ 4,
-          ciq3 == 5 ~ 3,
-          ciq3 == 6 ~ 2,
-          ciq3 == 7 ~ 1,
-          ciq3 == -77 ~ -77,
-          TRUE ~ NA_real_
+          ciq3 == "1" ~ "7",
+          ciq3 == "2" ~ "6",
+          ciq3 == "3" ~ "5",
+          ciq3 == "4" ~ "4",
+          ciq3 == "5" ~ "3",
+          ciq3 == "6" ~ "2",
+          ciq3 == "7" ~ "1",
+          ciq3 == "-77" ~ "-77",
+          TRUE ~ ciq3
         )
     ) %>%
     relocate(
@@ -374,6 +376,7 @@ ciq %>%
 # Below is the code that treat -77 as NA
 ciq_calc <-
   ciq %>%
+  mutate(across(-id, as.numeric)) %>%
   mutate(
     across(
       .cols = -id,
@@ -421,19 +424,19 @@ dast <-
     across(
       .cols = c(d00:d20),
       .fns = ~case_when(
-        .x == "Yes" ~ 1,
-        .x == "No" ~ 0,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
         across(
       .cols = c(d4, d5),
       .fns = ~case_when(
-        .x == 1 ~ 0,
-        .x == 0 ~ 1,
-        .x == -77 ~ -77,
-        TRUE ~ NA_real_
+        .x == "1" ~ "0",
+        .x == "0" ~ "1",
+        .x == "-77" ~ "-77",
+        TRUE ~ .x
       ),
       .names = '{.col}_r'
     )
@@ -455,15 +458,15 @@ There are missing data in DAST and missing rule applied.
 dast <- dast %>% 
   #TODO:Maria please double check the skip rule that is correct
   # for incarcerated TC, entire dast survey wasn't shown 
-  mutate_at(vars(dast_screen:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ -55, TRUE ~ .)) %>%
+  mutate_at(vars(dast_screen:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) %>%
   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
-  mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ -55, TRUE ~ . )) %>%
+  mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
   # Skip rule: if d1a == 0 or -77 , d2a is skipped
-  mutate(d2a = case_when(d1a == 0 | d1a == -77 ~ -55, TRUE ~ d2a)) %>%
+  mutate(d2a = case_when(d1a == 0 | d1a == "-77" ~ "-55", TRUE ~ d2a)) %>%
   # Skip rule: if d1a == 1 (d2a is answered (1,0,-77)) d2b should be skipped 
-  mutate(d2b = case_when(d1a == 1 ~ -55, TRUE ~ d2b)) %>%
+  mutate(d2b = case_when(d1a == 1 ~ "-55", TRUE ~ d2b)) %>%
   # Skip rule: if d2b == 0 or -77, rest question were skipped 
-  mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == -77 ~ -55, TRUE ~ . )) 
+  mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == "-77" ~ "-55", TRUE ~ . )) 
 
 
 
@@ -488,6 +491,7 @@ dast %>%
 # Apply NA rule
 dast_calc <-
   dast %>% 
+  mutate(across(-id, as.numeric)) %>%
   select(-dast_screen,
          -d4,
          -d5) %>%
@@ -496,20 +500,20 @@ dast_calc <-
     n_items = 21
   ) %>%
   full_join(dast, by = 'id') %>% 
+  mutate(across(-id, as.numeric))%>%
     filter(
     is.na(miss_pct) |
       miss_pct < 20
          ) %>%
   mutate(
     across(
-      .cols = c(d1a:d5_r),
+      .cols = -id,
       .fns = ~case_when(
         .x < 0 ~ NA_real_,
         TRUE ~ .x
       )
     )
   )
-
 
 ### DAST Composite & Subscale Score Creation 
 # TODO:Maria, Can you please check if the total is calculated right? I'm thinking we shouldn't include dast_screen but I can't find scoring doc. 
@@ -569,25 +573,25 @@ cts <-
       .cols = c(ct1:ct20),
       .fns = ~case_when(
         #TODO: Maria/Shaina, we talked about never happened should be code as 0, but I looked at the reference and it coded as following. Please confirm this should be the way to score. 
-        .x == "Once in the past year" ~ 1,
-        .x == "Twice in the past year" ~ 2,
-        .x == "3-5 times in the past year" ~ 3,
-        .x == "6-10 times in the past year" ~ 4,
-        .x == "11-20 times in the past year" ~ 5,
-        .x == "More than 20 times in the past year" ~ 6,
-        .x == "Not in the past year, but it did happen before" ~ 7,
-        .x == "This has never happened" ~ 8,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Once in the past year" ~ "1",
+        .x == "Twice in the past year" ~ "2",
+        .x == "3-5 times in the past year" ~ "3",
+        .x == "6-10 times in the past year" ~ "4",
+        .x == "11-20 times in the past year" ~ "5",
+        .x == "More than 20 times in the past year" ~ "6",
+        .x == "Not in the past year, but it did happen before" ~ "7",
+        .x == "This has never happened" ~ "8",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     across(
       .col = cts_screen,
       .fns = ~case_when(
-        .x == "Yes" ~ 1,
-        .x == "No" ~ 0, 
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0", 
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
       )
   ) 
@@ -599,9 +603,9 @@ There are missing data in CTS and missing rule applied.
 ```{r cts_missing}
 cts <- cts %>%
   # if answered no for screening question, the entire survey is skipped.
-  mutate_at(vars(ct1:ct20), ~case_when(cts_screen == 0  ~ -55, TRUE ~ . )) %>%
+  mutate_at(vars(ct1:ct20), ~case_when(cts_screen == 0  ~ "-55", TRUE ~ . )) %>%
   # Incarcerated TC weren't administered for this survey
-  mutate_at(vars(cts_screen, ct1:ct20), ~ ifelse(id %in% c("HR211", "HR181", "P819"), -55, .))
+  mutate_at(vars(cts_screen, ct1:ct20), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .))
 
 cts %>%
   pct_miss_fun(
@@ -625,6 +629,7 @@ cts_calc <-
   ) %>%
   full_join(cts,
             by = 'id') %>%
+  mutate(across(-id, as.numeric)) %>%
   filter(
     is.na(miss_pct) |
       miss_pct < 20
@@ -776,8 +781,8 @@ bcap <-
       .fns = ~case_when(
         .x == "Agree" ~ 1,
         .x == "Disagree" ~ 0,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Decline to Answer" ~ -77
+        # TRUE ~ NA_real_
       )
     ),
     across(
@@ -889,120 +894,122 @@ dyadc <-
       '^e\\d'
       )
     ) %>%
+  #mutate(across(-id, as.factor)) %>%
   mutate(
     across(
       .cols = c(dyadc_screener),
       .fns = ~case_when(
-        .x == "Yes" ~ 1,
-        .x == "No" ~ 0,
-        .x == "Decline to Answer" ~ -77,
-         TRUE ~ NA_real_
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     across(
       .cols = c(e1:e15),
       .fns = ~case_when(
-        .x == "Always Disagree" ~ 0,
-        .x == "Almost Always Disagree" ~ 1,
-        .x == "Frequently Disagree" ~ 2,
-        .x == "Occasionally Disagree" ~ 3,
-        .x == "Almost always Agree" ~ 4,
-        .x == "Always Agree" ~ 5,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Always Disagree" ~ "0",
+        .x == "Almost always Disagree" ~ "1",
+        .x == "Almost Always Disagree" ~ "1",
+        .x == "Frequently Disagree" ~ "2",
+        .x == "Occasionally Disagree" ~ "3",
+        .x == "Almost always Agree" ~ "4",
+        .x == "Always Agree" ~ "5",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~.x
       )
     ),
     across(
       .cols = c(e16, e17, e20:e22), 
       .fns = ~case_when(
-        .x == "All the time" ~ 0,
-        .x == "Most of the time" ~ 1,
-        .x == "More often than not" ~ 2,
-        .x == "Occasionally" ~ 3,
-        .x == "Rarely" ~ 4,
-        .x == "Never" ~ 5,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "All the time" ~ "0",
+        .x == "Most of the time" ~ "1",
+        .x == "More often than not" ~ "2",
+        .x == "Occasionally" ~ "3",
+        .x == "Rarely" ~ "4",
+        .x == "Never" ~ '5',
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     across(
       .cols = c(e18,e19), 
       .fns = ~case_when(
-        .x == "All the time" ~ 5,
-        .x == "Most of the time" ~ 4,
-        .x == "More often than not" ~ 3,
-        .x == "Occasionally" ~ 2,
-        .x == "Rarely" ~ 1,
-        .x == "Never" ~ 0,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "All the time" ~ "5",
+        .x == "Most of the time" ~ "4",
+        .x == "More often than not" ~ "3",
+        .x == "Occasionally" ~ "2",
+        .x == "Rarely" ~ "1",
+        .x == "Never" ~ "0",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     across(
       .cols = c(e23:e24),
       .fns = ~case_when(
-        .x == "Never" ~ 0,
-        .x == "Rarely" ~ 1,
-        .x == "Occasionally" ~ 2,
-        .x == "Almost every day" ~ 3,
-        .x == "Every day" ~ 4,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Never" ~ "0",
+        .x == "Rarely" ~ "1",
+        .x == "Occasionally" ~ "2",
+        .x == "Almost every day" ~ "3",
+        .x == "Every day" ~ "4",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     across(
       .cols = c(e25:e28),
       .fns = ~case_when(
-        .x == "Never" ~ 0,
-        .x == "Less than once a month" ~ 1,
-        .x == "Once or twice a month" ~ 2,
-        .x == "Once or twice a week" ~ 3,
-        .x == "Once a day" ~ 4,
-        .x == "More often" ~ 5,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Never" ~ '0',
+        .x == "Less than once a month" ~ "1",
+        .x == "Once or twice a month" ~ "2",
+        .x == "Once or twice a week" ~ "3",
+        .x == "Once a day" ~ "4",
+        .x == "More often" ~ "5",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     across(
       .cols = c(e29, e30),
       .fns = ~case_when(
-        .x == "Yes" ~ 0,
-        .x == "No" ~ 1,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Yes" ~ "0",
+        .x == "No" ~ "1",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
       )
     ),
     e31 = case_when(
-      e31 == "0 - Extremely Unhappy" ~ 0,
-      e31 == "1 - Fairly Unhappy" ~ 1,
-      e31 == "2 - A little Unhappy" ~ 2,
-      e31 == "3 - Happy" ~ 3,
-      e31 == "4 - Very Happy" ~ 4,
-      e31 == "5 - Extremely Happy" ~ 5,
-      e31 == "6 - Perfect" ~ 6,
-      e31 == "Decline to Answer" ~ -77,
-      TRUE ~ NA_real_
+      e31 == "0 - Extremely Unhappy" ~ "0",
+      e31 == "1 - Fairly Unhappy" ~ "1",
+      e31 == "2 - A little Unhappy" ~ "2",
+      e31 == "3 - Happy" ~ "3",
+      e31 == "4 - Very Happy" ~ "4",
+      e31 == "5 - Extremely Happy" ~ "5",
+      e31 == "6 - Perfect" ~ "6",
+      e31 == "Decline to Answer" ~ "-77",
+        TRUE ~ e31
     ),
     e32 = case_when(
-      e32 == "5 - I want desperately for my relationship to succeed, and would go to almost any length to see that it does." ~ 5,
-      e32 == "4 - I want very much for my relationship to succeed, and will do all I can to see that it does." ~ 4,
-      e32 == "3 - I want very much for my relationship to succeed, and will do my fair share to see that it does." ~ 3,
-      e32 == "2 - It would be nice if my relationship succeeded, but I can’t do much more than I’m doing now to help it succeed." ~ 2,
-      e32 == "1 - It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going." ~ 1,
-      e32 ==  "0 - My relationship can never succeed, and there is no more that I can do to keep the relationship going." ~ 0,
-      e32 == "Decline to Answer" ~ -77,
-      TRUE ~ NA_real_
+      e32 == "5 - I want desperately for my relationship to succeed, and would go to almost any length to see that it does." ~ "5",
+      e32 == "4 - I want very much for my relationship to succeed, and will do all I can to see that it does." ~ "4",
+      e32 == "3 - I want very much for my relationship to succeed, and will do my fair share to see that it does." ~ "3",
+      e32 == "2 - It would be nice if my relationship succeeded, but I can’t do much more than I’m doing now to help it succeed." ~ "2",
+      e32 == "1 - It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going." ~ "1",
+      e32 ==  "0 - My relationship can never succeed, and there is no more that I can do to keep the relationship going." ~ "0",
+      e32 == "Decline to Answer" ~ "-77",
+      TRUE ~ e32
     ),
     across(
       .cols = c(e18, e19),
       .fns = ~case_when(
-        .x == 5 ~ 0,
-        .x == 4 ~ 1,
-        .x == 3 ~ 2,
-        .x == 2 ~ 3,
-        .x == 1 ~ 4,
-        .x == 0 ~ 5,
-        TRUE ~ NA_real_
+        .x == "5" ~ "0",
+        .x == "4" ~ "1",
+        .x == "3" ~ '2',
+        .x == "2" ~ "3",
+        .x == "1" ~ "4",
+        .x == "0" ~ "5",
+        TRUE ~ .x
       ),
       .names = '{.col}_r'
     )
@@ -1015,9 +1022,9 @@ There are missing data in DYADC and missing rule applied.
 ```{r dyadc_missing}
 dyadc <- dyadc %>%
   # if answered no for screening question, the entire survey is skipped.
-  mutate_at(vars(e1:e19_r), ~case_when(dyadc_screener == 0  ~ -55, TRUE ~ . )) %>%
+  mutate_at(vars(e1:e19_r), ~case_when(dyadc_screener == 0  ~ "-55", TRUE ~ . )) %>%
     # Incarcerated TC weren't administered for this survey
-  mutate_at(vars(dyadc_screener, e1:e19_r), ~ ifelse(id %in% c("HR211", "HR181", "P819"), -55, .))
+  mutate_at(vars(dyadc_screener, e1:e19_r), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .))
 
 dyadc %>%
   pct_miss_fun(
@@ -1033,14 +1040,14 @@ dyadc %>%
 
 ### DYADC Calculations & Subscale
 ```{r dyadc_calculations}
-dyadc_calc <-
-  dyadc %>%
+dyadc_calc <-dyadc %>%
   pct_miss_fun(
     id = c('id', 'dyadc_screener'),
     n_items = 32
   ) %>%
   full_join(dyadc,
             by = 'id') %>%
+  mutate(across(-id, as.numeric))%>%
   filter(
     is.na(miss_pct) |
     miss_pct < 20
@@ -1049,8 +1056,7 @@ dyadc_calc <-
     across(
       .cols = c(e1:e32),
       .fns = ~case_when(
-        .x == -77 ~ NA_real_,
-        .x == -55 ~ NA_real_,
+        .x < 0 ~ NA_real_,
         TRUE ~ .x
       )
     )
@@ -1102,6 +1108,7 @@ dyadc_complete <-
 
 ## ARQ
 ### ARQ Select Variables and Recode
+<Maria>: Do we want to recode rqa?
 ```{r arq}
 # Select arq questions and recede
 arq <-
@@ -1196,8 +1203,7 @@ prss <- tpw_raw %>%
         .x == "Some of the time" ~ 2,
         .x == "Much of the time" ~ 3,
         .x == "Most of the time" ~ 4,
-        .x == "Decline to Answer" ~ -77,
-        TRUE ~ NA_real_
+        .x == "Decline to Answer" ~ -77
       )
     )
     )
@@ -1208,7 +1214,8 @@ There are missing data in PRSS and missing rule applied.
 ```{r prss_missing}
 prss <- prss %>%
   # we have missing due to partial finish
-  mutate_all(~replace(., is.na(.), -99)) 
+  mutate(across(-id, ~ifelse(id == "HR173", -99, .)))
+  
 
 prss_miss <- prss %>%
   pct_miss_fun(
@@ -1225,47 +1232,2087 @@ prss_miss %>%
 ```
 
 ### PRSS Calculation & Subscales 
+```{r prss_calculation}
+# apply missing rule
+prss_calc <- prss %>%
+  pct_miss_fun(
+    id = c("id"), 
+    n_items = 5
+  )%>%
+  full_join(prss, by = "id") %>%
+  filter(
+    is.na(miss_pct) |
+      miss_pct < 33
+  )%>%
+  mutate(
+    across(
+    .cols = c(ps9:ps13),
+    .fns = ~ case_when(
+      .x < 0 ~ NA_real_,
+      TRUE ~ .x
+    )
+    
+    )
+  )
+
+
+
+prss_complete <-
+  prss_calc %>%
+  composite_total_avg_fun(
+    id = 'id',
+    max_value = 5,
+    n_items = 5
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  rename(
+    prss_total = sum_values,
+    prss_avg = mean_values
+  ) %>%
+  mutate(
+    across(
+      c(
+        prss_total,
+        prss_avg
+      )
+    )
+  ) %>%
+  select(-miss_pct, - missing_n)
+```
+##SSQ
+### SSQ Select Variables and Recode
+```{r ssq}
+ssq <- tpw_raw %>%
+  select(
+  id,
+  ps1:ps8
+) %>%
+  mutate(across(-id, as.factor)) %>%
+  mutate(
+    across(
+      .cols = c(ps1:ps8),
+      .fns = ~case_when(
+        .x == "None of the time" ~ 0,
+        .x == "A little of the time" ~ 1,
+        .x == "Some of the time" ~ 2,
+        .x == "Much of the time" ~ 3,
+        .x == "Most of the time" ~ 4,
+        .x == "Decline to Answer"~ -77,
+        TRUE ~ NA_real_
+      )
+    )
+  ) 
+```
+
+### SSQ Missing Data
+Missing Rule applied. 
+```{r ssq_missing}
+ssq <- ssq %>%
+  # missing due to partial finished.
+  mutate(across(-id, ~ifelse(id == "HR173", -99, .)))
+
+
+
+ssq_miss <- ssq %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 8
+  )
+
+ssq_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = "SSQ Missing Data",
+    subtitle = "By Participant"
+  )
+
+ssq_remove <- ssq_miss %>% filter(miss_pct > 30) %>% pull(id)
+```
+
+### SSQ Calculation & Subscale
+```{r ssq_calculation}
+ssq_calc <-
+  ssq %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ssq_complete <-
+  ssq_calc %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c("ps1", "ps2", "ps3", "ps4"),
+    scale1_nitems = 4,
+    scale2 = c("ps1", "ps2", "ps3", "ps4",
+               "ps5", "ps6", "ps7", "ps8"),
+    scale2_nitems = 8
+  ) %>%
+  rename(
+    ssq_abuse_shame = total1,
+    ssq_total = total2
+  ) %>%
+  mutate(
+    across(
+      c(
+        ssq_abuse_shame,
+        ssq_total
+      ),
+      ~case_when(
+        id %in% ssq_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    ),
+    ssq_total_cutoff = case_when(
+      ssq_total >= 16 ~ "high shame",
+      ssq_total <= 15 ~ "low shame"
+    )
+  )
+```
+
+## EDS-F (Friend)
+### EDS-F Select Variables and Recode
+
+```{r eds df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+# # TODO: Min remove after maria confirm how to score 
+# # reverse scoring 
+# eds <-
+#   complete %>%
+#   select(
+#     id,
+#     matches(
+#       "^elf"
+#     )
+#   ) %>% 
+# composite_total_avg_fun(
+#   id = c(
+#     'id', "elf1_c", "elf2_c", "elf3_c", "elf7_c",
+#     "elf12_c", "elf13_c", "elf15_c", "elf17_c", "elf18_c",
+#     "elf19_c", "elf23_c", "elf26_c", "elf28_c", "elf30_c",
+#     "elf34_c", "elf35_c", "elf36_c", "elf37_c"
+#   ),
+#   max_value = 4,
+#   n_items = 21
+# ) %>%
+# distinct(
+#   across(
+#     .cols = everything()
+#   )
+# ) %>%
+# rename(
+#   elf_total = sum_values,
+#   elf_avg = mean_values)
+
+```
+
 ```{r}
-# prss_calc <-
-#   prss %>%
+# TODO: Maria, the scoring doc on dropbox have different scoring system
+elf <-
+  tpw_raw %>%
+  select(
+    id,
+    matches(
+      "^elf"
+    )
+  ) %>%
+  mutate(
+    across(
+      -c(id, elf23),
+      ~case_when(
+        # TODO: Maria, in JP's code, he mention all items need revers code, so I just coded them reversely. 
+#         1 - "All"
+# 2 - "Most"
+# 3 - "Some"
+# 4 - "Very Few"
+# 5 - "None"
+# 6 - "Does not apply"
+# -77 - "Decline to Answer"
+# 
+# All 39 items were reverse scored
+# Modified Scale
+# 0 - "Does not apply"
+# 1 - "None"
+# 2 - "Very Few"
+# 3 - "Some"
+# 4 - "Most"
+# 5 - "All"
+# -77 - "Decline to Answer"
+        .x == "All" ~ "4",
+        .x == "Most" ~ "3",
+        .x == "Some" ~ "2",
+        .x == "Very Few" ~ "1",
+        .x == "None" ~ "0",
+        .x == "Does not apply" ~ "0",   #TODO: Maria, how do we want to code doesn't apply. We have -55 for missing data which are not applicable, but that one is for question not shown. if this is changed, Min please change missing section accordingly.  
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    elf23 = case_when(
+      elf23 == "Only threatened to hit" ~ "1",
+      elf23 == "Tried but didn't succeed" ~ "2",
+      elf23 == "Actually hit" ~ "3",
+      elf23 == "Decline to Answer" ~"-77",
+      TRUE ~ elf23
+    )
+  )
+```
+
+### EDS-F Missing Data 
+```{r eds-f_missing}
+elf <- elf %>%
+  # partial finished TC
+  mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
+  mutate_at(vars(elf23), ~case_when(elf20 < 1 & elf21 < 1 & elf22 < 1 ~ "-55", TRUE ~.))
+  
+elf_miss <- elf %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 39
+  )
+
+elf_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = "EDS Missing Data",
+    subtitle = "By Participant"
+  )
+
+elf_remove <- elf_miss %>% filter(miss_pct >= 20) %>% pull(id)
+```
+
+
+### EDS-F Calculation & Subscale
+```{r eds-f_calculation}
+elf_calc <-
+  elf %>%
+  mutate(
+    across(
+      .cols = -c(
+        id
+      ),
+      .fns = ~case_when(
+        .x < 0 ~ NA,
+        TRUE ~ .x
+      )
+    )
+  ) %>%
+  mutate(across(-id, as.numeric))
+  
+elf_complete <-
+  elf_calc %>%
+  composite_total_avg_fun(
+    id = c('id', "elf1", "elf2", "elf3", "elf7",
+      "elf12", "elf13", "elf15", "elf17", "elf18",
+      "elf19", "elf23", "elf26", "elf28", "elf30",
+      "elf34", "elf35", "elf36", "elf37"), # Maria, please confirm these variable shouldn't be included when calculate total score 
+    max_value = 4,
+    n_items = 21
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  rename(
+    elf_total = sum_values,
+    elf_avg = mean_values #TODO: Maria do we need average for this measure 
+  ) %>%
+  mutate(
+    mutate(
+      across(
+        c(
+          elf_total,
+          elf_avg
+        ),
+        ~case_when(
+          id %in% elf_remove ~ NA_real_,
+          TRUE ~ .x
+        )
+      )
+    )
+  ) %>%
+  relocate(elf1:elf3, .before = "elf4") %>%
+  relocate(elf7, .before = "elf8") %>%
+  relocate(elf12:elf13, .before = "elf14") %>%
+  relocate(elf15, .before = "elf16") %>%
+  relocate(elf17:elf19, .before = "elf20") %>%
+  relocate(elf23, .before = "elf24") %>%
+  relocate(elf26, .before = "elf27") %>%
+  relocate(elf28, .before = "elf29") %>%
+  relocate(elf30, .before = "elf31") %>%
+  relocate(elf34:elf37, .before = "elf38")
+
+```
+## ELL (Self-Report)
+### ELL Select Variables and Recode
+```{r ell}
+ell <-
+  tpw_raw %>%
+  select(
+    id, ell1:ell39a
+  )  %>%
+  rename(
+    ell35a  = x35a
+  )  %>% 
+  mutate(
+    across(
+      matches("a$"),
+      ~case_when(
+        .x == "Once a month" ~ "1",  #4
+        .x == "Once every 2-3 weeks" ~ "2",  #
+        .x == "Once a week" ~ "3",
+        .x == "2-3 times a week" ~ "4",
+        .x == "Once a day" ~ "5",
+        .x == "2-3 times a day" ~ "6",   
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    ell23 = case_when(
+      ell23 == "Actually hit" ~ "3",
+      ell23 == "Tried but didn't succeed" ~"2",
+      ell23 == "Only threatened to hit" ~ "1",
+      ell23 == "Decline to Answer" ~ "-77",
+      TRUE ~ ell23
+    )
+    )%>%
+  mutate(across(-id, as.numeric))
+
+ell_count_calc <-
+  ell %>%
+  select(
+    id,
+    matches("\\d$")
+    ) %>%
+  mutate(
+    across(
+      -id,
+      ~case_when(
+        .x == 0 ~ 0,
+        .x > 0 ~ 1, # TODO: Maria, do you want everyone reported delinquency behavior coded as 1, or keep their original score? 
+        .x < 0 ~ NA,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+### ELL Missing Data 
+```{r ell_missing}
+ell <- ell %>%
+  # partial finished TC
+  mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
+   # Incarcerated TC weren't administered for this survey
+  mutate_at(vars(ell1:ell39a), ~ ifelse(id %in% c("HR211", "HR181", "P819"), -55, .)) %>%
+  # if ell20, ell21, ell22 are all less than 0 then then ell23 wasn't shown
+  mutate(ell23 = case_when(ell20 <= 0 & ell21 <=0 & ell22 <=0 ~ -55, TRUE ~ ell23)) 
+  
+
+  # if ellX is below 10, then ellXa should be -55
+for (i in 1:39) {
+    ell_col <- paste0("ell", i)
+    ella_col <- paste0("ell", i, "a")
+    
+    # Check if the "ellX" column is between 0 and 10 (excluding 10)
+    ell_col_values <- ell[[ell_col]]
+    set_to_55 <- ell_col_values >= 0 & ell_col_values < 10
+    
+    # Check if the "ellX" column is -77
+    set_to_77 <- ell_col_values == -77
+    
+    # Set the "ellXa" column to -55 or -77 
+    ell[[ella_col]][set_to_55] <- -55
+    ell[[ella_col]][set_to_77] <- -77
+}
+
+# ELL Count Missing Data
+# most participants will respond to the first part of each item
+# don't respond to anything on the scale
+# TODO: Maria: we are only counting the ellx questions. (ellxa qusetions are not included.)
+ell_count_miss <- ell_count_calc %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 39
+  )
+
+ell_count_miss %>%
+  gt::gt() %>%
+  gt::tab_header(title = 'Missing Data',
+                 subtitle = 'By Each Participant')
+
+ell_count_remove <- ell_count_miss %>% filter(miss_pct >= 20) %>% pull(id)
+```
+
+### ELL Calculation & Subscale 
+```{r ell_calculation}
+# TODO: Maria, this section need special attention since I just copy and past JP's code
+ell_calc <-
+  ell %>%
+  select(
+    id,
+    matches("a$")
+  ) %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x <0 ~ NA,
+        TRUE ~ .x
+      )
+    ),
+# TODO :Maria/Shaina, I don't think we need code below in comment, but can you confirm? note:JP also covert number larger than 4 to 4 in this code 
+    across(
+      -id,
+      .names = "{.col}a"
+    ),
+    across(
+      c(
+        matches("a$"),
+        matches("aa$")
+      ),
+      ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ 2,
+        .x == 4 ~ 3,
+        .x == 5 ~ 4,
+        .x == 6 ~ 5,
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      c(
+        matches("aa$")
+      ),
+      ~case_when(
+        .x >= 4 ~ 4,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ell_complete <-
+  ell_calc %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c(
+      "ell4a", "ell5a", "ell6a", "ell8a", "ell9a",
+      "ell10a", "ell11a", "ell14a", "ell16a", "ell20a",
+      "ell21a", "ell22a", "ell24a", "ell25a", "ell27a", "ell29a",
+      "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
+    ),
+    scale2 = c(
+      "ell4aa", "ell5aa", "ell6aa", "ell8aa", "ell9aa",
+      "ell10aa", "ell11aa", "ell14aa", "ell16aa", "ell20aa",
+      "ell21aa", "ell22aa", "ell24aa", "ell25aa", "ell27aa", "ell29aa",
+      "ell31aa", "ell32aa", "ell33aa", "ell38aa", "ell39aa"
+    )
+  ) %>%
+  rename(
+    ell_raw_total = total1,
+    ell_censor_total = total2
+  )
+
+
+ell_count_complete <-
+  ell_count_calc %>%
+  composite_total_avg_fun(
+    id = c(
+      'id', "ell1", "ell2", "ell3", "ell7",
+      "ell12", "ell13", "ell15", "ell17", "ell18",
+      "ell19", "ell23", "ell26", "ell28", "ell30",
+      "ell34", "ell35", "ell36", "ell37"
+    ),
+    max_value = 1,
+    n_items = 21
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  rename(
+    ell_count_total = sum_values,
+    ell_count_avg = mean_values
+  ) %>%
+  mutate(
+    across(
+      c(
+        ell_count_total,
+        ell_count_avg
+      ),
+      ~case_when(
+        id %in% ell_count_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+## MHC-SF
+### MHC-SF Select Variables and Recode
+```{r mhc-sf}
+mhc <-
+  tpw_raw %>%
+  select(
+    id,
+    matches(
+      "^h"
+    )
+  ) %>%
+  mutate(across(-id)) %>%
+  mutate(
+    across(
+      .cols = c(h1:h14),
+      .fns = ~case_when(
+        .x == "Never" ~ "0",
+        .x == "Once or Twice" ~ "1",
+        .x == "About Once A week" ~ "2",
+        .x == "About 2 or 3 Times a Week" ~ "3",
+        .x == "Almost Every Day" ~ "4",
+        .x == "Every Day" ~ "5",
+        .x == "Decline to Answer"~ "-77",
+        TRUE ~ .x
+      )
+    )
+  ) 
+
+
+# # TODO: Maria/Shina I don't think we need code below, please confirm
+# mhc <-
+#   mhc %>%
+#   subtract_scale(
+#     id = 'id',
+#     value = 1
+#   ) %>%
 #   mutate(
 #     across(
-#       .cols = -id,
-#       .fns = ~case_when(
-#         .x < 0 ~ NA_real_,
+#       -id,
+#       ~case_when(
+#         .x == 6 ~ -77,
+#         .x == 7 ~ NA_real_,
+#         is.na(.x) ~ NA_real_,
 #         TRUE ~ .x
 #       )
 #     )
 #   )
-# 
-# prss_complete <-
-#   prss_calc %>%
-#   composite_total_avg_fun(
-#     id = 'id',
-#     max_value = 5,
-#     n_items = 5
-#   ) %>%
-#   distinct(
+```
+
+### MHC-sf Missing Data
+There are missing data, but missing rule doesn't apply. 
+```{r mhc-sf_missing}
+mhc_miss <- mhc %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 14
+  )
+
+mhc_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'Missing Data',
+    subtitle = 'By Each Participant'
+  )
+
+
+mhc_remove <- mhc_miss %>% filter(miss_pct >= 20) %>% pull(id)
+```
+
+### MHC-SF Calculation & Subscale
+```{r mhc-sf_calc}
+mhc_calc <-
+  mhc %>%
+  mutate(across(-id, as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+mhc_complete <-
+  mhc_calc %>%
+  composite_total_avg_fun(
+    id = 'id',
+    max_value = 5,
+    n_items = 14
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  subscale_create(
+    total_only = FALSE,
+    scale1 = c("h1", "h2", "h3"),
+    scale1_nitems = 3,
+    scale2 = c("h4", "h5", "h6", "h7", "h8"),
+    scale2_nitems = 5,
+    scale3 = c("h9", "h10", "h11", "h12", "h13", "h14"),
+    scale3_nitems = 6
+  ) %>%
+  rename(
+    mhc_total = sum_values,
+    mhc_avg = mean_values,
+    mhc_pa = total1,
+    mhc_pa_avg = avg1,
+    mhc_swb = total2,
+    mhc_swb_avg = avg2,
+    mhc_pwb = total3,
+    mhc_pwb_avg = avg3
+  ) %>%
+  mutate(
+    across(
+      c(
+        mhc_total,
+        mhc_avg,
+        mhc_pa,
+        mhc_pa_avg,
+        mhc_swb,
+        mhc_swb_avg,
+        mhc_pwb,
+        mhc_pwb_avg
+      ),
+      ~case_when(
+        id %in% mhc_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+# TODO: Maria, this changes some value to NA, pleae confirm this is how you want them to be 
+mhc_complete <- mhc_complete %>%
+  pivot_longer(
+    h4:h14,
+    names_to = "pre_flourish",
+    values_to = "flourish_feel"
+  ) %>%
+  mutate(
+    flourish = case_when(
+      flourish_feel %in% c(4, 5) ~ 1,
+      !flourish_feel %in% c(4, 5) ~ 0,
+      TRUE ~ 0
+    ),
+    languish = case_when(
+      flourish_feel %in% c(0, 1) ~ 1,
+      !flourish_feel %in% c(0, 1) ~ 0,
+      TRUE ~ 0
+    )
+  ) %>%
+  group_by(id) %>%
+  mutate(
+    six_or_over = sum(flourish, na.rm = TRUE),
+    neg_six_or_more = sum(languish, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    flourish_diagnosis = case_when(
+      (h1 %in% c(4, 5) & six_or_over >= 6) |
+        (h2 %in% c(4, 5) & six_or_over >= 6) |
+        (h3 %in% c(4, 5) & six_or_over >= 6)
+      ~ "flourish",
+      TRUE ~ "not_flourish"
+    ),
+    languish_diagnosis = case_when(
+      (h1 %in% c(0, 1) & neg_six_or_more >= 6) |
+        (h2 %in% c(0, 1) & neg_six_or_more >= 6) |
+        (h3 %in% c(0, 1) & neg_six_or_more >= 6)
+      ~ "languish",
+      TRUE ~ "not_languish"
+    )
+  ) %>%
+  pivot_wider(
+    names_from = pre_flourish,
+    values_from = flourish_feel
+  ) %>%
+  distinct(
+    id,
+    .keep_all = TRUE
+  ) %>%
+  mutate(
+    final_diagnosis = case_when(
+      (flourish_diagnosis == "flourish" &
+         languish_diagnosis == "not_languish") ~ "flourish",
+      (flourish_diagnosis == "not_flourish" &
+         languish_diagnosis == "languish") ~ "languish",
+      (flourish_diagnosis == "not_flourish" &
+         languish_diagnosis == "not_languish") ~ "moderately mentally healthy"
+    )
+  ) %>%
+  relocate(h4:h14, .after = "h3")
+```
+
+## FI
+### FI Select Variable and Recode 
+```{r fi}
+flo <- tpw_raw %>%
+  select(
+    id,
+    i1:i12
+  ) %>%
+    mutate(
+    across(
+      .cols = c(i1:i12),
+      .fns = ~case_when(
+        .x == "0 - Not Satisfied at all" ~ "0",
+        .x == "0 - Strongly Disagree" ~ "0",
+        .x == "0 - Worry all of the time" ~ "0",
+        .x == "0 - Poor" ~ "0",
+        .x == "0 - Not at all worthwhile" ~ "0",
+        .x == "0 - Not true of me" ~ "0",
+        .x == "0 - Extremely Unhappy" ~ "0",
+        .x == "1" ~ "1",
+        .x == "2" ~ "2",
+        .x == "3" ~ "3",
+        .x == "4" ~ "4",
+        .x == "5" ~ "5",
+        .x == "6"~ "6",
+        .x == "7"~ "7",
+        .x == "8"~ "8",
+        .x == "9"~ "9",
+        .x == "10 - Completely Satisfied"~ "10", 
+        .x == "10 - Extremely Happy"~ "10", 
+        .x == "10 - Excellent"~ "10",
+        .x == "10 - Completely Worthwhile" ~ "10",
+        .x == "10 - Strongly Agree" ~ "10", 
+        .x == "10 - Completely true of me" ~ "10", 
+        .x == "10 - Do not ever worry" ~ "10", 
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    )
+  ) 
+```
+
+### FI Missing Data 
+There are missing data in FI and missing rule applied. 
+```{r}
+flo_miss <- flo %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 12
+  )
+
+flo_miss %>%
+  gt::gt() %>%
+  gt::tab_header(title = 'Missing Data',
+                 subtitle = 'By Each Participant')
+
+flo_remove <- flo_miss %>% filter(miss_pct >= 20) %>% pull(id)
+```
+
+### FI Calculation & Subscale 
+```{r}
+flo_calc <-
+  flo %>%
+  mutate(across(-id, as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+flo_complete <-
+  flo_calc %>%
+  composite_total_avg_fun(
+    id = 'id',
+    max_value = 10,
+    n_items = 12
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  select(
+    -mean_values
+  ) %>%
+  rename(flo_total = sum_values) %>%
+  mutate(
+    across(
+      c(
+        flo_total
+      ),
+      ~case_when(
+        id %in% flo_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+##ITQ
+### ITQ Select Vartiable and Recode 
+```{r itq}
+itq <- tpw_raw %>% 
+  select(
+    id,
+    matches(
+      "^itq"
+    )
+  )  %>%
+    mutate(
+    across(
+      .cols = c(itq1:itq9),
+      .fns = ~case_when(
+        .x == "Not at all" ~ "0",
+        .x == "A little bit" ~ "1",
+        .x == "Moderately" ~ "2",
+        .x == "Quite a bit" ~ "3",
+        .x == "Extremely" ~ "4",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    )
+  ) 
+```
+
+### ITQ Missing Data 
+There are missing data and missing rule applied. 
+```{r itq_missing}
+itq <- itq %>%
+  # partial finished TC
+  mutate(across(-id, ~ifelse(id == "HR173", -99, .))) 
+
+itq_miss <- itq %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 9
+  )
+
+itq_miss %>%
+  gt::gt() %>%
+  gt::tab_header(title = 'Missing Data',
+                 subtitle = 'By Each Participant')
+
+itq_remove <- itq_miss %>% filter(miss_pct >= 20) %>% pull(id)
+```
+
+### ITQ Calculation & Subscale 
+```{r itq_calc}
+itq_calc <- itq %>% 
+    mutate(across(-id, as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+itq_calc <- itq_calc %>%
+  mutate(
+    itq_re_dx = case_when(
+      (itq1 > 1 | itq2 > 1) ~ "diagnosis_met",
+      (itq1 < 2  | itq2 < 2) ~ "diagnosis_not_met",
+      TRUE ~ "conditions_not_met"
+    ),
+    itq_av_dx = case_when(
+      (itq3 > 1 | itq4 > 1)  ~ "diagnosis_met",
+      (itq3 < 2 | itq4 < 2)  ~ "diagnosis_not_met",
+      TRUE ~ "conditions_not_met"
+    ),
+    itq_th_dx = case_when(
+      (itq5 > 1 | itq6 > 1) ~ "diagnosis_met",
+      (itq5 < 2 | itq6 < 2) ~ "diagnosis_not_met",
+      TRUE ~ "conditions_not_met"
+    ),
+    itq_fi_dx = case_when(
+      (itq7 > 1 | itq8 > 1 | itq9 > 1) ~ "diagnosis_met",
+      (itq7 < 2 | itq8 < 2 | itq9 < 2) ~ "diagnosis_not_met",
+      TRUE ~ "conditions_not_met"
+    ),
+    itq_pstd_dx = case_when(
+      (itq_re_dx == "diagnosis_met" &
+         itq_av_dx == "diagnosis_met" &
+         itq_th_dx == "diagnosis_met" &
+         itq_fi_dx == "diagnosis_met") ~ "diagnosis_met",
+      TRUE ~ "diagnosis_not_met"
+    )
+  )
+
+itq_complete <-
+  itq_calc %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c("itq1", "itq2"),
+    scale2 = c("itq3", "itq4"),
+    scale3 = c("itq5", "itq6")
+  ) %>%
+  rename(
+    itq_ad_total = total1,
+    itq_nsc_total = total2,
+    itq_dr_total = total3
+  ) %>%
+  mutate(
+    itq_dso = (itq_ad_total + itq_nsc_total + itq_dr_total),
+    across(
+      c(
+        itq_ad_total,
+        itq_nsc_total,
+        itq_dr_total
+      ),
+     ~case_when(
+       id %in% itq_remove ~ NA_real_,
+         TRUE ~ .x
+       )
+    )
+  )
+```
+ibq: 1-7 - total 
+ibq 10- number, how many they select 
+ibq 10 a column for each indicator if endourse -1, no- 0 
+## IBQ
+### IBQ Select Variables and Recode
+```{r ibq}
+ibq <-
+  tpw_raw %>%
+  select(
+    id,
+    matches(
+      '^ibq'
+    )
+  ) %>%
+  mutate(across(-id, as.factor),
+      across(
+         .cols = c(ibq1:ibq9),
+        .fns = ~case_when(
+         .x == "Yes" ~ "1",
+         .x == "No" ~ "0",
+         .x == "Decline to Answer" ~ "-77",
+         TRUE ~ .x
+        )
+      ),
+    across(
+      .cols = c(ibq10_1:ibq10_9),
+      .fns = ~if_else(!is.na(.x), "1", "0")), 
+    ibq10_77 = case_when(
+        ibq10_77 == "Decline to Answer" ~ "-77",
+        TRUE ~ "0"
+    )) %>%
+  mutate(ibq10_9 = ifelse(tolower(ibq10_9_text) %in% c("none", "no institutions selected"), "0", ibq10_9)
+) %>%
+  mutate(ibq9 = ifelse(ibq9 %in% c("N/A"), "-55", ibq9)) %>% #TODO need confirm with Maria
+  mutate(across(ibq10_1:ibq10_9, as.numeric))%>%
+  mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>%
+  rename(ibq10_school = ibq10_1) %>%
+  rename(ibq10_juvenile_justice = ibq10_2) %>%
+  rename(ibq10_Legal_System = ibq10_3) %>%
+  rename(ibq10_Police = ibq10_4) %>%
+  rename(ibq10_Medical = ibq10_5) %>%
+  rename(ibq10_Church = ibq10_6) %>%
+  rename(ibq10_Foster_Care = ibq10_7) %>%
+  rename(ibq10_Child_Welfare = ibq10_8) %>%
+  rename(ibq10_other = ibq10_9) %>%
+  rename(ibq10_other_text = ibq10_9_text) %>%
+  relocate(ibq10, .after = ibq9) %>%
+  relocate(ibq10_other_text, .after = ibq10_other)
+```
+
+### IBQ Missing Data 
+There are missing data, and missing rule applied. 
+```{r ibq_missing }
+# correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
+ibq <- ibq %>%
+  # partial finished TC
+  mutate(across(-c(id,ibq10_other_text), ~ifelse(id == "HR173", "-99", .))) 
+
+ibq_miss <- ibq %>%
+  mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
+  pct_miss_fun(
+    id = c("id", "ibq10_school", "ibq10_juvenile_justice", "ibq10_Legal_System", "ibq10_Police", "ibq10_Medical", "ibq10_Church", "ibq10_Foster_Care", "ibq10_Child_Welfare","ibq10_other","ibq10_other_text","ibq10"),
+    n_items = 10
+  )
+
+ibq_miss %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'IBQ Missing Data',
+    subtitle = 'By Participant')
+
+ibq_remove <- ibq_miss %>% filter(miss_pct >= 20) %>% pull(id)
+```
+
+### IBQ Calculations & Subscale
+```{r ibq_calculations}
+# Below is the code that treats -77, -55 values as NA
+ibq_calc <-
+  ibq %>%
+  mutate(across(-c(id,ibq10_other_text), as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -c(id,ibq10_other_text),
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+# IBQ Composite & Subscale Score Creation 
+ibq_complete <-
+  ibq_calc %>%
+  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T))
+```
+
+### Sex History Survey
+### SEX Select Variables and Recode
+```{r sex}
+sex <- tpw_raw%>% 
+  select(
+    id,
+    s_pregnancy_screen:s48
+  )
+
+# sex <- sex %>%
+#   mutate(
+#     sex_preg_screen = case_when(
+#       s_pregnancy_screen == "Yes" ~"1",
+#       s_pregnancy_screen == "No" ~"0"
+#     ),
+#     sex_current_date = case_when(
+#       s1 =="Yes" ~ "1",
+#       s1 =="No" ~ "2",
+#       s1 =="Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_part_gender_id = case_when(
+#       s1a == 1 ~ "cisgender female",
+#       s1a == 2 ~ "female",
+#       s1a == 3 ~ "cisgender male",
+#       s1a == 4 ~ "male",
+#       s1a == 5 ~ "trans female",
+#       s1a == 6 ~ "tras male",
+#       s1a == 7 ~ "non-binary",
+#       s1a == 8 ~ "self-identify",
+#       s1a == 9 ~ NA_character_,
+#       s1a == 10 ~ NA_character_,
+#       TRUE ~ NA_character_
+#     ),
+#     sex_current_engage = case_when(
+#       s3 == 1 ~ "Yes",
+#       s3 == 2 ~ "No",
+#       s3 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_current_live = case_when(
+#       s4 == 1 ~ "Yes",
+#       s4 == 2 ~ "No",
+#       s4 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_current_marry = case_when(
+#       s6 == 1 ~ "Yes",
+#       s6 == 2 ~ "No",
+#       s6 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_pressure_stress = case_when(
+#       s9 == 1 ~ "a great deal",
+#       s9 == 2 ~ "quite a lot",
+#       s9 == 3 ~ "some",
+#       s9 == 4 ~ "not much",
+#       s9 == 5 ~ "very little",
+#       s9 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_id_feeling = case_when(
+#       s10 == 1 ~ "heterosexual",
+#       s10 == 2 ~ "gay_lesbian",
+#       s10 == 3 ~ "bisexual",
+#       s10 == 4 ~ "Other",
+#       s10 == 5 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_talk_safesex = case_when(
+#       s11 == 1 ~ "Never",
+#       s11 == 2 ~ "Rarely",
+#       s11 == 3 ~ "Sometimes",
+#       s11 == 4 ~ "Often",
+#       s11 == 5 ~ "Very Often",
+#       s11 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_talk_comfort = case_when(
+#       s12 == 1 ~ "Very Comfortable",
+#       s12 == 2 ~ "Somewhat Comfortable",
+#       s12 == 3 ~ "Neutral",
+#       s12 == 4 ~ "Somewhat uncomfortable",
+#       s12 == 5 ~ "Very uncomfortable",
+#       s12 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_other_safesex = case_when(
+#       s13 == 1 ~ "Yes",
+#       s13 == 2 ~ "No",
+#       s13 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_other_person_safesex = case_when(
+#       s14 == 1 ~ "Friend",
+#       s14 == 2 ~ "Romantic Partner",
+#       s14 == 3 ~ "Sister/Brother",
+#       s14 == 4 ~ "Other Relative",
+#       s14 == 5 ~ "Counselor/Teacher/Doctor",
+#       s14 == 6 ~ "Parent",
+#       s14 == 7 ~ "Other",
+#       s14 == 8 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_talk_safesex_other_person = case_when(
+#       s16 == 1 ~ "Never",
+#       s16 == 2 ~ "Rarely",
+#       s16 == 3 ~ "Sometimes",
+#       s16 == 4 ~ "Often",
+#       s16 == 5 ~ "Very Often",
+#       s16 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_talk_comfort_other_person = case_when(
+#       s17 == 1 ~ "Very Comfortable",
+#       s17 == 2 ~ "Somewhat Comfortable",
+#       s17 == 3 ~ "Neutral",
+#       s17 == 4 ~ "Somewhat uncomfortable",
+#       s17 == 5 ~ "Very uncomfortable",
+#       s17 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_birthcontrol_sex_with = case_when(
+#       s18 == 1 ~ "Very Comfortable",
+#       s18 == 2 ~ "Somewhat Comfortable",
+#       s18 == 3 ~ "Neutral",
+#       s18 == 4 ~ "Somewhat Uncomfortable",
+#       s18 == 5 ~ "Very Uncomfortable",
+#       s18 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_safesex_sex_with = case_when(
+#       s19 == 1 ~ "Very Comfortable",
+#       s19 == 2 ~ "Somewhat Comfortable",
+#       s19 == 3 ~ "Neutral",
+#       s19 == 4 ~ "Somewhat Uncomfortable",
+#       s19 == 5 ~ "Very Uncomfortable",
+#       s19 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_confident_condom = case_when(
+#       s20 == 1 ~ "Very confident",
+#       s20 == 2 ~ "Somewhat confident",
+#       s20 == 3 ~ "A little confident",
+#       s20 == 4 ~ "Not at all confident",
+#       s20 == 5 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_further_sexually = case_when(
+#       s21 == 1 ~ "Always or almost always",
+#       s21 == 2 ~ "Often",
+#       s21 == 3 ~ "About  half the time",
+#       s21 == 4 ~ "Occasionally",
+#       s21 == 5 ~ "Never or almost never",
+#       s21 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_std = case_when(
+#       s22 == 1 ~ "Yes",
+#       s22 == 2 ~ "No",
+#       s22 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_check_out = case_when(
+#       s23 == 1 ~ "Yes",
+#       s23 == 2 ~ "No",
+#       s23 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_std_happen = case_when(
+#       s24 == 1 ~ "Yes, I had a std (positive diagnosis)",
+#       s24 == 2 ~ "No STD (negative diagnosis)",
+#       s24 == 3 ~ "Don't know yet; waiting for results",
+#       s24 == 4 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
 #     across(
-#       .cols = everything()
+#       c(
+#         s25_1, s25_2, s25_3, s25_4, s25_5,
+#         s25_6, s25_7, s25_8, s25_9, s25_77
+#       ),
+#       ~case_when(
+#         is.na(.x) ~ NA_character_,
+#         TRUE ~ "Yes"
+#       )
+#     ),
+#     sex_bloodtest_hiv = case_when(
+#       s26 == 1 ~ "Yes",
+#       s26 == 2 ~ "No",
+#       s26 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_might_be_preg = case_when(
+#       s28 == 1 ~ "Yes",
+#       s28 == 2 ~ "No",
+#       s28 == 3 ~ "Decline",
+#       s28 == 4 ~ "Pregnant prior to last 6 months; knew pregnant prior to 6 month period",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_preg_what_happen = case_when(
+#       s29 == 1 ~ "Went to dr; positive diagnosis",
+#       s29 == 2 ~ "Went to dr; negative diagnosis",
+#       s29 == 3 ~ "Went to dr; don't know",
+#       s29 == 4 ~ "Took home test; positive",
+#       s29 == 5 ~ "Took home test; negative",
+#       s29 == 6 ~ "Took home test; don't know",
+#       s29 == 7 ~ "Did nothing; period started",
+#       s29 == 8 ~ "Did nothing, don't know",
+#       s29 == 9 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     across(
+#       c(
+#         s32_1, s32_2, s32_3, s32_4, s32_5,
+#         s32_6, s32_7, s32_8, s32_9, s32_77
+#       ),
+#       ~case_when(
+#         is.na(.x) ~ NA_character_,
+#         TRUE ~ "Yes"
+#       )
+#     ),
+#     sex_safesex_prev_std = case_when(
+#       s33 == 1 ~ "Always or almost always",
+#       s33 == 2 ~ "Often",
+#       s33 == 3 ~ "About half the time",
+#       s33 == 4 ~ "Occasionally",
+#       s33 == 5 ~ "Never or almost never",
+#       s33 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_percent_sex_relation_safesex_prev_std = case_when(
+#       s34 == 1 ~ "Never 0%",
+#       s34 == 2 ~ "Rarely 1-15%",
+#       s34 == 3 ~ "Occasionally 15-40%",
+#       s34 == 4 ~ "About half the time 40-60%",
+#       s34 == 5 ~ "Usually 60-85%",
+#       s34 == 6 ~ "Most of the time 85-99%",
+#       s34 == 7 ~ "Every single time 100%",
+#       s34 == 8 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_sex_relation_justmet = case_when(
+#       s35 == 1 ~ "Yes",
+#       s35 == 2 ~ "No",
+#       s35 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_alcohol_sex_relation = case_when(
+#       s36 == 1 ~ "Always or almost always",
+#       s36 == 2 ~ "Often",
+#       s36 == 3 ~ "About half the time",
+#       s36 == 4 ~ "Occasionally",
+#       s36 == 5 ~ "Never or almost never",
+#       s36 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_cannabis_drugs_sex_relation = case_when(
+#       s37 == 1 ~ "Always or almost always",
+#       s37 == 2 ~ "Often",
+#       s37 == 3 ~ "About half the time",
+#       s37 == 4 ~ "Occasionally",
+#       s37 == 5 ~ "Never or almost never",
+#       s37 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_sex_relation_w_injects = case_when(
+#       s38 == 1 ~ "Yes",
+#       s38 == 2 ~ "No",
+#       s38 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_intercourse_male_partner = case_when(
+#       s39 == 1 ~ "Yes",
+#       s39 == 2 ~ "No",
+#       s39 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_intercourse_male_nocondom = case_when(
+#       s40 == 1 ~ "Yes",
+#       s40 == 2 ~ "No",
+#       s40 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_percent_w_male_use_birthcontrol = case_when(
+#       s43 == 1 ~ "Never 0%",
+#       s43 == 2 ~ "Rarely 1-15%",
+#       s43 == 3 ~ "Occasionally 15-40%",
+#       s43 == 4 ~ "About half the time 40-60%",
+#       s43 == 5 ~ "Usually 60-85%",
+#       s43 == 6 ~ "Most of the time 85-99%",
+#       s43 == 7 ~ "Every single time 100%",
+#       s43 == 8 ~ "Decline",
+#       s43 == 9 ~ "Don't know",
+#       s43 == 10 ~ "Not using birth control; currently pregnant",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_intercourse_female_partner = case_when(
+#       s44 == 1 ~ "Yes",
+#       s44 == 2 ~ "No",
+#       s44 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_oralsex_female_partner = case_when(
+#       s45 == 1 ~ "Yes",
+#       s45 == 2 ~ "No",
+#       s45 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_oralsex_dentaldam_female_partner = case_when(
+#       s46 == 1 ~ "Yes, had oral sex without dental dam",
+#       s46 == 2 ~ "No, oral sex and always used dental dam",
+#       s46 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     )
+#   ) 
+```
+
+### Sex Missing Data
+```{r sex_missing}
+# sex <- sex %>% 
+#   #TODO:Maria please double check the skip rule that is correct
+#   # for incarcerated TC, entire this survey wasn't shown 
+#   mutate_at(vars(s_pregnancy_screen:s48), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) %>%
+#   # Skip rule: if s1 select 1-yes, then skip to 
+#   mutate_at(vars(s1a:s8), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
+#   
+#   
+#   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
+#   mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
+#   # Skip rule: if d1a == 0 or -77 , d2a is skipped
+#   mutate(d2a = case_when(d1a == 0 | d1a == "-77" ~ "-55", TRUE ~ d2a)) %>%
+#   # Skip rule: if d1a == 1 (d2a is answered (1,0,-77)) d2b should be skipped 
+#   mutate(d2b = case_when(d1a == 1 ~ "-55", TRUE ~ d2b)) %>%
+#   # Skip rule: if d2b == 0 or -77, rest question were skipped 
+#   mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == "-77" ~ "-55", TRUE ~ . )) 
+```
+
+### Sex Calculation & Subscale
+# Maria - it seems like JP change everything to text. 
+```{r sex_calc}
+# sex_calc <- sex %>%
+#   mutate(
+#     sex_preg_screen = case_when(
+#       s_pregnancy_screen == 1 ~ "Yes",
+#       s_pregnancy_screen == 2 ~ "No",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_current_date = case_when(
+#       s1 == 1 ~ "Yes",
+#       s1 == 2 ~ "No",
+#       s1 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_part_gender_id = case_when(
+#       s1a == 1 ~ "cisgender female",
+#       s1a == 2 ~ "female",
+#       s1a == 3 ~ "cisgender male",
+#       s1a == 4 ~ "male",
+#       s1a == 5 ~ "trans female",
+#       s1a == 6 ~ "tras male",
+#       s1a == 7 ~ "non-binary",
+#       s1a == 8 ~ "self-identify",
+#       s1a == 9 ~ NA_character_,
+#       s1a == 10 ~ NA_character_,
+#       TRUE ~ NA_character_
+#     ),
+#     sex_current_engage = case_when(
+#       s3 == 1 ~ "Yes",
+#       s3 == 2 ~ "No",
+#       s3 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_current_live = case_when(
+#       s4 == 1 ~ "Yes",
+#       s4 == 2 ~ "No",
+#       s4 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_current_marry = case_when(
+#       s6 == 1 ~ "Yes",
+#       s6 == 2 ~ "No",
+#       s6 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_pressure_stress = case_when(
+#       s9 == 1 ~ "a great deal",
+#       s9 == 2 ~ "quite a lot",
+#       s9 == 3 ~ "some",
+#       s9 == 4 ~ "not much",
+#       s9 == 5 ~ "very little",
+#       s9 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_id_feeling = case_when(
+#       s10 == 1 ~ "heterosexual",
+#       s10 == 2 ~ "gay_lesbian",
+#       s10 == 3 ~ "bisexual",
+#       s10 == 4 ~ "Other",
+#       s10 == 5 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_talk_safesex = case_when(
+#       s11 == 1 ~ "Never",
+#       s11 == 2 ~ "Rarely",
+#       s11 == 3 ~ "Sometimes",
+#       s11 == 4 ~ "Often",
+#       s11 == 5 ~ "Very Often",
+#       s11 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_talk_comfort = case_when(
+#       s12 == 1 ~ "Very Comfortable",
+#       s12 == 2 ~ "Somewhat Comfortable",
+#       s12 == 3 ~ "Neutral",
+#       s12 == 4 ~ "Somewhat uncomfortable",
+#       s12 == 5 ~ "Very uncomfortable",
+#       s12 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_other_safesex = case_when(
+#       s13 == 1 ~ "Yes",
+#       s13 == 2 ~ "No",
+#       s13 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_other_person_safesex = case_when(
+#       s14 == 1 ~ "Friend",
+#       s14 == 2 ~ "Romantic Partner",
+#       s14 == 3 ~ "Sister/Brother",
+#       s14 == 4 ~ "Other Relative",
+#       s14 == 5 ~ "Counselor/Teacher/Doctor",
+#       s14 == 6 ~ "Parent",
+#       s14 == 7 ~ "Other",
+#       s14 == 8 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_talk_safesex_other_person = case_when(
+#       s16 == 1 ~ "Never",
+#       s16 == 2 ~ "Rarely",
+#       s16 == 3 ~ "Sometimes",
+#       s16 == 4 ~ "Often",
+#       s16 == 5 ~ "Very Often",
+#       s16 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_talk_comfort_other_person = case_when(
+#       s17 == 1 ~ "Very Comfortable",
+#       s17 == 2 ~ "Somewhat Comfortable",
+#       s17 == 3 ~ "Neutral",
+#       s17 == 4 ~ "Somewhat uncomfortable",
+#       s17 == 5 ~ "Very uncomfortable",
+#       s17 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_birthcontrol_sex_with = case_when(
+#       s18 == 1 ~ "Very Comfortable",
+#       s18 == 2 ~ "Somewhat Comfortable",
+#       s18 == 3 ~ "Neutral",
+#       s18 == 4 ~ "Somewhat Uncomfortable",
+#       s18 == 5 ~ "Very Uncomfortable",
+#       s18 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_safesex_sex_with = case_when(
+#       s19 == 1 ~ "Very Comfortable",
+#       s19 == 2 ~ "Somewhat Comfortable",
+#       s19 == 3 ~ "Neutral",
+#       s19 == 4 ~ "Somewhat Uncomfortable",
+#       s19 == 5 ~ "Very Uncomfortable",
+#       s19 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_confident_condom = case_when(
+#       s20 == 1 ~ "Very confident",
+#       s20 == 2 ~ "Somewhat confident",
+#       s20 == 3 ~ "A little confident",
+#       s20 == 4 ~ "Not at all confident",
+#       s20 == 5 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_further_sexually = case_when(
+#       s21 == 1 ~ "Always or almost always",
+#       s21 == 2 ~ "Often",
+#       s21 == 3 ~ "About  half the time",
+#       s21 == 4 ~ "Occasionally",
+#       s21 == 5 ~ "Never or almost never",
+#       s21 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_std = case_when(
+#       s22 == 1 ~ "Yes",
+#       s22 == 2 ~ "No",
+#       s22 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_check_out = case_when(
+#       s23 == 1 ~ "Yes",
+#       s23 == 2 ~ "No",
+#       s23 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_std_happen = case_when(
+#       s24 == 1 ~ "Yes, I had a std (positive diagnosis)",
+#       s24 == 2 ~ "No STD (negative diagnosis)",
+#       s24 == 3 ~ "Don't know yet; waiting for results",
+#       s24 == 4 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     across(
+#       c(
+#         s25_1, s25_2, s25_3, s25_4, s25_5,
+#         s25_6, s25_7, s25_8, s25_9, s25_77
+#       ),
+#       ~case_when(
+#         is.na(.x) ~ NA_character_,
+#         TRUE ~ "Yes"
+#       )
+#     ),
+#     sex_bloodtest_hiv = case_when(
+#       s26 == 1 ~ "Yes",
+#       s26 == 2 ~ "No",
+#       s26 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_might_be_preg = case_when(
+#       s28 == 1 ~ "Yes",
+#       s28 == 2 ~ "No",
+#       s28 == 3 ~ "Decline",
+#       s28 == 4 ~ "Pregnant prior to last 6 months; knew pregnant prior to 6 month period",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_preg_what_happen = case_when(
+#       s29 == 1 ~ "Went to dr; positive diagnosis",
+#       s29 == 2 ~ "Went to dr; negative diagnosis",
+#       s29 == 3 ~ "Went to dr; don't know",
+#       s29 == 4 ~ "Took home test; positive",
+#       s29 == 5 ~ "Took home test; negative",
+#       s29 == 6 ~ "Took home test; don't know",
+#       s29 == 7 ~ "Did nothing; period started",
+#       s29 == 8 ~ "Did nothing, don't know",
+#       s29 == 9 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     across(
+#       c(
+#         s32_1, s32_2, s32_3, s32_4, s32_5,
+#         s32_6, s32_7, s32_8, s32_9, s32_77
+#       ),
+#       ~case_when(
+#         is.na(.x) ~ NA_character_,
+#         TRUE ~ "Yes"
+#       )
+#     ),
+#     sex_safesex_prev_std = case_when(
+#       s33 == 1 ~ "Always or almost always",
+#       s33 == 2 ~ "Often",
+#       s33 == 3 ~ "About half the time",
+#       s33 == 4 ~ "Occasionally",
+#       s33 == 5 ~ "Never or almost never",
+#       s33 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_percent_sex_relation_safesex_prev_std = case_when(
+#       s34 == 1 ~ "Never 0%",
+#       s34 == 2 ~ "Rarely 1-15%",
+#       s34 == 3 ~ "Occasionally 15-40%",
+#       s34 == 4 ~ "About half the time 40-60%",
+#       s34 == 5 ~ "Usually 60-85%",
+#       s34 == 6 ~ "Most of the time 85-99%",
+#       s34 == 7 ~ "Every single time 100%",
+#       s34 == 8 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_sex_relation_justmet = case_when(
+#       s35 == 1 ~ "Yes",
+#       s35 == 2 ~ "No",
+#       s35 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_alcohol_sex_relation = case_when(
+#       s36 == 1 ~ "Always or almost always",
+#       s36 == 2 ~ "Often",
+#       s36 == 3 ~ "About half the time",
+#       s36 == 4 ~ "Occasionally",
+#       s36 == 5 ~ "Never or almost never",
+#       s36 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_cannabis_drugs_sex_relation = case_when(
+#       s37 == 1 ~ "Always or almost always",
+#       s37 == 2 ~ "Often",
+#       s37 == 3 ~ "About half the time",
+#       s37 == 4 ~ "Occasionally",
+#       s37 == 5 ~ "Never or almost never",
+#       s37 == 6 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_sex_relation_w_injects = case_when(
+#       s38 == 1 ~ "Yes",
+#       s38 == 2 ~ "No",
+#       s38 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_intercourse_male_partner = case_when(
+#       s39 == 1 ~ "Yes",
+#       s39 == 2 ~ "No",
+#       s39 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_intercourse_male_nocondom = case_when(
+#       s40 == 1 ~ "Yes",
+#       s40 == 2 ~ "No",
+#       s40 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_percent_w_male_use_birthcontrol = case_when(
+#       s43 == 1 ~ "Never 0%",
+#       s43 == 2 ~ "Rarely 1-15%",
+#       s43 == 3 ~ "Occasionally 15-40%",
+#       s43 == 4 ~ "About half the time 40-60%",
+#       s43 == 5 ~ "Usually 60-85%",
+#       s43 == 6 ~ "Most of the time 85-99%",
+#       s43 == 7 ~ "Every single time 100%",
+#       s43 == 8 ~ "Decline",
+#       s43 == 9 ~ "Don't know",
+#       s43 == 10 ~ "Not using birth control; currently pregnant",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_intercourse_female_partner = case_when(
+#       s44 == 1 ~ "Yes",
+#       s44 == 2 ~ "No",
+#       s44 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_oralsex_female_partner = case_when(
+#       s45 == 1 ~ "Yes",
+#       s45 == 2 ~ "No",
+#       s45 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
+#     ),
+#     sex_oralsex_dentaldam_female_partner = case_when(
+#       s46 == 1 ~ "Yes, had oral sex without dental dam",
+#       s46 == 2 ~ "No, oral sex and always used dental dam",
+#       s46 == 3 ~ "Decline",
+#       TRUE ~ NA_character_
 #     )
 #   ) %>%
 #   rename(
-#     prss_total = sum_values,
-#     prss_avg = mean_values
-#   ) %>%
-#   mutate(
-#     across(
-#       c(
-#         prss_total,
-#         prss_avg
-#       ),
-#       ~case_when(
-#         id %in% prss_remove ~ NA_real_,
-#         TRUE ~ .x
-#       )
-#     )
+#     sex_start_see_part = s2,
+#     sex_been_together_yr = s2a,
+#     sex_been_together_mth = s2b,
+#     sex_been_together_day = s2c,
+#     sex_movein_date = s5,
+#     sex_live_together_yr = s5a,
+#     sex_live_together_mth = s5b,
+#     sex_live_together_day = s5c,
+#     sex_marry_date = s7,
+#     sex_part_age = s8,
+#     sex_id_feeling_text = s10_4_text,
+#     sex_other_person_text = s14_8_text,
+#     sex_other_person_age = s15,
+#     sex_std_herpes_diag = s25_1,
+#     sex_std_warts_diag = s25_2,
+#     sex_std_aids_hiv_diag = s25_3,
+#     sex_std_hepb_diag = s25_4,
+#     sex_std_gonorrhea_diag = s25_5,
+#     sex_std_syphilis_diag = s25_6,
+#     sex_std_chlamydia_diag = s25_7,
+#     sex_std_other_diag = s25_8,
+#     sex_std_dontremember = s25_9,
+#     sex_std_decline = s25_77,
+#     sex_std_diag_text = s25_8_text,
+#     sex_bloodtest_hiv_times = s27,
+#     sex_sex_relations_times = s30,
+#     sex_number_different_people = s31,
+#     sex_partner_male_sameage = s32_1,
+#     sex_partner_male_1to2_older = s32_2,
+#     sex_partner_male_more2_older = s32_3,
+#     sex_partner_female_sameage = s32_4,
+#     sex_partner_female_1to2_older = s32_5,
+#     sex_partner_female_more2_older = s32_6,
+#     sex_partner_nonbinary_sameage = s32_7,
+#     sex_partner_nonbinary_1to2_older = s32_8,
+#     sex_partner_nonbinary_more2_older = s32_9,
+#     sex_partner_decline = s32_77,
+#     sex_intercourse_male_nocondom_times = s41,
+#     sex_intercourse_male_nocondom_number_partner = s41,
+#     sex_oralsex_dentaldam_times = s47,
+#     sex_oralsex_dentaldam_number_parnter = s48
 #   )
+```
+
+## CINT
+### CINT-SOCIODEMS Select Variable & Recode
+```{r cint_soci}
+cint_socio <- tpw_raw %>%
+  select(id,cint_pregnancy_screen:cint_income_support, cint_identity, cint_identity_8_text) %>%
+  mutate(
+    across(
+      .cols = c(cint_pregnancy_screen, cint2:cint5),
+      .fns = ~case_when(
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    cint_0 = case_when(
+      cint_0 == "1. 8th grade or less or working towards GED" ~ "1",
+      cint_0 == "2. Completed GED/Alternative H.S. diploma" ~ "2",
+      cint_0 == "3. Completed some high school, but did not graduate" ~ "3",
+      cint_0 == "4. Graduated high school" ~ "4",
+      cint_0 == "5. Taking/have taken community college classes or working toward Associates Degree" ~ "5",
+      cint_0 == "6. Completed/obtained an Associate's Degree" ~ "6",
+      cint_0 == "7. Taking/have taken vocational classes or working toward Vocational Training" ~ "7",
+      cint_0 == "8. Completed Vocational Training" ~ "8",
+      cint_0 == "9. Taking/have taken 4 yr college classes or working toward 4 year college degree" ~ "9",
+      cint_0 == "10. Completed 4 year college degree" ~ "10",
+      cint_0 == "11. Taking/have taken graduate classes or working toward post-college degree" ~ "11",
+      cint_0 == "12. Completed post-college degree" ~ "12",
+      cint_0 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint_0
+    ),
+    cint1_1 = case_when(cint1_1 == "1. Currently Working" ~ "1",),
+    cint1_2 = case_when(cint1_2 == "2. Temporarily laid off" ~ "2"),
+    cint1_3 = case_when(cint1_3 == "3. On Leave" ~ "3"),
+    cint1_4 = case_when(cint1_4 == "4. Unemployed or looking for work" ~ "4"),
+    cint1_5 = case_when(cint1_5 == "5. Retired" ~ "5"),
+    cint1_6 = case_when(cint1_6 == "6. Disabled, permanently or temporarily" ~ "6"),
+    cint1_7 = case_when(cint1_7 == "7. Student" ~ "7"),
+    cint1_8 = case_when(cint1_8 == "8. Something else, please briefly describe" ~ "8"),
+    cint1_77 = case_when(cint1_77 == "Decline to Answer" ~ "-77"),
+    cint18 = case_when(
+      # TODO: Maria, please confirm the re-code value 
+      cint18 == "1. Always or almost always" ~ "1",
+      cint18 == "2. Often" ~ "2",
+      cint18 == "3. About half the time" ~ "3",
+      cint18 == "4. Occasionally" ~ "4",
+      cint18 == "5. Never or almost never" ~ "5",
+      cint18 == "8. N/A, no bills to pay" ~ "6",
+      cint18 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint18
+    ),
+    cint19 = case_when(
+      # TODO: Maria, please confirm the re-code value 
+      cint19 == "1. Always or almost always" ~ "1",
+      cint19 == "2. Often" ~ "2",
+      cint19 == "3. About half the time" ~ "3",
+      cint19 == "4. Occasionally" ~ "4",
+      cint19 == "5. Never or almost never" ~ "5",
+      cint19 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint19
+    ),
+    cint_identity = case_when(
+      cint_identity == "Cisgender female or woman" ~ "1",
+      cint_identity == "Cisgender male or man" ~ "2",
+      cint_identity == "Female/Woman" ~ "3",
+      cint_identity == "Male/Man" ~ "4",
+      cint_identity == "Trans female/woman" ~ "5",
+      cint_identity == "Trans male/man" ~ "6",
+      cint_identity == "Non-binary" ~ "7",
+      cint_identity == "Prefer to self-identify" ~ "8",
+      cint_identity == "Decline to Answer" ~ "-77",
+      TRUE ~ cint_identity
+    )
+    )
+```
+
+### CINT-SOCIODEMS Missing
+```{r cint_soci_missing}
+cint_socio <- cint_socio %>%
+  # if cint1_1 is not select cint2 will not be asked 
+   mutate(cint2 = case_when(is.na(cint1_1) ~ "-55", TRUE ~ cint2)) %>%
+  # if cint1_2 is not select cint3 will not be asked 
+   mutate(cint3 = case_when(is.na(cint1_2) ~ "-55", TRUE ~ cint3)) %>%
+  # if cint1_3 is not select cint4 will not be asked 
+   mutate(cint4 = case_when(is.na(cint1_3) ~ "-55", TRUE ~ cint4)) %>%
+  # if cint1_4 is not select cint5 will not be asked 
+   mutate(cint5 = case_when(is.na(cint1_4) ~ "-55", TRUE ~ cint5))
+```
+
+### CINT-Ladder Select Variable & Recode
+```{r}
+cint_ladder <- tpw_raw %>%
+  select(id, cint_ladder1, cint_ladder2) %>% 
+  mutate(
+    across(
+      .cols = -id,
+      .fns = ~case_when(
+        is.na(.x) ~ "-77",
+        TRUE ~ .x
+        )
+      )
+  )
+```
+
+### CINT-Romantic and friend relationships Select Variable & Recode
+```{r}
+cint_relation <- tpw_raw %>%
+  select(id, cint20:cint37) %>%
+  mutate(
+    cintq3 = case_when(
+        cintq3 == "1. Married" ~ "1",
+        cintq3 == "2. Living together" ~ "2",
+        cintq3 == "3. Dating or seeing each other, but not living together. This includes casual dating." ~ "3",
+        cintq3 == "4. Married, but separated" ~ "4",
+        cintq3 == "5. Decline to Answer" ~ "-77",
+        TRUE ~ cintq3
+      ),
+    cint26 = case_when(
+      cint26 == "1 - Not at all close" ~ "1",
+      cint26 == "10 - Extremely Close" ~ "10",
+      cint26 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint26
+    ),
+    cint27 = case_when(
+      cint27 == "1 - Not at all well" ~ "1",
+      cint27 == "10 - Very Well" ~ "10",
+      cint27 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint27
+    ),
+    across(
+      .cols = c(cint28, cint29, cint37),
+      .fns = ~case_when(
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0",
+        .x == "Don't Know" ~ "-66",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+     cint30 = case_when(
+       #This is not match out guideline which start from 0
+      cint30 == "1. Never" ~ "1",
+      cint30 == "2. Drank alcohol only a few times during the year" ~ "2",
+      cint30 == "3. Drinks regularly for a few weeks or more, then doesn't for a few weeks or more or drinks, then stops drinking (ex: became clean and sober)" ~ "3",
+      cint30 == "4. Drinks about once a month" ~ "4",
+      cint30 == "5. Drinks on weekends or mostly on weekends" ~ "5",
+      cint30 == "6. Drinks daily or almost daily" ~ "6",
+      cint30 == "7. Other: (Specify)" ~ "7",
+      cint30 == "8. Don't know" ~ "-66",
+      cint30 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint30
+    ),
+     cint31 = case_when(
+       #This is not match out guideline which start from 0
+      cint31 == "1. Never" ~ "1",
+      cint31 == "2. Smoked only a few times during the year" ~ "2",
+      cint31 == "3. Smokes regularly for a few weeks or more, then doesn't for a few weeks or more or used, then stopped (ex: became clean and sober)" ~ "3",
+      cint31 == "4. Smokes about once a month" ~ "4",
+      cint31 == "5. Smokes on weekends or mostly on weekends or a few times a week" ~ "5",
+      cint31 == "6. Smokes daily or almost daily" ~ "6",
+      cint31 == "7. Other: (Specify)" ~ "7",
+      cint31 == "8. Don't know" ~ "-66",
+      cint31 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint31
+    ),
+     cint32 = case_when(
+       #This is not match out guideline which start from 0
+      cint32 == "1. Never" ~ "1",
+      cint32 == "2. Used hard drugs a limited number of times" ~ "2",
+      cint32 == "3. Uses drugs regularly for a few weeks or more, then don't for a few weeks or more, or used, then stopped (ex: became clean and sober)" ~ "3",
+      cint32 == "4. Uses drugs about once a month" ~ "4",
+      cint32 == "5. Uses hard drugs on weekends or mostly on weekends or a few times a week" ~ "5",
+      cint32 == "6. Uses hard drugs daily or almost daily" ~ "6",
+      cint32 == "7. Other: (Specify)" ~ "7",
+      cint32 == "8. Don't know" ~ "-66",
+      cint32 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint32
+    ),
+    cint33 = case_when(
+       #This is not match out guideline which start from 0
+      cint33 == "1. Any grade up to the 12th grade, but not having a High School Diploma/GED" ~ "1",
+      cint33 == "2. GED or Equivalency" ~ "2",
+      cint33 == "3. High School Diploma" ~ "3",
+      cint33 == "4. Attended Community College but no A.A.(Associates) degree" ~ "4",
+      cint33 == "5. Community College degree, (A.A.)" ~ "5",
+      cint33 == "6. Attended 4 year University or College, but no degree" ~ "6",
+      cint33 == "7. B.A., B.S., BSN degree" ~ "7",
+      cint33 == "8. Graduate degree (MA, MS, PhD)" ~ "8",
+      cint33 == "9. Other (Technical, Vocational school)" ~ "9",
+      cint33 == "10. Don't know" ~ "-66",
+      cint33 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint33
+    ),
+     cint34 = case_when(
+      cint34 == "1 (Not at all Supportive)" ~ "1",
+      cint34 == "10 (Very Supportive)" ~ "10",
+      cint34 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint34
+    ),
+    cint35 = case_when(
+      cint35 == "1. None" ~ "1",
+      cint35 == "2. One" ~ "2",
+      cint35 == "3. Two or three" ~ "3",
+      cint35 == "4. Four or more" ~ "4",
+      cint35 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint35
+    ),
+    cint36 = case_when(
+      cint36 == "1. Never" ~ "1",
+      cint36 == "2. Less than once a week" ~ "2",
+      cint36 == "3. One" ~ "3",
+      cint36 == "4. Two or three" ~ "4",
+      cint36 == "5. Four or five" ~ "5",
+      cint36 == "6. Six or seven" ~ "6",
+      cint36 == "7. N/A, current living situation/setting provides no opportunity for socialization ( if says she is in a locked setting)" ~ "7",
+      cint36 == "Decline to Answer" ~ "-77",
+      TRUE ~ cint36
+    )
+    )
+```
+
+### CINT-Romantic Missing
+```{r cint_soci_missing}
+cint_relation <- cint_relation %>%
+  # if cint20 <1 cintq2:cint35 will not be asked 
+   mutate_at(vars(cintq2:cint34), ~case_when(cint20 < 1 ~ "-55", TRUE ~ .)) %>%
+  # if cint35 is none/1 or -77 cint36:cint37 will not be asked 
+   mutate_at(vars(cint36:cint37), ~case_when(cint35 == 1 |  cint35 == "-77" ~ "-55", TRUE ~ .))
+```
+
+### CINT-Substance Use Select Variable & Recode
+```{r}
+cint_substance <- tpw_raw %>%
+  select(id, cint_pregnancy_screen, cint39:cint84_77) %>%
+    mutate(
+    across(
+      .cols = c(cint_pregnancy_screen,cint39, cint41, cint43, cint45, cint50, cint54, cint56, cint58, cint60, cint63, cint64, cint65, cint66, cint68, cint70, cint72, cint74, cint76, cint78, cint80, cint82),
+      .fns = ~case_when(
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0",
+        .x == "3. NA -- not in school and not employed in last 6 months" ~ "-55", # this is for cint63
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = c(cint46),
+      .fns = ~case_when(
+        .x == "1. Not at all" ~ "1",
+        .x == "2. A little drunk" ~ "2",
+        .x == "3. Quite drunk" ~ "3",
+        .x == "4. Very drunk" ~ "4",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = c(cint47),
+      .fns = ~case_when(
+        .x == "1. Drank alcohol only a few times during the past 6 months (up to 5 times)" ~ "1",
+        .x == "2. Drink regularly for a few weeks or more, then don't for a few weeks or more or drank for a period and then stopped altogether" ~ "2",
+        .x == "3. Drink about once a month" ~ "3",
+        .x == "4. Drink on weekends or mostly weekends or a few times a week" ~ "4",
+        .x == "5. Drink daily or almost daily" ~ "5",
+        .x == "6. Other: Specify" ~ "6",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = c(cint61),
+      .fns = ~case_when(
+        .x == "1. A little high" ~ "1",
+        .x == "2. Quite high" ~ "2",
+        .x == "3. Very high" ~ "3",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = c(cint62),
+      .fns = ~case_when(
+        .x == "1. Smoked only a few times during the past 6 months" ~ "1",
+        .x == "2. Smoked regularly for a few weeks or more, then didn't for a few weeks or more or smoked for some time and then stopped" ~ "2",
+        .x == "3. Smoked about once a month" ~ "3",
+        .x == "4. Smoked on weekends or mostly weekends or a few times a week" ~ "4",
+        .x == "5. Smoked daily or almost daily" ~ "5",
+        .x == "6. Other" ~ "6",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    cint84_1 = case_when(cint84_1 == "1. Stranger" ~ "1",),
+    cint84_2 = case_when(cint84_2 == "2. Acquaintance" ~ "2",),
+    cint84_3 = case_when(cint84_3 == "3. Friend" ~ "3",),
+    cint84_4 = case_when(cint84_4 == "4. Family member" ~ "4",),
+    cint84_5 = case_when(cint84_5 == "5. Romantic partner" ~ "5",),
+    cint84_6 = case_when(cint84_6 == "6. Other" ~ "6",),
+    cint84_7 = case_when(cint84_77 == "Decline to Answer" ~ "-77",),
+
+)
+
+```
+
+### CINT-Substance Missing
+```{r cint_soci_missing}
+cint_substance <- cint_substance %>%
+  # if cint_pregnancy_screen is yes/1, cint40:cint43 were not asked 
+  # TODO: Maria, please check this skip rule I wasn't sure if this matches with what's on Quadratics
+   mutate_at(vars(cint39:cint84_77), ~case_when(cint_pregnancy_screen == 1 ~ "-55", TRUE ~ .)) %>%
+  # if cint39 is 0/No or -77 cint40:cint42 were not asked 
+   mutate_at(vars(cint40:cint42), ~case_when(cint39 == 0 |  cint39 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint41 is 0/No or -77 cint42 were not asked 
+   mutate_at(vars(cint42), ~case_when(cint41 == 0 |  cint41 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint43 is 0/No or -77, cint44:cint57 were not asked
+  # TODO: Maria, please check this skip rule I wasn't sure if this matches with what's on Quadratics
+  mutate_at(vars(cint44:cint57), ~case_when(cint43 == 0 |  cint43 == "-77" ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(cint47_6_text), ~case_when(cint47 != 6 ~ "-55", TRUE ~ .)) %>%
+  # if cint54 is 0/No or -77, cint55:cint57 were not asked
+  mutate_at(vars(cint55:cint57), ~case_when(cint54 == 0 |  cint54 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint56 is 0/No or -77, cint57 were not asked
+  mutate_at(vars(cint57), ~case_when(cint56 == 0 |  cint56 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint58 is 0/No or -77, cint57:cint65 were not asked
+   # TODO: Maria, please check this skip rule I wasn't sure if this matches with what's on Quadratics
+  mutate_at(vars(cint57:cint65), ~case_when(cint58 == 0 |  cint58 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint66 is 0/No or -77, cint67 were not asked
+  mutate_at(vars(cint67), ~case_when(cint66 == 0 |  cint66 == "-77" ~ "-55", TRUE ~ .)) %>%
+    # if cint68 is 0/No or -77, cint69 were not asked
+  mutate_at(vars(cint69), ~case_when(cint68 == 0 |  cint68 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint70 is 0/No or -77, cint71 were not asked
+  mutate_at(vars(cint71), ~case_when(cint70 == 0 |  cint70 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint72 is 0/No or -77, cint73 were not asked
+  mutate_at(vars(cint73), ~case_when(cint72 == 0 |  cint72 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint74 is 0/No or -77, cint75 were not asked
+  mutate_at(vars(cint75), ~case_when(cint74 == 0 |  cint74 == "-77" ~ "-55", TRUE ~ .)) %>%
+   # if cint76 is 0/No or -77, cint77 were not asked
+  mutate_at(vars(cint77), ~case_when(cint76 == 0 |  cint76 == "-77" ~ "-55", TRUE ~ .)) %>%
+   # if cint78 is 0/No or -77, cint79 were not asked
+  mutate_at(vars(cint79), ~case_when(cint78 == 0 |  cint78 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint80 is 0/No or -77, cint81:cint84_77 were not asked
+  mutate_at(vars(cint81:cint84_77), ~case_when(cint80 == 0 |  cint80 == "-77" ~ "-55", TRUE ~ .))
+```
+
+```{r}
+cint_covid <- tpw_raw %>%
+  select(cintc1:cintc14_77)
 ```
 
 ## Merge
@@ -1281,11 +3328,19 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(cts_complete, by = "id") %>%
   left_join(bcap_complete, by = "id") %>%
   left_join(dyadc_complete, by = "id") %>%
-  #left_join(arq_complete, by = "id") %>%
+  left_join(arq_complete, by = "id") %>%
+  left_join(prss_complete, by = "id") %>%
+  left_join(ssq_complete, by = "id") %>%
+  left_join(elf_complete, by = "id") %>%
+  left_join(ell_count_complete, by = "id") %>%
+  left_join(mhc_complete, by = "id") %>%
+  left_join(flo_complete, by = "id") %>%
+  left_join(itq_complete, by = "id") %>%
+  left_join(ibq_complete, by = "id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
-# Raw data with missing code are actual missing code instead of NA, this file doesn't include calculated items
+# Raw data with missing code are actual missing code (-99, -77 etc) instead of NA, this file doesn't include calculated items
 tpw_archive <- tpw_archive_id %>%
   left_join(bsi, by = "id") %>%
   left_join(cesd, by = "id") %>%
@@ -1294,7 +3349,15 @@ tpw_archive <- tpw_archive_id %>%
   left_join(cts, by = "id") %>%
   left_join(bcap, by = "id") %>%
   left_join(dyadc, by = "id") %>%
-  #left_join(arq, by = "id") %>%
+  left_join(arq, by = "id") %>%
+  left_join(prss, by = "id") %>%
+  left_join(ssq, by = "id") %>%
+  left_join(elf, by = "id") %>%
+  left_join(ell, by = "id") %>%
+  left_join(mhc, by = "id") %>%
+  left_join(flo, by = "id") %>%
+  left_join(itq, by = "id") %>%
+  left_join(ibq, by = "id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 ```
