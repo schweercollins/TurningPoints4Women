@@ -358,8 +358,8 @@ bio_na <- bio_td %>%
          hbc9d = ifelse(hbc9c != "Other: Please specify", "-55", hbc9d),
          across(c(hbc10a, hbc10b, hbc10c, hbc10c_elapsed), ~ ifelse(hbc10 == "0", "-55", .)),
          across(c(hbc10b, hbc10c, hbc10c_elapsed), ~ ifelse(hbc10a == "0", "-55", .)),
-         across(c(hbc11a, hbc11b, hbc11c), ~ ifelse(hbc11 == "0", "-55", .)),
-         across(c(hbc11b, hbc11c), ~ ifelse(hbc11a == "0", "-55", .)),
+         across(c(hbc11a, hbc11b, hbc11c, hbc11c_elapsed), ~ ifelse(hbc11 == "0", "-55", .)),
+         across(c(hbc11b, hbc11c, hbc11c_elapsed), ~ ifelse(hbc11a == "0", "-55", .)),
          across(c(hbc12a, hbc12b, hbc12c, hbc12d, hbc12b_elapsed, hbc12c_elapsed), ~ ifelse(hbc12 == "0", "-55", .)),
          hbc13a = ifelse(hbc13 == "0" | hbc13 == "-55", "-55", hbc13a),
          hbc14a = ifelse(hbc14 == "0" | hbc14 == "-55", "-55", hbc14a),
@@ -660,7 +660,7 @@ bio_td_archive <- rhs_subscales %>%
          hbc18f = hbc18f_elapsed)
 
 check_arch <- bio_td_archive %>% 
-  select(starts_with("hbc"))
+  select(family, starts_with("hbc"))
 
 
 ```
