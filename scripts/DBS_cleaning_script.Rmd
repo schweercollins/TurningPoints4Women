@@ -1,7 +1,7 @@
 ---
 title: "Dried Blood Spot Data Cleaning Script"
 author: "Shaina Trevino"
-date: "2023-09-19"
+date: "2023-11-27"
 output: html_document
 ---
 
@@ -41,18 +41,28 @@ raw_il6_df <- read_excel(dbs_fp, sheet = "IL6")
 ```{r al-vars}
 #CHO AL vars
 cho_df <- raw_cho_df %>% 
-  mutate(CHO_AL  = ifelse(PE_CHO >= 240, 1, 0),
+  mutate(CHO_AL  = ifelse(PE_CHO >= 200, 1, 0),
          CHO_PAL = ifelse(PE_CHO >= quantile(PE_CHO, 0.75, na.rm = TRUE), 1, 0),
+         #CHO_SAL = ifelse(PE_CHO > (mean(PE_CHO, na.rm = TRUE) + sd(PE_CHO, na.rm = TRUE)), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_CHO_Plate 1" ~ "1",
                               Plate_ID == "TPW_CHO_Plate 2" ~ "2",
                               Plate_ID == "TPW_CHO_Plate 3" ~ "3",
                               Plate_ID == "TPW_CHO_Plate 4" ~ "4",
-                              TRUE ~ Plate_ID)) %>% 
+                              Plate_ID == "not assayed" ~ "10",
+                              TRUE ~ Plate_ID),
+         Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
+         across(c(Direct_CHO, PE_CHO, CHO_AL, CHO_PAL), 
+                ~case_when(Plate_ID == "10"  ~ "-99",
+                           CHO_Assay_Note == "37" ~ "-99",
+                           TRUE ~ as.character(.))),
+         across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
+  mutate_at(vars(ends_with("Note")), ~ifelse(is.na(.), "-55", .)) %>% 
   rename(family = Study_Sample_ID,
          cho_pe = PE_CHO,
          cho_direct = Direct_CHO,
          cho_plate = Plate_ID,
-         cho_date = Assay_Date) %>% 
+         cho_date = Assay_Date,
+         dbs_id = BRL_Sample_ID) %>% 
   janitor::clean_names()
 
 #CRP AL vars
@@ -62,15 +72,25 @@ crp_df <- raw_crp_df %>%
          `Plate ID` = case_when(`Plate ID` == "TPW_CRP_PLATE 1" ~ "1",
                                 `Plate ID` == "TPW_CRP_PLATE 2" ~ "2",
                                 `Plate ID` == "TPW_CRP_DILUTION" ~ "5",
+                                `Plate ID` == "not assayed" ~ "10",
                                 TRUE ~ `Plate ID`),
+         Assay_Date = ifelse(`Plate ID` == "10", "-99", as.character(Assay_Date)),
+         across(c(Direct_CRP, PE_CRP, CRP_AL, CRP_PAL), 
+                ~case_when(`Plate ID` == "10"  ~ "-99",
+                           CRP_Assay_Note == "37" ~ "-99",
+                           CRP_Assay_Note == "1" ~ "-99",
+                           TRUE ~ as.character(.))),
          Direct_CRP = ifelse(Study_Sample_ID == "HR177", "<10", round(as.numeric(Direct_CRP), 2)),
-         PE_CRP = ifelse(Study_Sample_ID == "HR177", "<10", round(as.numeric(PE_CRP), 2))) %>% 
+         PE_CRP = ifelse(Study_Sample_ID == "HR177", "<10", round(as.numeric(PE_CRP), 2)),
+         across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
   mutate_at(vars(CRP_AL, CRP_PAL), ~ ifelse(Study_Sample_ID == "HR177", 0, .)) %>%  #force <10 to zero
+  mutate_at(vars(ends_with("Note")), ~ifelse(is.na(.), "-55", .)) %>% 
   rename(family = Study_Sample_ID,
          crp_pe = PE_CRP,
          crp_direct = Direct_CRP,
          crp_plate = `Plate ID`,
-         crp_date = Assay_Date) %>% 
+         crp_date = Assay_Date,
+         dbs_id = BRL_Sample_ID) %>% 
   janitor::clean_names()
 
 #IL6 AL vars
@@ -78,12 +98,20 @@ il6_df <- raw_il6_df %>%
   mutate(IL6_AL  = ifelse(PE_IL6 >= 6.1, 1, 0),
          IL6_PAL = ifelse(PE_IL6 >= quantile(PE_IL6, 0.75, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_IL6_Plate_1" ~ "1",
-                              TRUE ~ Plate_ID)) %>% 
+                              Plate_ID == "not assayed" ~ "10",
+                              TRUE ~ Plate_ID),
+         Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
+         across(c(Direct_IL6, PE_IL6, IL6_AL, IL6_PAL), 
+                ~case_when(Plate_ID == "10"  ~ "-99",
+                           TRUE ~ as.character(.))),
+         across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
+  mutate_at(vars(ends_with("Note")), ~ifelse(is.na(.), "-55", .)) %>%
   rename(family = Study_Sample_ID,
          il6_pe = PE_IL6,
          il6_direct = Direct_IL6,
          il6_plate = Plate_ID,
-         il6_date = Assay_Date) %>% 
+         il6_date = Assay_Date,
+         dbs_id = BRL_Sample_ID) %>% 
   janitor::clean_names()
 
 #HDL AL vars
@@ -94,12 +122,22 @@ hdl_df <- raw_hdl_df %>%
                               Plate_ID == "TPW_HDL_Plate 2" ~ "2",
                               Plate_ID == "TPW_HDL_Plate 3" ~ "3",
                               Plate_ID == "TPW_HDL_Plate 4" ~ "4",
-                              TRUE ~ Plate_ID)) %>% 
+                              Plate_ID == "not assayed" ~ "10",
+                              TRUE ~ Plate_ID),
+         Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
+         across(c(Direct_HDL, PE_HDL, HDL_AL, HDL_PAL), 
+                ~case_when(Plate_ID == "10"  ~ "-99",
+                           HDL_Assay_Note == "37" ~ "-99",
+                           HDL_Assay_Note == "1" ~ "-99",
+                           TRUE ~ as.character(.))),
+         across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
+  mutate_at(vars(ends_with("Note")), ~ifelse(is.na(.), "-55", .)) %>%
   rename(family = Study_Sample_ID,
          hdl_pe = PE_HDL,
          hdl_direct = Direct_HDL,
          hdl_plate = Plate_ID,
-         hdl_date = Assay_Date) %>% 
+         hdl_date = Assay_Date,
+         dbs_id = BRL_Sample_ID) %>% 
   janitor::clean_names()
   
 
@@ -111,27 +149,47 @@ trg_df <- raw_trg_df %>%
                               Plate_ID == "TPW_TRG_Plate 2" ~ "2",
                               Plate_ID == "TPW_TRG_Plate 3" ~ "3",
                               Plate_ID == "TPW_TRG_Plate 4" ~ "4",
-                              TRUE ~ Plate_ID)) %>% 
+                              Plate_ID == "not assayed" ~ "10",
+                              TRUE ~ Plate_ID),
+         Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
+         across(c(Direct_TRG, PE_TRG, TRG_AL, TRG_PAL), 
+                ~case_when(Plate_ID == "10"  ~ "-99",
+                           TRG_Assay_Note == "37" ~ "-99",
+                           TRG_Assay_Note == "1" ~ "-99",
+                           TRUE ~ as.character(.))),
+         across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
+  mutate_at(vars(ends_with("Note")), ~ifelse(is.na(.), "-55", .)) %>% 
   rename(family = Study_Sample_ID,
          trg_pe = PE_TRG,
          trg_direct = Direct_TRG,
          trg_plate = Plate_ID,
-         trg_date = Assay_Date) %>% 
+         trg_date = Assay_Date,
+         dbs_id = BRL_Sample_ID) %>% 
   janitor::clean_names()
 
 #A1C AL vars
 a1c_df <- raw_a1c_df %>% 
   mutate(A1C_AL  = ifelse(HbA1c >= 6.5, 1, 0),
-         AIC_PAL = ifelse(HbA1c >= quantile(HbA1c, 0.75, na.rm = TRUE), 1, 0),
+         A1C_PAL = ifelse(HbA1c >= quantile(HbA1c, 0.75, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_A1c_Plate_1" ~ "1",
                               Plate_ID == "TPW_A1c_Plate_2" ~ "2",
                               Plate_ID == "TPW_A1c_Plate_3" ~ "3",
                               Plate_ID == "TPW_A1c_Plate_4" ~ "4",
-                              TRUE ~ Plate_ID)) %>% 
+                              Plate_ID == "not assayed" ~ "10",
+                              TRUE ~ Plate_ID),
+         Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
+         across(c(HbA1c, A1C_AL, A1C_PAL), 
+                ~case_when(Plate_ID == "10"  ~ "-99",
+                           A1c_Assay_Note == "37" ~ "-99",
+                           A1c_Assay_Note == "1" ~ "-99",
+                           TRUE ~ as.character(.))),
+         across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
+  mutate_at(vars(ends_with("Note")), ~ifelse(is.na(.), "-55", .)) %>% 
   rename(family = Study_Sample_ID,
          a1c_hb = HbA1c,
          a1c_plate = Plate_ID,
-         a1c_date = Assay_Date) %>% 
+         a1c_date = Assay_Date,
+         dbs_id = BRL_Sample_ID) %>% 
   janitor::clean_names()
 
 #EBV AL vars
@@ -142,12 +200,22 @@ ebv_df <- raw_ebv_df %>%
                               Plate_ID == "TPW_EBV_Plate 2" ~ "2",
                               Plate_ID == "TPW_EBV_Plate 3" ~ "3",
                               Plate_ID == "TPW_EBV_Plate 4" ~ "4",
-                              TRUE ~ Plate_ID)) %>% 
+                              Plate_ID == "not assayed" ~ "10",
+                              TRUE ~ Plate_ID),
+         Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
+         across(c(Direct_EBV, PE_EBV, EBV_PAL), 
+                ~case_when(Plate_ID == "10"  ~ "-99",
+                           EBV_Assay_Note == "37" ~ "-99",
+                           EBV_Assay_Note == "1" ~ "-99",
+                           TRUE ~ as.character(.))),
+         across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
+  mutate_at(vars(ends_with("Note")), ~ifelse(is.na(.), "-55", .)) %>% 
   rename(family = Study_Sample_ID,
          ebv_pe = PE_EBV,
          ebv_direct = Direct_EBV,
          ebv_plate = Plate_ID,
-         ebv_date = Assay_Date) %>% 
+         ebv_date = Assay_Date,
+         dbs_id = BRL_Sample_ID) %>% 
   janitor::clean_names()
 
 ```
@@ -159,12 +227,12 @@ Merge together all AL indicators and export
 ```{r merge}
 
 full_df <- cho_df %>% 
-  left_join(crp_df, by = "Study_Sample_ID") %>% 
-  left_join(il6_df, by = "Study_Sample_ID") %>% 
-  left_join(hdl_df, by = "Study_Sample_ID") %>% 
-  left_join(trg_df, by = "Study_Sample_ID") %>% 
-  left_join(a1c_df, by = "Study_Sample_ID") %>% 
-  left_join(ebv_df, by = "Study_Sample_ID") 
+  left_join(crp_df, by = "family") %>% 
+  left_join(il6_df, by = "family") %>% 
+  left_join(hdl_df, by = "family") %>% 
+  left_join(trg_df, by = "family") %>% 
+  left_join(a1c_df, by = "family") %>% 
+  left_join(ebv_df, by = "family") 
 
 al_df <- full_df %>% 
   select(Study_Sample_ID, ends_with("al"))
