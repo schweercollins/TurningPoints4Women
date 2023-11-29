@@ -300,8 +300,8 @@ bio_td <- bio_df %>%
                             hbc18d == "Vigorous" ~ "3",
                             TRUE ~ hbc18d),
          chc1a = ifelse(chc1a == "Maybe", "-66", chc1a),
-         hbc1 = ifelse(family == "HR183", "9:45 AM", hbc1),
-         across(c(hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f), standardize_time)) #format times
+         hbc1 = ifelse(family == "HR183", "9:45 AM", hbc1))#,
+         #across(c(hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f), standardize_time)) #format times
 
 
 #create function to convert time to date/time object for calculating elapsed time
@@ -657,10 +657,36 @@ bio_td_archive <- rhs_subscales %>%
          hbc11c = hbc11c_elapsed,
          hbc12b = hbc12b_elapsed,
          hbc12c = hbc12c_elapsed,
-         hbc18f = hbc18f_elapsed)
+         hbc18f = hbc18f_elapsed) %>% 
+  #remove specific prescription drugs from archive data (confidential health info)
+  select(-all_of(c("hbc8b", "hbc9d", "hbc10b", "hbc11b"))) %>% 
+  rename(hbc8b = hbc8c,
+         hbc10b = hbc10c,
+         hbc11b = hbc11c) %>% 
+  mutate(hbc9c = ifelse(hbc9c == "Other: Please specify", "Other", hbc9c))
 
 check_arch <- bio_td_archive %>% 
   select(family, starts_with("hbc"))
+
+rcheck_bio <- bio_td %>% 
+  select(family, starts_with("hbc")) %>% 
+  select(family, hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f) 
+
+
+#Export times without AM/PM to double check
+# check_bio <- bio_td %>% 
+#   select(family, starts_with("hbc")) %>% 
+#   select(family, hbc1, hbc8c, hbc10c, hbc11c, hbc12c, hbc18f) %>%  #hbc7c, hbc9b, 
+#   filter(
+#     (!str_detect(hbc1,   "AM|PM|am|pm|Am|Pm|-55")   )|   #is.na(hbc1)) |
+#     (!str_detect(hbc8c,  "AM|PM|am|pm|Am|Pm|-55")  )|  #is.na(hbc8c)) |
+#     (!str_detect(hbc10c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc10c)) |
+#     (!str_detect(hbc11c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc11c)) |
+#     (!str_detect(hbc12c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc12c)) |
+#     (!str_detect(hbc18f, "AM|PM|am|pm|Am|Pm|-55") ) #is.na(hbc18f))
+#   )
+#export hbc time variables for checking
+#export(check_bio, "check_hbc_times.xlsx")
 
 
 ```
