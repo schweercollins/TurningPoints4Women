@@ -1,0 +1,541 @@
+ For scales with [10 or more items]{.underline}, a composite score
+    (average/total) is computed for each participant that have less than
+    [20%]{.underline} of the items from that measure missing
+
+-   For scales with [7 to 9 items]{.underline}, a composite score
+    (average/total) is computed for each participant that have less than
+    [30%]{.underline} of the items from that measure missing
+
+-   For scales with [3 to 6 items]{.underline}, a composite score
+    (average/total) is computed for each participant that have less than
+    [33%]{.underline} of the items from that measure missing
+
+-   For scales with [only 2 items]{.underline}, composite scores
+    (average/total) are calculated on a [case by case basis]{.underline}
+
+
+
+## Sexual History Survey - Sex
+
+### Sex Description
+
+The SEX is a *insert*.
+
+For the present study, 30 items from the SEX were collected in order to
+#TODO: insert text here
+
+No items need to be reverse scored. *TODO: need change text here Higher
+scores indicate more severe mental health symptoms.*
+
+The missing data rule was applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses)
+
+Reference:
+[\@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/10.1111/acps.12956?casa_token=K4GIoIIYOkwAAAAA%3ABuaGU3cOQZwsFiM78FxHp_PHTQXDc72xABnVp8nlMCYRCHzf4c0oOMropyrzVjdClA3pFA-m01heootZ);
+[DOI](https://doi.org/10.1111/acps.12956)
+
+### sex Variables
+
+#### Value Labels and Survey Items
+
+All SEX variables are presented below. Variable without value are open
+end questions.
+
+```{r sex-var-prep}
+# Pull question wording from qualtrics data
+sex_word <- qualtrics %>% 
+  select(S1:S48)%>%
+  slice(1)
+
+
+#create table with variable name, description, and notes
+sex_word_long <- sex_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         value = case_when(var_name == "s1" ~ "1 = Yes
+                                                  \n2 = No
+                                                  \n3 = Decline",
+                           var_name == "s1a" ~ "1 = cisgender female
+                                                \n2 = female
+                                                \n3 = cisgender male
+                                                \n4 = male
+                                                \n5 = trans female
+                                                \n6 = tras male
+                                                \n7 = non-binary
+                                                \n8 = self-identify",
+                           var_name %in% c("s3", "s4", "s6", "s13", "s22", "s23", "s26", "s35", "s38", "s39", "s40", "s44", "s45") ~ "1 = Yes
+                                                              \n2 = No
+                                                              \n3 = Decline",
+                           var_name == "s9" ~ "1 = a great deal
+                           \n2 = quite a lot
+                           \n3 = some
+                           \n4 = not much
+                           \n5 = very little
+                           \n6 = Decline",
+                           var_name == "s10" ~ "1 = heterosexual
+                           \n2 = gay_lesbian
+                           \n3 = bisexual
+                           \n4 = other
+                           \n5 = Decline",
+                           var_name == "s11" ~ "1 = Never,
+                           \n2 ~ Rarely
+                                 \n3 = Sometimes
+                                 \n4 = Often
+                                 \n5 = Very Often
+                                 \n6 = Decline",
+                           var_name == "s12" ~ "1 = Very Comfortable
+                                 \n2 = Somewhat Comfortable
+                                 \n3 = Neutral
+                                 \n4 = Somewhat",
+                           var_name == "s14" ~ "1 = Friend
+                                 \n2 = Romantic Partner
+                                 \n3 = Sister/Brother
+                                 \n4 = Other Relative
+                                 \n5 = Counselor/Teacher/Doctor
+                                 \n6 = Parent
+                                 \n7 = Other
+                                 \n8 = Decline",
+                           var_name == "s16" ~ "1 = Never
+                                 \n2 = Rarely
+                                 \n3 = Sometimes
+                                 \n4 = Often
+                                 \n5 = Very Often
+                                 \n6 = Decline",
+                           var_name %in% c("s17", "s18", "s19") ~ "1 = Very Comfortable
+                                 \n2 = Somewhat Comfortable
+                                 \n3 = Neutral
+                                 \n4 = Somewhat uncomfortable
+                                 \n5 = Very uncomfortable
+                                 \n6 = Decline",
+                           var_name == "s20" ~ "1 = Very confident
+                                 \n2 = Somewhat confident
+                                 \n3 = A little confident
+                                 \n4 = Not at all confident
+                                 \n5 = Decline",
+                           var_name == "s21" ~ "1 = Always or almost always
+                                 \n2 = Often
+                                 \n3 = About  half the time
+                                 \n4 = Occasionally
+                                 \n5 = Never or almost never
+                                 \n6 = Decline",
+                           var_name == "s24" ~ "1 = Yes, I had a std (positive diagnosis)
+                                 \n2 = No STD (negative diagnosis)
+                                 \n3 = Don't know yet; waiting for results
+                                 \n4 = Decline",
+                           var_name == "s28" ~ "1 = Yes
+                                 \n2 = No
+                                 \n3 = Decline
+                                 \n4 = Pregnant prior to last 6 months; knew pregnant prior to 6 month period",
+                           var_name == "s29" ~ "1 = Went to dr; positive diagnosis
+                                 \n2 = Went to dr; negative diagnosis
+                                 \n3 = Went to dr; don't know
+                                 \n4 = Took home test; positive
+                                 \n5 = Took home test; negative
+                                 \n6 = Took home test; don't know
+                                 \n7 = Did nothing; period started
+                                 \n8 = Did nothing, don't know
+                                 \n9 = Decline",
+                           var_name == "s33" ~ "1 = Always or almost always
+                                 \n2 = Often
+                                 \n3 = About half the time
+                                 \n4 = Occasionally
+                                 \n5 = Never or almost never
+                                 \n6 = Decline",
+                           var_name == "s34" ~ "1 = Never 0%
+                                 \n2 = Rarely 1-15%
+                                 \n3 = Occasionally 15-40%
+                                 \n4 = About half the time 40-60%
+                                 \n5 = Usually 60-85%
+                                 \n6 = Most of the time 85-99%
+                                 \n7 = Every single time 100%
+                                 \n8 = Decline",
+                           var_name == "s36" ~ "1 = Always or almost always
+                                 \n2 = Often
+                                 \n3 = About half the time
+                                 \n4 = Occasionally
+                                 \n5 = Never or almost never
+                                 \n6 = Decline",
+                           var_name == "s37" ~ "1 = Always or almost always
+                                 \n2 = Often
+                                 \n3 = About half the time
+                                 \n4 = Occasionally
+                                 \n5 = Never or almost never
+                                 \n6 = Decline",
+                           var_name == "s43" ~ "1 = Never 0%
+                                 \n2 = Rarely 1-15%
+                                 \n3 = Occasionally 15-40%
+                                 \n4 = About half the time 40-60%
+                                 \n5 = Usually 60-85%
+                                 \n6 = Most of the time 85-99%
+                                 \n7 = Every single time 100%
+                                 \n8 = Decline
+                                 \n9 = Don't know
+                                 \n10 = Not using birth control; currently pregnant",
+                           var_name == "s46" ~ "1 = Yes, had oral sex without dental dam
+                                 \n2 = No, oral sex and always used dental dam
+                                 \n3 = Decline",
+                           TRUE ~ as.character("")
+         ),
+         notes = as.character("")
+         
+  ) %>%
+  mutate(description = ifelse(var_name == "s2", "When did you start seeing your current partner? ",
+         ifelse(var_name == "s2a", "02a. How long, not counting time when you were broken up, have you and your partner been together? __ __ years",
+                              ifelse(var_name == "s2b", "	02b. __ __ months",
+                                     ifelse(var_name == "s2c", "02c. __ __ days",
+                                            ifelse(var_name == "s10", "Do you feel that you are: ",
+                                                   ifelse(var_name == "s10_4_text", "Do you feel that you are:",
+                                                          ifelse(var_name == "s13", "Do you have anyone else, not including your closest friends, that you talk to when you have a question or concern regarding birth control or safe sex practices?",
+                                                                 ifelse(var_name == "s14", "Is that person a friend, relative, partner, or someone else?",
+                                                                        ifelse(var_name == "s14_8_text", "Is that person a friend, relative, partner, or someone else?",
+                                                                               ifelse(var_name == "s18", "How comfortable do you feel discussing the use of birth control or contraceptives to prevent pregnancy with someone you might have sex with?",
+                                                                                      ifelse(var_name == "s28", "Were there any times during the last 6 months that you thought you might be pregnant? (Assessor select the 4th option \"I became pregnant prior to this last 6 months...\" if the participant was recently or is currently pregnant)",
+                                                                                             ifelse(var_name == "s29", "What happened?",
+                                                                                                    ifelse(var_name == "s30", "How many times, in the last six months, have you had sexual relations? __ __ __ times",
+                                                                                                           ifelse(var_name == "s38", "In the last 6 months, have you had sexual relations with someone who injects drugs? ",
+                                                                                                                  ifelse(var_name == "s43", "In the last 6 months, when you've had intercourse with a male partner, what percentage of the time did you or your partner USE a birth control method specifically to prevent pregnancy?", description
+                                                                                                                         ))))))))))))))))
+
+  
+
+
+
+```
+
+```{r sex-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+sex_gt_table <- gt(sex_word_long)
+
+# Table-specific formatting (col width, names)
+sex_gt_table <- sex_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(sex_gt_table)
+
+
+```
+
+## pregnancy childbirth trauma question
+
+### CINT Description
+
+The CINT is TODO: insert.
+
+All <TODO:insert> items from the
+
+TThe missing data rule was applied. Calculations were completed only
+with participants that had less than 20% missing data (this includes
+`-77` responses)
+
+Reference:
+[\@saxbe_birth_2018](https://psycnet.apa.org/doiLanding?doi=10.1037%2Ffam0000365);
+[DOI](https://doi.org/10.1037/fam0000365)
+
+### CINT Variables
+
+#### Value Labels
+
+All CINT survey items response options are below.
+
+pct0, pct1, pct2a, pct2b, pct2c, pct2d, pct3a, pct3b, pct3c, pct3d
+
+```{r CINT-label-table, results = 'asis'}
+
+cint_label_df <- data.frame(
+  value = c("1", "0"),
+  label = c("Yes",
+            "No")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+cint_label_df <- setNames(cint_label_df[-1, ], unlist(cint_label_df[1, ]))
+
+
+#create table
+cint_label_table <- cint_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cint_label_table)
+
+
+```
+
+#### Survey Items
+
+All CINT survey items are presented in the following table:
+
+```{r cint-var-prep}
+# Pull question wording from qualtrics data
+cint_word <- qualtrics %>% 
+  select(PCT0:PCT3e) %>% 
+  slice(1)
+
+#create table with variable name, description, and notes
+
+cint_word_long <- cint_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate_all(~gsub("READ:", "", .)) %>%
+  mutate(description = str_replace(description, "^\\d[a-z]+\\.\\s*|^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name), 
+         notes = as.character("")
+         ) %>%
+  mutate(description = if_else(var_name == "pct0", "Has TC reported any pregnancies?",
+                               if_else(var_name == "pct2e", "During which pregnancy or pregnancies did this occur? ",
+                                       if_else(var_name == "pct3e", "During which pregnancy or pregnancies did this occur? ", description))))
+  
+
+
+
+```
+
+```{r cint-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cint_gt_table <- gt(cint_word_long)
+
+# Table-specific formatting (col width, names)
+cint_gt_table <- cint_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(250),
+             var_name ~ px(100)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cint_gt_table)
+
+```
+
+#### Scale and Subscales
+
+Information on the aggregated scale and subscale variables are below.
+Total and subscale variables were constructed by summing corresponding
+items.
+
+```{r cint-alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+cint_alpha <-
+  complete_rnd2 %>%
+  select( pct1, pct2a, pct2b, pct2c, pct2d, pct3a, pct3b, pct3c, pct3d) %>% #TODO: Shaina, could you double check if the calculation is right
+   filter(complete.cases(.)) %>%
+  psych::alpha(check.keys = TRUE)
+
+cint_alpha_Preg <-
+  complete_rnd2 %>%
+  select( pct1, pct2a, pct2b, pct2c, pct2d) %>% #TODO: Shaina, could you double check if the calculation is right
+   filter(complete.cases(.)) %>%
+  psych::alpha(check.keys = TRUE)
+
+cint_alpha_Child <-
+  complete_rnd2 %>%
+  select( pct1, pct3a, pct3b, pct3c, pct3d) %>% #TODO: Shaina, could you double check if the calculation is right
+   filter(complete.cases(.)) %>%
+  psych::alpha(check.keys = TRUE)
+```
+
+TODO: the Preg & Child sub-scale will need calculate in cleaning script
+
+```{r cint-scale-table, results = 'asis'}
+# Create the table as a data frame
+# TODO: should the calculation use revers score?
+cint_scale_df <- data.frame(
+  var_name = c("cint_total", "", ""), # TODO: the scale need to be calculated in cleaning file
+  scale = c("Total Score (9)","Pregnancy Trauma (3)","Childbirth Trauma (3)"),
+  scale_construction = c( "`pct1`, `pct2a`, `pct2b`, `pct2c`, `pct2d`, `pct3a`, `pct3b`, `pct3c`, `pct3d`", "`pct1`, `pct2a`, `pct2b`, `pct2c`, `pct2d`", "`pct1`,`pct3a`, `pct3b`, `pct3c`, `pct3d`"),
+  scale_range = c("","",""),
+  alpha = c(round(cint_alpha$total$raw_alpha, 3),
+            round(cint_alpha_Preg$total$raw_alpha, 3),
+            round(cint_alpha_Child$total$raw_alpha, 3)
+            )
+)
+
+# Create the gt table object
+cint_scale_table <- gt(cint_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)", 
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale ~ px(135)) %>% 
+  apply_tbl_theme()
+
+# Print the table
+print(cint_scale_table)
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item, total, and
+subscale score:
+
+```{r cint-mean-items}
+# Create subset of cint items
+data_subset_cint <- complete_rnd2 %>%
+  select( pct1, pct2a, pct2b, pct2c, pct2d, pct3a, pct3b, pct3c, pct3d)
+
+# Calculate the summary statistics for each variable
+summary_data_cint <- lapply(data_subset_cint, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- sprintf("%.2f", round(sd(x, na.rm = TRUE), 2))
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+summary_df_cint <- as.data.frame(summary_data_cint) %>% 
+  rbind(names(summary_data_cint)) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  select(`5`, everything())
+
+# Create the gt table
+cint_tbl <- summary_df_cint %>%
+  gt() %>%
+  cols_label(`5` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(2:5 ~ px(160)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cint_tbl
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r cint-calculation, class.source='fold', echo = FALSE}
+cint <- complete_rnd2 %>%
+  select(
+    id,
+    pct0:pct3e
+  ) %>%
+  mutate(
+    pct0 = case_when(
+      pct0 == 1 ~ "Yes",
+      pct0 == 2 ~ "No",
+      TRUE ~ NA_character_
+    ),
+    across(
+      c(
+        pct1:pct2d,
+        pct3a:pct3d
+      ),
+      ~case_when(
+        .x == 1 ~ 1,
+        .x == 2 ~ 0,
+        .x == 3 ~ -77,
+        TRUE ~ NA_real_
+      )
+    )
+  )
+
+cint_calc <- cint %>%
+  mutate(
+    across(
+        -c(id, pct0, pct1, pct2e, pct3e),
+        ~case_when(
+          .x == -77 ~ NA_real_,
+          TRUE ~ .x
+        )
+    )
+  )
+
+cint_miss <- cint_calc %>%
+  pct_miss_fun(
+    id = c(
+      "id",
+      "pct0",
+      "pct1",
+      "pct2e",
+      "pct3e"
+    ),
+    n_items = 8
+  )
+
+# cint_miss %>%
+#   gt::gt() %>%
+#   gt::tab_header(
+#     title = "Missing Data",
+#     subtitle = "By Each Participant"
+#   )
+
+cint_remove <- cint_miss %>% filter(miss_pct >= 30) %>% pull(id)
+
+cint_complete <- cint_calc %>%
+  composite_total_avg_fun(
+    id = c(
+      "id",
+      "pct0",
+      "pct1",
+      "pct2e",
+      "pct3e"
+    ),
+    max_value = 1,
+    n_items = 8
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  select(
+    -mean_values
+  ) %>%
+  rename(
+    cint_total = sum_values
+    ) %>%
+  mutate(
+    across(
+      c(
+        cint_total
+      ),
+      ~case_when(
+        id %in% cint_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+```
+
+```{r cint-distributions, class.source='fold', echo = FALSE}
+cint_complete %>%
+  composite_hist(
+    x = cint_total,
+    bins = 10
+  ) +
+  labs(
+    title = "Distribution of Total Scores for the CINT"
+  )
+```

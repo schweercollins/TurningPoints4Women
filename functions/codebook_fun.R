@@ -13,6 +13,7 @@ subtract_scale <-
   }
 
 # reverse scoring is messed up. It converts back to original qualtrics scale 1 - ...
+# Using reversd column as data could solve this problem
 composite_total_avg_fun <- function(
     data,
     id,
@@ -655,7 +656,7 @@ pct_miss_fun <- function(
     ) %>%
     group_by(id, items) %>%
     count(item_values) %>%
-    filter(item_values == -77 |
+    filter(item_values < 0 |
              is.na(item_values)) %>%
     ungroup() %>%
     group_by(id) %>%
