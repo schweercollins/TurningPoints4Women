@@ -656,7 +656,7 @@ pct_miss_fun <- function(
     ) %>%
     group_by(id, items) %>%
     count(item_values) %>%
-    filter(item_values < 0 |
+    filter(item_values < -40 |
              is.na(item_values)) %>%
     ungroup() %>%
     group_by(id) %>%

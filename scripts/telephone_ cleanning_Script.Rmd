@@ -564,7 +564,7 @@ dast_complete <- dast_complete %>%
   ))
 ```
 
-## CTS
+## CTS - Partner
 ### CTS Select Variables and Recode 
 ```{r cts}
 # Select cts questions and recede
@@ -1393,16 +1393,16 @@ ssq_complete <-
 ### EDS-F Select Variables and Recode
 
 ```{r eds df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-# # TODO: Min remove after maria confirm how to score 
-# # reverse scoring 
-# eds <-
-#   complete %>%
-#   select(
-#     id,
-#     matches(
-#       "^elf"
-#     )
-#   ) %>% 
+# TODO: Min remove after maria confirm how to score
+# reverse scoring
+eds <-
+  complete %>%
+  select(
+    id,
+    matches(
+      "^elf"
+    )
+  )
 # composite_total_avg_fun(
 #   id = c(
 #     'id', "elf1_c", "elf2_c", "elf3_c", "elf7_c",
@@ -1523,7 +1523,7 @@ elf_complete <-
     id = c('id', "elf1", "elf2", "elf3", "elf7",
       "elf12", "elf13", "elf15", "elf17", "elf18",
       "elf19", "elf23", "elf26", "elf28", "elf30",
-      "elf34", "elf35", "elf36", "elf37"), # Maria, please confirm these variable shouldn't be included when calculate total score 
+      "elf34", "elf35", "elf36", "elf37"), 
     max_value = 4,
     n_items = 21
   ) %>%
@@ -3584,6 +3584,7 @@ socinf_gen_miss %>%
 socinf_gen_remove <- socinf_gen_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
+TODO: Min remove missing 
 ```{r socinf_gen_calc}
 socinf_gen_complete <-
   socinf_gen %>%
@@ -3620,11 +3621,23 @@ cts_pc <- tpw_raw %>%
         .x == "6-10 times" ~ "4",
         .x == "11-20 times" ~ "5", 
         .x == "More than 20 times" ~ "6",
-        .x == "Not in the past year, but it happened before" ~ "7", # TODO: Maria please check if you wuold want this item code this way 
+        .x == "Not in the past year, but it happened before" ~ "7", 
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
-    )
+    ), 
+    across(
+      .cols = -c(id, cts_parent_screen),
+      .fns = ~case_when(
+        .x == "3" ~ "4",
+        .x == "4" ~ "8",
+        .x == "5" ~ "15",
+        .x == "6" ~ "25",
+        .x == "7" ~ "-2",
+      TRUE ~ .x
+      ),
+      .names = '{.col}_r'
+      )
   )
   
 ```
@@ -3649,6 +3662,110 @@ cts_pc_miss %>%
     subtitle = 'By Participant')
 
 cts_pc_remove <- cts_pc_miss %>% filter(miss_pct >= 20) %>% pull(id)
+```
+
+### CTS_PC
+```{r cts-pc calculation & sbuscale}
+# TODO: Maria, please pay extra attention to this section, since I use SPSS code as reference 
+cts_pc_calc <-
+  cts_pc %>%
+    mutate(across(-c(id), as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -c(id),
+      .fns = ~case_when(
+        .x < -10 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+cts_pc_complete <-
+  cts_pc_calc %>%
+  # NVD items: 1,2,5,12
+  mutate(
+    # Raw Scoring for Nonviolent Discipline - Past Year (Chronicity)
+         cts_pc_NVDP = rowSums(select(., 'a1_r', 'a2_r','a5_r', 'a12_r'), na.rm = T), 
+    # Count of Nonviolent Discipline Responses 
+         cts_pc_NVDC = rowSums(!is.na(select(., a1_r, a2_r, a5_r, a12_r))), 
+    # Raw Scoring for Nonviolent Discipline Past Year - Mean (Chronicity)
+         cts_pc_NVDM = cts_pc_NVDP/cts_pc_NVDC,    
+    # Raw Scoring for Nonviolent Discipline Past Year (Prevalence) 
+         cts_pc_NVDPP= rowSums(select(., a1_r, a2_r, a5_r, a12_r) > 0, na.rm = T), 
+    # Raw Scoring for Nonviolent Discipline - Lifetime (Ever Prevalence)
+         cts_pc_NVDL = rowSums(select(., a1_r, a2_r, a5_r, a12_r) == -2, na.rm = T),  
+    # Raw Scoring for Nonviolent Discipline (Ever Prevalence)
+         cts_pc_NVDEP = cts_pc_NVDL + cts_pc_NVDPP 
+) %>% 
+    # PSA items: 6,8,9,10,14
+    mutate(
+      # Raw Scoring for Psychological Aggression - Past Year (Chronicity)
+      cts_pc_PSAP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r'), na.rm = T), 
+      # Count of Psychological Aggression Responses
+      cts_pc_PSAC = rowSums(!is.na(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r'))),
+      # Raw Scoring for Psychological Aggression Past Year - Mean (Chronicity)
+      cts_pc_PSAM = cts_pc_PSAP/cts_pc_PSAC,
+      # Raw Scoring for Psychological Aggression - Past Year (Prevalence)
+      cts_pc_PSAPP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0, na.rm = T),
+      # Raw Scoring for Psychological Aggression Discipline - Lifetime (Ever Prevalence)
+      cts_pc_PSAL = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') == -2, na.rm = T),
+      # Raw Scoring for Psychological Aggression (Ever Prevalance)
+      cts_pc_PSAEP = cts_pc_PSAL + cts_pc_PSAPP
+    ) %>%
+  # PHA Items: 3,4,7,11,13
+  mutate(
+    # Raw Scoring for Physical Assault - Past Year (Chronicity)
+    cts_pc_PHAP = rowSums(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r'), na.rm = T), 
+    # Count of Physical Assault Responses
+    cts_pc_PHAC = rowSums(!is.na(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r'))),
+    # Raw Scoring for Physical Assault Past Year - Mean (Chronicity)
+    cts_pc_PHAM = cts_pc_PHAP/cts_pc_PHAC, 
+    # Raw Scoring for Physical Assault - Past Year (Prevalence)
+    cts_pc_PHAPP =  rowSums(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r') > 0, na.rm = T),
+    # Raw Scoring for Physical Assault - Lifetime (Ever Prevalence)
+    cts_pc_PHAL = rowSums(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r') == -2, na.rm = T),
+    # Raw Scoring for Physical Assault (Ever Prevalence)
+    cts_pc_PHAEP = cts_pc_PHAL/cts_pc_PHAPP
+  ) %>%
+  # WKD Items: 16, 17, 18
+  # Maria: WKD items need extra attention 
+  mutate(
+    # Raw Scoring for Weekly Discipline - Past Week (Chronicity)
+    cts_pc_WKDP = if_else(!is.na(a15_r) & !is.na(a16_r) & !is.na(a17_r) & !is.na(a18_r), 0, NA),
+    cts_pc_WKDP = cts_pc_WKDP + ifelse(a16_r > 0, a16_r, 0) + ifelse(a17_r > 0, a17_r, 0) + ifelse(a18_r > 0, a18_r, 0),
+    # Count of Weekly Discipline Responses
+    cts_pc_WKDC = if_else(!is.na(a15_r) & !is.na(a16_r) & !is.na(a17_r) & !is.na(a18_r), 0, NA),
+    cts_pc_WKDC = cts_pc_WKDC + ifelse(!is.na(a16_r), 1, 0) + ifelse(!is.na(a17_r), 1, 0) + ifelse(!is.na(a18_r), 1, 0),
+    # Raw Scoring for Weekly Discipline Past Week - Mean (Chronicity)
+    cts_pc_WKDM = cts_pc_WKDP/cts_pc_WKDC,
+    # Raw Scoring for Weekly Discipline - Past Week (Prevalence)
+    cts_pc_WKDPP = rowSums(select(., 'a16_r', 'a17_r', 'a18_r') > 0, na.rm = T)
+  )%>%
+  # NEG Items: 19 20 21 22 23
+  mutate(
+    # Raw Scoring for Neglect - Past Year (Chronicity)
+    cts_pc_NEGP = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r'), na.rm = T), 
+    # Count of Neglect Responses
+    cts_pc_NEGC = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r'), na.rm = T), 
+    # Raw Scoring for Neglect Past Year - Mean (Chronicity)
+    cts_pc_NEGM = cts_pc_NEGP/cts_pc_NEGC,
+    # Raw Scoring for Neglect - Past Year (Prevalence)
+    cts_pc_NEGPP = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r') > 0, na.rm = T),
+    # Raw Scoring for Neglect - Lifetime (Ever Prevalence)
+    cts_pc_NEGL = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r') == -2, na.rm = T),
+    # Raw Scoring for Neglect (Ever Prevalance)
+    cts_pc_NEGEP = cts_pc_NEGL/cts_pc_NEGPP
+  )%>%
+  mutate(
+    across(
+      -c(id),
+      ~case_when(
+        id %in% cts_pc_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  ) %>% 
+      rename_all(tolower)
 ```
 
 ## Pregnancy and Childbirth Trauma
@@ -3893,6 +4010,314 @@ sus <- sus %>%
 sus$new_column <- ifelse(sus$sus13 == 1 | sus$sus13a <= 10, -55, NA)
 sus<-sus %>% relocate(new_column, .after = sus13)
 
+
+## PLC 
+### PLC Select Variabl and Recode 
+Min's question: Should I rename the columns? what should I code NA to - they are not nesssely missing; should I identify NA manually (eg. if pcl1_1, pcl1_2, pcl1_3, pcl1_4 are all NAs)
+```{r plc}
+pcl <- tpw_raw %>%
+  select(id, starts_with("pcl")) %>%
+    mutate(
+    pcl1_devperiod = factor(
+      case_when(
+        !is.na(pcl1a_1) & pcl1_1 == "Happened to me" ~ "0-5",
+        is.na(pcl1a_1) & !is.na(pcl1a_2) & pcl1_1 == "Happened to me" ~ "6-11",
+        is.na(pcl1a_1) & is.na(pcl1a_2) & !is.na(pcl1_3) & pcl1_1 == "Happened to me" ~ "12-19",
+        is.na(pcl1a_1) & is.na(pcl1a_2) & is.na(pcl1a_3) & !is.na(pcl1a_4) & pcl1_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl2_devperiod = factor(
+      case_when(
+        !is.na(pcl2a_1) & pcl2_1 == "Happened to me" ~ "0-5",
+        is.na(pcl2a_1) & !is.na(pcl2a_2) & pcl2_1 == "Happened to me" ~ "6-11",
+        is.na(pcl2a_1) & is.na(pcl2a_2) & !is.na(pcl2_3) & pcl2_1 == "Happened to me" ~ "12-19",
+        is.na(pcl2a_1) & is.na(pcl2a_2) & is.na(pcl2a_3) & !is.na(pcl2a_4) & pcl2_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl3_devperiod = factor(
+      case_when(
+        !is.na(pcl3a_1) & pcl3_1 == "Happened to me" ~ "0-5",
+        is.na(pcl3a_1) & !is.na(pcl3a_2) & pcl3_1 == "Happened to me" ~ "6-11",
+        is.na(pcl3a_1) & is.na(pcl3a_2) & !is.na(pcl3_3) & pcl3_1 == "Happened to me" ~ "12-19",
+        is.na(pcl3a_1) & is.na(pcl3a_2) & is.na(pcl3a_3) & !is.na(pcl3a_4) & pcl3_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl4_devperiod = factor(
+      case_when(
+        !is.na(pcl4a_1) & pcl4_1 == "Happened to me" ~ "0-5",
+        is.na(pcl4a_1) & !is.na(pcl4a_2) & pcl4_1 == "Happened to me" ~ "6-11",
+        is.na(pcl4a_1) & is.na(pcl4a_2) & !is.na(pcl4_3) & pcl4_1 == "Happened to me" ~ "12-19",
+        is.na(pcl4a_1) & is.na(pcl4a_2) & is.na(pcl4a_3) & !is.na(pcl4a_4) & pcl4_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl5_devperiod = factor(
+      case_when(
+        !is.na(pcl5a_1) & pcl5_1 == "Happened to me" ~ "0-5",
+        is.na(pcl5a_1) & !is.na(pcl5a_2) & pcl5_1 == "Happened to me" ~ "6-11",
+        is.na(pcl5a_1) & is.na(pcl5a_2) & !is.na(pcl5_3) & pcl5_1 == "Happened to me" ~ "12-19",
+        is.na(pcl5a_1) & is.na(pcl5a_2) & is.na(pcl5a_3) & !is.na(pcl5a_4) & pcl5_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl6_devperiod = factor(
+      case_when(
+        !is.na(pcl6a_1) & pcl6_1 == "Happened to me" ~ "0-5",
+        is.na(pcl6a_1) & !is.na(pcl6a_2) & pcl6_1 == "Happened to me" ~ "6-11",
+        is.na(pcl6a_1) & is.na(pcl6a_2) & !is.na(pcl6_3) & pcl6_1 == "Happened to me" ~ "12-19",
+        is.na(pcl6a_1) & is.na(pcl6a_2) & is.na(pcl6a_3) & !is.na(pcl6a_4) & pcl6_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl7_devperiod = factor(
+      case_when(
+        !is.na(pcl7a_1) & pcl7_1 == "Happened to me" ~ "0-5",
+        is.na(pcl7a_1) & !is.na(pcl7a_2) & pcl7_1 == "Happened to me" ~ "6-11",
+        is.na(pcl7a_1) & is.na(pcl7a_2) & !is.na(pcl7_3) & pcl7_1 == "Happened to me" ~ "12-19",
+        is.na(pcl7a_1) & is.na(pcl7a_2) & is.na(pcl7a_3) & !is.na(pcl7a_4) & pcl7_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl8_devperiod = factor(
+      case_when(
+        !is.na(pcl8a_1) & pcl8_1 == "Happened to me" ~ "0-5",
+        is.na(pcl8a_1) & !is.na(pcl8a_2) & pcl8_1 == "Happened to me" ~ "6-11",
+        is.na(pcl8a_1) & is.na(pcl8a_2) & !is.na(pcl8_3) & pcl8_1 == "Happened to me" ~ "12-19",
+        is.na(pcl8a_1) & is.na(pcl8a_2) & is.na(pcl8a_3) & !is.na(pcl8a_4) & pcl8_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl9_devperiod = factor(
+      case_when(
+        !is.na(pcl9a_1) & pcl9_1 == "Happened to me" ~ "0-5",
+        is.na(pcl9a_1) & !is.na(pcl9a_2) & pcl9_1 == "Happened to me" ~ "6-11",
+        is.na(pcl9a_1) & is.na(pcl9a_2) & !is.na(pcl9_3) & pcl9_1 == "Happened to me" ~ "12-19",
+        is.na(pcl9a_1) & is.na(pcl9a_2) & is.na(pcl9a_3) & !is.na(pcl9a_4) & pcl9_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl10_devperiod = factor(
+      case_when(
+        !is.na(pcl10a_1) & pcl10_1 == "Happened to me" ~ "0-5",
+        is.na(pcl10a_1) & !is.na(pcl10a_2) & pcl10_1 == "Happened to me" ~ "6-11",
+        is.na(pcl10a_1) & is.na(pcl10a_2) & !is.na(pcl10_3) & pcl10_1 == "Happened to me" ~ "12-19",
+        is.na(pcl10a_1) & is.na(pcl10a_2) & is.na(pcl10a_3) & !is.na(pcl10a_4) & pcl10_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl11_devperiod = factor(
+      case_when(
+        !is.na(pcl11a_1) & pcl11_1 == "Happened to me" ~ "0-5",
+        is.na(pcl11a_1) & !is.na(pcl11a_2) & pcl11_1 == "Happened to me" ~ "6-11",
+        is.na(pcl11a_1) & is.na(pcl11a_2) & !is.na(pcl11_3) & pcl11_1 == "Happened to me" ~ "12-19",
+        is.na(pcl11a_1) & is.na(pcl11a_2) & is.na(pcl11a_3) & !is.na(pcl11a_4) & pcl11_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl12_devperiod = factor(
+      case_when(
+        !is.na(pcl12a_1) & pcl12_1 == "Happened to me" ~ "0-5",
+        is.na(pcl12a_1) & !is.na(pcl12a_2) & pcl12_1 == "Happened to me" ~ "6-11",
+        is.na(pcl12a_1) & is.na(pcl12a_2) & !is.na(pcl12_3) & pcl12_1 == "Happened to me" ~ "12-19",
+        is.na(pcl12a_1) & is.na(pcl12a_2) & is.na(pcl12a_3) & !is.na(pcl12a_4) & pcl12_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl13_devperiod = factor(
+      case_when(
+        !is.na(pcl13a_1) & pcl13_1 == "Happened to me" ~ "0-5",
+        is.na(pcl13a_1) & !is.na(pcl13a_2) & pcl13_1 == "Happened to me" ~ "6-11",
+        is.na(pcl13a_1) & is.na(pcl13a_2) & !is.na(pcl13_3) & pcl13_1 == "Happened to me" ~ "12-19",
+        is.na(pcl13a_1) & is.na(pcl13a_2) & is.na(pcl13a_3) & !is.na(pcl13a_4) & pcl13_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl14_devperiod = factor(
+      case_when(
+        !is.na(pcl14a_1) & pcl14_1 == "Happened to me" ~ "0-5",
+        is.na(pcl14a_1) & !is.na(pcl14a_2) & pcl14_1 == "Happened to me" ~ "6-11",
+        is.na(pcl14a_1) & is.na(pcl14a_2) & !is.na(pcl14_3) & pcl14_1 == "Happened to me" ~ "12-19",
+        is.na(pcl14a_1) & is.na(pcl14a_2) & is.na(pcl14a_3) & !is.na(pcl14a_4) & pcl14_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl15_devperiod = factor(
+      case_when(
+        !is.na(pcl15a_1) & pcl15_1 == "Happened to me" ~ "0-5",
+        is.na(pcl15a_1) & !is.na(pcl15a_2) & pcl15_1 == "Happened to me" ~ "6-11",
+        is.na(pcl15a_1) & is.na(pcl15a_2) & !is.na(pcl15_3) & pcl15_1 == "Happened to me" ~ "12-19",
+        is.na(pcl15a_1) & is.na(pcl15a_2) & is.na(pcl15a_3) & !is.na(pcl15a_4) & pcl15_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl16_devperiod = factor(
+      case_when(
+        !is.na(pcl16a_1) & pcl16_1 == "Happened to me" ~ "0-5",
+        is.na(pcl16a_1) & !is.na(pcl16a_2) & pcl16_1 == "Happened to me" ~ "6-11",
+        is.na(pcl16a_1) & is.na(pcl16a_2) & !is.na(pcl16_3) & pcl16_1 == "Happened to me" ~ "12-19",
+        is.na(pcl16a_1) & is.na(pcl16a_2) & is.na(pcl16a_3) & !is.na(pcl16a_4) & pcl16_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl17_devperiod = factor(
+      case_when(
+        !is.na(pcl17a_1) & pcl17_1 == "Happened to me" ~ "0-5",
+        is.na(pcl17a_1) & !is.na(pcl17a_2) & pcl17_1 == "Happened to me" ~ "6-11",
+        is.na(pcl17a_1) & is.na(pcl17a_2) & !is.na(pcl17_3) & pcl17_1 == "Happened to me" ~ "12-19",
+        is.na(pcl17a_1) & is.na(pcl17a_2) & is.na(pcl17a_3) & !is.na(pcl17a_4) & pcl17_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    #TODO: Maria please double check I changed 16 to 18 
+    pcl18_devperiod = factor(
+      case_when(
+        !is.na(pcl18a_1) & pcl18_1 == "Happened to me" ~ "0-5",
+        is.na(pcl18a_1) & !is.na(pcl18a_2) & pcl18_1 == "Happened to me" ~ "6-11",
+        is.na(pcl18a_1) & is.na(pcl18a_2) & !is.na(pcl18_3) & pcl18_1 == "Happened to me" ~ "12-19",
+        is.na(pcl18a_1) & is.na(pcl18a_2) & is.na(pcl18a_3) & !is.na(pcl18a_4) & pcl18_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl19_devperiod = factor(
+      case_when(
+        !is.na(pcl19a_1) & pcl19_1 == "Happened to me" ~ "0-5",
+        is.na(pcl19a_1) & !is.na(pcl19a_2) & pcl19_1 == "Happened to me" ~ "6-11",
+        is.na(pcl19a_1) & is.na(pcl19a_2) & !is.na(pcl19_3) & pcl19_1 == "Happened to me" ~ "12-19",
+        is.na(pcl19a_1) & is.na(pcl19a_2) & is.na(pcl19a_3) & !is.na(pcl19a_4) & pcl19_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    )
+  )
+
+pcl <- pcl %>%
+  mutate(pcl1_devperiod = case_when(
+     # TODO Maria, please double check I replace _16 to _2, and seems like this code section is doing the same with above
+    !is.na(pcl1a_1) & pcl1_1 == "Happened to me" ~ "0-5",
+    is.na(pcl1a_1) & !is.na(pcl1a_2) & pcl1_1 == "Happened to me" ~ "6-11",
+    is.na(pcl1a_1) & is.na(pcl1a_2) & !is.na(pcl1_3) & pcl1_1 == "Happened to me" ~ "12-19",
+    is.na(pcl1a_1) & is.na(pcl1a_2) & is.na(pcl1a_3) & !is.na(pcl1a_4) & pcl1_1 == "Happened to me" ~ "adulthood",
+    TRUE ~ NA_character_),
+    pcl2_devperiod = case_when(
+      !is.na(pcl2a_1) & pcl2_1 == "Happened to me" ~ "0-5",
+      is.na(pcl2a_1) & !is.na(pcl2a_2) & pcl2_1 == "Happened to me" ~ "6-11",
+      is.na(pcl2a_1) & is.na(pcl2a_2) & !is.na(pcl2_3) & pcl2_1 == "Happened to me" ~ "12-19",
+      is.na(pcl2a_1) & is.na(pcl2a_2) & is.na(pcl2a_3) & !is.na(pcl2a_4) & pcl2_1 == "Happened to me" ~ "adulthood",
+      TRUE ~ NA_character_),
+      pcl3_devperiod = case_when(
+        !is.na(pcl3a_1) & pcl3_1 == "Happened to me" ~ "0-5",
+        is.na(pcl3a_1) & !is.na(pcl3a_2) & pcl3_1 == "Happened to me" ~ "6-11",
+        is.na(pcl3a_1) & is.na(pcl3a_2) & !is.na(pcl3_3) & pcl3_1 == "Happened to me" ~ "12-19",
+        is.na(pcl3a_1) & is.na(pcl3a_2) & is.na(pcl3a_3) & !is.na(pcl3a_4) & pcl3_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+  ))
+
+pcl <- pcl %>%
+  mutate(pcl1_yes = if_else(pcl1_1 == "Happened to me", 1, 0, missing = 0),
+           # Maria: i replaced pcl16_yes with pcl2_yes
+         pcl2_yes = if_else(pcl2_1 == "Happened to me", 1, 0, missing = 0),
+         pcl3_yes = if_else(pcl3_1 == "Happened to me", 1, 0, missing = 0),
+         pcl4_yes = if_else(pcl4_1 == "Happened to me", 1, 0, missing = 0),
+         pcl5_yes = if_else(pcl5_1 == "Happened to me", 1, 0, missing = 0),
+         pcl6_yes = if_else(pcl6_1 == "Happened to me", 1, 0, missing = 0),
+         pcl7_yes = if_else(pcl7_1 == "Happened to me", 1, 0, missing = 0),
+         pcl8_yes = if_else(pcl8_1 == "Happened to me", 1, 0, missing = 0),
+         pcl9_yes = if_else(pcl9_1 == "Happened to me", 1, 0, missing = 0),
+         pcl10_yes = if_else(pcl10_1 == "Happened to me", 1, 0, missing = 0),
+         pcl11_yes = if_else(pcl11_1 == "Happened to me", 1, 0, missing = 0),
+         # Maria: i replaced pcl116_1 with pcl12_1
+         pcl12_yes = if_else(pcl12_1 == "Happened to me", 1, 0, missing = 0),
+         pcl13_yes = if_else(pcl13_1 == "Happened to me", 1, 0, missing = 0),
+         pcl14_yes = if_else(pcl14_1 == "Happened to me", 1, 0, missing = 0),
+         pcl15_yes = if_else(pcl15_1 == "Happened to me", 1, 0, missing = 0),
+         pcl16_yes = if_else(pcl16_1 == "Happened to me", 1, 0, missing = 0),
+         pcl17_yes = if_else(pcl17_1 == "Happened to me", 1, 0, missing = 0),
+         pcl16_yes = if_else(pcl16_1 == "Happened to me", 1, 0, missing = 0),
+         pcl19_yes = if_else(pcl19_1 == "Happened to me", 1, 0, missing = 0)
+         )
+# okay here is a basic by time period
+
+pcl <- pcl %>%
+  mutate(
+    across(
+      # had you experienced and how 
+      .cols = c(matches("^pcl\\d+_\\d+")),
+      .fns = ~case_when(
+        .x == "Happened to me" ~ "1",
+        .x == "Witnessed it" ~ "1",
+        .x == "Learned about it" ~ "1",
+        .x == "No (did not happen)" ~ "0",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across(
+    .cols = c(matches("^pcl\\d+a_\\d+")),
+    # if the happened when 
+      .fns = ~case_when(
+        .x == "Ages 0-5" ~ "1",
+        .x == "Ages 6-11" ~ "1",
+        .x == "Ages 12-19" ~ "1",
+        .x == "Adulthood" ~ "1",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across()
+  )
+
+
+  mutate(
+    across(
+      .cols = everything(),
+      .fns = ~case_when(
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0",
+        
+        .x == "1. Hearing" ~ "1",
+        .x == "2. Continuance" ~ "2",
+        .x == "3. Court Monitoring" ~ "3",
+        
+        .x == "1. Yes, available and accessed" ~ "1",
+        .x == "2. No, available but did not access" ~ "2",
+        .x == "3. No, attempted to access but experienced a barrier" ~ "3",
+        .x == "4. No, was not aware service was available" ~ "4",
+        
+        .x == "1. Physical" ~ "1",
+        .x == "2. Mental/Psychological" ~ "2",
+        .x == "3. Substance Use" ~ "3",
+        
+        .x == "Don't Know" ~ "-66",
+        .x == "Decline to Answer" ~ "-77",
+        .x == "5. Decline to answer" ~ "-77",
+        TRUE ~ .x
+      )
+    )
+  ) 
+
+  
+```
 
 ## Merge
 Merge together all measures 
