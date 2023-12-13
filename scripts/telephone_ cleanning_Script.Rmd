@@ -3250,7 +3250,7 @@ cint_relation <- cint_relation %>%
    mutate_at(vars(cint36:cint37), ~case_when(cint35 == 1 |  cint35 == "-77" ~ "-55", TRUE ~ .))
 
 cint_relation_miss <- cint_relation %>%
-  mutate(across(-c(id,matches("_8_text$")), as.numeric))%>%
+  mutate(across(-c(id, matches("_8_text$")), as.numeric))%>%
   pct_miss_fun(
     id = c("id", matches("_8_text$")),
     n_items = 10
@@ -3501,6 +3501,7 @@ socinf_sub_remove <- socinf_sub_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ### SOCINF Substances Calculations
 ```{r socinf_sub_calc}
 # Below is the code that treats -77, -55 values as NA
+# No calculations is needed 
 socinf_sub_complete <-
   socinf_sub %>%
   mutate(across(-id, as.numeric)) %>%
@@ -3584,7 +3585,7 @@ socinf_gen_miss %>%
 socinf_gen_remove <- socinf_gen_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
-TODO: Min remove missing 
+TODO: Min remove missing, no calculations is needed 
 ```{r socinf_gen_calc}
 socinf_gen_complete <-
   socinf_gen %>%
@@ -4011,8 +4012,8 @@ sus$new_column <- ifelse(sus$sus13 == 1 | sus$sus13a <= 10, -55, NA)
 sus<-sus %>% relocate(new_column, .after = sus13)
 
 
-## PLC 
-### PLC Select Variabl and Recode 
+## PCL 
+### PCL Select Variabl and Recode 
 Min's question: Should I rename the columns? what should I code NA to - they are not nesssely missing; should I identify NA manually (eg. if pcl1_1, pcl1_2, pcl1_3, pcl1_4 are all NAs)
 ```{r plc}
 pcl <- tpw_raw %>%
