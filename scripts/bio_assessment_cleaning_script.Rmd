@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 if (!require("pacman")) install.packages("pacman")
 
-pacman::p_load(rio, here, tidyverse)
+pacman::p_load(rio, here, tidyverse, lubridate)
 
 ```
 
@@ -18,12 +18,16 @@ pacman::p_load(rio, here, tidyverse)
 
 ```{r import}
 #import raw data
-raw_bio_df <- import(here("do_not_push", "Biological_Assessment_final_raw_sample_data_NEVERDELETE.csv")) %>% 
+raw_bio_df <- import(here("do_not_push", "Biological Assessment_final_raw_sample_data_NEVERDELETE.csv"), header = TRUE) %>% 
   janitor::clean_names()
 
 #import pulse data
 
 raw_pulse_df <- import(here("do_not_push", "HeartRate_coded.csv")) %>% 
+  janitor::clean_names()
+
+#import incarcerated data
+incarcerated_df <- import(here("do_not_push", "tpw_incarcerated_bio.csv"), header = TRUE) %>% 
   janitor::clean_names()
 
 ```
@@ -41,6 +45,8 @@ Tidy data for archiving
 1. Correct variable types for calculations
 
 1. Rename variables based on construct name
+
+1. Merge with pulse data and incarcerated data
 
 1. Specify missing data
 
@@ -61,38 +67,94 @@ Tidy data for archiving
 
 
 ```{r tidy}
+#create function to clean and standardize time format
+standardize_time <- function(time) {
+  #remove any non-time-related characters and extra spaces
+  time_clean <- str_trim(str_remove(time, "[^0-9:APMapm]"))
+  time_parsed <- parse_date_time(time_clean, orders = c('HM', 'HMS', 'HMa', 'HMp', 'H'))
+  #return NA if parsing fails, otherwise format
+  if (all(is.na(time_parsed))) {
+    NA_character_ 
+  } else {
+    format(time_parsed, '%I:%M %p')  
+  }
+}
+
+#create function to convert military time to standard time
+convert_to_standard_time <- function(time) {
+  #parse the time with a default date
+  time_parsed <- strptime(paste("1970-01-01", time), format = "%Y-%m-%d %H:%M")
+  #format the time to 'HH:MM AM/PM' format
+  format(time_parsed, "%I:%M %p")
+}
+
 #transform pulse data to merge
 pulse_td <- raw_pulse_df %>% 
-  rename(id = family) %>% 
-  select(id, pulse1, pulse2)
+  select(family, pulse1, pulse2)
+
+#transform incarcerated data to merge
+incar_td <- incarcerated_df %>% 
+  slice(-1) %>% 
+  filter(recipient_first_name != "HR211") %>% #TODO: MARIA, confirm remove and not change to -99
+  rename_with(~gsub("_\\d+", "", .x), starts_with("q")) %>% 
+  mutate(start_date = format(ymd_hms(start_date), "%m/%d/%Y %H:%M"),
+         end_date = format(ymd_hms(end_date), "%m/%d/%Y %H:%M")) %>% 
+  mutate(q8 = "-55") %>% #TODO: MARIA, confirm -55 for incarcerated participants
+  relocate(q8, .before = q9) %>% 
+  select(-x7b_2, -x7b_3) %>% 
+  select(start_date, end_date, recorded_date, recipient_first_name,
+         starts_with("q"), starts_with("x"), starts_with("r")) %>% 
+  rename(x6b = x6b_4009,
+         x6b_2 = x6b_4010,
+         x9a = x9a_4029,
+         x7b = x7b_1) 
+
+#select incarcerated variables in bio data to bind rows
+bio_incarvars_td <- raw_bio_df %>% 
+  select(start_date, end_date, recorded_date, recipient_first_name,
+         starts_with("q"), starts_with("x"), starts_with("r"), -q291, -q291_1_text, -q292)
   
+
+#TODO: MARIA, confirm -99 (or -55) for missing incarcerated variables
+#bind rows then merge with rest of variables
+all_incarvars_td <- rbind(bio_incarvars_td, incar_td) %>% 
+  left_join(raw_bio_df)
+
+#extract names of variables that were asked of incarcerated participants
+names_bio_df <- names(raw_bio_df)
+names_incar_df <- names(incar_td)
+
+#extract variables that were not asked of incarcerated participants
+vars_not_incar <- setdiff(names_bio_df, names_incar_df) %>% 
+  .[-(1:10)]
+
 #extract question text and variable name for metadata
-bio_md <- raw_bio_df %>% 
+bio_md <- all_incarvars_td %>% 
   slice(1) %>% 
   pivot_longer(cols = everything(), names_to = "Variable", values_to = "Question_Text")
 
 #correct complex data entry errors
-bio_df <- raw_bio_df %>% 
-  rename(id = recipient_first_name) %>%
+bio_df <- all_incarvars_td %>% 
+  rename(family = recipient_first_name) %>%
   mutate(
-    temp1 = ifelse(id == "P821", pef_1, fev1a),
-    temp2 = ifelse(id == "P821", pef2, fev1b),
-    temp3 = ifelse(id == "P821", pef3, fev1c),
-    pef_1  = ifelse(id == "P821", fev1a, pef_1),
-    pef2  = ifelse(id == "P821", fev1b, pef2),
-    pef3  = ifelse(id == "P821", fev1c, pef3),
-    fev1a = ifelse(id == "P821", temp1, fev1a),
-    fev1b = ifelse(id == "P821", temp2, fev1b),
-    fev1c = ifelse(id == "P821", temp3, fev1c),
-    temp_hr2 = ifelse(id == "HR216", fev1b, pef2),
-    temp_hr5 = ifelse(id == "HR216", pef2, fev1b),
-    pef3  = ifelse(id == "HR214", 246, pef3),
-    fev1a = ifelse(id == "P866", 2.16, fev1a),
-    fev1c = case_when(id == "P856" ~ "2.11",
-                      id == "P844" ~ "2.11", 
-                      id == "HR119" ~ "2.08",
+    temp1 = ifelse(family == "P821", pef_1, fev1a),
+    temp2 = ifelse(family == "P821", pef2, fev1b),
+    temp3 = ifelse(family == "P821", pef3, fev1c),
+    pef_1  = ifelse(family == "P821", fev1a, pef_1),
+    pef2  = ifelse(family == "P821", fev1b, pef2),
+    pef3  = ifelse(family == "P821", fev1c, pef3),
+    fev1a = ifelse(family == "P821", temp1, fev1a),
+    fev1b = ifelse(family == "P821", temp2, fev1b),
+    fev1c = ifelse(family == "P821", temp3, fev1c),
+    temp_hr2 = ifelse(family == "HR216", fev1b, pef2),
+    temp_hr5 = ifelse(family == "HR216", pef2, fev1b),
+    pef3  = ifelse(family == "HR214", 246, pef3),
+    fev1a = ifelse(family == "P866", 2.16, fev1a),
+    fev1c = case_when(family == "P856" ~ "2.11",
+                      family == "P844" ~ "2.11", 
+                      family == "HR119" ~ "2.08",
                       TRUE ~ fev1c),
-    b27 = ifelse(id == "P803", NA, b27)
+    b27 = ifelse(family == "P803", NA, b27)
   ) %>%
   select(-temp1, -temp2, -temp3, -pef2, -fev1b) %>% 
   rename(pef2 = temp_hr2,
@@ -101,31 +163,37 @@ bio_df <- raw_bio_df %>%
 #remove excess variables from qualtrics, slice, re-order, rename, and create calculated variables
 bio_td <- bio_df %>% 
   slice(-1:-2) %>% 
-  select(id, bp1a, bp1b, bp2a, bp2b, height_measure:fev1c, fev1b, pef2, r1:r12, q1:q14, b1:b29a, starts_with("x")) %>% 
-  mutate_if(is.character, ~na_if(., "")) %>% 
   mutate_all(~ifelse(is.nan(.), NA, .)) %>% 
+  mutate(across(all_of(vars_not_incar), ~ ifelse(is.na(.) & (family == "HR181" | family == "P819"), "-55", .)),
+          start_day = as.Date(mdy_hm(start_date)),
+          start_time = format(mdy_hm(start_date), "%H:%M"),
+          end_day = as.Date(mdy_hm(end_date)),
+          end_time = format(mdy_hm(end_date), "%H:%M")) %>% 
+  mutate(diff_day = ifelse(start_day != end_day, "Yes", "No")) %>% 
+  select(family, start_date, end_date, ends_with("day"), ends_with("time"), bp1a, bp1b, bp2a, bp2b, height_measure:fev1c, fev1b,
+         pef2, r1:r12, q1:q14, b1:b29a, starts_with("x")) %>% 
+  mutate_if(is.character, ~na_if(., "")) %>% 
   mutate_at(vars(starts_with("bp"), starts_with("pef"), starts_with("fev"), ends_with("measure")), as.numeric) %>%
   mutate_at(vars(starts_with("pef"), starts_with("fev")), ~ ifelse(. == 0, NA, .)) %>% 
   left_join(pulse_td) %>% 
-  mutate(bp_sys_avg = rowMeans(select(., bp1a, bp2a), na.rm = TRUE),
-         bp_dia_avg = rowMeans(select(., bp1b, bp2b), na.rm = TRUE),
-         bp_sys_cal = ifelse(bp_sys_avg >= 140, 1, 0),
-         bp_dia_cal = ifelse(bp_dia_avg >= 90, 1, 0),
-         bp_sys_pal = ifelse(bp_sys_avg >= quantile(bp_sys_avg, 0.75), 1, 0),
-         bp_dia_pal = ifelse(bp_dia_avg >= quantile(bp_dia_avg, 0.75), 1, 0),
-         pef_avg    = round(rowMeans(select(., starts_with("pef")), na.rm = TRUE), 1),
-         pef_cal    = ifelse(pef_avg <= 319, 1, 0),
-         pef_pal    = ifelse(pef_avg >= quantile(pef_avg, 0.75, na.rm = TRUE), 1, 0),
-         wth_ratio    = round(iliac_crest_measure / hip_measure, 3),
-         wth_cal = ifelse(wth_ratio >= 0.85, 1, 0),
-         wth_pal = ifelse(wth_ratio >= quantile(wth_ratio, 0.75), 1, 0),
-         bmi_score  = weight_measure / ((height_measure / 100)^2),
-         bmi_cal    = ifelse(bmi_score >= 30, 1, 0),
-         bmi_pal    = ifelse(bmi_score >= quantile(bmi_score, 0.75), 1, 0),
-         pulse_avg  = rowMeans(select(., pulse1, pulse2), na.rm = TRUE),
-         pulse_tavg = ifelse(!is.na(pulse1) & !is.na(pulse2), 1, 0),
-         pulse_cal  = ifelse(pulse_avg >= 90, 1, 0),
-         pulse_pal  = ifelse(pulse_avg >= quantile(pulse_avg, 0.75, na.rm = TRUE), 1, 0)) %>% 
+  mutate(bp_sys_avg = ifelse(bp1a != -55 & bp2a != -55, rowMeans(select(., bp1a, bp2a), na.rm = TRUE), -55),
+         bp_dia_avg = ifelse(bp1b != -55 & bp2b != -55, rowMeans(select(., bp1b, bp2b), na.rm = TRUE), -55),
+         bp_sys_cal = ifelse(bp_sys_avg != -55, ifelse(bp_sys_avg >= 140, 1, 0), -55),
+         bp_dia_cal = ifelse(bp_dia_avg != -55, ifelse(bp_dia_avg >= 90, 1, 0), -55),
+         bp_sys_pal = ifelse(bp_sys_avg != -55, ifelse(bp_sys_avg >= quantile(bp_sys_avg, 0.75, na.rm = TRUE), 1, 0), -55),
+         bp_dia_pal = ifelse(bp_dia_avg != -55, ifelse(bp_dia_avg >= quantile(bp_dia_avg, 0.75, na.rm = TRUE), 1, 0), -55),
+         pef_avg = ifelse(all(select(., starts_with("pef")) != -55, na.rm = TRUE), round(pef_columns, 1), -55),
+         pef_cal    = ifelse(pef_avg != -55, ifelse(pef_avg <= 319, 1, 0), -55),
+         pef_pal    = ifelse(pef_avg != -55, ifelse(pef_avg >= quantile(pef_avg, 0.75, na.rm = TRUE), 1, 0), -55),
+         wth_ratio  = ifelse(iliac_crest_measure != -55 & hip_measure != -55, round(iliac_crest_measure / hip_measure, 3), -55),
+         wth_cal = ifelse(wth_ratio != -55, ifelse(wth_ratio >= 0.85, 1, 0), -55),
+         wth_pal = ifelse(wth_ratio != -55, ifelse(wth_ratio >= quantile(wth_ratio, 0.75, na.rm = TRUE), 1, 0), -55),
+         bmi_score  = ifelse(weight_measure != -55 & height_measure != -55, weight_measure / ((height_measure / 100)^2), -55),
+         bmi_cal    = ifelse(bmi_score != -55, ifelse(bmi_score >= 30, 1, 0), -55),
+         bmi_pal    = ifelse(bmi_score != -55, ifelse(bmi_score >= quantile(bmi_score, 0.75, na.rm = TRUE), 1, 0), -55),
+         pulse_avg  = ifelse(pulse1 != -55 & pulse2 != -55, rowMeans(select(., pulse1, pulse2), na.rm = TRUE), -55),
+         pulse_cal  = ifelse(pulse_avg != -55, ifelse(pulse_avg >= 90, 1, 0), -55),
+         pulse_pal  = ifelse(pulse_avg != -55, ifelse(pulse_avg >= quantile(pulse_avg, 0.75, na.rm = TRUE), 1, 0), -55)) %>% 
   rename(bp1 = bp1a,
          bp2 = bp1b,
          bp3 = bp2a,
@@ -147,8 +215,32 @@ bio_td <- bio_df %>%
          b10b = b10a_1_text,
          b11a = q291,
          b11b = q291_1_text,
-         b11c = q292,
-         b14a = b14b) %>%
+         b11c = q292#,
+        # b14a = b14b
+         ) %>% 
+  rename(b12a = 	b13, 
+         b12b = 	b14,
+         b12c = 	b14b,
+         b12d = 	b15,
+         b13	 = b16, 
+         b13a = 	b16a, 
+         b14	 = b17,
+         b14a = 	b17a, 
+         b15	 = b18,
+         b15a = 	b18a, 
+         b16	 = b19, 
+         b16a = 	b19a, 
+         b17	 = b20, 
+         b17a = 	b21, 
+         b17b = 	b22, 
+         b17c = 	b23, 
+         b18	 = b24, 
+         b18a = 	b25, 
+         b18b = 	b26, 
+         b18c = 	b27, 
+         b18d = 	b28,
+         b18e = 	b29, 
+         b18f = 	b29a) %>%
   rename_at(vars(matches("^b[0-9]")), ~paste0("hbc", substr(., 2, nchar(.)))) %>%
   rename_at(vars(matches("^r[0-9]")), ~paste0("rhs", substr(., 2, nchar(.)))) %>%
   rename_at(vars(matches("^x[0-9]")), ~paste0("chc", substr(., 2, nchar(.)))) %>%
@@ -170,13 +262,13 @@ bio_td <- bio_df %>%
                         . == "Mostly false" ~ "4",
                         . == "Definitely false" ~ "5",
                         TRUE ~ .)) %>% 
-  mutate_at(vars(hbc16a, hbc17a, hbc18a, hbc19a),
+  mutate_at(vars(hbc13a, hbc14a, hbc15a, hbc16a),
             ~ case_when(. == "a. never" ~ "1", 
                         . == "b. .5-1 hour/day" ~ "2",
                         . == "c. 1-5 hours/day" ~ "3",
                         . == "d. 5 or more hours/day" ~ "4",
                         TRUE ~ .)) %>% 
-  mutate_at(vars(hbc21, hbc23),
+  mutate_at(vars(hbc17a, hbc17c),
             ~ case_when(. == "a. 0" ~ "1",
                         . == "b. 1-3 cups or cans" ~ "2",
                         . == "c. 4-6 cups or cans" ~ "3",
@@ -188,83 +280,269 @@ bio_td <- bio_df %>%
                           rhs1 == "3 - Good" ~ "3",
                           rhs1 == "4 - Fair" ~ "4",
                           rhs1 == "5 - Poor" ~ "5",
-                          rhs1 == "6 - Decline to Answer" ~ "-66",
+                          rhs1 == "6 - Decline to Answer" ~ "-77",
                           TRUE ~ rhs1),
          cev12 = case_when(cev12 == "Johnson & Johnson" ~ "1",
                            cev12 == "Moderna" ~ "2",
                            cev12 == "Pfizer" ~ "3",
                            cev12 == "Not Specified (this option can be used when a participant cannot recall)" ~ "-77",
                            TRUE ~ cev12),
-         hbc13 = case_when(hbc13 == "1 cigarette" ~ "1",
-                           hbc13 == "2-5 cigarettes" ~ "2",
-                           hbc13 == "1 pack" ~ "3",
-                           hbc13 == "2 packs" ~ "4",
-                           TRUE ~ hbc13),
-         hbc15 = case_when(hbc15 == "1 cigarette" ~ "1",
-                           hbc15 == "2-5 cigarettes" ~ "2",
-                           TRUE ~ hbc13),
-         hbc28 = case_when(hbc28 == "Mild" ~ "1", 
-                           hbc28 == "Moderate" ~ "2",
-                           hbc28 == "Vigorous" ~ "3",
-                           TRUE ~ hbc28),
-         chc1a = ifelse(chc1a == "Maybe", "3", chc1a)) %>% 
+         hbc12a = case_when(hbc12a == "1 cigarette" ~ "1",
+                            hbc12a == "2-5 cigarettes" ~ "2",
+                            hbc12a == "1 pack" ~ "3",
+                            hbc12a == "2 packs" ~ "4",
+                            TRUE ~ hbc12a),
+         hbc12d = case_when(hbc12d == "1 cigarette" ~ "1",
+                            hbc12d == "2-5 cigarettes" ~ "2",
+                           TRUE ~ hbc12d),
+         hbc18d = case_when(hbc18d == "Mild" ~ "1", 
+                            hbc18d == "Moderate" ~ "2",
+                            hbc18d == "Vigorous" ~ "3",
+                            TRUE ~ hbc18d),
+         chc1a = ifelse(chc1a == "Maybe", "-66", chc1a),
+         hbc1 = ifelse(family == "HR183", "9:45 AM", hbc1))#,
+         #across(c(hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f), standardize_time)) #format times
+
+
+#create function to convert time to date/time object for calculating elapsed time
+convert_to_posixct <- function(time) {
+  strptime(paste("1970-01-01", time), format = "%Y-%m-%d %I:%M %p")
+}
+
+#create elapsed time variables
+elapsed_vars_df <- bio_td %>% 
+  select(ends_with("day"), ends_with("time"), family, hbc1, hbc7c, hbc8c, hbc9b, 
+         hbc10c, hbc11c, hbc12b, hbc12c, hbc18f) %>% 
+  mutate(across(c(start_time, end_time), convert_to_standard_time),
+         across(c(start_time, end_time, hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f), convert_to_posixct),
+         hbc1_raw_elapsed = as.numeric(difftime(end_time, hbc1, units = "mins")),
+         hbc7c_raw_elapsed = as.numeric(difftime(end_time, hbc7c, units = "mins")),
+         hbc8c_raw_elapsed = as.numeric(difftime(end_time, hbc8c, units = "mins")),
+         hbc9b_raw_elapsed = as.numeric(difftime(end_time, hbc9b, units = "mins")),
+         hbc10c_raw_elapsed =  as.numeric(difftime(end_time, hbc10c, units = "mins")),
+         hbc11c_raw_elapsed =  as.numeric(difftime(end_time, hbc11c, units = "mins")),
+         hbc12c_raw_elapsed = as.numeric(difftime(end_time, hbc12c, units = "mins")),
+         hbc18f_raw_elapsed =  as.numeric(difftime(end_time, hbc18f, units = "mins")),
+         hbc12b_raw_elapsed = as.numeric(ymd(end_day) - mdy(hbc12b))) %>% 
+        #manually check negative elapsed times and correct
+  mutate(hbc1_elapsed = case_when(family == "P805" ~ 0,
+                                  hbc1_raw_elapsed < 0 ~ 1440 + hbc1_raw_elapsed, 
+                                  TRUE ~ hbc1_raw_elapsed),
+         hbc10c_elapsed = ifelse(hbc10c_raw_elapsed < 0, 1440 + hbc10c_raw_elapsed, hbc10c_raw_elapsed),
+         hbc11c_elapsed = ifelse(hbc11c_raw_elapsed < 0, 1440 + hbc11c_raw_elapsed, hbc11c_raw_elapsed),
+         hbc12c_elapsed = ifelse(hbc12c_raw_elapsed < 0, 1440 + hbc12c_raw_elapsed, hbc12c_raw_elapsed),
+         hbc18f_elapsed = ifelse(hbc18f_raw_elapsed < 0, 1440 + hbc18f_raw_elapsed, hbc18f_raw_elapsed)) %>% 
+  rename(hbc7c_elapsed = hbc7c_raw_elapsed,
+         hbc8c_elapsed = hbc8c_raw_elapsed,
+         hbc9b_elapsed = hbc9b_raw_elapsed,
+         hbc12b_elapsed = hbc12b_raw_elapsed) %>% 
+  select(-ends_with("raw_elapsed")) %>% 
+  select(family, ends_with("elapsed"))
+
+
+bio_na <- bio_td %>% 
+  #merge in elapsed time variables
+  left_join(elapsed_vars_df) %>% 
   #specify missing data
-  mutate_all(~ ifelse(. %in% c("N/A - Lives Alone", "N/A - Not currently employed"), "-88", .)) %>% 
-  mutate_all(~ ifelse(. %in% c("Decline to Answer"), "-66", .)) %>% 
-    select(id, starts_with("bp"), starts_with("bmi"), starts_with("wth"), pef1, pef2, pef3, pef4, pef5, pef6,
-           pef_avg, pef_cal, pef_pal, starts_with("pulse"), starts_with("rhs"), starts_with("cev"),
-           starts_with("hbc"), starts_with("chc"))
+  mutate_all(~ ifelse(. %in% c("N/A - Lives Alone", "N/A - Not currently employed", "N/A"), "-55", .)) %>% 
+  mutate_all(~ ifelse(. %in% c("Decline to Answer"), "-77", .)) %>% 
+  mutate(cev2 = ifelse(cev1 == "0", "-55", cev2),
+         cev4 = ifelse(cev3 == "0", "-55", cev4),
+         across(c(cev12, cev13, cev14), ~ ifelse(cev11 == "0", "-55", .)),
+         across(c(hbc7a, hbc7b, hbc7c), ~ ifelse(hbc7 == "0", "-55", .)),
+         across(c(hbc7b, hbc7c), ~ ifelse(hbc7a == "0", "-55", .)),
+         across(c(hbc8a, hbc8b, hbc8c, hbc8c_elapsed), ~ ifelse(hbc8 == "0", "-55", .)),
+         across(c(hbc8b, hbc8c, hbc8c_elapsed), ~ ifelse(hbc8a == "0", "-55", .)),
+         across(c(hbc9a, hbc9b, hbc9c, hbc9d, hbc9b_elapsed), ~ ifelse(hbc9 == "0", "-55", .)),
+         across(c(hbc9b, hbc9b_elapsed), ~ ifelse(hbc9a == "0", "-55", .)),
+         hbc9d = ifelse(hbc9c != "Other: Please specify", "-55", hbc9d),
+         across(c(hbc10a, hbc10b, hbc10c, hbc10c_elapsed), ~ ifelse(hbc10 == "0", "-55", .)),
+         across(c(hbc10b, hbc10c, hbc10c_elapsed), ~ ifelse(hbc10a == "0", "-55", .)),
+         across(c(hbc11a, hbc11b, hbc11c, hbc11c_elapsed), ~ ifelse(hbc11 == "0", "-55", .)),
+         across(c(hbc11b, hbc11c, hbc11c_elapsed), ~ ifelse(hbc11a == "0", "-55", .)),
+         across(c(hbc12a, hbc12b, hbc12c, hbc12d, hbc12b_elapsed, hbc12c_elapsed), ~ ifelse(hbc12 == "0", "-55", .)),
+         hbc13a = ifelse(hbc13 == "0" | hbc13 == "-55", "-55", hbc13a),
+         hbc14a = ifelse(hbc14 == "0" | hbc14 == "-55", "-55", hbc14a),
+         hbc15a = ifelse(hbc15 == "0" | hbc15 == "-77", "-55", hbc15a),
+         hbc16a = ifelse(hbc16 == "0", "-55", hbc16a),
+         across(c(hbc17a, hbc17b, hbc17c), ~ ifelse(hbc17 == "0", "-55", .)), 
+         across(c(hbc18a, hbc18b, hbc18c, hbc18d, hbc18e, hbc18f, hbc18f_elapsed), ~ ifelse(hbc18 == "0" | hbc18 == "-77", "-55", .)),
+         across(c(hbc18f, hbc18f_elapsed), ~ ifelse(hbc18e == "0", "-55", .)),
+         across(c(chc1b, chc1c, chc1d, chc1e, chc1f, chc1g), ~ ifelse(chc1a == "0" | chc1a == "-66", "-55", .)),
+         chc1g = ifelse(chc1f == "1", "-55", chc1g),
+         across(c(chc2b, chc2c, chc2d, chc2e, chc2f, chc2g, chc2h), ~ ifelse(chc2a == "0", "-55", .)), 
+         chc2c = ifelse(chc2b == "-77", "-55", chc2c),
+         chc2h = ifelse(chc2g == "1", "-55", chc2h),
+         across(c(chc3b, chc3c, chc3d, chc3e, chc3f), ~ ifelse(chc3a == "0", "-55", .)), 
+         chc3f = ifelse(chc3e == "-77" | chc3e == "1", "-55", chc3f),
+         across(c(chc4b, chc4c, chc4d, chc4e, chc4f), ~ ifelse(chc4a == "0", "-55", .)), 
+         chc4f = ifelse(chc4e == "-77" | chc4e == "1", "-55", chc4f),
+         across(c(chc5b, chc5c, chc5d, chc5e, chc5f, chc5g), ~ ifelse(chc5a == "0" | chc5a == "-77", "-55", .)), 
+         chc5g = ifelse(chc5f == "1", "-55", chc5g),
+         across(c(chc6b, chc6b_2, chc6c, chc6d, chc6e), ~ ifelse(chc6a == "0", "-55", .)), 
+         chc6e = ifelse(chc6d == "1", "-55", chc6e),
+         across(c(chc7b, chc7c, chc7d, chc7e, chc7f, chc7g), ~ ifelse(chc7a == "0", "-55", .)), 
+         chc7g = ifelse(chc7f == "1", "-55", chc7g),
+         across(c(chc8b, chc8c, chc8d, chc8e, chc8f), ~ ifelse(chc8a == "0" | chc8a == "-77", "-55", .)), 
+         chc8f = ifelse(chc8e == "1", "-55", chc8f),
+         across(c(chc9b, chc9c, chc9d, chc9e, chc9f, chc9g), ~ ifelse(chc9a == "0", "-55", .)), 
+         chc9g = ifelse(chc9f == "1", "-55", chc9g),
+         across(c(chc10b, chc10c, chc10d, chc10e, chc10f, chc10g), ~ ifelse(chc10a == "0", "-55", .)), 
+         chc10g = ifelse(chc10f == "1", "-55", chc10g),
+         across(c(chc11b, chc11c, chc11d, chc11e, chc11f, chc11g), ~ ifelse(chc11a == "0", "-55", .)), 
+         chc11g = ifelse(chc11f == "1" | chc11f == "-77", "-55", chc11g),
+         across(c(chc12b, chc12c, chc12d, chc12e, chc12f, chc12g), ~ ifelse(chc12a == "0", "-55", .)), 
+         chc12g = ifelse(chc12f == "1", "-55", chc12g),
+         across(c(chc13b, chc13c, chc13d, chc13e, chc13f, chc13g), ~ ifelse(chc13a == "0" | chc13a == "-77", "-55", .)), 
+         chc13g = ifelse(chc13f == "1", "-55", chc13g),
+         across(c(chc14b, chc14c, chc14d, chc14e, chc14f, chc14g), ~ ifelse(chc14a == "0", "-55", .)), 
+         chc14g = ifelse(chc14f == "1", "-55", chc14g),
+         across(c(chc15b, chc15c, chc15d, chc15e, chc15f, chc15g), ~ ifelse(chc15a == "0", "-55", .)), 
+         chc15g = ifelse(chc15f == "1", "-55", chc15g),
+         across(c(chc16b, chc16c, chc16d, chc16e, chc16f, chc16g), ~ ifelse(chc16a == "0", "-55", .)), 
+         chc16g = ifelse(chc16f == "1", "-55", chc16g),
+         across(c(chc17b, chc17c, chc17d, chc17e, chc17f), ~ ifelse(chc17a == "0", "-55", .)), 
+         chc17f = ifelse(chc17e == "1" | chc17e == "-77", "-55", chc17f),
+         across(c(chc18b, chc18c, chc18d, chc18e, chc18f), ~ ifelse(chc18a == "0", "-55", .)), 
+         chc18f = ifelse(chc18e == "1" | chc18e == "-77", "-55", chc18f),
+         across(c(chc19b, chc19c, chc19d, chc19e, chc19f), ~ ifelse(chc19a == "0", "-55", .)), 
+         chc19d = ifelse(chc19c == "-77", "-55", chc19d),
+         chc19f = ifelse(chc19e == "1" | chc19e == "-77", "-55", chc19f),
+         across(c(chc20a_1_text, chc20b, chc20c, chc20d, chc20e, chc20f, chc20g), ~ ifelse(chc20a == "0", "-55", .)), 
+         chc20g = ifelse(chc20f== "1" | chc20f == "-77", "-55", chc20g),
+         across(c(hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12b, hbc12c, hbc18f, hbc1_elapsed, hbc7c_elapsed, hbc8c_elapsed, 
+                  hbc9b_elapsed, hbc10c_elapsed, hbc11c_elapsed, hbc12b_elapsed, hbc12c_elapsed, hbc18f_elapsed, 
+                  pulse1, pulse2, pulse_avg, pulse_cal, pulse_pal), 
+                ~ ifelse(family == "HR181" | family == "P819" , "-55", .))) %>% 
+    mutate_all(~ ifelse(is.na(.) | is.nan(.), -99, .)) %>%  #last after all conditional are dealt with
+    select(family, start_date, end_date, starts_with("bp"), starts_with("bmi"), starts_with("wth"), 
+           pef1, pef2, pef3, pef4, pef5, pef6, pef_avg, pef_cal, pef_pal, 
+           starts_with("pulse"), starts_with("rhs"), starts_with("cev"), 
+           hbc1, hbc1_elapsed, hbc2, hbc3, hbc4, hbc5, hbc6, hbc7, hbc7a, hbc7b, hbc7c, hbc7c_elapsed,
+           hbc8, hbc8a, hbc8b, hbc8c, hbc8c_elapsed, hbc9, hbc9a, hbc9b, hbc9b_elapsed, hbc9c, hbc9d, hbc10, hbc10a,
+           hbc10b, hbc10c, hbc10c_elapsed, hbc11, hbc11a, hbc11b, hbc11c, hbc11c_elapsed, hbc12, hbc12a, hbc12b, 
+           hbc12b_elapsed, hbc12c, hbc12c_elapsed, hbc12d, hbc13, hbc13a, hbc14, hbc14a, hbc15, hbc15a, hbc16, hbc16a, 
+           hbc17, hbc17a, hbc17b, hbc17c, hbc18, hbc18a, hbc18b, hbc18c, hbc18d, hbc18e, hbc18f, hbc18f_elapsed,
+           starts_with("chc"))
 
 
 
 
 
-#ADD SKIP LOGIC NA'S (ESP. HBC VARS WHEN 0 SOME = NA; also need to check CHC - check all missing values to make sure NA is truly missing)
+#check to make sure all NA are coded
+check_na <- bio_na %>% 
+  filter(rowSums(is.na(.)) > 0)
 
-# #create RAND subscales
-# rhs_calc <- bio_td %>% 
-#   select(starts_with("rhs")) %>% 
-#   mutate(rhs1_r = case_when(
-#       rhs1 == 5 ~ 1,
-#       rhs1 == 4 ~ 2,
-#       rhs1 == 3 ~ 3,
-#       rhs1 == 2 ~ 4,
-#       rhs1 == 1 ~ 5,
-#      # rhs1 == 6 ~ -77,
-#       TRUE ~ NA_real_)) %>% 
-#   mutate(across(starts_with("rhs"), ~if_else(.x %in% c("Decline to Answer", "Don't know"), NA_character_, .x))) %>%
-#   mutate(
-#     rhs1 = case_when(
-#       rhs1 == 5 ~ 1,
-#       rhs1 == 4 ~ 2,
-#       rhs1 == 3 ~ 3,
-#       rhs1 == 2 ~ 4,
-#       rhs1 == 1 ~ 5,
-#      # rhs1 == 6 ~ -77,
-#       TRUE ~ NA_real_
-#     ),
-#     across(
-#       c(rhs2:rhs8),
-#       ~case_when(
-#         .x == "Yes" ~ 1,
-#         .x == "No" ~ 0,
-#        # .x == 3 ~ -77,
-#         TRUE ~ NA_real_
-#       )
-#     ),
-#     across(
-#       c(rhs9:rhs12),
-#       ~case_when(
-#         .x == 1 ~ 5,
-#         .x == 2 ~ 4,
-#         .x == 3 ~ 3,
-#         .x == 4 ~ 2,
-#         .x == 5 ~ 1,
-#         .x == 6 ~ -77,
-#         TRUE ~ NA_real_
-#       )
-#     )
-#   )
+#check dates for elapsed time vars
+check_raw_dates <- bio_td %>% 
+  select(ends_with("day"), ends_with("time"), family, hbc1, hbc7c, hbc8c, hbc9b, 
+         hbc10c, hbc12b, hbc12c, hbc18f)
+
+
+
+
+
+```
+
+Create RHS subscales
+
+| Variable | Description |
+|----------|-------------|
+| rhs1     | Item 1      |
+| rhs2     | Item 13     |
+| rhs3     | Item 14     |
+| rhs4     | Item 15     |
+| rhs5     | Item 16     |
+| rhs6     | Item 17     |
+| rhs7     | Item 18     |
+| rhs8     | Item 19     |
+| rhs9     | Item 33     |
+| rhs10    | Item 34     |
+| rhs11    | Item 35     |
+| rhs12    | Item 36     |
+
+
+
+```{r subscale}
+
+#Recoding items
+rhs_sub_recode <- bio_na %>% 
+  mutate(rhs1_p = case_when(rhs1 == "1" ~ 100, 
+                            rhs1 == "2" ~ 75,
+                            rhs1 == "3" ~ 50,
+                            rhs1 == "4" ~ 25,
+                            rhs1 == "5" ~ 0,
+                            TRUE ~ as.numeric(rhs1)),
+         rhs2_p = case_when(rhs2 == "1" ~ 0, 
+                            rhs2 == "0" ~ 100,
+                            TRUE ~ as.numeric(rhs2)),
+         rhs3_p = case_when(rhs3 == "1" ~ 0, 
+                            rhs3 == "0" ~ 100,
+                            TRUE ~ as.numeric(rhs3)),
+         rhs4_p = case_when(rhs4 == "1" ~ 0, 
+                            rhs4 == "0" ~ 100,
+                            TRUE ~ as.numeric(rhs4)),
+         rhs5_p = case_when(rhs5 == "1" ~ 0, 
+                            rhs5 == "0" ~ 100,
+                            TRUE ~ as.numeric(rhs5)),
+         rhs6_p = case_when(rhs6 == "1" ~ 0, 
+                            rhs6 == "0" ~ 100,
+                            TRUE ~ as.numeric(rhs6)),
+         rhs7_p = case_when(rhs7 == "1" ~ 0, 
+                            rhs7 == "0" ~ 100,
+                            TRUE ~ as.numeric(rhs7)),
+         rhs8_p = case_when(rhs8 == "1" ~ 0, 
+                            rhs8 == "0" ~ 100,
+                            TRUE ~ as.numeric(rhs8)),
+         rhs9_p = case_when(rhs9 == "1" ~ 0, 
+                            rhs9 == "2" ~ 25,
+                            rhs9 == "3" ~ 50,
+                            rhs9 == "4" ~ 75,
+                            rhs9 == "5" ~ 100,
+                            TRUE ~ as.numeric(rhs9)),
+         rhs10_p = case_when(rhs10 == "1" ~ 100, 
+                            rhs10 == "2" ~ 75,
+                            rhs10 == "3" ~ 50,
+                            rhs10 == "4" ~ 25,
+                            rhs10 == "5" ~ 0,
+                            TRUE ~ as.numeric(rhs10)),
+         rhs11_p = case_when(rhs11 == "1" ~ 0, 
+                            rhs11 == "2" ~ 25,
+                            rhs11 == "3" ~ 50,
+                            rhs11 == "4" ~ 75,
+                            rhs11 == "5" ~ 100,
+                            TRUE ~ as.numeric(rhs11)),
+         rhs12_p = case_when(rhs12 == "1" ~ 100, 
+                            rhs12 == "2" ~ 75,
+                            rhs12 == "3" ~ 50,
+                            rhs12 == "4" ~ 25,
+                            rhs12 == "5" ~ 0,
+                            TRUE ~ as.numeric(rhs12)))
+
+rhs_calc <- rhs_sub_recode %>% 
+  select(family, ends_with("_p")) %>% 
+  mutate_all(~ifelse(. == -77, NA, .)) 
+
+#check if missing data rule should be applied - no
+check_missing <- rhs_calc %>% 
+  select(-family) %>% 
+  rowwise() %>%
+  mutate(perc_missing = sum(is.na(c_across(everything()))) / length(c_across(everything())) * 100) %>% 
+  arrange(desc(perc_missing))
+
+rhs_subscales <- rhs_calc %>%
+  mutate(rhs_health = rowMeans(select(., rhs1_p, rhs9_p, rhs10_p, rhs11_p, rhs12_p), na.rm = TRUE),
+         rhs_phys_limit = rowMeans(select(., rhs2_p, rhs3_p, rhs4_p, rhs5_p), na.rm = TRUE),
+         rhs_emo_limit = round(rowMeans(select(., rhs6_p, rhs7_p, rhs8_p), na.rm = TRUE), 2)) %>% 
+  select(family, rhs_health, rhs_phys_limit, rhs_emo_limit) %>% 
+  right_join(rhs_sub_recode) %>% 
+  select(family, start_date, end_date, starts_with("bp"), starts_with("bmi"), starts_with("wth"), pef1, pef2, pef3, pef4, pef5, pef6,
+         pef_avg, pef_cal, pef_pal, starts_with("pulse"), rhs1:rhs12, ends_with("_p"), rhs_health, rhs_phys_limit, rhs_emo_limit, 
+         starts_with("cev"), starts_with("hbc"), starts_with("chc"))
+
+
+#internal file
+internal_df <- rhs_subscales
 
 #take out identifiable cev and chc vars and rename sequentially for archived dataset
 #specify excluded variables
@@ -273,11 +551,11 @@ excluded_vars <- c("cev2", "cev4", "cev13", "cev14", "chc1b", "chc1e", "chc1g", 
                    "chc7e", "chc7g", "chc8d", "chc8f", "chc9b", "chc9e", "chc9g", "chc10b", "chc10e", "chc10g", "chc11b",
                    "chc11e", "chc11g", "chc12b", "chc12e", "chc12g", "chc13b", "chc13e", "chc13g", "chc14b", "chc14e",
                    "chc14g", "chc15b", "chc15e", "chc15g", "chc16b", "chc16e", "chc16g", "chc17d", "chc17f", "chc18d",
-                   "chc18f", "chc19d", "chc19f", "chc20a_1_text", "chc20b", "chc20e", "chc20g")
+                   "chc18f", "chc19d", "chc19f", "chc20a_1_text", "chc20b", "chc20e", "chc20g", "start_date", "end_date")
 
 
-bio_td_archive <- bio_td %>% 
-  select(-one_of(excluded_vars)) %>% 
+bio_td_archive <- rhs_subscales %>% 
+  select(-one_of(excluded_vars)) %>%
   rename(cev1	=	cev1,
          cev2	=	cev3,
          cev3	=	cev5,
@@ -368,60 +646,61 @@ bio_td_archive <- bio_td %>%
          chc20a	=	chc20a,
          chc20b	=	chc20c,
          chc20c	=	chc20d,
-         chc20d	=	chc20f)
+         chc20d	=	chc20f) %>% 
+  #remove hbc dates and replace with elapsed variables
+  select(-all_of(c("hbc1", "hbc7c", "hbc8c", "hbc9b", "hbc10c", "hbc11c", "hbc12b", "hbc12c", "hbc18f"))) %>% 
+  rename(hbc1 = hbc1_elapsed,
+         hbc7c = hbc7c_elapsed,
+         hbc8c = hbc8c_elapsed,
+         hbc9b = hbc9b_elapsed,
+         hbc10c = hbc10c_elapsed,
+         hbc11c = hbc11c_elapsed,
+         hbc12b = hbc12b_elapsed,
+         hbc12c = hbc12c_elapsed,
+         hbc18f = hbc18f_elapsed) %>% 
+  #remove specific prescription drugs from archive data (confidential health info)
+  select(-all_of(c("hbc8b", "hbc9d", "hbc10b", "hbc11b"))) %>% 
+  rename(hbc8b = hbc8c,
+         hbc10b = hbc10c,
+         hbc11b = hbc11c) %>% 
+  mutate(hbc9c = ifelse(hbc9c == "Other: Please specify", "Other", hbc9c))
+
+check_arch <- bio_td_archive %>% 
+  select(family, starts_with("hbc"))
+
+rcheck_bio <- bio_td %>% 
+  select(family, starts_with("hbc")) %>% 
+  select(family, hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f) 
 
 
-#export for use before cleaned
-#export(bio_td, "bio_assessment_WIP_9_26_23.xlsx")
+#Export times without AM/PM to double check
+# check_bio <- bio_td %>% 
+#   select(family, starts_with("hbc")) %>% 
+#   select(family, hbc1, hbc8c, hbc10c, hbc11c, hbc12c, hbc18f) %>%  #hbc7c, hbc9b, 
+#   filter(
+#     (!str_detect(hbc1,   "AM|PM|am|pm|Am|Pm|-55")   )|   #is.na(hbc1)) |
+#     (!str_detect(hbc8c,  "AM|PM|am|pm|Am|Pm|-55")  )|  #is.na(hbc8c)) |
+#     (!str_detect(hbc10c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc10c)) |
+#     (!str_detect(hbc11c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc11c)) |
+#     (!str_detect(hbc12c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc12c)) |
+#     (!str_detect(hbc18f, "AM|PM|am|pm|Am|Pm|-55") ) #is.na(hbc18f))
+#   )
+#export hbc time variables for checking
+#export(check_bio, "check_hbc_times.xlsx")
 
 
 ```
 
-### Data Quality Check (delete before archiving)
+## Export
 
-Check for data errors
+```{r export}
+#export internal file
+#export(internal_df, "bio_internal.xlsx")
 
-+hbc and chc variables need deeper review that just checking descriptives
-
-```{r dq-check}
-check <- bio_td %>% select(id, starts_with("rhs"))
-
-psych::describe(check)
-
-#hbc and chc will need more in depth look - export to review in excel (list to correct dates - compare dates with original excel/csv file or on Qualtrics), list to remove identifiable text descriptions, etc.)
-
-hbc_vars <- bio_td %>% 
-  select(id, starts_with("hbc"))
-
-#export(hbc_vars, "hbc_vars_tocheck.xlsx")
-
-chc_vars <- bio_td %>% 
-  select(id, starts_with("chc"))
-
-#export(chc_vars, "chc_vars_tocheck.xlsx")
-
-```
+#export archived file
+#export(bio_td_archive, "bio_archive.xlsx")
 
 
-## DELETE - FREQUENCY FOR AL INDICATORS
-
-```{r results = 'asis'}
-#descriptives of AL indicators
-
-fts <- bio_td %>% 
-  select(ends_with("al")) %>% 
-  map(~table(., useNA = "always"))
-
-#print(fts)
-
-# Format and display the frequency tables using map
-library(kableExtra)
-formatted_tables <- map(fts, function(table_data) {
-  kable(table_data, format = "html") %>%
-    kable_styling(full_width = FALSE)
-})
-
-formatted_tables
 ```
 
 
