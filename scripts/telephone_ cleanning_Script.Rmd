@@ -1,3 +1,4 @@
+TEsting 
 ---
 title: "Telephonw Assessment Data Cleanning"
 author: "Min Zhang"
@@ -526,7 +527,7 @@ dast_calc <-
   )
 
 ### DAST Composite & Subscale Score Creation 
-# TODO:Maria, Can you please check if the total is calculated right? I'm thinking we shouldn't include dast_screen but I can't find scoring doc. 
+# TODO:Maria, Can you please check if the total is calculated right? double check d4, d5 
 dast_complete <-
   dast_calc %>%
   select(-missing_n,
@@ -3051,6 +3052,14 @@ cint_socio <- tpw_raw %>%
       TRUE ~ cint_identity
     )
     )
+
+# Combine cint1 answer options to cint1 
+cint_socio$cint1 <- apply(cint_socio[, c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Organize column order 
+cint_socio <- cint_socio %>%
+  relocate(cint1, .after = cint_0)
+
 ```
 
 ### CINT-SOCIODEMS Missing
@@ -3063,20 +3072,23 @@ cint_socio <- cint_socio %>%
   # if cint1_3 is not select cint4 will not be asked 
    mutate(cint4 = case_when(is.na(cint1_3) ~ "-55", TRUE ~ cint4)) %>%
   # if cint1_4 is not select cint5 will not be asked 
-   mutate(cint5 = case_when(is.na(cint1_4) ~ "-55", TRUE ~ cint5))
+   mutate(cint5 = case_when(is.na(cint1_4) ~ "-55", TRUE ~ cint5)) %>%
+  select(-c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77"))
 
 cint_socio_miss <- cint_socio %>%
   #mutate(across(-c(id, matches("_8_text$")), as.numeric))%>%
   pct_miss_fun(
-    id = c("id"),
-    n_items = 49
+    id = c("id", "cint1_8_text", "cint_identity_8_text"),
+    n_items = 12
   )
+
 
 cint_socio_miss %>% 
   gt::gt() %>% 
   gt::tab_header(
     title = 'CINT-SOCIODEMS Missing Data',
     subtitle = 'By Participant')
+
 cint_socio_remove <- cint_socio_miss %>% filter(miss_pct >= 20) %>% pull(id)
 
 ```
@@ -3105,22 +3117,60 @@ cint_socio_complete <-
                )
            )
   )
-
-# TODO: Maria, is there anything we should calculate for this measure 
 ```
 
 ### CINT-Ladder Select Variable & Recode
-```{r}
+```{r cint-ladder}
 cint_ladder <- tpw_raw %>%
   select(id, cint_ladder1, cint_ladder2) %>% 
   mutate(
     across(
       .cols = -id,
       .fns = ~case_when(
-        is.na(.x) ~ "-77",
+        #is.na(.x) ~ "-77",
         TRUE ~ .x
         )
       )
+  )
+```
+
+### CINT-Ladder Missing 
+```{r cint-ladder-missing}
+cint_ladder_missing <- cint_ladder %>%
+  pct_miss_fun(
+    id = c("id"),
+    n_items = 2
+  )
+
+cint_ladder_missing %>% gt::gt() %>% 
+  gt::tab_header(
+    title = 'CINT-LADDDER Missing Data',
+    subtitle = 'By Participant')
+
+cint_ladder_remove <- cint_ladder_miss %>% filter(miss_pct >= 20) %>% pull(id)
+
+
+# Below is the code that treats -77, -55 values as NA
+cint_ladder_complete <-
+  cint_ladder %>%
+  mutate(across(-c(id), as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -c(id),
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  ) %>%
+  mutate(
+         across(
+             -c(id),
+             ~case_when(
+                 id %in% cint_ladder_remove ~ NA_real_,
+                 TRUE ~ .x
+               )
+           )
   )
 ```
 
@@ -3241,8 +3291,8 @@ cint_relation <- tpw_raw %>%
     )
 ```
 
-### CINT-Romantic Missing
-```{r cint_soci_missing}
+### CINT-Romantic & F Missing
+```{r cint_relation_missing}
 cint_relation <- cint_relation %>%
   # if cint20 <1 cintq2:cint35 will not be asked 
    mutate_at(vars(cintq2:cint34), ~case_when(cint20 < 1 ~ "-55", TRUE ~ .)) %>%
@@ -3252,9 +3302,17 @@ cint_relation <- cint_relation %>%
 cint_relation_miss <- cint_relation %>%
   mutate(across(-c(id, matches("_8_text$")), as.numeric))%>%
   pct_miss_fun(
-    id = c("id", matches("_8_text$")),
-    n_items = 10
+    id = c("id", matches("_7_text$")),
+    n_items = 15
   )
+
+cint_relation_miss%>% gt::gt() %>% 
+  gt::tab_header(
+    title = 'CINT- Ramantic and Friend Relationship Missing Data',
+    subtitle = 'By Participant')
+
+cint_relation_remove <- cint_relation_miss %>% filter(miss_pct >= 20) %>% pull(id)
+
 ```
 
 ### CINT-Substance Use Select Variable & Recode
@@ -3665,7 +3723,7 @@ cts_pc_miss %>%
 cts_pc_remove <- cts_pc_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
-### CTS_PC
+### CTS_PC Calculations 
 ```{r cts-pc calculation & sbuscale}
 # TODO: Maria, please pay extra attention to this section, since I use SPSS code as reference 
 cts_pc_calc <-
@@ -4342,6 +4400,8 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(flo_complete, by = "id") %>%
   left_join(itq_complete, by = "id") %>%
   left_join(ibq_complete, by = "id") %>%
+  left_join(cint_socio_complete, by="id") %>%
+  left_join(cint_ladder_complete, by="id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
