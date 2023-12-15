@@ -48,6 +48,8 @@ Tidy data for archiving
 
 1. Merge with pulse data and incarcerated data
 
+1. Format dates/times and calculate elapsed time for biological confounds
+
 1. Specify missing data
 
 1. Check for data errors (data quality check of variables included in calculations) - impossible values
@@ -61,8 +63,7 @@ Tidy data for archiving
   
 1. Protect identifiability
 
-  * remove exact covid and diagnosis dates
-  * remove specific diagnosis names
+  * remove protected health information (e.g., exact covid dates, diagnoses)
 
 
 
@@ -95,11 +96,11 @@ pulse_td <- raw_pulse_df %>%
 #transform incarcerated data to merge
 incar_td <- incarcerated_df %>% 
   slice(-1) %>% 
-  filter(recipient_first_name != "HR211") %>% #TODO: MARIA, confirm remove and not change to -99
+  filter(recipient_first_name != "HR211") %>% 
   rename_with(~gsub("_\\d+", "", .x), starts_with("q")) %>% 
   mutate(start_date = format(ymd_hms(start_date), "%m/%d/%Y %H:%M"),
          end_date = format(ymd_hms(end_date), "%m/%d/%Y %H:%M")) %>% 
-  mutate(q8 = "-55") %>% #TODO: MARIA, confirm -55 for incarcerated participants
+  mutate(q8 = "-55") %>% 
   relocate(q8, .before = q9) %>% 
   select(-x7b_2, -x7b_3) %>% 
   select(start_date, end_date, recorded_date, recipient_first_name,
@@ -114,8 +115,6 @@ bio_incarvars_td <- raw_bio_df %>%
   select(start_date, end_date, recorded_date, recipient_first_name,
          starts_with("q"), starts_with("x"), starts_with("r"), -q291, -q291_1_text, -q292)
   
-
-#TODO: MARIA, confirm -99 (or -55) for missing incarcerated variables
 #bind rows then merge with rest of variables
 all_incarvars_td <- rbind(bio_incarvars_td, incar_td) %>% 
   left_join(raw_bio_df)
@@ -300,8 +299,33 @@ bio_td <- bio_df %>%
                             hbc18d == "Vigorous" ~ "3",
                             TRUE ~ hbc18d),
          chc1a = ifelse(chc1a == "Maybe", "-66", chc1a),
-         hbc1 = ifelse(family == "HR183", "9:45 AM", hbc1))#,
-         #across(c(hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f), standardize_time)) #format times
+         #manually correct times
+         hbc1 = case_when(family == "HR183" ~ "9:45 AM",
+                          family == "HR121" ~ "12:30 PM",
+                          family == "HR185" ~ "11:30 PM",
+                          family == "HR140" ~ "9:45 AM", 
+                          family == "HR147" ~ "12:30 PM", 
+                          TRUE ~ hbc1),
+         hbc8c = ifelse(family == "HR201", "1:30 PM", hbc8c),
+         hbc10c = case_when(family == "HR185" ~ "", 
+                            family == "P816" ~ "-99", 
+                            TRUE ~ hbc10c),
+         hbc11c = case_when(family == "P856" ~ "-99", 
+                            family == "P902" ~ "-99",
+                            family == "HR178" ~ "-99",
+                            family == "P822" ~ "-99",
+                            family == "HR156" ~ "-99",
+                            family == "P845" ~ "-99",
+                            family == "HR124" ~ "-99",
+                            family == "P833" ~ "-99",
+                            TRUE ~ hbc11c),
+         hbc12c = case_when(family == "P896" ~ "9:06 AM",
+                            family == "P868" ~ "1:45 PM",
+                            family == "HR155" ~ "1:15 PM",
+                            family == "HR214" ~ "10:30 AM",
+                            TRUE ~ hbc12c),
+         hbc18f = ifelse(family == "HR121", "4:00 PM", hbc18f),
+         across(c(hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f), standardize_time)) #format times
 
 
 #create function to convert time to date/time object for calculating elapsed time
@@ -424,21 +448,6 @@ bio_na <- bio_td %>%
            hbc12b_elapsed, hbc12c, hbc12c_elapsed, hbc12d, hbc13, hbc13a, hbc14, hbc14a, hbc15, hbc15a, hbc16, hbc16a, 
            hbc17, hbc17a, hbc17b, hbc17c, hbc18, hbc18a, hbc18b, hbc18c, hbc18d, hbc18e, hbc18f, hbc18f_elapsed,
            starts_with("chc"))
-
-
-
-
-
-#check to make sure all NA are coded
-check_na <- bio_na %>% 
-  filter(rowSums(is.na(.)) > 0)
-
-#check dates for elapsed time vars
-check_raw_dates <- bio_td %>% 
-  select(ends_with("day"), ends_with("time"), family, hbc1, hbc7c, hbc8c, hbc9b, 
-         hbc10c, hbc12b, hbc12c, hbc18f)
-
-
 
 
 
@@ -664,29 +673,6 @@ bio_td_archive <- rhs_subscales %>%
          hbc10b = hbc10c,
          hbc11b = hbc11c) %>% 
   mutate(hbc9c = ifelse(hbc9c == "Other: Please specify", "Other", hbc9c))
-
-check_arch <- bio_td_archive %>% 
-  select(family, starts_with("hbc"))
-
-rcheck_bio <- bio_td %>% 
-  select(family, starts_with("hbc")) %>% 
-  select(family, hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12c, hbc18f) 
-
-
-#Export times without AM/PM to double check
-# check_bio <- bio_td %>% 
-#   select(family, starts_with("hbc")) %>% 
-#   select(family, hbc1, hbc8c, hbc10c, hbc11c, hbc12c, hbc18f) %>%  #hbc7c, hbc9b, 
-#   filter(
-#     (!str_detect(hbc1,   "AM|PM|am|pm|Am|Pm|-55")   )|   #is.na(hbc1)) |
-#     (!str_detect(hbc8c,  "AM|PM|am|pm|Am|Pm|-55")  )|  #is.na(hbc8c)) |
-#     (!str_detect(hbc10c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc10c)) |
-#     (!str_detect(hbc11c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc11c)) |
-#     (!str_detect(hbc12c, "AM|PM|am|pm|Am|Pm|-55") )| #is.na(hbc12c)) |
-#     (!str_detect(hbc18f, "AM|PM|am|pm|Am|Pm|-55") ) #is.na(hbc18f))
-#   )
-#export hbc time variables for checking
-#export(check_bio, "check_hbc_times.xlsx")
 
 
 ```
