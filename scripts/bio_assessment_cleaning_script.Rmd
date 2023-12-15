@@ -356,6 +356,8 @@ elapsed_vars_df <- bio_td %>%
          hbc11c_elapsed = ifelse(hbc11c_raw_elapsed < 0, 1440 + hbc11c_raw_elapsed, hbc11c_raw_elapsed),
          hbc12c_elapsed = ifelse(hbc12c_raw_elapsed < 0, 1440 + hbc12c_raw_elapsed, hbc12c_raw_elapsed),
          hbc18f_elapsed = ifelse(hbc18f_raw_elapsed < 0, 1440 + hbc18f_raw_elapsed, hbc18f_raw_elapsed)) %>% 
+  #correct time since last cigarette on different day
+  mutate(hbc12c_elapsed = ifelse(hbc12b_raw_elapsed > 2, "-99", hbc12c_elapsed)) %>% 
   rename(hbc7c_elapsed = hbc7c_raw_elapsed,
          hbc8c_elapsed = hbc8c_raw_elapsed,
          hbc9b_elapsed = hbc9b_raw_elapsed,
@@ -474,7 +476,7 @@ Create RHS subscales
 
 ```{r subscale}
 
-#Recoding items
+#Recoding items according to RAND scoring
 rhs_sub_recode <- bio_na %>% 
   mutate(rhs1_p = case_when(rhs1 == "1" ~ 100, 
                             rhs1 == "2" ~ 75,
@@ -680,11 +682,11 @@ bio_td_archive <- rhs_subscales %>%
 ## Export
 
 ```{r export}
-#export internal file
-#export(internal_df, "bio_internal.xlsx")
-
-#export archived file
-#export(bio_td_archive, "bio_archive.xlsx")
+# #export internal file
+# export(internal_df, "bio_internal.xlsx")
+# 
+# #export archived file
+# export(bio_td_archive, "bio_archive.xlsx")
 
 
 ```
