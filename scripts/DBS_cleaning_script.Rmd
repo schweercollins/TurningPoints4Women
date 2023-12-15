@@ -235,7 +235,7 @@ full_df <- cho_df %>%
   left_join(ebv_df, by = "family") 
 
 al_df <- full_df %>% 
-  select(Study_Sample_ID, ends_with("al"))
+  select(family, ends_with("al"))
 
 #export as same format with new AL variables in respective tabs
 #write.xlsx(list("CHO" = cho_df, "HDL" = hdl_df, "TRG" = trg_df, "CRP" = crp_df, "EBV" = ebv_df, "A1c" = a1c_df, "IL6" = il6_df), file = "do_not_push/dbs_full.xlsx")
