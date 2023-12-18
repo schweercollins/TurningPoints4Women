@@ -473,13 +473,28 @@ dast <- dast %>%
   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
   mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
   # Skip rule: if d1a == 0 or -77 , d2a is skipped
-  mutate(d2a = case_when(d1a == 0 | d1a == "-77" ~ "-55", TRUE ~ d2a)) %>%
+  # mutate(d2a = case_when(d1a == 0 | d1a == "-77" ~ "-55", TRUE ~ d2a)) %>%
   # Skip rule: if d1a == 1 (d2a is answered (1,0,-77)) d2b should be skipped 
-  mutate(d2b = case_when(d1a == 1 ~ "-55", TRUE ~ d2b)) %>%
+  # mutate(d2b = case_when(d1a == 1 ~ "-55", TRUE ~ d2b)) %>%
   # Skip rule: if d2b == 0 or -77, rest question were skipped 
   mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == "-77" ~ "-55", TRUE ~ . )) 
 
+# Combine d2a and d2b answer options to d2
+dast$d2 <- apply(dast[, c("d2a", "d2b")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
 
+# Organize column order 
+dast <- dast %>%
+  relocate(d2, .after = d1a) %>%
+  select(-c(d2a, d2b)) %>%
+  mutate(
+    across(
+      .cols = d2,
+      .fns = ~case_when(
+        .x == "-55;-55" ~ "-55",
+        TRUE ~ .x
+      )
+    )
+  ) 
 
 dast %>%
   select(-dast_screen,
@@ -487,7 +502,7 @@ dast %>%
          -d5) %>%
   pct_miss_fun(
     id = 'id',
-    n_items = 21
+    n_items = 20
   ) %>% 
   gt::gt() %>% 
   gt::tab_header(
@@ -3313,6 +3328,29 @@ cint_relation_miss%>% gt::gt() %>%
 
 cint_relation_remove <- cint_relation_miss %>% filter(miss_pct >= 20) %>% pull(id)
 
+
+# Below is the code that treats -77, -55 values as NA
+cint_relation_complete <-
+  cint_relation %>%
+  mutate(across(-c(id, matches("_7_text$")), as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -c(id, matches("_7_text$")),
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  ) %>%
+  mutate(
+         across(
+             -c(id, matches("_7_text$")),
+             ~case_when(
+                 id %in% cint_relation_remove ~ NA_real_,
+                 TRUE ~ .x
+               )
+           )
+  )
 ```
 
 ### CINT-Substance Use Select Variable & Recode
@@ -3377,15 +3415,17 @@ cint_substance <- tpw_raw %>%
         TRUE ~ .x
       )
     ),
-    cint84_1 = case_when(cint84_1 == "1. Stranger" ~ "1",),
-    cint84_2 = case_when(cint84_2 == "2. Acquaintance" ~ "2",),
-    cint84_3 = case_when(cint84_3 == "3. Friend" ~ "3",),
-    cint84_4 = case_when(cint84_4 == "4. Family member" ~ "4",),
-    cint84_5 = case_when(cint84_5 == "5. Romantic partner" ~ "5",),
-    cint84_6 = case_when(cint84_6 == "6. Other" ~ "6",),
-    cint84_7 = case_when(cint84_77 == "Decline to Answer" ~ "-77",),
-
+    cint84_1 = case_when(cint84_1 == "1. Stranger" ~ "1", TRUE ~ cint84_1),
+    cint84_2 = case_when(cint84_2 == "2. Acquaintance" ~ "2",TRUE ~ cint84_2),
+    cint84_3 = case_when(cint84_3 == "3. Friend" ~ "3", TRUE ~ cint84_3),
+    cint84_4 = case_when(cint84_4 == "4. Family member" ~ "4", TRUE ~ cint84_4),
+    cint84_5 = case_when(cint84_5 == "5. Romantic partner" ~ "5", TRUE ~ cint84_5),
+    cint84_6 = case_when(cint84_6 == "6. Other" ~ "6", TRUE ~ cint84_6),
+    cint84_77 = case_when(cint84_77 == "Decline to Answer" ~ "-77", TRUE ~ cint84_77)
 )
+
+# Combine cint1 answer options to cint1 
+cint_substance$cint84 <- apply(cint_substance[, c("cint84_1", "cint84_2", "cint84_3", "cint84_4", "cint84_5", "cint84_6", "cint84_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
 
 ```
 
@@ -3394,7 +3434,7 @@ cint_substance <- tpw_raw %>%
 cint_substance <- cint_substance %>%
   # if cint_pregnancy_screen is yes/1, cint40:cint43 were not asked 
   # TODO: Maria, please check this skip rule I wasn't sure if this matches with what's on Quadratics
-   mutate_at(vars(cint39:cint84_77), ~case_when(cint_pregnancy_screen == 1 ~ "-55", TRUE ~ .)) %>%
+   mutate_at(vars(cint39:cint84), ~case_when(cint_pregnancy_screen == 1 ~ "-55", TRUE ~ .)) %>%
   # if cint39 is 0/No or -77 cint40:cint42 were not asked 
    mutate_at(vars(cint40:cint42), ~case_when(cint39 == 0 |  cint39 == "-77" ~ "-55", TRUE ~ .)) %>%
   # if cint41 is 0/No or -77 cint42 were not asked 
@@ -3409,7 +3449,7 @@ cint_substance <- cint_substance %>%
   mutate_at(vars(cint57), ~case_when(cint56 == 0 |  cint56 == "-77" ~ "-55", TRUE ~ .)) %>%
   # if cint58 is 0/No or -77, cint57:cint65 were not asked
    # TODO: Maria, please check this skip rule I wasn't sure if this matches with what's on Quadratics
-  mutate_at(vars(cint57:cint65), ~case_when(cint58 == 0 |  cint58 == "-77" ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(cint57:cint65), ~case_when(cint58 == 0 |  cint58 == "-77" |cint58 == "-55"~ "-55", TRUE ~ .)) %>%
   # if cint66 is 0/No or -77, cint67 were not asked
   mutate_at(vars(cint67), ~case_when(cint66 == 0 |  cint66 == "-77" ~ "-55", TRUE ~ .)) %>%
     # if cint68 is 0/No or -77, cint69 were not asked
@@ -3425,11 +3465,59 @@ cint_substance <- cint_substance %>%
    # if cint78 is 0/No or -77, cint79 were not asked
   mutate_at(vars(cint79), ~case_when(cint78 == 0 |  cint78 == "-77" ~ "-55", TRUE ~ .)) %>%
   # if cint80 is 0/No or -77, cint81:cint84_77 were not asked
-  mutate_at(vars(cint81:cint84_77), ~case_when(cint80 == 0 |  cint80 == "-77" ~ "-55", TRUE ~ .))
+  mutate_at(vars(cint81:cint84), ~case_when(cint80 == 0 |  cint80 == "-77" ~ "-55", TRUE ~ .)) %>% 
+  select(-c(cint84_1:cint84_77))
+
+
+cint_substance_miss <- cint_substance %>%
+  mutate(across(-c(id, matches("_6_text$")), as.numeric))%>%
+  pct_miss_fun(
+    id = c("id", matches("_6_text$")),
+    n_items = 47
+  )
+
+cint_substance_miss%>% gt::gt() %>% 
+  gt::tab_header(
+    title = 'CINT- Subtance use Missing Data',
+    subtitle = 'By Participant')
+
+cint_substance_remove <- cint_substance_miss %>% filter(miss_pct >= 20) %>% pull(id)
+
+
+# Below is the code that treats -77, -55 values as NA
+cint_substance_complete <-
+  cint_substance %>%
+  mutate(across(-c(id, matches("_6_text$")), as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -c(id, matches("_6_text$")),
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = matches("_6_text$"),
+      .fns = ~case_when(
+        .x == -55 ~ NA,
+        TRUE ~ .x
+      )
+    )
+  ) %>%
+  mutate(
+         across(
+             -c(id, matches("_6_text$")),
+             ~case_when(
+                 id %in% cint_substance_remove ~ NA_real_,
+                 TRUE ~ .x
+               )
+           )
+  )
 ```
 
+### CINT-COVID Select Variables and Recode 
 ```{r}
-  # TODO: Maria, on Qualtrics, I saw there is an answer option N/A, but I didn't see column for NAs
+  # TODO: Maria, on Qualtrics, I saw there is an answer option N/A, but I didn't see column for NAs. I compired couple of them with Qualtric response, seems like all the empty ones are N/A so I coded all the empty ones to NA, Let me know if this should be code to something else. 
 cint_covid <- tpw_raw %>%
   select(id, starts_with("cintc")) %>%
     mutate(
@@ -3446,40 +3534,62 @@ cint_covid <- tpw_raw %>%
   )
 
 
-# # Min: also consider cintc1 already have items, 
-# TODO: Maria, do we need combine multiple-choice questions answer options into one column? 
-# # combine multiple column into one for each question
-# for (i in 1:14) {
-#   col_name <- paste0("cintc", i)
-#   p_cols <- c(cint_covid[paste0(col_name, "_1")], 
-#             cint_covid[paste0(col_name, "_2")],
-#             cint_covid[paste0(col_name, "_3")],
-#             cint_covid[paste0(col_name, "_77")])
-# 
-#   cint_covid[col_name] <- c(paste(p_cols[!is.na(p_cols)], sep = ","))
-#     #apply(cint_covid, 2, function(col) paste(p_cols[!is.na(col)], col[!is.na(col)], sep = "_"))
-#     #paste(p_cols[!is.na(p_cols)], sep = ",")
-# }
-# 
-# for (i in 1:14) {
-#   column_name <- paste0("cintc", i)
-#   indices <- paste0(column_name, "_1")
-#   indices2 <- paste0(column_name, "_2")
-#   indices3 <- paste0(column_name, "_3")
-#   indices77 <- paste0(column_name, "_77")
-# 
-#   # Combine values, excluding NAs
-#   cint_covid[column_name] <- apply(cint_covid[, c(indices, indices2, indices3, indices77)], 1, function(row) {
-#     paste0(row, collapse = "", sep = "")
-#   })
-# }
-# 
-
-# cint_covid[cintc1] <- paste0(cint_covid$cintc1_1,cint_covid$cintc1_2, cint_covid$cintc1_3,cint_covid$cintc1_77)
-# cint_covid[cintc2] <- paste0(cint_covid$cintc2_1,cint_covid$cintc2_2, cint_covid$cintc2_3,cint_covid$cintc2_77)
-# cint_covid[cintc3] <- paste0(cint_covid$cintc3_1,cint_covid$cintc3_2, cint_covid$cintc3_3,cint_covid$cintc3_77)
+# Combine multiple choice columns into one for each question
+for (i in 1:14) {
+  # Define the columns to be combined for the current group
+  group_columns <- paste0("cintc", i, "_", c(1, 2, 3, 77))
+  # Apply the function to concatenate non-NA values for each row
+  cint_covid[, paste0("cintc", i)] <- apply(cint_covid[, c(group_columns, paste0("cintc", i))], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+}
 
 
+cint_covid <- cint_covid %>%
+  select(id, cintc1:cintc14)
+```
+
+### CINT-COVID Missing 
+```{r}
+# Replace all empty cells with -55 in the entire data frame
+cint_covid <- cint_covid %>%
+  replace(cint_covid, is.na(cint_covid) | cint_covid == "", -55)
+
+cint_covid_miss <- cint_covid %>%
+  mutate(across(-c(id), as.numeric))%>%
+  pct_miss_fun(
+    id = c("id"),
+    n_items = 14
+  )
+
+cint_covid_miss%>% gt::gt() %>% 
+  gt::tab_header(
+    title = 'CINT- COVID Question Missing Data',
+    subtitle = 'By Participant')
+
+cint_covid_remove <- cint_covid_miss %>% filter(miss_pct >= 20) %>% pull(id)
+
+
+# Below is the code that treats -77, -55 values as NA
+cint_covid_complete <-
+  cint_covid %>%
+  mutate(across(-c(id), as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -c(id),
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  ) %>%
+  mutate(
+    across(
+      -c(id),
+      ~case_when(
+        id %in% cint_covid_remove ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
 
 ```
 
@@ -4402,6 +4512,9 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(ibq_complete, by = "id") %>%
   left_join(cint_socio_complete, by="id") %>%
   left_join(cint_ladder_complete, by="id") %>%
+  left_join(cint_relation_complete, by="id") %>%
+  left_join(cint_substance_complete, by="id") %>%
+  left_join(cint_covid_complete, by="id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
@@ -4427,6 +4540,7 @@ tpw_archive <- tpw_archive_id %>%
   left_join(cint_ladder, by = "id") %>%
   left_join(cint_relation, by = "id") %>%
   left_join(cint_substance, by = "id") %>%
+  left_join(cint_covid, by="id") %>%
   left_join(socinf_sub, by = "id") %>%
   left_join(socinf_gen, by = "id") %>%
   left_join(cts_pc, by = "id") %>%
