@@ -1,4 +1,3 @@
-TEsting 
 ---
 title: "Telephonw Assessment Data Cleanning"
 author: "Min Zhang"
@@ -2205,9 +2204,8 @@ itq_complete <-
     )
   )
 ```
-ibq: 1-7 - total 
-ibq 10- number, how many they select 
-ibq 10 a column for each indicator if endourse -1, no- 0 
+
+
 ## IBQ
 ### IBQ Select Variables and Recode
 ```{r ibq}
@@ -2240,7 +2238,9 @@ ibq <-
 ) %>%
   mutate(ibq9 = ifelse(ibq9 %in% c("N/A"), "-55", ibq9)) %>% #TODO need confirm with Maria
   mutate(across(ibq10_1:ibq10_9, as.numeric))%>%
-  mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>%
+  mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>% # ibq 10, how many they select
+  mutate(ibq10 = as.character(ibq10))%>% 
+  mutate_at(vars(ibq10), ~case_when(ibq10_77 <0  ~ ibq10_77, TRUE ~ . )) %>%
   rename(ibq10_school = ibq10_1) %>%
   rename(ibq10_juvenile_justice = ibq10_2) %>%
   rename(ibq10_Legal_System = ibq10_3) %>%
@@ -2253,6 +2253,7 @@ ibq <-
   rename(ibq10_other_text = ibq10_9_text) %>%
   relocate(ibq10, .after = ibq9) %>%
   relocate(ibq10_other_text, .after = ibq10_other)
+
 ```
 
 ### IBQ Missing Data 
@@ -2266,7 +2267,7 @@ ibq <- ibq %>%
 ibq_miss <- ibq %>%
   mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
   pct_miss_fun(
-    id = c("id", "ibq10_school", "ibq10_juvenile_justice", "ibq10_Legal_System", "ibq10_Police", "ibq10_Medical", "ibq10_Church", "ibq10_Foster_Care", "ibq10_Child_Welfare","ibq10_other","ibq10_other_text","ibq10"),
+    id = c("id", "ibq10_school", "ibq10_juvenile_justice", "ibq10_Legal_System", "ibq10_Police", "ibq10_Medical", "ibq10_Church", "ibq10_Foster_Care", "ibq10_Child_Welfare","ibq10_other","ibq10_other_text"),
     n_items = 10
   )
 
@@ -2308,689 +2309,284 @@ sex <- tpw_raw%>%
   select(
     id,
     s_pregnancy_screen:s48
+  )%>%
+  mutate(
+    across(
+      .cols = everything(),
+      .fns = ~case_when(
+        # s_pregnancy_screen
+        # sex_current_engage ~ s3
+        # sex_current_live ~ s4
+        # sex_current_marry ~s6
+        # sex_other_safesex ~ s13
+        # sex_std ~ s22
+        # sex_check_out ~ s23
+        # sex_bloodtest_hiv ~ s26
+        # sex_sex_relation_justmet ~ s35
+        # sex_sex_relation_w_injects ~ s38
+        # sex_intercourse_male_partner ~ s39
+        # sex_intercourse_male_nocondom ~ s40
+        # sex_intercourse_female_partner ~ s44
+        # sex_oralsex_female_partner ~ s45
+        .x == "Yes" ~"1",
+        .x == "No" ~"0",
+        
+        # sex_might_be_preg ~ s28
+        .x == "1. Yes" ~ "1",
+        .x == "2. No" ~ "1",
+        .x == "4. I became pregnant prior to this last 6 months and knew that I was pregnant prior to this 6 month period" ~ "2",
+        
+        # sex_current_date ~ s1
+        .x =="1          Yes" ~ "1",
+        .x =="2 No" ~ "0",
+        
+        #sex_part_gender_id ~ s1a
+        # TODO: Maria, the code book guideline is: If nominal, number sequentially starting at 1 alphabetically, do you want me change the order 
+        .x == "Cisgender female or woman" ~ "1",
+        .x == "Female/Woman" ~"2",
+        .x == "Cisgender male or man" ~ "3",
+        .x == "Male/Man" ~ "4",
+        .x == "Trans female/woman" ~ "5",
+        .x == "Trans male/man" ~ "6",
+        .x == "Non-binary"~ "7",
+        .x == "Prefer to self-identify" ~ "8",
+        
+        # sex_pressure_stress ~s9
+        .x == "a great deal" ~ "5",
+        .x == "quite a lot" ~ "4",
+        .x == "some" ~"3",
+        .x == "not much" ~ "2",
+        .x == "very little" ~ "1",
+        
+        #sex_id_feeling ~ s10
+        .x == "1 - heterosexual (attracted to the opposite sex)" ~ "1",
+        .x == "2 - gay or lesbian (attracted to the same sex)" ~ "2",
+        .x == "3 - bi-sexual (attracted to both males and females)" ~ "3",
+        .x == "4 - Other: Please describe" ~"4",
+        
+        # sex_talk_safesex ~ s11
+        # sex_talk_safesex_other_person ~ s16
+        .x == "1 - Never" ~ "0",
+        .x == "1 - never" ~ "0",
+        .x == "2 - Rarely" ~ "1",
+        .x == "2 - rarely" ~ "1",
+        .x == "3 - Sometimes" ~ "2",
+        .x == "3 - sometimes" ~ "2",
+        .x == "4 - Often" ~ "3",
+        .x == "4 - often" ~ "3",
+        .x == "5 - Very Often" ~ "4",
+        .x == "5 - very often" ~ "4",
+
+        # sex_talk_comfort ~ s12
+        # sex_talk_comfort_other_person ~ s17
+        # sex_birthcontrol_sex_with ~ s18
+        # sex_safesex_sex_with ~ s19
+         .x == "very comfortable" ~ "5",
+         .x == "1 - very comfortable" ~ "5",
+         .x == "somewhat comfortable" ~ "4",
+         .x == "2 - somewhat comfortable" ~ "4",
+         .x == "neutral" ~ "3",
+         .x == "3 - neutral" ~ "3",
+         .x == "somewhat uncomfortable" ~ "2",
+         .x == "4 - somewhat uncomfortable" ~ "2",
+         .x == "very uncomfortable" ~ "1",
+         .x == "5 - very uncomfortable" ~ "1",
+        
+        # sex_other_person_safesex ~ s14
+        .x == "1 - friend" ~ "1",
+        .x == "2 - romantic partner" ~ "2",
+        .x == "3 - sister or brother" ~ "3",
+        .x == "4 - other relative" ~ "4",
+        .x == "5 - counselor, teacher, doctor" ~ "5",
+        .x == "6 - parent/parent figure" ~ "6",
+        .x == "7 - other (please describe:)" ~ "7",
+
+        # sex_confident_condom ~ s20
+        .x == "1 - Very Confident" ~ "3",
+        .x == "2 - Somewhat Confident" ~ "2",
+        .x == "3 - A little Confident" ~ "1",
+        .x == "4 - Not at all Confident" ~ "0",
+        
+        # sex_further_sexually ~ s21
+        # sex_safesex_prev_std ~ s33
+        # sex_alcohol_sex_relation ~ s36
+        # sex_cannabis_drugs_sex_relation ~ s37
+        .x == "1 - Always or almost always" ~ "4",
+        .x == "1.\tAlways or almost always" ~ "4",
+        .x == "2 - Often" ~ "3",
+        .x == "2.\tOften" ~ "3",
+        .x == "3.\tAbout half the time" ~ "2",
+        .x == "3 - About half the time" ~ "2",
+        .x == "4 - Occasionally" ~ "1",
+        .x == "4.\tOccasionally" ~ "1",
+        .x == "5 - Never or almost never" ~ "0",
+        .x == "5.\tNever or almost never" ~ "0",
+
+        
+        # sex_std_happen ~ s24
+        # TODO: Maria, please check if you want to code following option the way I did
+        .x == "Yes, I had a Sexually Transmitted Disease -STD  (positive diagnosis)" ~ "1",
+        .x == "I did not have an STD (negative diagnosis)" ~ "0",
+        .x == "I don't know yet; still waiting for the results" ~ "2",
+        
+        # s25
+        .x == "a. Genital herpes" ~ "1",
+        .x == "b. Genital warts" ~ "2",
+        .x == "c. AIDS/HIV" ~ "3",
+        .x == "d. Hepatitis B" ~ "4",
+        .x == "e.   Gonorrhea (clap)" ~ "5",
+        .x == "f.    Syphilis" ~ "6",
+        .x == "g.   Chlamydia" ~ "7",
+        .x == "h.   Other: Specify" ~ "8",
+        
+        # sex_preg_what_happen ~ s29
+        .x == "1 - Went to doctor, Positive diagnosis" ~ "1",
+        .x == "2 - Went to doctor, Negative diagnosis" ~ "2",
+        .x == "3 - Went to doctor, Don't know" ~ "3",
+        .x == "4 - Took a home test, positive" ~ "4",
+        .x == "5 - Took a home test, negative" ~ "5",
+        .x == "6 - Took a home test, don't know" ~ "6",
+        .x == "7 - Did nothing, negative (period started)" ~ "7",
+        .x == "8 - Did nothing, don't know" ~ "8",
+        
+        # s32
+        .x == "1.\tMale, same age or younger" ~ "1",
+        .x == "2.\tMale, 1-2 years older" ~ "2",
+        .x == "3.\tMale, more than 2 years older" ~ "3",
+        .x == "4.\tFemale, same age or younger" ~ "4",
+        .x == "5.\tFemale, 1-2 years older" ~ "5",
+        .x == "6. Female, more than 2 years older" ~ "6",
+        .x == "7. Non-binary and/or Other Gender, same age or younger" ~ "7",
+        .x == "8. 7. Non-binary and/or Other Gender, 1-2 years older" ~ "8",
+        .x == "9. 7. Non-binary and/or Other Gender, more than 2 years older" ~ "9",
+        .x == "" ~ "10",
+        # sex_percent_sex_relation_safesex_prev_std ~ s34
+        .x == "1  \tNever               \t0%" ~ "0",
+        .x == "2  \tRarely             \t1 - 15%" ~ "1",
+        .x == "3  \tOccasionally    \t15 - 40%" ~ "2",
+        .x == "4  \tAbout half the time\t40 - 60%" ~ "3",
+        .x == "5  \tUsually             \t60 - 85%" ~ "4",
+        .x == "6  \tMost of the time   \t85 -99%" ~ "5",
+        .x == "7  \tEvery single time  \t100%" ~ "6",
+        # sex_percent_w_male_use_birthcontrol ~ s43
+        .x == "Don't know" ~ "9",
+        .x == "10       Not using birth control because I am currently pregnant" ~ "10",
+        # sex_oralsex_dentaldam_female_partner ~ s46
+        .x == "Yes, had oral sex without a dental dam" ~ "1",
+        .x == "No, oral sex and always used dental dam" ~ "0",
+        .x == "Decline to Answer" ~ "-77",
+        .x == "decline to answer" ~ "-77",
+        .x == "Decline to answer" ~ "-77",
+        .x == "6 - Decline to Answer" ~ "-77",
+        .x == "6 - decline to answer" ~ "-77",
+        .x == "6 - Decline to answer" ~ "-77",
+        .x == "5 - decline to answer" ~ "-77",
+        .x == "5 - Decline to answer" ~ "-77",
+        .x == "3. Decline to answer" ~ "-77",
+        .x == "9 - Decline to answer" ~ "-77",
+        .x == "10. Decline to answer" ~ "-77",
+         
+        TRUE ~ .x
+      )
+    )
   )
 
-# sex <- sex %>%
-#   mutate(
-#     sex_preg_screen = case_when(
-#       s_pregnancy_screen == "Yes" ~"1",
-#       s_pregnancy_screen == "No" ~"0"
-#     ),
-#     sex_current_date = case_when(
-#       s1 =="Yes" ~ "1",
-#       s1 =="No" ~ "2",
-#       s1 =="Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_part_gender_id = case_when(
-#       s1a == 1 ~ "cisgender female",
-#       s1a == 2 ~ "female",
-#       s1a == 3 ~ "cisgender male",
-#       s1a == 4 ~ "male",
-#       s1a == 5 ~ "trans female",
-#       s1a == 6 ~ "tras male",
-#       s1a == 7 ~ "non-binary",
-#       s1a == 8 ~ "self-identify",
-#       s1a == 9 ~ NA_character_,
-#       s1a == 10 ~ NA_character_,
-#       TRUE ~ NA_character_
-#     ),
-#     sex_current_engage = case_when(
-#       s3 == 1 ~ "Yes",
-#       s3 == 2 ~ "No",
-#       s3 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_current_live = case_when(
-#       s4 == 1 ~ "Yes",
-#       s4 == 2 ~ "No",
-#       s4 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_current_marry = case_when(
-#       s6 == 1 ~ "Yes",
-#       s6 == 2 ~ "No",
-#       s6 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_pressure_stress = case_when(
-#       s9 == 1 ~ "a great deal",
-#       s9 == 2 ~ "quite a lot",
-#       s9 == 3 ~ "some",
-#       s9 == 4 ~ "not much",
-#       s9 == 5 ~ "very little",
-#       s9 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_id_feeling = case_when(
-#       s10 == 1 ~ "heterosexual",
-#       s10 == 2 ~ "gay_lesbian",
-#       s10 == 3 ~ "bisexual",
-#       s10 == 4 ~ "Other",
-#       s10 == 5 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_talk_safesex = case_when(
-#       s11 == 1 ~ "Never",
-#       s11 == 2 ~ "Rarely",
-#       s11 == 3 ~ "Sometimes",
-#       s11 == 4 ~ "Often",
-#       s11 == 5 ~ "Very Often",
-#       s11 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_talk_comfort = case_when(
-#       s12 == 1 ~ "Very Comfortable",
-#       s12 == 2 ~ "Somewhat Comfortable",
-#       s12 == 3 ~ "Neutral",
-#       s12 == 4 ~ "Somewhat uncomfortable",
-#       s12 == 5 ~ "Very uncomfortable",
-#       s12 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_other_safesex = case_when(
-#       s13 == 1 ~ "Yes",
-#       s13 == 2 ~ "No",
-#       s13 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_other_person_safesex = case_when(
-#       s14 == 1 ~ "Friend",
-#       s14 == 2 ~ "Romantic Partner",
-#       s14 == 3 ~ "Sister/Brother",
-#       s14 == 4 ~ "Other Relative",
-#       s14 == 5 ~ "Counselor/Teacher/Doctor",
-#       s14 == 6 ~ "Parent",
-#       s14 == 7 ~ "Other",
-#       s14 == 8 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_talk_safesex_other_person = case_when(
-#       s16 == 1 ~ "Never",
-#       s16 == 2 ~ "Rarely",
-#       s16 == 3 ~ "Sometimes",
-#       s16 == 4 ~ "Often",
-#       s16 == 5 ~ "Very Often",
-#       s16 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_talk_comfort_other_person = case_when(
-#       s17 == 1 ~ "Very Comfortable",
-#       s17 == 2 ~ "Somewhat Comfortable",
-#       s17 == 3 ~ "Neutral",
-#       s17 == 4 ~ "Somewhat uncomfortable",
-#       s17 == 5 ~ "Very uncomfortable",
-#       s17 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_birthcontrol_sex_with = case_when(
-#       s18 == 1 ~ "Very Comfortable",
-#       s18 == 2 ~ "Somewhat Comfortable",
-#       s18 == 3 ~ "Neutral",
-#       s18 == 4 ~ "Somewhat Uncomfortable",
-#       s18 == 5 ~ "Very Uncomfortable",
-#       s18 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_safesex_sex_with = case_when(
-#       s19 == 1 ~ "Very Comfortable",
-#       s19 == 2 ~ "Somewhat Comfortable",
-#       s19 == 3 ~ "Neutral",
-#       s19 == 4 ~ "Somewhat Uncomfortable",
-#       s19 == 5 ~ "Very Uncomfortable",
-#       s19 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_confident_condom = case_when(
-#       s20 == 1 ~ "Very confident",
-#       s20 == 2 ~ "Somewhat confident",
-#       s20 == 3 ~ "A little confident",
-#       s20 == 4 ~ "Not at all confident",
-#       s20 == 5 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_further_sexually = case_when(
-#       s21 == 1 ~ "Always or almost always",
-#       s21 == 2 ~ "Often",
-#       s21 == 3 ~ "About  half the time",
-#       s21 == 4 ~ "Occasionally",
-#       s21 == 5 ~ "Never or almost never",
-#       s21 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_std = case_when(
-#       s22 == 1 ~ "Yes",
-#       s22 == 2 ~ "No",
-#       s22 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_check_out = case_when(
-#       s23 == 1 ~ "Yes",
-#       s23 == 2 ~ "No",
-#       s23 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_std_happen = case_when(
-#       s24 == 1 ~ "Yes, I had a std (positive diagnosis)",
-#       s24 == 2 ~ "No STD (negative diagnosis)",
-#       s24 == 3 ~ "Don't know yet; waiting for results",
-#       s24 == 4 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     across(
-#       c(
-#         s25_1, s25_2, s25_3, s25_4, s25_5,
-#         s25_6, s25_7, s25_8, s25_9, s25_77
-#       ),
-#       ~case_when(
-#         is.na(.x) ~ NA_character_,
-#         TRUE ~ "Yes"
-#       )
-#     ),
-#     sex_bloodtest_hiv = case_when(
-#       s26 == 1 ~ "Yes",
-#       s26 == 2 ~ "No",
-#       s26 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_might_be_preg = case_when(
-#       s28 == 1 ~ "Yes",
-#       s28 == 2 ~ "No",
-#       s28 == 3 ~ "Decline",
-#       s28 == 4 ~ "Pregnant prior to last 6 months; knew pregnant prior to 6 month period",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_preg_what_happen = case_when(
-#       s29 == 1 ~ "Went to dr; positive diagnosis",
-#       s29 == 2 ~ "Went to dr; negative diagnosis",
-#       s29 == 3 ~ "Went to dr; don't know",
-#       s29 == 4 ~ "Took home test; positive",
-#       s29 == 5 ~ "Took home test; negative",
-#       s29 == 6 ~ "Took home test; don't know",
-#       s29 == 7 ~ "Did nothing; period started",
-#       s29 == 8 ~ "Did nothing, don't know",
-#       s29 == 9 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     across(
-#       c(
-#         s32_1, s32_2, s32_3, s32_4, s32_5,
-#         s32_6, s32_7, s32_8, s32_9, s32_77
-#       ),
-#       ~case_when(
-#         is.na(.x) ~ NA_character_,
-#         TRUE ~ "Yes"
-#       )
-#     ),
-#     sex_safesex_prev_std = case_when(
-#       s33 == 1 ~ "Always or almost always",
-#       s33 == 2 ~ "Often",
-#       s33 == 3 ~ "About half the time",
-#       s33 == 4 ~ "Occasionally",
-#       s33 == 5 ~ "Never or almost never",
-#       s33 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_percent_sex_relation_safesex_prev_std = case_when(
-#       s34 == 1 ~ "Never 0%",
-#       s34 == 2 ~ "Rarely 1-15%",
-#       s34 == 3 ~ "Occasionally 15-40%",
-#       s34 == 4 ~ "About half the time 40-60%",
-#       s34 == 5 ~ "Usually 60-85%",
-#       s34 == 6 ~ "Most of the time 85-99%",
-#       s34 == 7 ~ "Every single time 100%",
-#       s34 == 8 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_sex_relation_justmet = case_when(
-#       s35 == 1 ~ "Yes",
-#       s35 == 2 ~ "No",
-#       s35 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_alcohol_sex_relation = case_when(
-#       s36 == 1 ~ "Always or almost always",
-#       s36 == 2 ~ "Often",
-#       s36 == 3 ~ "About half the time",
-#       s36 == 4 ~ "Occasionally",
-#       s36 == 5 ~ "Never or almost never",
-#       s36 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_cannabis_drugs_sex_relation = case_when(
-#       s37 == 1 ~ "Always or almost always",
-#       s37 == 2 ~ "Often",
-#       s37 == 3 ~ "About half the time",
-#       s37 == 4 ~ "Occasionally",
-#       s37 == 5 ~ "Never or almost never",
-#       s37 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_sex_relation_w_injects = case_when(
-#       s38 == 1 ~ "Yes",
-#       s38 == 2 ~ "No",
-#       s38 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_intercourse_male_partner = case_when(
-#       s39 == 1 ~ "Yes",
-#       s39 == 2 ~ "No",
-#       s39 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_intercourse_male_nocondom = case_when(
-#       s40 == 1 ~ "Yes",
-#       s40 == 2 ~ "No",
-#       s40 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_percent_w_male_use_birthcontrol = case_when(
-#       s43 == 1 ~ "Never 0%",
-#       s43 == 2 ~ "Rarely 1-15%",
-#       s43 == 3 ~ "Occasionally 15-40%",
-#       s43 == 4 ~ "About half the time 40-60%",
-#       s43 == 5 ~ "Usually 60-85%",
-#       s43 == 6 ~ "Most of the time 85-99%",
-#       s43 == 7 ~ "Every single time 100%",
-#       s43 == 8 ~ "Decline",
-#       s43 == 9 ~ "Don't know",
-#       s43 == 10 ~ "Not using birth control; currently pregnant",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_intercourse_female_partner = case_when(
-#       s44 == 1 ~ "Yes",
-#       s44 == 2 ~ "No",
-#       s44 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_oralsex_female_partner = case_when(
-#       s45 == 1 ~ "Yes",
-#       s45 == 2 ~ "No",
-#       s45 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_oralsex_dentaldam_female_partner = case_when(
-#       s46 == 1 ~ "Yes, had oral sex without dental dam",
-#       s46 == 2 ~ "No, oral sex and always used dental dam",
-#       s46 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     )
-#   ) 
+# Combine sex25 answer options to sex25 
+sex$s25 <- apply(sex[, c("s25_1","s25_2","s25_3","s25_4","s25_5","s25_6","s25_7","s25_8","s25_9","s25_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sex25 answer options to sex32 
+sex$s32 <- apply(sex[, c("s32_1","s32_2","s32_3","s32_4","s32_5","s32_6","s32_7","s32_8","s32_9","s32_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
 ```
 
 ### Sex Missing Data
 ```{r sex_missing}
-# sex <- sex %>% 
-#   #TODO:Maria please double check the skip rule that is correct
-#   # for incarcerated TC, entire this survey wasn't shown 
-#   mutate_at(vars(s_pregnancy_screen:s48), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) %>%
-#   # Skip rule: if s1 select 1-yes, then skip to 
-#   mutate_at(vars(s1a:s8), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
-#   
-#   
-#   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
-#   mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
-#   # Skip rule: if d1a == 0 or -77 , d2a is skipped
-#   mutate(d2a = case_when(d1a == 0 | d1a == "-77" ~ "-55", TRUE ~ d2a)) %>%
-#   # Skip rule: if d1a == 1 (d2a is answered (1,0,-77)) d2b should be skipped 
-#   mutate(d2b = case_when(d1a == 1 ~ "-55", TRUE ~ d2b)) %>%
-#   # Skip rule: if d2b == 0 or -77, rest question were skipped 
-#   mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == "-77" ~ "-55", TRUE ~ . )) 
+ sex <- sex %>% 
+  relocate(s25, .before = s25_8_text) %>%
+  relocate(s32, .before = s33) %>%
+  # select(-c(s25_1:s25_77, s32_1:s32_77)) %>%
+   # for incarcerated TC, entire this survey wasn't shown 
+   mutate_at(vars(s_pregnancy_screen:s48), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.)  ~ "-55", TRUE ~ .)) %>%
+   # Skip rule: if s1 select no/Decline (0/-77), then skip s1a:s8
+   mutate_at(vars(s1a:s8), ~case_when(s1 != 1 ~ "-55", TRUE ~ . )) %>%
+   # Skip rule: if s4 select no/Decline (0/-77), then skip s5:s5c
+   mutate_at(vars(s5:s5c), ~case_when(s4 != 1 ~ "-55", TRUE ~ . )) %>%
+   # skip rule: if s3 is not Yes-1, s6is skipped  
+   mutate_at(vars(s6), ~case_when(s3 == 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s3 is Yes-1 | s6 != 1 , s7 is skipped  
+   mutate_at(vars(s7), ~case_when(s3 == 1 | s6 != 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s11 is Never(0) | s11 != -77 , s12 is skipped  
+   mutate_at(vars(s12), ~case_when(s11 == 0 | s11 != -77 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s13 is not Yes-1, s14:s17 is skipped  
+   mutate_at(vars(s14:s17), ~case_when(s13 != 1 ~ "-55", TRUE ~ . )) %>%
+    # skip rule: if s13 is not Yes-1, s14 is skipped  
+   #mutate_at(vars(s14), ~case_when(s13 != 1 ~ "-55", TRUE ~ . )) %>%
+    # skip rule: if s22 is not Yes-1, s23:s25 is skipped  
+   mutate_at(vars(s23:s25), ~case_when(s22 != 1 ~ "-55", TRUE ~ . )) %>%
+   # skip rule: if s23 is not Yes-1, s24:s25 is skipped  
+   mutate_at(vars(s24:s25), ~case_when(s23 != 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s24 is not Yes-1, s25 is skipped  
+   mutate_at(vars(s25), ~case_when(s24 != 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s26 is not Yes-1, s27 is skipped  
+   mutate_at(vars(s27), ~case_when(s26 != 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s28 is not Yes-1, s29 is skipped  
+   mutate_at(vars(s29), ~case_when(s28 != 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s30 <=0, s31:s35, s39, s40, s43, s44 is skipped  
+   mutate_at(vars(s31:s35, s39, s40, s43, s44), ~case_when(s30 <= 0 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s_pregnancy_Screen is not No (0) | s30 <=0, s36:s38 is skipped  
+   mutate_at(vars(s36:s38), ~case_when(s_pregnancy_screen != 0 | s30 <= 0 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s39 is not Yes-1, s40:s43 is skipped  
+   mutate_at(vars(s40:s43), ~case_when(s39 != 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s40 is not Yes-1, s40:s42 is skipped  
+   mutate_at(vars(s40:s42), ~case_when(s40 != 1 ~ "-55", TRUE ~ . )) %>%
+    # skip rule: if s40 is not Yes (1) | s30 <=0, s41:s42 is skipped  
+   mutate_at(vars(s41:s42), ~case_when(s40 != 1 | s30 <= 0 ~ "-55", TRUE ~ . )) %>%
+   # skip rule: if s44 is not Yes (1), s45:s48 is skipped  
+   mutate_at(vars(s45:s48), ~case_when(s44 != 1 ~ "-55", TRUE ~ . )) %>%
+   # skip rule: if s44 is not Yes (1) | s30 <=0, s45 is skipped  
+   mutate_at(vars(s45), ~case_when(s44 != 1 | s30 <= 0 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s45 is not Yes (1), s46:s48 is skipped  
+   mutate_at(vars(s46:s48), ~case_when(s45 != 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s45 is not Yes (1) | s30 <=0, s45, s47 is skipped  
+   mutate_at(vars(s46:s48), ~case_when(s45 != 1 | s30 <= 0 ~ "-55", TRUE ~ . )) %>%
+   # skip rule: if s46 is not Yes (1), s47:s48 is skipped  
+   mutate_at(vars(s47:s48), ~case_when(s46 != 1 ~ "-55", TRUE ~ . ))
+# TODO: Maria, I can't figure out why NAs in s29 are missing 
+
+
+sex_miss <- sex %>%
+  # mutate(across(-c(s2,s5,s7,matches("_text$")), as.numeric))%>%
+  pct_miss_fun(
+    id = c("id", matches("_text$")),
+    n_items = 56
+  )
+
+sex_miss %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'sex Missing Data',
+    subtitle = 'By Participant')
+
+sex_remove <- sex_miss %>% filter(miss_pct >= 20) %>% pull(id)  
+   
 ```
 
 ### Sex Calculation & Subscale
-# Maria - it seems like JP change everything to text. 
 ```{r sex_calc}
-# sex_calc <- sex %>%
-#   mutate(
-#     sex_preg_screen = case_when(
-#       s_pregnancy_screen == 1 ~ "Yes",
-#       s_pregnancy_screen == 2 ~ "No",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_current_date = case_when(
-#       s1 == 1 ~ "Yes",
-#       s1 == 2 ~ "No",
-#       s1 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_part_gender_id = case_when(
-#       s1a == 1 ~ "cisgender female",
-#       s1a == 2 ~ "female",
-#       s1a == 3 ~ "cisgender male",
-#       s1a == 4 ~ "male",
-#       s1a == 5 ~ "trans female",
-#       s1a == 6 ~ "tras male",
-#       s1a == 7 ~ "non-binary",
-#       s1a == 8 ~ "self-identify",
-#       s1a == 9 ~ NA_character_,
-#       s1a == 10 ~ NA_character_,
-#       TRUE ~ NA_character_
-#     ),
-#     sex_current_engage = case_when(
-#       s3 == 1 ~ "Yes",
-#       s3 == 2 ~ "No",
-#       s3 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_current_live = case_when(
-#       s4 == 1 ~ "Yes",
-#       s4 == 2 ~ "No",
-#       s4 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_current_marry = case_when(
-#       s6 == 1 ~ "Yes",
-#       s6 == 2 ~ "No",
-#       s6 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_pressure_stress = case_when(
-#       s9 == 1 ~ "a great deal",
-#       s9 == 2 ~ "quite a lot",
-#       s9 == 3 ~ "some",
-#       s9 == 4 ~ "not much",
-#       s9 == 5 ~ "very little",
-#       s9 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_id_feeling = case_when(
-#       s10 == 1 ~ "heterosexual",
-#       s10 == 2 ~ "gay_lesbian",
-#       s10 == 3 ~ "bisexual",
-#       s10 == 4 ~ "Other",
-#       s10 == 5 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_talk_safesex = case_when(
-#       s11 == 1 ~ "Never",
-#       s11 == 2 ~ "Rarely",
-#       s11 == 3 ~ "Sometimes",
-#       s11 == 4 ~ "Often",
-#       s11 == 5 ~ "Very Often",
-#       s11 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_talk_comfort = case_when(
-#       s12 == 1 ~ "Very Comfortable",
-#       s12 == 2 ~ "Somewhat Comfortable",
-#       s12 == 3 ~ "Neutral",
-#       s12 == 4 ~ "Somewhat uncomfortable",
-#       s12 == 5 ~ "Very uncomfortable",
-#       s12 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_other_safesex = case_when(
-#       s13 == 1 ~ "Yes",
-#       s13 == 2 ~ "No",
-#       s13 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_other_person_safesex = case_when(
-#       s14 == 1 ~ "Friend",
-#       s14 == 2 ~ "Romantic Partner",
-#       s14 == 3 ~ "Sister/Brother",
-#       s14 == 4 ~ "Other Relative",
-#       s14 == 5 ~ "Counselor/Teacher/Doctor",
-#       s14 == 6 ~ "Parent",
-#       s14 == 7 ~ "Other",
-#       s14 == 8 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_talk_safesex_other_person = case_when(
-#       s16 == 1 ~ "Never",
-#       s16 == 2 ~ "Rarely",
-#       s16 == 3 ~ "Sometimes",
-#       s16 == 4 ~ "Often",
-#       s16 == 5 ~ "Very Often",
-#       s16 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_talk_comfort_other_person = case_when(
-#       s17 == 1 ~ "Very Comfortable",
-#       s17 == 2 ~ "Somewhat Comfortable",
-#       s17 == 3 ~ "Neutral",
-#       s17 == 4 ~ "Somewhat uncomfortable",
-#       s17 == 5 ~ "Very uncomfortable",
-#       s17 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_birthcontrol_sex_with = case_when(
-#       s18 == 1 ~ "Very Comfortable",
-#       s18 == 2 ~ "Somewhat Comfortable",
-#       s18 == 3 ~ "Neutral",
-#       s18 == 4 ~ "Somewhat Uncomfortable",
-#       s18 == 5 ~ "Very Uncomfortable",
-#       s18 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_safesex_sex_with = case_when(
-#       s19 == 1 ~ "Very Comfortable",
-#       s19 == 2 ~ "Somewhat Comfortable",
-#       s19 == 3 ~ "Neutral",
-#       s19 == 4 ~ "Somewhat Uncomfortable",
-#       s19 == 5 ~ "Very Uncomfortable",
-#       s19 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_confident_condom = case_when(
-#       s20 == 1 ~ "Very confident",
-#       s20 == 2 ~ "Somewhat confident",
-#       s20 == 3 ~ "A little confident",
-#       s20 == 4 ~ "Not at all confident",
-#       s20 == 5 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_further_sexually = case_when(
-#       s21 == 1 ~ "Always or almost always",
-#       s21 == 2 ~ "Often",
-#       s21 == 3 ~ "About  half the time",
-#       s21 == 4 ~ "Occasionally",
-#       s21 == 5 ~ "Never or almost never",
-#       s21 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_std = case_when(
-#       s22 == 1 ~ "Yes",
-#       s22 == 2 ~ "No",
-#       s22 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_check_out = case_when(
-#       s23 == 1 ~ "Yes",
-#       s23 == 2 ~ "No",
-#       s23 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_std_happen = case_when(
-#       s24 == 1 ~ "Yes, I had a std (positive diagnosis)",
-#       s24 == 2 ~ "No STD (negative diagnosis)",
-#       s24 == 3 ~ "Don't know yet; waiting for results",
-#       s24 == 4 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     across(
-#       c(
-#         s25_1, s25_2, s25_3, s25_4, s25_5,
-#         s25_6, s25_7, s25_8, s25_9, s25_77
-#       ),
-#       ~case_when(
-#         is.na(.x) ~ NA_character_,
-#         TRUE ~ "Yes"
-#       )
-#     ),
-#     sex_bloodtest_hiv = case_when(
-#       s26 == 1 ~ "Yes",
-#       s26 == 2 ~ "No",
-#       s26 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_might_be_preg = case_when(
-#       s28 == 1 ~ "Yes",
-#       s28 == 2 ~ "No",
-#       s28 == 3 ~ "Decline",
-#       s28 == 4 ~ "Pregnant prior to last 6 months; knew pregnant prior to 6 month period",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_preg_what_happen = case_when(
-#       s29 == 1 ~ "Went to dr; positive diagnosis",
-#       s29 == 2 ~ "Went to dr; negative diagnosis",
-#       s29 == 3 ~ "Went to dr; don't know",
-#       s29 == 4 ~ "Took home test; positive",
-#       s29 == 5 ~ "Took home test; negative",
-#       s29 == 6 ~ "Took home test; don't know",
-#       s29 == 7 ~ "Did nothing; period started",
-#       s29 == 8 ~ "Did nothing, don't know",
-#       s29 == 9 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     across(
-#       c(
-#         s32_1, s32_2, s32_3, s32_4, s32_5,
-#         s32_6, s32_7, s32_8, s32_9, s32_77
-#       ),
-#       ~case_when(
-#         is.na(.x) ~ NA_character_,
-#         TRUE ~ "Yes"
-#       )
-#     ),
-#     sex_safesex_prev_std = case_when(
-#       s33 == 1 ~ "Always or almost always",
-#       s33 == 2 ~ "Often",
-#       s33 == 3 ~ "About half the time",
-#       s33 == 4 ~ "Occasionally",
-#       s33 == 5 ~ "Never or almost never",
-#       s33 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_percent_sex_relation_safesex_prev_std = case_when(
-#       s34 == 1 ~ "Never 0%",
-#       s34 == 2 ~ "Rarely 1-15%",
-#       s34 == 3 ~ "Occasionally 15-40%",
-#       s34 == 4 ~ "About half the time 40-60%",
-#       s34 == 5 ~ "Usually 60-85%",
-#       s34 == 6 ~ "Most of the time 85-99%",
-#       s34 == 7 ~ "Every single time 100%",
-#       s34 == 8 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_sex_relation_justmet = case_when(
-#       s35 == 1 ~ "Yes",
-#       s35 == 2 ~ "No",
-#       s35 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_alcohol_sex_relation = case_when(
-#       s36 == 1 ~ "Always or almost always",
-#       s36 == 2 ~ "Often",
-#       s36 == 3 ~ "About half the time",
-#       s36 == 4 ~ "Occasionally",
-#       s36 == 5 ~ "Never or almost never",
-#       s36 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_cannabis_drugs_sex_relation = case_when(
-#       s37 == 1 ~ "Always or almost always",
-#       s37 == 2 ~ "Often",
-#       s37 == 3 ~ "About half the time",
-#       s37 == 4 ~ "Occasionally",
-#       s37 == 5 ~ "Never or almost never",
-#       s37 == 6 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_sex_relation_w_injects = case_when(
-#       s38 == 1 ~ "Yes",
-#       s38 == 2 ~ "No",
-#       s38 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_intercourse_male_partner = case_when(
-#       s39 == 1 ~ "Yes",
-#       s39 == 2 ~ "No",
-#       s39 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_intercourse_male_nocondom = case_when(
-#       s40 == 1 ~ "Yes",
-#       s40 == 2 ~ "No",
-#       s40 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_percent_w_male_use_birthcontrol = case_when(
-#       s43 == 1 ~ "Never 0%",
-#       s43 == 2 ~ "Rarely 1-15%",
-#       s43 == 3 ~ "Occasionally 15-40%",
-#       s43 == 4 ~ "About half the time 40-60%",
-#       s43 == 5 ~ "Usually 60-85%",
-#       s43 == 6 ~ "Most of the time 85-99%",
-#       s43 == 7 ~ "Every single time 100%",
-#       s43 == 8 ~ "Decline",
-#       s43 == 9 ~ "Don't know",
-#       s43 == 10 ~ "Not using birth control; currently pregnant",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_intercourse_female_partner = case_when(
-#       s44 == 1 ~ "Yes",
-#       s44 == 2 ~ "No",
-#       s44 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_oralsex_female_partner = case_when(
-#       s45 == 1 ~ "Yes",
-#       s45 == 2 ~ "No",
-#       s45 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     ),
-#     sex_oralsex_dentaldam_female_partner = case_when(
-#       s46 == 1 ~ "Yes, had oral sex without dental dam",
-#       s46 == 2 ~ "No, oral sex and always used dental dam",
-#       s46 == 3 ~ "Decline",
-#       TRUE ~ NA_character_
-#     )
-#   ) %>%
-#   rename(
-#     sex_start_see_part = s2,
-#     sex_been_together_yr = s2a,
-#     sex_been_together_mth = s2b,
-#     sex_been_together_day = s2c,
-#     sex_movein_date = s5,
-#     sex_live_together_yr = s5a,
-#     sex_live_together_mth = s5b,
-#     sex_live_together_day = s5c,
-#     sex_marry_date = s7,
-#     sex_part_age = s8,
-#     sex_id_feeling_text = s10_4_text,
-#     sex_other_person_text = s14_8_text,
-#     sex_other_person_age = s15,
-#     sex_std_herpes_diag = s25_1,
-#     sex_std_warts_diag = s25_2,
-#     sex_std_aids_hiv_diag = s25_3,
-#     sex_std_hepb_diag = s25_4,
-#     sex_std_gonorrhea_diag = s25_5,
-#     sex_std_syphilis_diag = s25_6,
-#     sex_std_chlamydia_diag = s25_7,
-#     sex_std_other_diag = s25_8,
-#     sex_std_dontremember = s25_9,
-#     sex_std_decline = s25_77,
-#     sex_std_diag_text = s25_8_text,
-#     sex_bloodtest_hiv_times = s27,
-#     sex_sex_relations_times = s30,
-#     sex_number_different_people = s31,
-#     sex_partner_male_sameage = s32_1,
-#     sex_partner_male_1to2_older = s32_2,
-#     sex_partner_male_more2_older = s32_3,
-#     sex_partner_female_sameage = s32_4,
-#     sex_partner_female_1to2_older = s32_5,
-#     sex_partner_female_more2_older = s32_6,
-#     sex_partner_nonbinary_sameage = s32_7,
-#     sex_partner_nonbinary_1to2_older = s32_8,
-#     sex_partner_nonbinary_more2_older = s32_9,
-#     sex_partner_decline = s32_77,
-#     sex_intercourse_male_nocondom_times = s41,
-#     sex_intercourse_male_nocondom_number_partner = s41,
-#     sex_oralsex_dentaldam_times = s47,
-#     sex_oralsex_dentaldam_number_parnter = s48
-#   )
+# Below is the code that treats -77, -55 values as NA
+sex_complete <-
+  sex %>%
+  mutate(across(-c(id,matches("_text$")), as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -c(id),
+      .fns = ~case_when(
+        .x < 0 ~ NA,
+        TRUE ~ .x
+      )
+    )
+  )
+
+
 ```
 
 ## CINT
@@ -3106,10 +2702,7 @@ cint_socio_miss %>%
 
 cint_socio_remove <- cint_socio_miss %>% filter(miss_pct >= 20) %>% pull(id)
 
-```
 
-### CINT-SOCIODEMS Calculations 
-```{r cint_soci_cal}
 # Below is the code that treats -77, -55 values as NA
 cint_socio_complete <-
   cint_socio %>%
@@ -4515,6 +4108,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(cint_relation_complete, by="id") %>%
   left_join(cint_substance_complete, by="id") %>%
   left_join(cint_covid_complete, by="id") %>%
+  left_join(sex_complete, by="id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
@@ -4544,6 +4138,7 @@ tpw_archive <- tpw_archive_id %>%
   left_join(socinf_sub, by = "id") %>%
   left_join(socinf_gen, by = "id") %>%
   left_join(cts_pc, by = "id") %>%
+  left_join(sex, by="id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 ```
