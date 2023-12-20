@@ -41,7 +41,7 @@ raw_il6_df <- read_excel(dbs_fp, sheet = "IL6")
 ```{r al-vars}
 #CHO AL vars
 cho_df <- raw_cho_df %>% 
-  mutate(CHO_AL  = ifelse(PE_CHO >= 200, 1, 0),
+  mutate(CHO_CAL  = ifelse(PE_CHO >= 200, 1, 0),
          CHO_PAL = ifelse(PE_CHO >= quantile(PE_CHO, 0.75, na.rm = TRUE), 1, 0),
          #CHO_SAL = ifelse(PE_CHO > (mean(PE_CHO, na.rm = TRUE) + sd(PE_CHO, na.rm = TRUE)), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_CHO_Plate 1" ~ "1",
@@ -51,7 +51,7 @@ cho_df <- raw_cho_df %>%
                               Plate_ID == "not assayed" ~ "10",
                               TRUE ~ Plate_ID),
          Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
-         across(c(Direct_CHO, PE_CHO, CHO_AL, CHO_PAL), 
+         across(c(Direct_CHO, PE_CHO, CHO_CAL, CHO_PAL), 
                 ~case_when(Plate_ID == "10"  ~ "-99",
                            CHO_Assay_Note == "37" ~ "-99",
                            TRUE ~ as.character(.))),
@@ -67,7 +67,7 @@ cho_df <- raw_cho_df %>%
 
 #CRP AL vars
 crp_df <- raw_crp_df %>% 
-  mutate(CRP_AL  = ifelse(as.numeric(PE_CRP) >= 0.3, 1, 0),
+  mutate(CRP_CAL  = ifelse(as.numeric(PE_CRP) >= 0.3, 1, 0),
          CRP_PAL = ifelse(as.numeric(PE_CRP) >= quantile(as.numeric(PE_CRP), 0.75, na.rm = TRUE), 1, 0),
          `Plate ID` = case_when(`Plate ID` == "TPW_CRP_PLATE 1" ~ "1",
                                 `Plate ID` == "TPW_CRP_PLATE 2" ~ "2",
@@ -75,7 +75,7 @@ crp_df <- raw_crp_df %>%
                                 `Plate ID` == "not assayed" ~ "10",
                                 TRUE ~ `Plate ID`),
          Assay_Date = ifelse(`Plate ID` == "10", "-99", as.character(Assay_Date)),
-         across(c(Direct_CRP, PE_CRP, CRP_AL, CRP_PAL), 
+         across(c(Direct_CRP, PE_CRP, CRP_CAL, CRP_PAL), 
                 ~case_when(`Plate ID` == "10"  ~ "-99",
                            CRP_Assay_Note == "37" ~ "-99",
                            CRP_Assay_Note == "1" ~ "-99",
@@ -83,7 +83,7 @@ crp_df <- raw_crp_df %>%
          Direct_CRP = ifelse(Study_Sample_ID == "HR177", "<10", round(as.numeric(Direct_CRP), 2)),
          PE_CRP = ifelse(Study_Sample_ID == "HR177", "<10", round(as.numeric(PE_CRP), 2)),
          across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
-  mutate_at(vars(CRP_AL, CRP_PAL), ~ ifelse(Study_Sample_ID == "HR177", 0, .)) %>%  #force <10 to zero
+  mutate_at(vars(CRP_CAL, CRP_PAL), ~ ifelse(Study_Sample_ID == "HR177", 0, .)) %>%  #force <10 to zero
   mutate_at(vars(ends_with("Note")), ~ifelse(is.na(.), "-55", .)) %>% 
   rename(family = Study_Sample_ID,
          crp_pe = PE_CRP,
@@ -95,13 +95,13 @@ crp_df <- raw_crp_df %>%
 
 #IL6 AL vars
 il6_df <- raw_il6_df %>% 
-  mutate(IL6_AL  = ifelse(PE_IL6 >= 6.1, 1, 0),
+  mutate(IL6_CAL  = ifelse(PE_IL6 >= 6.1, 1, 0),
          IL6_PAL = ifelse(PE_IL6 >= quantile(PE_IL6, 0.75, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_IL6_Plate_1" ~ "1",
                               Plate_ID == "not assayed" ~ "10",
                               TRUE ~ Plate_ID),
          Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
-         across(c(Direct_IL6, PE_IL6, IL6_AL, IL6_PAL), 
+         across(c(Direct_IL6, PE_IL6, IL6_CAL, IL6_PAL), 
                 ~case_when(Plate_ID == "10"  ~ "-99",
                            TRUE ~ as.character(.))),
          across(ends_with("note"), ~str_replace_all(., ",", "; "))) %>% 
@@ -116,7 +116,7 @@ il6_df <- raw_il6_df %>%
 
 #HDL AL vars
 hdl_df <- raw_hdl_df %>% 
-  mutate(HDL_AL  = ifelse(PE_HDL <= 39, 1, 0),
+  mutate(HDL_CAL  = ifelse(PE_HDL <= 39, 1, 0),
          HDL_PAL = ifelse(PE_HDL >= quantile(PE_HDL, 0.75, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_HDL_Plate 1" ~ "1",
                               Plate_ID == "TPW_HDL_Plate 2" ~ "2",
@@ -125,7 +125,7 @@ hdl_df <- raw_hdl_df %>%
                               Plate_ID == "not assayed" ~ "10",
                               TRUE ~ Plate_ID),
          Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
-         across(c(Direct_HDL, PE_HDL, HDL_AL, HDL_PAL), 
+         across(c(Direct_HDL, PE_HDL, HDL_CAL, HDL_PAL), 
                 ~case_when(Plate_ID == "10"  ~ "-99",
                            HDL_Assay_Note == "37" ~ "-99",
                            HDL_Assay_Note == "1" ~ "-99",
@@ -143,7 +143,7 @@ hdl_df <- raw_hdl_df %>%
 
 #TRG AL vars
 trg_df <- raw_trg_df %>% 
-  mutate(TRG_AL  = ifelse(PE_TRG >= 150, 1, 0),
+  mutate(TRG_CAL  = ifelse(PE_TRG >= 150, 1, 0),
          TRG_PAL = ifelse(PE_TRG >= quantile(PE_TRG, 0.75, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_TRG_Plate 1" ~ "1",
                               Plate_ID == "TPW_TRG_Plate 2" ~ "2",
@@ -152,7 +152,7 @@ trg_df <- raw_trg_df %>%
                               Plate_ID == "not assayed" ~ "10",
                               TRUE ~ Plate_ID),
          Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
-         across(c(Direct_TRG, PE_TRG, TRG_AL, TRG_PAL), 
+         across(c(Direct_TRG, PE_TRG, TRG_CAL, TRG_PAL), 
                 ~case_when(Plate_ID == "10"  ~ "-99",
                            TRG_Assay_Note == "37" ~ "-99",
                            TRG_Assay_Note == "1" ~ "-99",
@@ -169,7 +169,7 @@ trg_df <- raw_trg_df %>%
 
 #A1C AL vars
 a1c_df <- raw_a1c_df %>% 
-  mutate(A1C_AL  = ifelse(HbA1c >= 6.5, 1, 0),
+  mutate(A1C_CAL  = ifelse(HbA1c >= 6.5, 1, 0),
          A1C_PAL = ifelse(HbA1c >= quantile(HbA1c, 0.75, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_A1c_Plate_1" ~ "1",
                               Plate_ID == "TPW_A1c_Plate_2" ~ "2",
@@ -178,7 +178,7 @@ a1c_df <- raw_a1c_df %>%
                               Plate_ID == "not assayed" ~ "10",
                               TRUE ~ Plate_ID),
          Assay_Date = ifelse(Plate_ID == "10", "-99", as.character(Assay_Date)),
-         across(c(HbA1c, A1C_AL, A1C_PAL), 
+         across(c(HbA1c, A1C_CAL, A1C_PAL), 
                 ~case_when(Plate_ID == "10"  ~ "-99",
                            A1c_Assay_Note == "37" ~ "-99",
                            A1c_Assay_Note == "1" ~ "-99",
@@ -194,7 +194,7 @@ a1c_df <- raw_a1c_df %>%
 
 #EBV AL vars
 ebv_df <- raw_ebv_df %>% 
-  mutate(#EBV_AL  = ifelse(PE_EBV >= #, 1, 0),
+  mutate(#EBV_CAL  = ifelse(PE_EBV >= #, 1, 0),
          EBV_PAL = ifelse(PE_EBV >= quantile(PE_EBV, 0.75, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_EBV_Plate 1" ~ "1",
                               Plate_ID == "TPW_EBV_Plate 2" ~ "2",
@@ -222,7 +222,7 @@ ebv_df <- raw_ebv_df %>%
 
 ## Merge 
 
-Merge together all AL indicators and export
+Merge together all AL indicators to view, then export
 
 ```{r merge}
 
