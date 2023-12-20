@@ -1,0 +1,601 @@
+---
+title: "Codebook draft for DBS and BIO vars"
+author: "Shaina Trevino"
+date: "2023-12-15"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(readxl, here, tidyverse, openxlsx, gt, tidyverse, scales, ggpubr)
+
+```
+
+```{r import, include = FALSE}
+#file path
+dbs_fp <- here("do_not_push", "dbs_archive.xlsx")
+
+#import data from all tabs
+dbs_cho_df <- read_excel(dbs_fp, sheet = "CHO") 
+
+dbs_hdl_df <- read_excel(dbs_fp, sheet = "HDL") 
+
+dbs_trg_df <- read_excel(dbs_fp, sheet = "TRG")
+
+dbs_crp_df <- read_excel(dbs_fp, sheet = "CRP")
+
+dbs_ebv_df <- read_excel(dbs_fp, sheet = "EBV")
+
+dbs_a1c_df <- read_excel(dbs_fp, sheet = "A1c")
+
+dbs_il6_df <- read_excel(dbs_fp, sheet = "IL6")
+
+```
+
+```{r DELETE}
+#COPIED FROM CODEBOOK SO THIS WILL RENDER WITH SAME FORMAT/THEME - DELETE WHEN INTEGRATING INTO FULL CODEBOOK
+source(here("functions", "codebook_fun.R"))
+
+# Color palettes 
+ Two_color = c("#246B69", "#604C41")
+
+# Histogram style 
+# hist_style <- geom_histogram(bins=20, color = "white", fill = "#246B69", alpha = 0.7)
+
+
+bar_style <- geom_bar(color = "white", fill = "#246B69", alpha = 0.7)
+
+THEME <-     theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 13),
+    )
+
+#re-work JP cutoff function due to error "cant use `{{` in non-quoting function
+cutoff_plot2 <- function(data,
+                        x,
+                        cutoff = 0,
+                        cutoff_color = '#324B4A',
+                        cutoff_other = NULL,
+                        cutoff_other_color = '#95B1AF',
+                        cutoff_other2 = NULL,
+                        cutoff_other2_color = '#546085',
+                        bins = 20) {
+
+  library(magrittr)
+  library(dplyr)
+  library(ggplot2)
+
+  x <- enquo(x)
+
+  if (is.null(cutoff_other)) {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = '#246B69',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 20),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  } else if (is.null(cutoff_other2)) {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = '#246B69',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other,
+                 color = cutoff_other_color,
+                 linetype = 3,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 13),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  } else {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = 'black',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other,
+                 color = cutoff_other_color,
+                 linetype = 3,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other2,
+                 color = cutoff_other2_color,
+                 linetype = 4,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 13),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  }
+}
+
+# gt-theme-general
+apply_tbl_theme <- function(table) {
+  table %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
+            locations = cells_body(columns = everything())) %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
+                         cell_fill(color = "#246B69", alpha = .7)),
+            locations = cells_column_labels()) %>% 
+  tab_options(column_labels.border.top.color = "black",
+              column_labels.border.bottom.color = "black",
+              table_body.border.bottom.color = "black",
+              table.border.top.color = "white",
+              heading.border.bottom.color = "black",
+              table_body.hlines.color = "white")%>% 
+  tab_options(table.align = "left")
+}
+
+#theme for value label tables
+apply_labtab_theme <- function(table) {
+  table %>% 
+  cols_align(columns = everything(), align = "center") %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
+            locations = cells_body(columns = everything())) %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
+                         cell_fill(color = "#246B69", alpha = .7)),
+            locations = cells_column_labels()) %>% 
+  tab_options(column_labels.border.top.color = "black",
+              column_labels.border.bottom.color = "black",
+              table_body.border.bottom.color = "black",
+              table.border.top.color = "white",
+              heading.border.bottom.color = "black",
+              table_body.hlines.color = "white") %>% 
+  tab_options(table.align = "left")
+}
+
+```
+
+
+# Allostatic Load Assessment
+
+*<MARIA> INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN (includes DBS and bio survey data)*
+
+## Dried Blood Spot Data Collection
+
+These data are in the `dbs_archive.xlsx` file where each construct domain is a separate tab. 
+
+*<MARIA, insert brief description about DBS assessment/construct domain and how it was measured>* 
+
+The seven biological constructs assessed were cholesterol, c-reactive protein, interleukin-6, high-density lipoprotein, triglycerides, blood sugar (i.e., A1C), and Epstein-Barr virus. 
+
+For each biological construct, allostatic load indicators were calculated based on *<MARIA INSERT, include difference between AL and percentile AL indicator if possible>.*
+
+*<MARIA, insert any references to include here (or only for composite scores?)>*
+
+### Cholesterol (CHO) Description
+
+These data include variables related to the cholesterol assessment, including direct and plasma equivalent (PE) cholesterol values for participants. Higher scores indicate higher cholesterol. The PE cholesterol value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+### CHO Variables
+
+#### Value Labels
+
+The value labels for all `_note` variables (`cho_punch_note`, `cho_assay_note`, and `cho_result_note`) are below: 
+
+```{r CHO-label-table, results = 'asis'}
+
+cho_label_df <- data.frame(
+  value = c("1", "4", "5", "37", "42"),
+  label = c("Blank punch",
+            "Small spot, <80%",
+            "Non-circular dried blood spot",
+            "Punch did not elute",
+            "Blood from filter paper touched inside back cover")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+cho_label_df <- setNames(cho_label_df[-1, ], unlist(cho_label_df[1, ]))
+
+
+#create table
+cho_label_table <- cho_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cho_label_table)
+
+```
+
+
+
+Allostatic load indicators, `cho_cal` and `cho_pal` are dichotomous:
+
+```{r CHO-dichot-value, results = 'asis'}
+#create dichotomous table to be re-used
+dichot_label_df <- data.frame(
+  value = c("0", "1"),
+  label = c("No",
+            "Yes")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+dichot_label_df <- setNames(dichot_label_df[-1, ], unlist(dichot_label_df[1, ]))
+
+
+#create table
+dichot_label_table <- dichot_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(dichot_label_table)
+
+```
+
+
+#### Variables
+
+All CHO variables are presented in the following table.
+
+```{r CHO-var-table, results = 'asis'}
+#create table of info
+cho_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "cho_direct", "cho_pe", "cho_punch_note", "cho_assay_note", "cho_result_note", 
+            "cho_plate", "cho_date", "cho_cal", "cho_pal"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct cholesterol analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent cholesterol analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay",
+            "Clinical allostatic load indicator for out-of-range cholesterol",
+            "Percentile-based allostatic load indicator for out-of-range cholesterol")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+cho_var_table <- cho_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(cho_var_table)
+
+```
+
+#### Composite Variables
+
+Using the plasma-equivalent cholesterol value, two allostatic load indicators were calculated. One based on the clinical cut-off for high cholesterol (`cho_cal`) and the other is a percentile-based cut-off for high cholesterol (`cho_pal`) defined as the top 25% of cholesterol scores. 
+
+```{r CHO-subscale-table, results = 'asis'}
+#create table of info for AL indicators
+cho_scale_df <- data.frame(
+  var_name = c("cho_cal", "cho_pal"),
+  scale = c("Allostatic load indicator based on clinical cut-off  for high cholesterol (1)",
+            "Allostatic load indicator based on top 25% of cholesterol scores (1)"),
+  scale_construction = c("`cho_pe` > 199", 
+                         "Top 25% of observed `cho_pe` values"),
+  scale_range = c("0-1", "0-1"))
+
+#create gt table
+cho_scale_table <- cho_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(cho_scale_table)
+
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key CHO variables.
+
+Raw cholesterol values: 
+
+```{r cho-cont-summary-table, results = 'asis'}
+#create function for calculating continuous summary statistics
+calc_cont_sum_stats <- function(df) {
+  stats_list <- lapply(names(df), function(name) {
+    x <- df[[name]]
+    mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+    sd_val <- round(sd(x, na.rm = TRUE), 2)
+    range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+    miss_val <- round(mean(is.na(x)) * 100, 2)
+    data.frame(Variable = name, Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  })
+  stats_df <- do.call(rbind, stats_list)
+  return(stats_df)
+}
+
+
+#apply function to calculate summary stats
+cho_sum_df <- dbs_cho_df %>% 
+  select(cho_direct, cho_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+cho_sum_tbl <- cho_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cho_sum_tbl
+
+```
+
+Allostatic load indicators: 
+
+```{r cho-dichot-summary-table, results = 'asis'}
+#create function for calculating dichotomous summary statistics
+calc_dichot_sum_stats <- function(df) {
+  stats_list <- lapply(names(df), function(name) {
+    x <- df[[name]]
+    per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+    per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+    num_no <- sum(x == 0, na.rm = TRUE)
+    num_yes <-sum(x == 1, na.rm = TRUE)
+    miss_val <- round(mean(is.na(x)) * 100, 2)
+    data.frame(Variable = name, per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+  })
+  stats_df <- do.call(rbind, stats_list)
+  return(stats_df)
+}
+
+#apply function to calculate summary stats
+cho_dichot_df <- dbs_cho_df %>% 
+  select(cho_cal, cho_pal) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+#create gt table
+cho_tbl_dichot <- cho_dichot_df %>%
+  gt() %>%
+  cols_label(num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+cho_tbl_dichot
+
+```
+
+Data collection notes: 
+
+```{r cho-cat-summary-table, results = 'asis'}
+#create function to process columns with multiple responses
+calc_multi_column <- function(column, responses) {
+  responses_list <- strsplit(as.character(column), ";")
+  flat_responses <- unlist(responses_list)
+  flat_responses <- trimws(flat_responses)  # Remove leading/trailing spaces
+  
+  # Modify to include -55 as a valid response
+  valid_responses <- flat_responses[flat_responses %in% c(responses, "-55")]
+
+  count_response <- function(response) {
+    sum(valid_responses == response, na.rm = TRUE)
+  }
+
+  total_valid_responses <- length(valid_responses)
+
+  response_counts <- sapply(c(responses, "-55"), count_response)
+  response_percents <- round(response_counts / total_valid_responses * 100, 1)
+
+  data.frame(
+    Response = c(responses, "-55"),
+    Count = response_counts,
+    Percent = response_percents,
+    stringsAsFactors = FALSE
+  )
+}
+
+#notes for cho_df
+cho_notes <- c(1, 4, 5, 37, 42)
+
+cho_note_df <- dbs_cho_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+cho_note_list <- lapply(cho_note_df, function(column) calc_multi_column(column, cho_notes))
+
+#combine results into df
+cho_note_sum <- bind_rows(cho_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+cho_tbl_notes <- cho_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_37 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_37 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Count_1", "Count_4", "Count_5", "Count_37", "Count_42", "Percent_1",
+                         "Percent_4", "Percent_5", "Percent_37", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Did not elute", columns = c(Count_37, Percent_37)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_4, Percent_4,
+                                                        Count_5, Percent_5, Count_37, Percent_37,
+                                                        Count_42, Percent_42))) 
+
+# Render the table
+print(cho_tbl_notes) 
+
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the allostatic load indicators.
+
+```{r cho-dist-plots}
+#create function to create plot for AL indicators
+create_AL_plot <- function(data, column_name, composite_name) {
+  #transform values to labels
+  transform_AL_plot <- function(x) {
+    factor(x, levels = c("0", "1", "-99"), labels = c("No", "Yes", "Missing"))
+  }
+
+  #ensure that column_name is a character and exists in the dataframe
+  if (!is.character(column_name) || !column_name %in% names(data)) {
+    stop("column_name must be a character string and exist in the dataframe.")
+  }
+  
+  #create plot
+  data %>%
+    mutate("{column_name}" := transform_AL_plot(.[[column_name]])) %>%
+    ggplot(aes_string(x = column_name)) +
+    bar_style +
+    labs(x = "Response", y = "Count", title = paste("Distribution for", composite_name)) +
+    THEME
+}
+
+
+#cho_cal
+p_cho_cal <- create_AL_plot(dbs_cho_df, "cho_cal", "CHO Allostatic \nLoad (AL) Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#cho_pal
+p_cho_pal <- create_AL_plot(dbs_cho_df, "cho_pal", "CHO Percentile- \nDetermined AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_cho_cal, p_cho_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for plasma-equivalent cholesterol values (cho_pe) alongside the clinical and percentile-determined allostatic load cutoffs are presented below.
+
+```{r cho-clinical-plot}
+dbs_cho_df %>%
+  filter(cho_pe != "-99") %>% 
+  mutate(cho_pe = as.numeric(cho_pe)) %>% 
+  cutoff_plot2(
+    x = cho_pe,
+    cutoff = 200,
+    cutoff_other = 166.25
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for CHO',
+    caption = 'Clinical cutoff is 200 and \n percentile-determined cutoff is 166.'
+  )+
+  annotate("text", x = 155, y = 18.5, label = "Percentile") +
+  annotate("text", x = 209, y = 18.5, label = "Clinical")
+
+```
+
+
+## Other Health Measures (bio measures from bio file and AL indicators, and total AL)
+
+**explain data file**
+
+**explain total AL as own table/section OR as total score from other health measures?**
