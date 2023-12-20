@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 if (!require("pacman")) install.packages("pacman")
 
-pacman::p_load(rio, here, tidyverse, lubridate)
+pacman::p_load(rio, here, readxl, tidyverse, lubridate)
 
 ```
 
@@ -29,6 +29,17 @@ raw_pulse_df <- import(here("do_not_push", "HeartRate_coded.csv")) %>%
 #import incarcerated data
 incarcerated_df <- import(here("do_not_push", "tpw_incarcerated_bio.csv"), header = TRUE) %>% 
   janitor::clean_names()
+
+#import cleaned DBS data for AL total score
+dbs_fp <- here("do_not_push", "dbs_archive.xlsx")
+
+raw_dbs_full <- read_excel(dbs_fp, sheet = "CHO") %>% 
+     left_join(read_excel(dbs_fp, sheet = "HDL"), by = join_by(family)) %>%  
+     left_join(read_excel(dbs_fp, sheet = "TRG"), by = join_by(family)) %>% 
+     left_join(read_excel(dbs_fp, sheet = "CRP"), by = join_by(family)) %>% 
+     left_join(read_excel(dbs_fp, sheet = "EBV"), by = join_by(family)) %>% 
+     left_join(read_excel(dbs_fp, sheet = "A1c"), by = join_by(family)) %>% 
+     left_join(read_excel(dbs_fp, sheet = "IL6"), by = join_by(family))
 
 ```
 
@@ -61,9 +72,12 @@ Tidy data for archiving
   * `fev1c` is missing decimals for participants P856, P844, and HR119
   * `b27` should be changed to NA for P803
   
+1. Merge with DBS data to calculate total AL summed score
+
 1. Protect identifiability
 
-  * remove protected health information (e.g., exact covid dates, diagnoses)
+  * remove protected health information (e.g., exact covid dates, diagnoses) from archived dataset
+
 
 
 
@@ -132,6 +146,11 @@ bio_md <- all_incarvars_td %>%
   slice(1) %>% 
   pivot_longer(cols = everything(), names_to = "Variable", values_to = "Question_Text")
 
+#merge all dbs files into one and select AL indicators for total summed calculation
+dbs_td <- raw_dbs_full %>% 
+  select(family, ends_with("_cal"), ebv_pal) %>% 
+  mutate(across(c(ends_with("cal"), "ebv_pal"), as.numeric))
+
 #correct complex data entry errors
 bio_df <- all_incarvars_td %>% 
   rename(family = recipient_first_name) %>%
@@ -175,13 +194,14 @@ bio_td <- bio_df %>%
   mutate_at(vars(starts_with("bp"), starts_with("pef"), starts_with("fev"), ends_with("measure")), as.numeric) %>%
   mutate_at(vars(starts_with("pef"), starts_with("fev")), ~ ifelse(. == 0, NA, .)) %>% 
   left_join(pulse_td) %>% 
+  left_join(dbs_td) %>% 
   mutate(bp_sys_avg = ifelse(bp1a != -55 & bp2a != -55, rowMeans(select(., bp1a, bp2a), na.rm = TRUE), -55),
          bp_dia_avg = ifelse(bp1b != -55 & bp2b != -55, rowMeans(select(., bp1b, bp2b), na.rm = TRUE), -55),
          bp_sys_cal = ifelse(bp_sys_avg != -55, ifelse(bp_sys_avg >= 140, 1, 0), -55),
          bp_dia_cal = ifelse(bp_dia_avg != -55, ifelse(bp_dia_avg >= 90, 1, 0), -55),
          bp_sys_pal = ifelse(bp_sys_avg != -55, ifelse(bp_sys_avg >= quantile(bp_sys_avg, 0.75, na.rm = TRUE), 1, 0), -55),
          bp_dia_pal = ifelse(bp_dia_avg != -55, ifelse(bp_dia_avg >= quantile(bp_dia_avg, 0.75, na.rm = TRUE), 1, 0), -55),
-         pef_avg = ifelse(all(select(., starts_with("pef")) != -55, na.rm = TRUE), round(pef_columns, 1), -55),
+         pef_avg = round(rowMeans(select(., starts_with("pef")), na.rm = TRUE), 2),
          pef_cal    = ifelse(pef_avg != -55, ifelse(pef_avg <= 319, 1, 0), -55),
          pef_pal    = ifelse(pef_avg != -55, ifelse(pef_avg >= quantile(pef_avg, 0.75, na.rm = TRUE), 1, 0), -55),
          wth_ratio  = ifelse(iliac_crest_measure != -55 & hip_measure != -55, round(iliac_crest_measure / hip_measure, 3), -55),
@@ -192,7 +212,13 @@ bio_td <- bio_df %>%
          bmi_pal    = ifelse(bmi_score != -55, ifelse(bmi_score >= quantile(bmi_score, 0.75, na.rm = TRUE), 1, 0), -55),
          pulse_avg  = ifelse(pulse1 != -55 & pulse2 != -55, rowMeans(select(., pulse1, pulse2), na.rm = TRUE), -55),
          pulse_cal  = ifelse(pulse_avg != -55, ifelse(pulse_avg >= 90, 1, 0), -55),
-         pulse_pal  = ifelse(pulse_avg != -55, ifelse(pulse_avg >= quantile(pulse_avg, 0.75, na.rm = TRUE), 1, 0), -55)) %>% 
+         pulse_pal  = ifelse(pulse_avg != -55, ifelse(pulse_avg >= quantile(pulse_avg, 0.75, na.rm = TRUE), 1, 0), -55)) %>%
+  #calculate AL total score with applied missing data rule
+  mutate(missing_data_proportion = rowMeans(select(., ends_with("_cal")) %>% 
+      mutate(across(everything(), ~ is.na(.) | . == -99 | . == -55)), na.rm = TRUE),
+      total_al = ifelse(missing_data_proportion < 0.20, 
+                        rowSums(select(., ends_with("_cal")) == 1, na.rm = TRUE), 
+                        NA)) %>% 
   rename(bp1 = bp1a,
          bp2 = bp1b,
          bp3 = bp2a,
@@ -438,12 +464,12 @@ bio_na <- bio_td %>%
          chc20g = ifelse(chc20f== "1" | chc20f == "-77", "-55", chc20g),
          across(c(hbc1, hbc7c, hbc8c, hbc9b, hbc10c, hbc11c, hbc12b, hbc12c, hbc18f, hbc1_elapsed, hbc7c_elapsed, hbc8c_elapsed, 
                   hbc9b_elapsed, hbc10c_elapsed, hbc11c_elapsed, hbc12b_elapsed, hbc12c_elapsed, hbc18f_elapsed, 
-                  pulse1, pulse2, pulse_avg, pulse_cal, pulse_pal), 
+                  pulse1, pulse2, pulse_avg, pulse_cal, pulse_pal, total_al), 
                 ~ ifelse(family == "HR181" | family == "P819" , "-55", .))) %>% 
     mutate_all(~ ifelse(is.na(.) | is.nan(.), -99, .)) %>%  #last after all conditional are dealt with
     select(family, start_date, end_date, starts_with("bp"), starts_with("bmi"), starts_with("wth"), 
            pef1, pef2, pef3, pef4, pef5, pef6, pef_avg, pef_cal, pef_pal, 
-           starts_with("pulse"), starts_with("rhs"), starts_with("cev"), 
+           starts_with("pulse"), total_al, starts_with("rhs"), starts_with("cev"), 
            hbc1, hbc1_elapsed, hbc2, hbc3, hbc4, hbc5, hbc6, hbc7, hbc7a, hbc7b, hbc7c, hbc7c_elapsed,
            hbc8, hbc8a, hbc8b, hbc8c, hbc8c_elapsed, hbc9, hbc9a, hbc9b, hbc9b_elapsed, hbc9c, hbc9d, hbc10, hbc10a,
            hbc10b, hbc10c, hbc10c_elapsed, hbc11, hbc11a, hbc11b, hbc11c, hbc11c_elapsed, hbc12, hbc12a, hbc12b, 
@@ -548,7 +574,8 @@ rhs_subscales <- rhs_calc %>%
   select(family, rhs_health, rhs_phys_limit, rhs_emo_limit) %>% 
   right_join(rhs_sub_recode) %>% 
   select(family, start_date, end_date, starts_with("bp"), starts_with("bmi"), starts_with("wth"), pef1, pef2, pef3, pef4, pef5, pef6,
-         pef_avg, pef_cal, pef_pal, starts_with("pulse"), rhs1:rhs12, ends_with("_p"), rhs_health, rhs_phys_limit, rhs_emo_limit, 
+         pef_avg, pef_cal, pef_pal, starts_with("pulse"), total_al, rhs1:rhs12, ends_with("_p"), 
+         rhs_health, rhs_phys_limit, rhs_emo_limit, 
          starts_with("cev"), starts_with("hbc"), starts_with("chc"))
 
 
