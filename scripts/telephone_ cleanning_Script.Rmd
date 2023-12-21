@@ -25,7 +25,14 @@ tpw_archive_id <- tpw_raw %>%
 ```
 
 ## Min's TODO/Note 
-add prompt for each measure in codebook. 
+add prompt for each measure in codebook.
+check missing rules in codebook 
+
+cleanning todo: 
+check pct_miss_fun have right numbers 
+check all pct_miss_fun has   mutate(across(-c(id), as.numeric))%>%.  # done checking through cintsubstance 
+check multiple choices questions shouldn't be changed to as.numeric 
+
 Missing data rule should apply to all missing numbers 
 note if a qustion was skipped for incarerated TC. 
 
@@ -82,7 +89,7 @@ bsi <-
 ```
 
 ### BSI Missing Data 
-There are missing data in BSI, but missing rule does not applied. #TODO: Shaina/Maria: can you confirm this it correct that missing rule should not be applied. 
+There are missing data in BSI, but missing rule does not applied. 
 ```{r bsi_missing }
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 bsi <- bsi %>% 
@@ -95,6 +102,7 @@ bsi <- bsi %>%
   )
   
 bsi %>%
+  mutate(across(-c(id), as.numeric))%>%
   pct_miss_fun(
     id = 'id',
     n_items = 19
@@ -204,7 +212,7 @@ mutate(
 ```
 
 ### CESD Missing Data
-There are missing data in CESD and missing rule is applied. #TODO: Shaina/Maria: can you confirm this it correct that missing rule should be applied. 
+There are missing data in CESD and missing rule is not applied.
 ```{r CESD_missing }
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 # if response is No to item c21, then TC moved on to item c24
@@ -220,9 +228,10 @@ cesd <- cesd %>%
 
 
 cesd_missing <- cesd %>%
+  mutate(across(-c(id), as.numeric))%>%
   select(id,
          c1:c24,
-         #TODO: Maria/Shaina, I don't think we should include revers score here. Otherwise Min will need edits calculation section.
+         #TODO: Maria/Shaina, I don't think we should include revers score here. if that is correct, Please remove these two line of comment. Otherwise Min will need edits calculation section.
          #c4_r:c16_r
          ) %>% 
   pct_miss_fun(
@@ -253,19 +262,11 @@ cesd_calc <-
           TRUE ~ .x
         )
       )
-    )%>%
-full_join(cesd_missing, by ='id') %>%
-  # TODO: Shaina, please double check the missing rule is correctly applied. 
-  filter(
-    is.na(miss_pct) |
-      miss_pct < 20
-  ) 
+    )
 
 # CESD Composite & Subscale Score Creation 
 cesd_complete <-
   cesd_calc %>%
-    select(-missing_n,
-         -miss_pct) %>%
   composite_total_avg_fun(
     id = c('id',
            'c4',
@@ -367,6 +368,7 @@ ciq <-
 No missing data found in the CIQ measure. 
 ```{r, warning = FALSE, message = FALSE}
 ciq %>%
+    mutate(across(-id, as.numeric)) %>%
   select(id,
          ciq1:ciq3_r) %>%
   pct_miss_fun(
@@ -496,6 +498,7 @@ dast <- dast %>%
   ) 
 
 dast %>%
+    mutate(across(-id, as.numeric)) %>%
   select(-dast_screen,
          -d4,
          -d5) %>%
@@ -633,6 +636,7 @@ cts <- cts %>%
   mutate_at(vars(cts_screen, ct1:ct20), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .))
 
 cts %>%
+  mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = c('id', 'cts_screen'),
     n_items = 20
@@ -823,10 +827,11 @@ bcap <-
 ```
 
 ### BCAP Missing Data 
-There are missing data in BCAP and missing rule applied. #TODO: Shaina, all the TC has missing less than 20% persent, should we still say missing rul applied? 
+There are missing data in BCAP and missing rule not applied. 
 ```{r bcap_missing}
 bcap %>%
   select(-c(q1,q2,q23,q29)) %>%
+    mutate(across(-id, as.numeric)) %>%
     pct_miss_fun(
       id = 'id', 
       n_items = 34 
@@ -1052,6 +1057,7 @@ dyadc <- dyadc %>%
   mutate_at(vars(dyadc_screener, e1:e19_r), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .))
 
 dyadc %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = c('id', 'dyadc_screener'),
     n_items = 32
@@ -1162,6 +1168,7 @@ arq <-
 There are missing data in ARQ and missing rule applied.
 ```{r arq_missing}
 arq %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = c("id","rq1"), # Shaina: the missing data doesn't include rq1, I manually checked we don't have missing value in this column, I wasn't sure how to do this automatically. 
     n_items = 4
@@ -1243,6 +1250,7 @@ prss <- prss %>%
   
 
 prss_miss <- prss %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = "id",
     n_items = 5
@@ -1343,6 +1351,7 @@ ssq <- ssq %>%
 
 
 ssq_miss <- ssq %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = "id",
     n_items = 8
@@ -1388,9 +1397,7 @@ ssq_complete <-
   ) %>%
   mutate(
     across(
-      c(
-        ssq_abuse_shame,
-        ssq_total
+      -c(id
       ),
       ~case_when(
         id %in% ssq_remove ~ NA_real_,
@@ -1476,7 +1483,7 @@ elf <-
         .x == "Some" ~ "2",
         .x == "Very Few" ~ "1",
         .x == "None" ~ "0",
-        .x == "Does not apply" ~ "0",   #TODO: Maria, how do we want to code doesn't apply. We have -55 for missing data which are not applicable, but that one is for question not shown. if this is changed, Min please change missing section accordingly.  
+        .x == "Does not apply" ~ "0",   #TODO: Maria, how do we want to code doesn't apply. We have -55 for missing data which are not applicable, but that one is for question not shown. If this is changed, Min please change missing section accordingly.  
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
@@ -1499,6 +1506,7 @@ elf <- elf %>%
   mutate_at(vars(elf23), ~case_when(elf20 < 1 & elf21 < 1 & elf22 < 1 ~ "-55", TRUE ~.))
   
 elf_miss <- elf %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = "id",
     n_items = 39
@@ -1554,9 +1562,7 @@ elf_complete <-
   mutate(
     mutate(
       across(
-        c(
-          elf_total,
-          elf_avg
+        -c(id
         ),
         ~case_when(
           id %in% elf_remove ~ NA_real_,
@@ -1577,6 +1583,7 @@ elf_complete <-
   relocate(elf34:elf37, .before = "elf38")
 
 ```
+
 ## ELL (Self-Report)
 ### ELL Select Variables and Recode
 ```{r ell}
@@ -1609,26 +1616,11 @@ ell <-
       ell23 == "Decline to Answer" ~ "-77",
       TRUE ~ ell23
     )
-    )%>%
+    ) %>%
   mutate(across(-id, as.numeric))
 
-ell_count_calc <-
-  ell %>%
-  select(
-    id,
-    matches("\\d$")
-    ) %>%
-  mutate(
-    across(
-      -id,
-      ~case_when(
-        .x == 0 ~ 0,
-        .x > 0 ~ 1, # TODO: Maria, do you want everyone reported delinquency behavior coded as 1, or keep their original score? 
-        .x < 0 ~ NA,
-        TRUE ~ .x
-      )
-    )
-  )
+
+
 ```
 
 ### ELL Missing Data 
@@ -1642,7 +1634,7 @@ ell <- ell %>%
   mutate(ell23 = case_when(ell20 <= 0 & ell21 <=0 & ell22 <=0 ~ -55, TRUE ~ ell23)) 
   
 
-  # if ellX is below 10, then ellXa should be -55
+  # if ellX is below 10, then ellXa should be -55 (will need remove ell23a, because we don't have that question)
 for (i in 1:39) {
     ell_col <- paste0("ell", i)
     ella_col <- paste0("ell", i, "a")
@@ -1659,76 +1651,77 @@ for (i in 1:39) {
     ell[[ella_col]][set_to_77] <- -77
 }
 
+
+
 # ELL Count Missing Data
 # most participants will respond to the first part of each item
 # don't respond to anything on the scale
 # TODO: Maria: we are only counting the ellx questions. (ellxa qusetions are not included.)
-ell_count_miss <- ell_count_calc %>%
+ell_miss <- ell %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
-    id = "id",
+    id = c("id", matches("a$")),
     n_items = 39
   )
 
-ell_count_miss %>%
+
+ell_miss %>%
   gt::gt() %>%
   gt::tab_header(title = 'Missing Data',
                  subtitle = 'By Each Participant')
 
-ell_count_remove <- ell_count_miss %>% filter(miss_pct >= 20) %>% pull(id)
+ell_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
 ### ELL Calculation & Subscale 
 ```{r ell_calculation}
-# TODO: Maria, this section need special attention since I just copy and past JP's code
-ell_calc <-
-  ell %>%
-  select(
-    id,
-    matches("a$")
-  ) %>%
+ell <- ell %>%
+  # TODO: Maria, this section need special attention
+  select(-ell23a) %>%
   mutate(
+    # Create ell count columns 
     across(
-      .cols = -id,
+      .cols = matches("\\d$"),
       .fns = ~case_when(
-        .x <0 ~ NA,
+        .x == 0 ~ 0,
+        .x > 0 ~ 1, # everyone reported delinquency behavior coded as 1
         TRUE ~ .x
-      )
-    ),
-# TODO :Maria/Shaina, I don't think we need code below in comment, but can you confirm? note:JP also covert number larger than 4 to 4 in this code 
+      ),
+      .names = '{.col}_c'
+      ),
+# TODO :Maria:JP also covert number larger than 4 to 4 in this code, but the SPSS Syntax cap at 7 which is what I used below. If this is correct, please delete this comment. 
     across(
-      -id,
-      .names = "{.col}a"
+      .cols = matches("\\d$"),
+      .names = "{.col}_r"
     ),
     across(
       c(
-        matches("a$"),
-        matches("aa$")
+        matches("_r$")
       ),
       ~case_when(
-        .x == 1 ~ 0,
-        .x == 2 ~ 1,
-        .x == 3 ~ 2,
-        .x == 4 ~ 3,
-        .x == 5 ~ 4,
-        .x == 6 ~ 5,
-        .x == 7 ~ -77,
-        .x == 8 ~ NA_real_,
-        TRUE ~ NA_real_
-      )
-    ),
-    across(
-      c(
-        matches("aa$")
-      ),
-      ~case_when(
-        .x >= 4 ~ 4,
+        .x >= 7 ~ 7, # cap at 7
         TRUE ~ .x
       )
     )
   )
 
+ell_calc <-
+  ell %>%
+  mutate(
+    across(
+      .cols = -c(
+        id
+      ),
+      .fns = ~case_when(
+        .x < 0 ~ NA,
+        TRUE ~ .x
+      )
+    )
+  )
+
+
 ell_complete <-
-  ell_calc %>%
+  ell %>%
   subscale_create(
     total_only = TRUE,
     scale1 = c(
@@ -1773,9 +1766,7 @@ ell_count_complete <-
   ) %>%
   mutate(
     across(
-      c(
-        ell_count_total,
-        ell_count_avg
+      -c(id
       ),
       ~case_when(
         id %in% ell_count_remove ~ NA_real_,
@@ -1838,6 +1829,7 @@ mhc <-
 There are missing data, but missing rule doesn't apply. 
 ```{r mhc-sf_missing}
 mhc_miss <- mhc %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = "id",
     n_items = 14
@@ -2027,6 +2019,7 @@ flo <- tpw_raw %>%
 There are missing data in FI and missing rule applied. 
 ```{r}
 flo_miss <- flo %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = "id",
     n_items = 12
@@ -2073,8 +2066,7 @@ flo_complete <-
   rename(flo_total = sum_values) %>%
   mutate(
     across(
-      c(
-        flo_total
+      -c(id
       ),
       ~case_when(
         id %in% flo_remove ~ NA_real_,
@@ -2118,6 +2110,7 @@ itq <- itq %>%
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) 
 
 itq_miss <- itq %>%
+    mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = "id",
     n_items = 9
@@ -2192,13 +2185,10 @@ itq_complete <-
   mutate(
     itq_dso = (itq_ad_total + itq_nsc_total + itq_dr_total),
     across(
-      c(
-        itq_ad_total,
-        itq_nsc_total,
-        itq_dr_total
+      -c(id
       ),
      ~case_when(
-       id %in% itq_remove ~ NA_real_,
+       id %in% itq_remove ~ NA,
          TRUE ~ .x
        )
     )
@@ -2267,7 +2257,7 @@ ibq <- ibq %>%
 ibq_miss <- ibq %>%
   mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
   pct_miss_fun(
-    id = c("id", "ibq10_school", "ibq10_juvenile_justice", "ibq10_Legal_System", "ibq10_Police", "ibq10_Medical", "ibq10_Church", "ibq10_Foster_Care", "ibq10_Child_Welfare","ibq10_other","ibq10_other_text"),
+    id = c("id", "ibq10_school", "ibq10_juvenile_justice", "ibq10_Legal_System", "ibq10_Police", "ibq10_Medical", "ibq10_Church", "ibq10_Foster_Care", "ibq10_Child_Welfare","ibq10_other","ibq10_other_text", "ibq10_77"),
     n_items = 10
   )
 
@@ -2299,7 +2289,17 @@ ibq_calc <-
 # IBQ Composite & Subscale Score Creation 
 ibq_complete <-
   ibq_calc %>%
-  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T))
+  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) %>%
+   mutate(
+    across(
+      -c(id
+      ),
+     ~case_when(
+       id %in% ibq_remove ~ NA,
+         TRUE ~ .x
+       )
+    )
+  )
 ```
 
 ## Sex History Survey
@@ -2499,6 +2499,7 @@ sex$s32 <- apply(sex[, c("s32_1","s32_2","s32_3","s32_4","s32_5","s32_6","s32_7"
 ```
 
 ### Sex Missing Data
+There are missing data and missing rule applied 
 ```{r sex_missing}
  sex <- sex %>% 
   relocate(s25, .before = s25_8_text) %>%
@@ -2549,12 +2550,13 @@ sex$s32 <- apply(sex[, c("s32_1","s32_2","s32_3","s32_4","s32_5","s32_6","s32_7"
   # skip rule: if s45 is not Yes (1) | s30 <=0, s45, s47 is skipped  
    mutate_at(vars(s46:s48), ~case_when(s45 != 1 | s30 <= 0 ~ "-55", TRUE ~ . )) %>%
    # skip rule: if s46 is not Yes (1), s47:s48 is skipped  
-   mutate_at(vars(s47:s48), ~case_when(s46 != 1 ~ "-55", TRUE ~ . ))
+   mutate_at(vars(s47:s48), ~case_when(s46 != 1 ~ "-55", TRUE ~ . )) %>% 
 # TODO: Maria, I can't figure out why NAs in s29 are missing 
+  select(-c("s25_1","s25_2","s25_3","s25_4","s25_5","s25_6","s25_7","s25_8","s25_9","s25_77")) %>%
+  select(-c("s32_1","s32_2","s32_3","s32_4","s32_5","s32_6","s32_7","s32_8","s32_9","s32_77"))
 
 
 sex_miss <- sex %>%
-  # mutate(across(-c(s2,s5,s7,matches("_text$")), as.numeric))%>%
   pct_miss_fun(
     id = c("id", matches("_text$")),
     n_items = 56
@@ -2575,7 +2577,8 @@ sex_remove <- sex_miss %>% filter(miss_pct >= 20) %>% pull(id)
 # Below is the code that treats -77, -55 values as NA
 sex_complete <-
   sex %>%
-  mutate(across(-c(id,matches("_text$")), as.numeric)) %>%
+  mutate(across(-c(id, s2,s5,s7, matches("_text$")), as.numeric)) %>%
+  #mutate(across(-c(id,matches("_text$")), as.numeric)) %>%
   mutate(
     across(
       .cols = -c(id),
@@ -2583,6 +2586,16 @@ sex_complete <-
         .x < 0 ~ NA,
         TRUE ~ .x
       )
+    )
+  )%>%
+mutate(
+    across(
+      -c(id
+      ),
+     ~case_when(
+       id %in% sex_remove ~ NA,
+         TRUE ~ .x
+       )
     )
   )
 
@@ -2687,7 +2700,7 @@ cint_socio <- cint_socio %>%
   select(-c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77"))
 
 cint_socio_miss <- cint_socio %>%
-  #mutate(across(-c(id, matches("_8_text$")), as.numeric))%>%
+  mutate(across(-c(id, matches("_8_text$")), as.numeric))%>%
   pct_miss_fun(
     id = c("id", "cint1_8_text", "cint_identity_8_text"),
     n_items = 12
@@ -2735,7 +2748,7 @@ cint_ladder <- tpw_raw %>%
     across(
       .cols = -id,
       .fns = ~case_when(
-        #is.na(.x) ~ "-77",
+        is.na(.x) ~ "-77",
         TRUE ~ .x
         )
       )
@@ -2745,6 +2758,7 @@ cint_ladder <- tpw_raw %>%
 ### CINT-Ladder Missing 
 ```{r cint-ladder-missing}
 cint_ladder_missing <- cint_ladder %>%
+  mutate(across(-c(id), as.numeric)) %>%
   pct_miss_fun(
     id = c("id"),
     n_items = 2
@@ -2755,7 +2769,7 @@ cint_ladder_missing %>% gt::gt() %>%
     title = 'CINT-LADDDER Missing Data',
     subtitle = 'By Participant')
 
-cint_ladder_remove <- cint_ladder_miss %>% filter(miss_pct >= 20) %>% pull(id)
+cint_ladder_remove <- cint_ladder_missing %>% filter(miss_pct >= 20) %>% pull(id)
 
 
 # Below is the code that treats -77, -55 values as NA
@@ -2905,10 +2919,13 @@ cint_relation <- cint_relation %>%
   # if cint20 <1 cintq2:cint35 will not be asked 
    mutate_at(vars(cintq2:cint34), ~case_when(cint20 < 1 ~ "-55", TRUE ~ .)) %>%
   # if cint35 is none/1 or -77 cint36:cint37 will not be asked 
-   mutate_at(vars(cint36:cint37), ~case_when(cint35 == 1 |  cint35 == "-77" ~ "-55", TRUE ~ .))
+   mutate_at(vars(cint36:cint37), ~case_when(cint35 == 1 |  cint35 == "-77" ~ "-55", TRUE ~ .)) %>% 
+   mutate_at(vars(cint30_7_text), ~case_when(cint30 != 7 ~ "-55", TRUE ~ .)) %>% 
+   mutate_at(vars(cint31_7_text), ~case_when(cint31 != 7 ~ "-55", TRUE ~ .)) %>% 
+   mutate_at(vars(cint32_7_text), ~case_when(cint32 != 7 ~ "-55", TRUE ~ .))
 
 cint_relation_miss <- cint_relation %>%
-  mutate(across(-c(id, matches("_8_text$")), as.numeric))%>%
+  mutate(across(-c(id, matches("_7_text$")), as.numeric))%>%
   pct_miss_fun(
     id = c("id", matches("_7_text$")),
     n_items = 15
@@ -2956,6 +2973,16 @@ cint_substance <- tpw_raw %>%
       .fns = ~case_when(
         .x == "Yes" ~ "1",
         .x == "No" ~ "0",
+        .x == "3. NA -- not in school and not employed in last 6 months" ~ "-55", # this is for cint63
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+        across(
+      .cols = c( cint63),
+      .fns = ~case_when(
+        .x == "1. Yes" ~ "1",
+        .x == "2. No" ~ "0",
         .x == "3. NA -- not in school and not employed in last 6 months" ~ "-55", # this is for cint63
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
@@ -3025,6 +3052,8 @@ cint_substance$cint84 <- apply(cint_substance[, c("cint84_1", "cint84_2", "cint8
 ### CINT-Substance Missing
 ```{r cint_soci_missing}
 cint_substance <- cint_substance %>%
+       # Incarcerated TC weren't administered for this survey
+  mutate_at(vars(cint39:cint84), ~ ifelse(id %in% c("HR211", "HR181", "P819"), -55, .)) %>%
   # if cint_pregnancy_screen is yes/1, cint40:cint43 were not asked 
   # TODO: Maria, please check this skip rule I wasn't sure if this matches with what's on Quadratics
    mutate_at(vars(cint39:cint84), ~case_when(cint_pregnancy_screen == 1 ~ "-55", TRUE ~ .)) %>%
@@ -3059,8 +3088,19 @@ cint_substance <- cint_substance %>%
   mutate_at(vars(cint79), ~case_when(cint78 == 0 |  cint78 == "-77" ~ "-55", TRUE ~ .)) %>%
   # if cint80 is 0/No or -77, cint81:cint84_77 were not asked
   mutate_at(vars(cint81:cint84), ~case_when(cint80 == 0 |  cint80 == "-77" ~ "-55", TRUE ~ .)) %>% 
-  select(-c(cint84_1:cint84_77))
+  # cint40 they could choose not to answer 
+  mutate(cint40 = ifelse(is.na(cint40), -77, cint40))%>%
+  # cint44 they could choose not to answer 
+  mutate(cint44 = ifelse(is.na(cint44), -77, cint44))%>%
+    # cint53they could choose not to answer 
+mutate(cint53 = ifelse(is.na(cint53), -77, cint53))%>%
+      # cint83they could choose not to answer 
+  mutate(cint83 = ifelse(is.na(cint83), -77, cint83))%>%
 
+  mutate_at(vars(cint47_6_text), ~case_when(cint47 != 7 ~ "-55", TRUE ~ .)) %>% 
+  mutate_at(vars(cint62_6_text), ~case_when(cint62 != 7 ~ "-55", TRUE ~ .)) %>%
+ select(-c(cint84_1:cint84_77)) 
+# TODO: Maria, I don't know why HR166 has cint84 missing 
 
 cint_substance_miss <- cint_substance %>%
   mutate(across(-c(id, matches("_6_text$")), as.numeric))%>%
@@ -3080,12 +3120,12 @@ cint_substance_remove <- cint_substance_miss %>% filter(miss_pct >= 20) %>% pull
 # Below is the code that treats -77, -55 values as NA
 cint_substance_complete <-
   cint_substance %>%
-  mutate(across(-c(id, matches("_6_text$")), as.numeric)) %>%
+mutate(across(-c(id, matches("_6_text$"), cint84), as.numeric)) %>% # cint84 is multiple choices
   mutate(
     across(
       .cols = -c(id, matches("_6_text$")),
       .fns = ~case_when(
-        .x < 0 ~ NA_real_,
+        .x < 0 ~ NA,
         TRUE ~ .x
       )
     ),
@@ -3101,7 +3141,7 @@ cint_substance_complete <-
          across(
              -c(id, matches("_6_text$")),
              ~case_when(
-                 id %in% cint_substance_remove ~ NA_real_,
+                 id %in% cint_substance_remove ~ NA,
                  TRUE ~ .x
                )
            )
@@ -3221,6 +3261,7 @@ socinf_sub<- tpw_raw %>%
 ### SOCINF Substances Missing 
 ```{r socinf_sub_missing}
 socinf_sub <- socinf_sub%>%
+
   # if socinf_relationship_screener is NO/0, SOC1:SOC2d; soc4a:soc4h; socb1:socb2e; socb4a:socb4k; socc1; socc2a:socc2e; socc4a:socc4k; socd1 were not asked
   mutate_at(vars(soc1:soc2d, soc4a:soc4h, socb1:socb2e, socb4a:socb4k, socc1, socc2a:socc2e, socc4a:socc4k,socd1, socd2a:socd2d, socd4a:socd4k), ~case_when(socinf_relationship_screener == 0 ~ "-55", TRUE ~ .)) %>%
   # if soc1 is Yes/1, soc2a:soc2d were not asked
@@ -3387,7 +3428,17 @@ cts_pc <- tpw_raw %>%
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
-    ), 
+    )
+  )
+  
+```
+
+### CTS-PC Missing
+```{r}
+cts_pc <- cts_pc%>%
+  # if cts_parent_screen is NO/0, the entire questionner was not administered. 
+  mutate_at(vars(a1:a23), ~case_when(cts_parent_screen == 0 ~ "-55", TRUE ~ .)) %>%
+  mutate(
     across(
       .cols = -c(id, cts_parent_screen),
       .fns = ~case_when(
@@ -3399,21 +3450,13 @@ cts_pc <- tpw_raw %>%
       TRUE ~ .x
       ),
       .names = '{.col}_r'
-      )
-  )
-  
-```
-
-### CTS-PC Missing
-```{r}
-cts_pc <- cts_pc%>%
-  # if cts_parent_screen is NO/0, the entire questionner was not administered. 
-  mutate_at(vars(a1:a23), ~case_when(cts_parent_screen == 0 ~ "-55", TRUE ~ .))
+      ))
 
 cts_pc_miss <- cts_pc %>%
+  # Shaina: I was expected pct_miss_fun would count -2 but it didn't 
   mutate(across(-c(id), as.numeric))%>%
   pct_miss_fun(
-    id = c("id"),
+    id = c("id", -matches("\\d$")),
     n_items = 24
   )
 
