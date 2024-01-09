@@ -1418,7 +1418,7 @@ ssq_complete <-
 # TODO: Min remove after maria confirm how to score
 # reverse scoring
 eds <-
-  complete %>%
+  tpw_raw %>%
   select(
     id,
     matches(
@@ -1670,11 +1670,14 @@ ell_miss %>%
   gt::tab_header(title = 'Missing Data',
                  subtitle = 'By Each Participant')
 
-ell_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
+ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
 ### ELL Calculation & Subscale 
+
 ```{r ell_calculation}
+# '{.col}_c' delinquency behavior coded count (if delinquecy reported then coded as 1)
+# "{.col}_r" re-code with cap at 7
 ell <- ell %>%
   # TODO: Maria, this section need special attention
   select(-ell23a) %>%
@@ -1691,7 +1694,7 @@ ell <- ell %>%
       ),
 # TODO :Maria:JP also covert number larger than 4 to 4 in this code, but the SPSS Syntax cap at 7 which is what I used below. If this is correct, please delete this comment. 
     across(
-      .cols = matches("\\d$"),
+      .cols = matches("\\d$"),   # TODO: Maria, JP used column end with a to create this receded column, but based on spss I think it should be column without a, this is what I used for this code. Please confirm this is correct. 
       .names = "{.col}_r"
     ),
     across(
@@ -1704,6 +1707,7 @@ ell <- ell %>%
       )
     )
   )
+
 
 ell_calc <-
   ell %>%
@@ -1719,9 +1723,9 @@ ell_calc <-
     )
   )
 
-
+# TODO: Maria, please double check right items were used for calculation 
 ell_complete <-
-  ell %>%
+  ell_calc %>%
   subscale_create(
     total_only = TRUE,
     scale1 = c(
@@ -1731,10 +1735,11 @@ ell_complete <-
       "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
     ),
     scale2 = c(
-      "ell4aa", "ell5aa", "ell6aa", "ell8aa", "ell9aa",
-      "ell10aa", "ell11aa", "ell14aa", "ell16aa", "ell20aa",
-      "ell21aa", "ell22aa", "ell24aa", "ell25aa", "ell27aa", "ell29aa",
-      "ell31aa", "ell32aa", "ell33aa", "ell38aa", "ell39aa"
+      "ell4_r", "ell5_r",
+       "ell6_r", "ell8_r", "ell9_r",
+       "ell10_r", "ell11_r", "ell14_r", "ell16_r", "ell20_r",
+       "ell21_r", "ell22_r", "ell24_r", "ell25_r", "ell27_r", "ell29_r",
+       "ell31_r", "ell32_r", "ell33_r", "ell38_r", "ell39_r"
     )
   ) %>%
   rename(
@@ -1744,7 +1749,7 @@ ell_complete <-
 
 
 ell_count_complete <-
-  ell_count_calc %>%
+  ell_complete %>%
   composite_total_avg_fun(
     id = c(
       'id', "ell1", "ell2", "ell3", "ell7",
@@ -1774,6 +1779,16 @@ ell_count_complete <-
       )
     )
   )
+
+ell_count_complete <- ell_count_complete%>%
+  select(
+    order(names(.))
+  ) %>%
+  relocate(ell1a:ell2_r, .after = "ell1_r") %>%
+  relocate(ell3a:ell7_r, .after = "ell3_r") %>%
+  relocate(ell7a:ell9a, .after = "ell7_r") %>%
+  relocate(id, .before = "ell1") %>% 
+  relocate(ell_censor_total:ell_raw_total, .after = "ell39a")
 ```
 
 ## MHC-SF
@@ -3050,7 +3065,7 @@ cint_substance$cint84 <- apply(cint_substance[, c("cint84_1", "cint84_2", "cint8
 ```
 
 ### CINT-Substance Missing
-```{r cint_soci_missing}
+```{r cint_subs_missing}
 cint_substance <- cint_substance %>%
        # Incarcerated TC weren't administered for this survey
   mutate_at(vars(cint39:cint84), ~ ifelse(id %in% c("HR211", "HR181", "P819"), -55, .)) %>%
@@ -3183,8 +3198,10 @@ cint_covid <- cint_covid %>%
 ### CINT-COVID Missing 
 ```{r}
 # Replace all empty cells with -55 in the entire data frame
+# cint_covid <- cint_covid %>%
+#   replace(cint_covid, is.na(cint_covid) | cint_covid == "", -55)
 cint_covid <- cint_covid %>%
-  replace(cint_covid, is.na(cint_covid) | cint_covid == "", -55)
+  mutate_all(~ ifelse(is.na(.x) | .x == "", -55, .x))
 
 cint_covid_miss <- cint_covid %>%
   mutate(across(-c(id), as.numeric))%>%
@@ -4063,63 +4080,63 @@ pcl <- pcl %>%
          )
 # okay here is a basic by time period
 
-pcl <- pcl %>%
-  mutate(
-    across(
-      # had you experienced and how 
-      .cols = c(matches("^pcl\\d+_\\d+")),
-      .fns = ~case_when(
-        .x == "Happened to me" ~ "1",
-        .x == "Witnessed it" ~ "1",
-        .x == "Learned about it" ~ "1",
-        .x == "No (did not happen)" ~ "0",
-        .x == "Decline to Answer" ~ "-77",
-        TRUE ~ .x
-      )
-    ),
-    across(
-    .cols = c(matches("^pcl\\d+a_\\d+")),
-    # if the happened when 
-      .fns = ~case_when(
-        .x == "Ages 0-5" ~ "1",
-        .x == "Ages 6-11" ~ "1",
-        .x == "Ages 12-19" ~ "1",
-        .x == "Adulthood" ~ "1",
-        .x == "Decline to Answer" ~ "-77",
-        TRUE ~ .x
-      )
-    ),
-    across()
-  )
+# pcl <- pcl %>%
+#   mutate(
+#     across(
+#       # had you experienced and how 
+#       .cols = c(matches("^pcl\\d+_\\d+")),
+#       .fns = ~case_when(
+#         .x == "Happened to me" ~ "1",
+#         .x == "Witnessed it" ~ "1",
+#         .x == "Learned about it" ~ "1",
+#         .x == "No (did not happen)" ~ "0",
+#         .x == "Decline to Answer" ~ "-77",
+#         TRUE ~ .x
+#       )
+#     ),
+#     across(
+#     .cols = c(matches("^pcl\\d+a_\\d+")),
+#     # if the happened when 
+#       .fns = ~case_when(
+#         .x == "Ages 0-5" ~ "1",
+#         .x == "Ages 6-11" ~ "1",
+#         .x == "Ages 12-19" ~ "1",
+#         .x == "Adulthood" ~ "1",
+#         .x == "Decline to Answer" ~ "-77",
+#         TRUE ~ .x
+#       )
+#     ),
+#     across()
+#   )
 
 
-  mutate(
-    across(
-      .cols = everything(),
-      .fns = ~case_when(
-        .x == "Yes" ~ "1",
-        .x == "No" ~ "0",
-        
-        .x == "1. Hearing" ~ "1",
-        .x == "2. Continuance" ~ "2",
-        .x == "3. Court Monitoring" ~ "3",
-        
-        .x == "1. Yes, available and accessed" ~ "1",
-        .x == "2. No, available but did not access" ~ "2",
-        .x == "3. No, attempted to access but experienced a barrier" ~ "3",
-        .x == "4. No, was not aware service was available" ~ "4",
-        
-        .x == "1. Physical" ~ "1",
-        .x == "2. Mental/Psychological" ~ "2",
-        .x == "3. Substance Use" ~ "3",
-        
-        .x == "Don't Know" ~ "-66",
-        .x == "Decline to Answer" ~ "-77",
-        .x == "5. Decline to answer" ~ "-77",
-        TRUE ~ .x
-      )
-    )
-  ) 
+  # mutate(
+  #   across(
+  #     .cols = everything(),
+  #     .fns = ~case_when(
+  #       .x == "Yes" ~ "1",
+  #       .x == "No" ~ "0",
+  #       
+  #       .x == "1. Hearing" ~ "1",
+  #       .x == "2. Continuance" ~ "2",
+  #       .x == "3. Court Monitoring" ~ "3",
+  #       
+  #       .x == "1. Yes, available and accessed" ~ "1",
+  #       .x == "2. No, available but did not access" ~ "2",
+  #       .x == "3. No, attempted to access but experienced a barrier" ~ "3",
+  #       .x == "4. No, was not aware service was available" ~ "4",
+  #       
+  #       .x == "1. Physical" ~ "1",
+  #       .x == "2. Mental/Psychological" ~ "2",
+  #       .x == "3. Substance Use" ~ "3",
+  #       
+  #       .x == "Don't Know" ~ "-66",
+  #       .x == "Decline to Answer" ~ "-77",
+  #       .x == "5. Decline to answer" ~ "-77",
+  #       TRUE ~ .x
+  #     )
+  #   )
+  # ) 
 
   
 ```
@@ -4141,7 +4158,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(prss_complete, by = "id") %>%
   left_join(ssq_complete, by = "id") %>%
   left_join(elf_complete, by = "id") %>%
-  left_join(ell_count_complete, by = "id") %>%
+  #left_join(ell_count_complete, by = "id") %>%
   left_join(mhc_complete, by = "id") %>%
   left_join(flo_complete, by = "id") %>%
   left_join(itq_complete, by = "id") %>%
