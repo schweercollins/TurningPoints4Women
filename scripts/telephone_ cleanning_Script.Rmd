@@ -1029,19 +1029,6 @@ dyadc <-
       e32 ==  "0 - My relationship can never succeed, and there is no more that I can do to keep the relationship going." ~ "0",
       e32 == "Decline to Answer" ~ "-77",
       TRUE ~ e32
-    ),
-    across(
-      .cols = c(e18, e19),
-      .fns = ~case_when(
-        .x == "5" ~ "0",
-        .x == "4" ~ "1",
-        .x == "3" ~ '2',
-        .x == "2" ~ "3",
-        .x == "1" ~ "4",
-        .x == "0" ~ "5",
-        TRUE ~ .x
-      ),
-      .names = '{.col}_r'
     )
   )
 
@@ -1052,9 +1039,9 @@ There are missing data in DYADC and missing rule applied.
 ```{r dyadc_missing}
 dyadc <- dyadc %>%
   # if answered no for screening question, the entire survey is skipped.
-  mutate_at(vars(e1:e19_r), ~case_when(dyadc_screener == 0  ~ "-55", TRUE ~ . )) %>%
+  mutate_at(vars(e1:e32), ~case_when(dyadc_screener == 0  ~ "-55", TRUE ~ . )) %>%
     # Incarcerated TC weren't administered for this survey
-  mutate_at(vars(dyadc_screener, e1:e19_r), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .))
+  mutate_at(vars(dyadc_screener, e1:e32), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .)) 
 
 dyadc %>%
     mutate(across(-id, as.numeric)) %>%
@@ -1072,6 +1059,7 @@ dyadc %>%
 ### DYADC Calculations & Subscale
 ```{r dyadc_calculations}
 dyadc_calc <-dyadc %>%
+  mutate(across(-id, as.numeric))%>%
   pct_miss_fun(
     id = c('id', 'dyadc_screener'),
     n_items = 32
@@ -1083,15 +1071,15 @@ dyadc_calc <-dyadc %>%
     is.na(miss_pct) |
     miss_pct < 20
     ) %>%
-  mutate(
+    mutate(
     across(
       .cols = c(e1:e32),
       .fns = ~case_when(
-        .x < 0 ~ NA_real_,
+        .x < 0 ~ NA,
         TRUE ~ .x
       )
     )
-  )
+  ) 
 
 dyadc_complete <-
   dyadc_calc %>%
@@ -1100,7 +1088,7 @@ dyadc_complete <-
       -miss_pct
            ) %>%
     composite_total_avg_fun(
-      id = c('id', 'dyadc_screener'),
+      id = c('id', 'dyadc_screener', ),
       n_items = 32
     ) %>%
     rename(
@@ -3590,7 +3578,7 @@ cts_pc_complete <-
       rename_all(tolower)
 ```
 
-## Pregnancy and Childbirth Trauma
+## PCT - Pregnancy and Childbirth Trauma
 ### PCT Select Variable and Recode
 ```{r pct}
 pct <- tpw_raw %>%
@@ -3608,7 +3596,7 @@ pct <- tpw_raw %>%
   )
 ```
 
-PCT Missing 
+### PCT Missing 
 ```{r pct_missing}
 pct <- pct%>%  
   mutate_at(vars(pct0), ~case_when(p00a == 0 | p00a == NA ~ "-55", TRUE ~ .)) %>%
@@ -3616,8 +3604,58 @@ pct <- pct%>%
   # if pct1 is NO/0 or -77, the entire questionner was not administered. 
   mutate_at(vars(pct2a:pct3e), ~case_when(pct1 != 1 ~ "-55", TRUE ~ .)) 
 #TODO: Maria if pct0 is not displayed does the rest of pct will be skipped? 
+
+pct_miss <- pct %>%
+  mutate(across(-c(id, pct2e, pct3e), as.numeric)) %>%
+  pct_miss_fun(
+    id = c("id", "pct2e", "pct3e"),
+    n_items = 13
+  )
+
+pct_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'PCT Missing Data',
+    subtitle = 'by Participant'
+  )
+
+pct_remove <- pct_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
+PCT Calculation & Subscale 
+```{r pct_calc}
+# Below is the code that treats -77, -55 values as NA
+pct_calc <-
+  pct %>%
+  mutate(across(-c(id,pct2e,pct3e), as.numeric)) %>%
+  mutate(
+    across(
+      .cols = -c(id,pct2e,pct3e),
+      .fns = ~case_when(
+        .x < 0 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+# pct Composite & Subscale Score Creation 
+pct_complete <-
+  pct_calc %>%
+  # TODO: Maria, please double check the calculation were 
+  mutate(pct_preg_total = rowSums(select(., pct2a:pct2d), na.rm = T)) %>%
+  mutate(pct_childbirth_total = rowSums(select(., pct3a:pct3d), na.rm = T)) %>%
+  mutate(
+    across(
+      -c(id
+      ),
+      ~case_when(
+        id %in% pct_remove ~ NA,
+        TRUE ~ .x
+      )
+    )
+  )
+
+```
 
 ## Service Utilization Survey
 ### SUS Select Variable and Recode 
@@ -3652,8 +3690,87 @@ sus <- tpw_raw %>%
     )
   ) 
     #mutate(across(-c(id,sus6a:sus6c,sus14, sus14b,sus14c, sus14d, sus14e, sus14f,sus14g,sus14h,sus14i,sus14j,sus14k,sus14l,sus14m,sus14n,sus14o), as.numeric))
+
+# Combine sus11b answer options to sus11b 
+sus$sus11b <- apply(sus[, c("sus11b_1","sus11b_2","sus11b_3","sus11b_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus12b answer options to sus12b 
+sus$sus12b <- apply(sus[, c("sus12b_1","sus12b_2","sus12b_3","sus12b_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14a answer options to sus14a 
+sus$sus14a <- apply(sus[, c("sus14a_1","sus14a_2","sus14a_3","sus14a_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14b2 answer options to sus14b1 (this was labled wrong in Qualtric, it should be sus14b1) 
+sus$sus14b1 <- apply(sus[, c("sus14b2_1","sus14b2_2","sus14b2_3","sus14b2_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14c1 answer options to sus14c1
+sus$sus14c1 <- apply(sus[, c("sus14c1_1","sus14c1_2","sus14c1_3","sus14c1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14d1 answer options to sus14d1
+sus$sus14d1 <- apply(sus[, c("sus14d1_1","sus14d1_2","sus14d1_3","sus14d1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14e1 answer options to sus14e1
+sus$sus14e1 <- apply(sus[, c("sus14e1_1","sus14e1_2","sus14e1_3","sus14e1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14f1 answer options to sus14f1
+sus$sus14f1 <- apply(sus[, c("sus14f1_1","sus14f1_2","sus14f1_3","sus14f1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14g1 answer options to sus14g1
+sus$sus14g1 <- apply(sus[, c("sus14g1_1","sus14g1_2","sus14g1_3","sus14g1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14h1 answer options to sus14h1
+sus$sus14h1 <- apply(sus[, c("sus14h1_1","sus14h1_2","sus14h1_3","sus14h1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14i1 answer options to sus14i1
+sus$sus14i1 <- apply(sus[, c("sus14i1_1","sus14i1_2","sus14i1_3","sus14i1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14j1 answer options to sus14j1
+sus$sus14j1 <- apply(sus[, c("sus14j1_1","sus14j1_2","sus14j1_3","sus14j1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14k1 answer options to sus14k1
+sus$sus14k1 <- apply(sus[, c("sus14k1_1","sus14k1_2","sus14k1_3","sus14k1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14l1 answer options to sus14l1
+sus$sus14l1 <- apply(sus[, c("sus14l1_1","sus14l1_2","sus14l1_3","sus14l1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14m1 answer options to sus14m1
+sus$sus14m1 <- apply(sus[, c("sus14m1_1","sus14m1_2","sus14m1_3","sus14m1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14n1 answer options to sus14n1
+sus$sus14n1 <- apply(sus[, c("sus14n1_1","sus14n1_2","sus14n1_3","sus14n1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus14o1 answer options to sus14o1
+sus$sus14o1 <- apply(sus[, c("sus14o1_1","sus14o1_2","sus14o1_3","sus14o1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+# Combine sus26b answer options to sus26b
+sus$sus26b <- apply(sus[, c("sus26b_1","sus26b_2","sus26b_3","sus26b_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+
+
+
+
+sus <- sus %>%
+  relocate(sus11b, .after = "sus11a") %>%
+  relocate(sus12b, .after = "sus12a") %>%
+  relocate(sus14a, .after = "sus14") %>%
+  relocate(sus14b1, .after = "sus14b") %>%
+  relocate(sus14c1, .after = "sus14c") %>%
+  relocate(sus14e1, .after = "sus14e") %>%
+  relocate(sus14f1, .after = "sus14f") %>%
+  relocate(sus14g1, .after = "sus14g") %>%
+  relocate(sus14h1, .after = "sus14h") %>%
+  relocate(sus14i1, .after = "sus14i") %>%
+  relocate(sus14j1, .after = "sus14j") %>%
+  relocate(sus14k1, .after = "sus14k") %>%
+  relocate(sus14l1, .after = "sus14l") %>%
+  relocate(sus14m1, .after = "sus14m") %>%
+  relocate(sus14n1, .after = "sus14n") %>% 
+  relocate(sus14o1, .after = "sus14o") %>%
+  relocate(sus26b, .after = "sus26b") 
+  
+  
 ```
 
+### SUS Missing
 ```{r sus_missing}
 sus <- sus %>% 
   # sus-start; sus1:sus9 will not display if sus screen is not yes/1
@@ -3692,14 +3809,14 @@ sus <- sus %>%
   mutate_at(vars(sus10j), ~case_when(sus9 <= 9 ~ "-55", TRUE ~ .)) %>%
   
   # if sus11 is 2/4/5..  sus11a:sus11c weren't asked 
-  mutate_at(vars(sus11a:sus11c), ~case_when(sus11 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus11a:sus11c), ~case_when(sus11 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus11 is 3..  sus11a:sus11b weren't asked 
   mutate_at(vars(sus11a:sus11c), ~case_when(sus11 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus11 is not 3, sus11c was not asked
   mutate_at(vars(sus11c), ~case_when(sus11 != 3 ~ "-55", TRUE ~ .)) %>%
   
   # if sus12 is 2,4,5, sus12a:sus12c were not asked
-  mutate_at(vars(sus12a:sus12c), ~case_when(sus12 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus12a:sus12c), ~case_when(sus12 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus12 is 3..  sus12a:sus12b weren't asked 
   mutate_at(vars(sus12a:sus12b_77), ~case_when(sus12 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus12 is not 3, sus12c was not asked
@@ -3712,7 +3829,7 @@ sus <- sus %>%
       .fns = ~case_when(is.na(.x) ~ "-77", TRUE ~ .x)
   ))%>%
   # if sus13 is 2,4,5, sus13a:sus14o2 were not asked
-  mutate_at(vars(sus13a:sus14o2), ~case_when(sus13 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus13a:sus14o2), ~case_when(sus13 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus13 is 3..  sus13a weren't asked 
   mutate_at(vars(sus13a), ~case_when(sus13 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus13 is not 3, sus13b was not asked
@@ -3752,85 +3869,109 @@ sus <- sus %>%
   mutate_at(vars(sus14o:sus14o2), ~case_when(sus13a <=14 | sus13 != 1 ~ "-55", TRUE ~ .)) %>%
 
   # if sus15 is 2,4,5, sus15a:sus15b were not asked
-  mutate_at(vars(sus15a:sus15), ~case_when(sus15 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus15a:sus15), ~case_when(sus15 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus15 is 3..  sus15a weren't asked 
   mutate_at(vars(sus15a), ~case_when(sus15 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus15 is not 3, sus15b was not asked
   mutate_at(vars(sus15b), ~case_when(sus15 != 3 ~ "-55", TRUE ~ .)) %>%
   
   # if sus16 is 2,4,5, sus16a:sus16b were not asked
-  mutate_at(vars(sus16a:sus16b), ~case_when(sus16 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus16a:sus16b), ~case_when(sus16 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus16 is 3..  sus16a weren't asked 
   mutate_at(vars(sus16a), ~case_when(sus16 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus16 is not 3, sus16b was not asked
   mutate_at(vars(sus16b), ~case_when(sus16 != 3 ~ "-55", TRUE ~ .)) %>%
   
   # if sus17 is 2,4,5, sus17a:sus17b were not asked
-  mutate_at(vars(sus17a:sus17b), ~case_when(sus17 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus17a:sus17b), ~case_when(sus17 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus17 is 3..  sus17a weren't asked 
   mutate_at(vars(sus17a), ~case_when(sus17 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus17 is not 3, sus17b was not asked
   mutate_at(vars(sus17b), ~case_when(sus17 != 3 ~ "-55", TRUE ~ .)) %>%
  
   # if sus19 is 2,4,5, sus19a:sus19b were not asked
-  mutate_at(vars(sus19a:sus19b), ~case_when(sus19 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus19a:sus19b), ~case_when(sus19 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus19 is 3..  sus19a weren't asked 
   mutate_at(vars(sus19a), ~case_when(sus19 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus19 is not 3, sus19b was not asked
   mutate_at(vars(sus19b), ~case_when(sus19 != 3 ~ "-55", TRUE ~ .)) %>%
 
   # if sus20 is 2,4,5, sus20a:sus20b were not asked
-  mutate_at(vars(sus20a:sus20b), ~case_when(sus20 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus20a:sus20b), ~case_when(sus20 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus20 is 3..  sus20a weren't asked 
   mutate_at(vars(sus20a), ~case_when(sus20 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus20 is not 3, sus20b was not asked
   mutate_at(vars(sus20b), ~case_when(sus20 != 3 ~ "-55", TRUE ~ .)) %>%
 
   # if sus21 is 2,4,5, sus21a:sus21b were not asked
-  mutate_at(vars(sus21a:sus21b), ~case_when(sus21 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus21a:sus21b), ~case_when(sus21 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus21 is 3..  sus21a weren't asked 
   mutate_at(vars(sus21a), ~case_when(sus21 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus21 is not 3, sus20b was not asked
   mutate_at(vars(sus21b), ~case_when(sus21 != 3 ~ "-55", TRUE ~ .)) %>%
 
   # if sus22 is 2,4,5, sus22a:sus22b were not asked
-  mutate_at(vars(sus22a:sus22b), ~case_when(sus22 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus22a:sus22b), ~case_when(sus22 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus22 is 3..  sus22a weren't asked 
   mutate_at(vars(sus22a), ~case_when(sus22 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus22 is not 3, sus20b was not asked
   mutate_at(vars(sus22b), ~case_when(sus22 != 3 ~ "-55", TRUE ~ .)) %>%
 
   # if sus23 is 2,4,5, sus23a:sus23b were not asked
-  mutate_at(vars(sus23a:sus23b), ~case_when(sus23 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus23a:sus23b), ~case_when(sus23 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus23 is 3..  sus23a weren't asked 
   mutate_at(vars(sus23a), ~case_when(sus23 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus23 is not 3, sus23b was not asked
   mutate_at(vars(sus23b), ~case_when(sus23 != 3 ~ "-55", TRUE ~ .)) %>%
   
   # if sus24 is 2,4,5, sus24a:sus24b were not asked
-  mutate_at(vars(sus24a:sus24b), ~case_when(sus24 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus24a:sus24b), ~case_when(sus24 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus24 is 3..  sus24a weren't asked 
   mutate_at(vars(sus24a), ~case_when(sus24 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus24 is not 3, sus24b was not asked
   mutate_at(vars(sus24b), ~case_when(sus24 != 3 ~ "-55", TRUE ~ .)) %>%
 
   # if sus25 is 2,4,5, sus25a:sus25b were not asked
-  mutate_at(vars(sus25a:sus25b), ~case_when(sus25 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus25a:sus25b), ~case_when(sus25 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus25 is 3..  sus25a weren't asked 
   mutate_at(vars(sus25a), ~case_when(sus25 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus25 is not 3, sus25b was not asked
   mutate_at(vars(sus25b), ~case_when(sus25 != 3 ~ "-55", TRUE ~ .)) %>%
 
   # if sus26 is 2,4,5, sus26a:sus26c were not asked
-  mutate_at(vars(sus26a:sus26c), ~case_when(sus26 %in%c(2,4,5) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sus26a:sus26c), ~case_when(sus26 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus26 is 3..  sus26a:sus26b weren't asked 
   mutate_at(vars(sus26a:sus26b_77), ~case_when(sus26 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus26 is not 3, sus26b was not asked
-  mutate_at(vars(sus26b_77), ~case_when(sus26 != 3 ~ "-55", TRUE ~ .))
-```
+  mutate_at(vars(sus26b_77), ~case_when(sus26 != 3 ~ "-55", TRUE ~ .)) %>%
+    # we have missing due to partial finish
+  mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
+  select(-c("sus11b_1","sus11b_2","sus11b_3","sus11b_77")) %>%
+  select(-c("sus12b_1","sus12b_2","sus12b_3","sus12b_77")) %>%
+  select(-c("sus14a_1","sus14a_2","sus14a_3","sus14a_77")) %>%
+  select(-c("sus14b2_1","sus14b2_2","sus14b2_3","sus14b2_77")) %>%
+  select(-c("sus14c1_1","sus14c1_2","sus14c1_3","sus14c1_77")) %>%
+  select(-c("sus14d1_1","sus14d1_2","sus14d1_3","sus14d1_77")) %>%
+  select(-c("sus14e1_1","sus14e1_2","sus14e1_3","sus14e1_77")) %>%
+  select(-c("sus14f1_1","sus14f1_2","sus14f1_3","sus14f1_77")) %>%
+  select(-c("sus14g1_1","sus14g1_2","sus14g1_3","sus14g1_77")) %>%
+  select(-c("sus14h1_1","sus14h1_2","sus14h1_3","sus14h1_77")) %>%
+  select(-c("sus14i1_1","sus14i1_2","sus14i1_3","sus14i1_77")) %>%
+  select(-c("sus14j1_1","sus14j1_2","sus14j1_3","sus14j1_77")) %>%
+  select(-c("sus14k1_1","sus14k1_2","sus14k1_3","sus14k1_77")) %>%
+  select(-c("sus14l1_1","sus14l1_2","sus14l1_3","sus14l1_77")) %>%
+  select(-c("sus14m1_1","sus14m1_2","sus14m1_3","sus14m1_77")) %>%
+  select(-c("sus14n1_1","sus14n1_2","sus14n1_3","sus14n1_77")) %>%
+  select(-c("sus14o1_1","sus14o1_2","sus14o1_3","sus14o1_77")) %>%
+  select(-c("sus26b_1","sus26b_2","sus26b_3","sus26b_77"))
 
-sus$new_column <- ifelse(sus$sus13 == 1 | sus$sus13a <= 10, -55, NA)
-sus<-sus %>% relocate(new_column, .after = sus13)
+sus_miss <- sus %>%
+    mutate(across(-c(id), as.numeric))%>%
+  pct_miss_fun(
+    id = c("id", -matches("\\d$")),
+    n_items = 24
+  )
+```
 
 
 ## PCL 
@@ -3839,6 +3980,23 @@ Min's question: Should I rename the columns? what should I code NA to - they are
 ```{r plc}
 pcl <- tpw_raw %>%
   select(id, starts_with("pcl")) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)_1", "pcl\\1_happen", .),
+    .cols = matches("pcl\\d+_1")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)_2", "pcl\\1_witness", .),
+    .cols = matches("pcl\\d+_2")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)_3", "pcl\\1_learn", .),
+    .cols = matches("pcl\\d+_3")
+  )
+  
+  
+  
+  
+  
     mutate(
     pcl1_devperiod = factor(
       case_when(
@@ -4055,6 +4213,7 @@ pcl <- pcl %>%
         TRUE ~ NA_character_
   ))
 
+# Happen to me 
 pcl <- pcl %>%
   mutate(pcl1_yes = if_else(pcl1_1 == "Happened to me", 1, 0, missing = 0),
            # Maria: i replaced pcl16_yes with pcl2_yes
@@ -4080,34 +4239,52 @@ pcl <- pcl %>%
          )
 # okay here is a basic by time period
 
-# pcl <- pcl %>%
-#   mutate(
-#     across(
-#       # had you experienced and how 
-#       .cols = c(matches("^pcl\\d+_\\d+")),
-#       .fns = ~case_when(
-#         .x == "Happened to me" ~ "1",
-#         .x == "Witnessed it" ~ "1",
-#         .x == "Learned about it" ~ "1",
-#         .x == "No (did not happen)" ~ "0",
-#         .x == "Decline to Answer" ~ "-77",
-#         TRUE ~ .x
-#       )
-#     ),
-#     across(
-#     .cols = c(matches("^pcl\\d+a_\\d+")),
-#     # if the happened when 
-#       .fns = ~case_when(
-#         .x == "Ages 0-5" ~ "1",
-#         .x == "Ages 6-11" ~ "1",
-#         .x == "Ages 12-19" ~ "1",
-#         .x == "Adulthood" ~ "1",
-#         .x == "Decline to Answer" ~ "-77",
-#         TRUE ~ .x
-#       )
-#     ),
-#     across()
-#   )
+pcl <- pcl %>%
+  mutate(
+    across(
+      # had you experienced and how
+      .cols = c(matches("^pcl\\d+_\\d+")),
+      .fns = ~case_when(
+        .x == "Happened to me" ~ "1",
+        .x == "Witnessed it" ~ "1",
+        .x == "Learned about it" ~ "1",
+        .x == "No (did not happen)" ~ "0",
+        .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = c(pcl1_1, pcl1_2, pcl1_3),
+      .fns = ~case_when(
+        pcl1_77 == "-77" ~ "-77",
+        pcl1_4 == "0" ~ "0",
+        is.na(.x) ~ "0",
+        TRUE ~ .x
+      )
+    ),
+    across(
+    .cols = c(matches("^pcl\\d+a_\\d+")),
+    # if the happened when
+      .fns = ~case_when(
+        .x == "Ages 0-5" ~ "1",
+        # .x == "Ages 6-11" ~ "1",
+        # .x == "Ages 12-19" ~ "1",
+        # .x == "Adulthood" ~ "1",
+        # .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    )
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)_1", "pcl\\1_happen", .),
+    .cols = matches("pcl\\d+_1")
+  )
+  rename(pcl1_happen = pcl1_1) %>%
+  rename(pcl1_witness = pcl1_2) %>%
+  rename(pcl1_learn = pcl1_3) %>%
+  rename(pcl1_0_5 = pcl1a_1) %>%
+  rename(pcl1_)
+  
 
 
   # mutate(
