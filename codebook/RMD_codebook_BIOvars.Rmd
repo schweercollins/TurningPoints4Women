@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE, warning=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 if (!require("pacman")) install.packages("pacman")
 
@@ -206,7 +206,7 @@ These data are in the `dbs_archive.xlsx` file where each construct domain is a s
 
 *<MARIA, insert brief description about DBS assessment/construct domain and how it was measured>* 
 
-The seven biological constructs assessed were cholesterol, c-reactive protein, interleukin-6, high-density lipoprotein, triglycerides, blood sugar (i.e., A1C), and Epstein-Barr virus. 
+The seven biological constructs assessed were cholesterol, high-density lipoprotein cholesterol, Triglycerides, c-reactive protein, Epstein-Barr virus, hemoglobin A1C, and Interleukin-6.. 
 
 For each biological construct, allostatic load indicators were calculated based on *<MARIA INSERT, include difference between AL and percentile AL indicator if possible>.*
 
@@ -214,13 +214,12 @@ For each biological construct, allostatic load indicators were calculated based 
 
 ### Cholesterol (CHO) Description
 
-These data include variables related to the cholesterol assessment, including direct and plasma equivalent (PE) cholesterol values for participants. Higher scores indicate higher cholesterol. The PE cholesterol value was used to calculate allostatic load indicators.
+These data include variables related to the cholesterol assessment, including direct and plasma equivalent (PE) cholesterol values for participants. Higher values indicate higher cholesterol. The PE cholesterol value was used to calculate allostatic load indicators.
 
 The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
 
 Reference: *<MARIA> INSERT REF if applicable*
 
-### CHO Variables
 
 #### Value Labels
 
@@ -254,7 +253,6 @@ cho_label_table <- cho_label_df %>%
 print(cho_label_table)
 
 ```
-
 
 
 Allostatic load indicators, `cho_cal` and `cho_pal` are dichotomous:
@@ -324,14 +322,14 @@ print(cho_var_table)
 
 #### Composite Variables
 
-Using the plasma-equivalent cholesterol value, two allostatic load indicators were calculated. One based on the clinical cut-off for high cholesterol (`cho_cal`) and the other is a percentile-based cut-off for high cholesterol (`cho_pal`) defined as the top 25% of cholesterol scores. 
+Using the plasma-equivalent cholesterol value, two allostatic load indicators were calculated. One based on the clinical cut-off for high cholesterol (`cho_cal`) and the other is a percentile-based cut-off for high cholesterol (`cho_pal`) defined as the top 25% of cholesterol values. 
 
 ```{r CHO-subscale-table, results = 'asis'}
 #create table of info for AL indicators
 cho_scale_df <- data.frame(
   var_name = c("cho_cal", "cho_pal"),
   scale = c("Allostatic load indicator based on clinical cut-off  for high cholesterol (1)",
-            "Allostatic load indicator based on top 25% of cholesterol scores (1)"),
+            "Allostatic load indicator based on top 25% of cholesterol values (1)"),
   scale_construction = c("`cho_pe` > 199", 
                          "Top 25% of observed `cho_pe` values"),
   scale_range = c("0-1", "0-1"))
@@ -355,13 +353,11 @@ print(cho_scale_table)
 
 ```
 
-### Summary Statistics
-
 #### Descriptive Statistics
 
 Descriptive statistics are presented below for key CHO variables.
 
-Raw cholesterol values: 
+**Raw cholesterol values:** 
 
 ```{r cho-cont-summary-table, results = 'asis'}
 #create function for calculating continuous summary statistics
@@ -401,7 +397,7 @@ cho_sum_tbl
 
 ```
 
-Allostatic load indicators: 
+**Allostatic load indicators:** 
 
 ```{r cho-dichot-summary-table, results = 'asis'}
 #create function for calculating dichotomous summary statistics
@@ -448,7 +444,7 @@ cho_tbl_dichot
 
 ```
 
-Data collection notes: 
+**Data collection notes:** 
 
 ```{r cho-cat-summary-table, results = 'asis'}
 #create function to process columns with multiple responses
@@ -559,7 +555,7 @@ create_AL_plot <- function(data, column_name, composite_name) {
 
 
 #cho_cal
-p_cho_cal <- create_AL_plot(dbs_cho_df, "cho_cal", "CHO Allostatic \nLoad (AL) Indicator") +
+p_cho_cal <- create_AL_plot(dbs_cho_df, "cho_cal", "CHO Clinical \nAllostatic Load (AL) Indicator") +
   theme(plot.title = element_text(hjust = 0.5))
 
 #cho_pal
@@ -573,7 +569,7 @@ ggarrange(p_cho_cal, p_cho_pal)
 
 #### Clinical Categories
 
-The distribution for plasma-equivalent cholesterol values (cho_pe) alongside the clinical and percentile-determined allostatic load cutoffs are presented below.
+The distribution for plasma-equivalent cholesterol values (`cho_pe`) alongside the clinical and percentile-determined allostatic load cutoffs are presented below.
 
 ```{r cho-clinical-plot}
 dbs_cho_df %>%
@@ -582,16 +578,1643 @@ dbs_cho_df %>%
   cutoff_plot2(
     x = cho_pe,
     cutoff = 200,
-    cutoff_other = 166.25
+    cutoff_other = 171.5
   ) +
   labs(
     title = 'Allostatic Load Cutoff Values for CHO',
-    caption = 'Clinical cutoff is 200 and \n percentile-determined cutoff is 166.'
+    caption = 'Clinical cutoff is 200 and \n percentile-determined cutoff is 172.'
   )+
-  annotate("text", x = 155, y = 18.5, label = "Percentile") +
+  annotate("text", x = 160, y = 18.5, label = "Percentile") +
   annotate("text", x = 209, y = 18.5, label = "Clinical")
 
 ```
+
+
+### High-Density Lipoprotein Cholesterol (HDL) Description
+
+These data include variables related to the HDL cholesterol assessment, including direct and plasma equivalent (PE) HDL cholesterol values for participants. Higher values indicate higher HDL cholesterol. The PE value was used to calculate allostatic load indicators.
+
+*<MARIA> INSERT INFO RE: LOWER HDL IS WORSE (FOR AL INDICATOR) if desired - since HDL AL indicator is based off low values vs higher values in other variables*
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`hdl_punch_note`, `hdl_assay_note`, and `hdl_result_note`) are below: 
+
+```{r hdl-label-table, results = 'asis'}
+#same notes as cho vars
+# Print the table
+print(cho_label_table)
+
+```
+
+Allostatic load indicators, `hdl_cal` and `hdl_pal` are dichotomous:
+
+```{r hdl-dichot-value, results = 'asis'}
+# Print the table
+print(dichot_label_table)
+
+```
+
+#### Variables
+
+All HDL variables are presented in the following table.
+
+```{r hdl-var-table, results = 'asis'}
+#create table of info
+hdl_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "hdl_direct", "hdl_pe", "hdl_punch_note", "hdl_assay_note", "hdl_result_note", 
+            "hdl_plate", "hdl_date", "hdl_cal", "hdl_pal"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct HDL cholesterol analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent HDL cholesterol analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay",
+            "Clinical allostatic load indicator for out-of-range HDL cholesterol",
+            "Percentile-based allostatic load indicator for out-of-range HDL cholesterol")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+hdl_var_table <- hdl_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(hdl_var_table)
+
+```
+
+#### Composite Variables
+
+Using the plasma-equivalent HDL cholesterol value, two allostatic load indicators were calculated. One based on the clinical cut-off for high HDL cholesterol (`hdl_cal`) and the other is a percentile-based cut-off for high HDL cholesterol (`hdl_pal`) defined as the top 25% of HDL cholesterol values. 
+
+```{r hdl-subscale-table, results = 'asis'}
+#create table of info for AL indicators
+hdl_scale_df <- data.frame(
+  var_name = c("hdl_cal", "hdl_pal"),
+  scale = c("Allostatic load indicator based on clinical cut-off  for high HDL cholesterol (1)",
+            "Allostatic load indicator based on top 25% of HDL cholesterol values (1)"),
+  scale_construction = c("`hdl_pe` < 40", 
+                         "Top 25% of observed `hdl_pe` values"),
+  scale_range = c("0-1", "0-1"))
+
+#create gt table
+hdl_scale_table <- hdl_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(hdl_scale_table)
+
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key HDL variables.
+
+**Raw HDL cholesterol values:** 
+
+```{r hdl-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+hdl_sum_df <- dbs_hdl_df %>% 
+  select(hdl_direct, hdl_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% # warning due to <10 response
+  calc_cont_sum_stats()
+
+#create gt table
+hdl_sum_tbl <- hdl_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+hdl_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r hdl-dichot-summary-table, results = 'asis'}
+
+#apply function to calculate summary stats
+hdl_dichot_df <- dbs_hdl_df %>% 
+  select(hdl_cal, hdl_pal) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+#create gt table
+hdl_tbl_dichot <- hdl_dichot_df %>%
+  gt() %>%
+  cols_label(num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+hdl_tbl_dichot
+
+```
+
+**Data collection notes:** 
+
+```{r hdl-cat-summary-table, results = 'asis'}
+
+#notes for hdl_df
+hdl_notes <- c(1, 4, 5, 37, 42)
+
+hdl_note_df <- dbs_hdl_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+hdl_note_list <- lapply(hdl_note_df, function(column) calc_multi_column(column, hdl_notes))
+
+#combine results into df
+hdl_note_sum <- bind_rows(hdl_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+hdl_tbl_notes <- hdl_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_37 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_37 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Count_1", "Count_4", "Count_5", "Count_37", "Count_42", "Percent_1",
+                         "Percent_4", "Percent_5", "Percent_37", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Did not elute", columns = c(Count_37, Percent_37)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_4, Percent_4,
+                                                        Count_5, Percent_5, Count_37, Percent_37,
+                                                        Count_42, Percent_42))) 
+
+# Render the table
+print(hdl_tbl_notes) 
+
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the allostatic load indicators.
+
+```{r hdl-dist-plots}
+
+#hdl_cal
+p_hdl_cal <- create_AL_plot(dbs_hdl_df, "hdl_cal", "HDL Clinical \nAllostatic Load (AL) Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#hdl_pal
+p_hdl_pal <- create_AL_plot(dbs_hdl_df, "hdl_pal", "HDL Percentile- \nDetermined AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_hdl_cal, p_hdl_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for plasma-equivalent HDL cholesterol values (`hdl_pe`) alongside the clinical and percentile-determined allostatic load cutoffs are presented below.
+
+```{r hdl-clinical-plot}
+dbs_hdl_df %>%
+  filter(hdl_pe != "-99") %>% 
+  mutate(hdl_pe = as.numeric(hdl_pe)) %>% 
+  cutoff_plot2(
+    x = hdl_pe,
+    cutoff = 39,
+    cutoff_other = 53
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for HDL',
+    caption = 'Clinical cutoff is 39 and \n percentile-determined cutoff is 53.'
+  )+
+  annotate("text", x = 58, y = 15, label = "Percentile") +
+  annotate("text", x = 35, y = 15, label = "Clinical")
+
+```
+
+
+### Triglycerides (TRG) Description
+
+These data include variables related to the triglycerides assessment, including direct and plasma equivalent (PE) triglyceride values for participants. Higher values indicate higher triglycerides. The PE triglyceride value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`trg_punch_note`, `trg_assay_note`, and `trg_result_note`) are below: 
+
+```{r trg-label-table, results = 'asis'}
+#Same as CHO notes table
+# Print the table
+print(cho_label_table)
+
+```
+
+
+Allostatic load indicators, `trg_cal` and `trg_pal` are dichotomous:
+
+```{r trg-dichot-value, results = 'asis'}
+# Print the table
+print(dichot_label_table)
+
+```
+
+
+#### Variables
+
+All TRG variables are presented in the following table.
+
+```{r TRG-var-table, results = 'asis'}
+#create table of info
+trg_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "trg_direct", "trg_pe", "trg_punch_note", "trg_assay_note", "trg_result_note", 
+            "trg_plate", "trg_date", "trg_cal", "trg_pal"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct triglycerides analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent triglycerides analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay",
+            "Clinical allostatic load indicator for out-of-range triglycerides",
+            "Percentile-based allostatic load indicator for out-of-range triglycerides")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+trg_var_table <- trg_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(trg_var_table)
+
+```
+
+#### Composite Variables
+
+Using the plasma-equivalent triglyceride value, two allostatic load indicators were calculated. One based on the clinical cut-off for high triglycerides (`trg_cal`) and the other is a percentile-based cut-off for high triglycerides (`trg_pal`) defined as the top 25% of triglyceride values. 
+
+```{r trg-subscale-table, results = 'asis'}
+#create table of info for AL indicators
+trg_scale_df <- data.frame(
+  var_name = c("trg_cal", "trg_pal"),
+  scale = c("Allostatic load indicator based on clinical cut-off  for high triglycerides (1)",
+            "Allostatic load indicator based on top 25% of triglyceride values (1)"),
+  scale_construction = c("`trg_pe` > 149", 
+                         "Top 25% of observed `trg_pe` values"),
+  scale_range = c("0-1", "0-1"))
+
+#create gt table
+trg_scale_table <- trg_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(trg_scale_table)
+
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key TRG variables.
+
+**Raw triglyceride values:** 
+
+```{r trg-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+trg_sum_df <- dbs_trg_df %>% 
+  select(trg_direct, trg_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+trg_sum_tbl <- trg_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+trg_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r trg-dichot-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+trg_dichot_df <- dbs_trg_df %>% 
+  select(trg_cal, trg_pal) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+#create gt table
+trg_tbl_dichot <- trg_dichot_df %>%
+  gt() %>%
+  cols_label(num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+trg_tbl_dichot
+
+```
+
+**Data collection notes:** 
+
+```{r trg-cat-summary-table, results = 'asis'}
+#notes for trg_df
+trg_notes <- c(1, 4, 5, 37, 42)
+
+trg_note_df <- dbs_trg_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+trg_note_list <- lapply(trg_note_df, function(column) calc_multi_column(column, trg_notes))
+
+#combine results into df
+trg_note_sum <- bind_rows(trg_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+trg_tbl_notes <- trg_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_37 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_37 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Count_1", "Count_4", "Count_5", "Count_37", "Count_42", "Percent_1",
+                         "Percent_4", "Percent_5", "Percent_37", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Did not elute", columns = c(Count_37, Percent_37)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_4, Percent_4,
+                                                        Count_5, Percent_5, Count_37, Percent_37,
+                                                        Count_42, Percent_42))) 
+
+# Render the table
+print(trg_tbl_notes) 
+
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the allostatic load indicators.
+
+```{r trg-dist-plots}
+#trg_cal
+p_trg_cal <- create_AL_plot(dbs_trg_df, "trg_cal", "TRG Clinical \nAllostatic Load (AL) Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#trg_pal
+p_trg_pal <- create_AL_plot(dbs_trg_df, "trg_pal", "TRG Percentile- \nDetermined AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_trg_cal, p_trg_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for plasma-equivalent triglyceride values (`trg_pe`) alongside the clinical and percentile-determined allostatic load cutoffs are presented below.
+
+```{r trg-clinical-plot}
+dbs_trg_df %>%
+  filter(trg_pe != "-99") %>% 
+  mutate(trg_pe = as.numeric(trg_pe)) %>% 
+  cutoff_plot2(
+    x = trg_pe,
+    cutoff = 150,
+    cutoff_other = 97
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for TRG',
+    caption = 'Clinical cutoff is 150 and \n percentile-determined cutoff is 97.'
+  )+
+  annotate("text", x = 106.5, y = 17, label = "Percentile") +
+  annotate("text", x = 158, y = 17, label = "Clinical")
+
+```
+
+
+### C-Reactive Protein (CRP) Description
+
+These data include variables related to the c-reactive protein assessment, including direct and plasma equivalent (PE) c-reactive protein values for participants. Higher values indicate higher c-reactive protein. The PE value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`crp_punch_note`, `crp_assay_note`, and `crp_result_note`) are below: 
+
+```{r CRP-label-table, results = 'asis'}
+crp_label_df <- data.frame(
+  value = c("1", "3", "4", "5", "29", "42"),
+  label = c("Blank punch",
+            "Smeared Drops/ Inconsistent Absorption",
+            "Small spot, <80%",
+            "Non-circular dried blood spot",
+            "Below lower limit of detection (LLoD)",
+            "Blood from filter paper touched inside back cover")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+crp_label_df <- setNames(crp_label_df[-1, ], unlist(crp_label_df[1, ]))
+
+
+#create table
+crp_label_table <- crp_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(crp_label_table)
+
+```
+
+
+Allostatic load indicators, `crp_cal` and `crp_pal` are dichotomous:
+
+```{r crp-dichot-value, results = 'asis'}
+# Print the table
+print(dichot_label_table)
+
+```
+
+
+#### Variables
+
+All CRP variables are presented in the following table.
+
+```{r CRP-var-table, results = 'asis'}
+#create table of info
+crp_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "crp_direct", "crp_pe", "crp_punch_note", "crp_assay_note", "crp_result_note", 
+            "crp_plate", "crp_date", "crp_cal", "crp_pal"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct c-reactive protein analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent c-reactive protein analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay",
+            "Clinical allostatic load indicator for out-of-range c-reactive protein",
+            "Percentile-based allostatic load indicator for out-of-range c-reactive protein")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+crp_var_table <- crp_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(crp_var_table)
+
+```
+
+#### Composite Variables
+
+Using the plasma-equivalent c-reactive protein value, two allostatic load indicators were calculated. One based on the clinical cut-off for high c-reactive protein (`crp_cal`) and the other is a percentile-based cut-off for high c-reactive protein (`crp_pal`) defined as the top 25% of c-reactive protein values. 
+
+```{r CRP-subscale-table, results = 'asis'}
+#create table of info for AL indicators
+crp_scale_df <- data.frame(
+  var_name = c("crp_cal", "crp_pal"),
+  scale = c("Allostatic load indicator based on clinical cut-off  for high c-reactive protein (1)",
+            "Allostatic load indicator based on top 25% of c-reactive protein values (1)"),
+  scale_construction = c("`crp_pe` > 0.2", 
+                         "Top 25% of observed `crp_pe` values"),
+  scale_range = c("0-1", "0-1"))
+
+#create gt table
+crp_scale_table <- crp_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(crp_scale_table)
+
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key CRP variables.
+
+**Raw c-reactive protein values:** 
+
+```{r CRP-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+crp_sum_df <- dbs_crp_df %>% 
+  select(crp_direct, crp_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% # warning due to <10 response
+  calc_cont_sum_stats()
+
+#create gt table
+crp_sum_tbl <- crp_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+crp_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r crp-dichot-summary-table, results = 'asis'}
+
+#apply function to calculate summary stats
+crp_dichot_df <- dbs_crp_df %>% 
+  select(crp_cal, crp_pal) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+#create gt table
+crp_tbl_dichot <- crp_dichot_df %>%
+  gt() %>%
+  cols_label(num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+crp_tbl_dichot
+
+```
+
+**Data collection notes:** 
+
+```{r crp-cat-summary-table, results = 'asis'}
+#notes for crp_df
+crp_notes <- c(1, 3, 4, 5, 29, 42)
+
+crp_note_df <- dbs_crp_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+crp_note_list <- lapply(crp_note_df, function(column) calc_multi_column(column, crp_notes))
+
+#combine results into df
+crp_note_sum <- bind_rows(crp_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+crp_tbl_notes <- crp_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_3 = "N", 
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_29 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_3 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_29 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100)) %>%
+  cols_align(columns = c("Count_1", "Count_3", "Count_4", "Count_5", "Count_29", "Count_42", "Percent_1", "Percent_3",
+                         "Percent_4", "Percent_5", "Percent_29", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Smeared drops",  columns =  c(Count_3, Percent_3)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Below limit", columns = c(Count_29, Percent_29)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_3, Percent_3,
+                                                        Count_4, Percent_4, Count_5, Percent_5, 
+                                                        Count_29, Percent_29, Count_42, Percent_42))) 
+
+# Render the table
+print(crp_tbl_notes) 
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the allostatic load indicators.
+
+```{r crp-dist-plots}
+
+#crp_cal
+p_crp_cal <- create_AL_plot(dbs_crp_df, "crp_cal", "CRP Clinical \nAllostatic Load (AL) Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#crp_pal
+p_crp_pal <- create_AL_plot(dbs_crp_df, "crp_pal", "CRP Percentile- \nDetermined AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_crp_cal, p_crp_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for plasma-equivalent c-reactive protein values (`crp_pe`) alongside the clinical and percentile-determined allostatic load cutoffs are presented below.
+
+```{r crp-clinical-plot}
+dbs_crp_df %>%
+  filter(crp_pe != "-99") %>% 
+  mutate(crp_pe = as.numeric(crp_pe)) %>% 
+  cutoff_plot2(
+    x = crp_pe,
+    cutoff = 0.3,
+    cutoff_other = 5.3
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for CRP',
+    caption = 'Clinical cutoff is 0.3 and \n percentile-determined cutoff is 5.3.'
+  )+
+  annotate("text", x = 8.9, y = 35, label = "Percentile") +
+  annotate("text", x = 2.7, y = 42, label = "Clinical")
+
+```
+
+
+### Epstein-Barr virus (EBV) Description
+
+These data include variables related to the Epstein-Barr virus assessment, including direct and plasma equivalent (PE) Epstein-Barr virus values for participants. Higher values indicate higher Epstein-Barr virus concentration *<MARIA> CONFRIM CORRECT*. The PE Epstein-Barr virus value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`ebv_punch_note`, `ebv_assay_note`, and `ebv_result_note`) are below: 
+
+```{r ebv-label-table, results = 'asis'}
+#specify notes in EBV data
+ebv_label_df <- data.frame(
+  value = c("1", "3", "4", "5", "12", "13", "42"),
+  label = c("Blank punch",
+            "Smeared Drops/ Inconsistent Absorption",
+            "Small spot, <80%",
+            "Non-circular dried blood spot",
+            "Drop outside printed circle",
+            "No DBS remains",
+            "Blood from filter paper touched inside back cover")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+ebv_label_df <- setNames(ebv_label_df[-1, ], unlist(ebv_label_df[1, ]))
+
+
+#create table
+ebv_label_table <- ebv_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(ebv_label_table)
+
+```
+
+
+The allostatic load indicator, `ebv_pal`, is dichotomous:
+
+```{r ebv-dichot-value, results = 'asis'}
+# Print the table
+print(dichot_label_table)
+
+```
+
+
+#### Variables
+
+All EBV variables are presented in the following table.
+
+```{r EBV-var-table, results = 'asis'}
+#create table of info
+ebv_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "ebv_direct", "ebv_pe", "ebv_punch_note", "ebv_assay_note", "ebv_result_note", 
+            "ebv_plate", "ebv_date", "ebv_pal"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct Epstein-Barr virus analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent Epstein-Barr virus analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay",
+            "Percentile-based allostatic load indicator for out-of-range Epstein-Barr virus")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+ebv_var_table <- ebv_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(ebv_var_table)
+
+```
+
+#### Composite Variables
+
+Using the plasma-equivalent Epstein-Barr virus value, an allostatic load indicator was calculated. Only the percentile-based cut-off for high Epstein-Barr virus (`ebv_pal`) was used to calculate an allostatic load indicator as no standard clinical cutoff was found *<MARIA> CONFIRM*. The percentile cutoff is defined as the top 25% of Epstein-Barr virus values. 
+
+```{r ebv-subscale-table, results = 'asis'}
+#create table of info for AL indicators
+ebv_scale_df <- data.frame(
+  var_name = c("ebv_pal"),
+  scale = c("Allostatic load indicator based on top 25% of Epstein-Barr virus values (1)"),
+  scale_construction = c("Top 25% of observed `ebv_pe` values"),
+  scale_range = c("0-1"))
+
+#create gt table
+ebv_scale_table <- ebv_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(ebv_scale_table)
+
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key EBV variables.
+
+**Raw Epstein-Barr virus values:** 
+
+```{r ebv-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+ebv_sum_df <- dbs_ebv_df %>% 
+  select(ebv_direct, ebv_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+ebv_sum_tbl <- ebv_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+ebv_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r ebv-dichot-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+ebv_dichot_df <- dbs_ebv_df %>% 
+  select(ebv_pal) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+#create gt table
+ebv_tbl_dichot <- ebv_dichot_df %>%
+  gt() %>%
+  cols_label(num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+ebv_tbl_dichot
+
+```
+
+**Data collection notes:** 
+
+```{r ebv-cat-summary-table, results = 'asis'}
+#notes for ebv_df
+ebv_notes <- c(1, 3, 4, 5, 12, 13, 42)
+
+ebv_note_df <- dbs_ebv_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+ebv_note_list <- lapply(ebv_note_df, function(column) calc_multi_column(column, ebv_notes))
+
+#combine results into df
+ebv_note_sum <- bind_rows(ebv_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+ebv_tbl_notes <- ebv_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_3 = "N",
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_12 = "N",
+             Count_13 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_3 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_12 = "%",
+             Percent_13 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Count_1", "Count_3", "Count_4", "Count_5", "Count_12", "Count_13",
+                         "Count_42", "Percent_1", "Percent_3", "Percent_4", "Percent_5",
+                         "Percent_12", "Percent_13", "Percent_42", "Percent_-55"), 
+             align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Smeared drop",  columns =  c(Count_3, Percent_3)) %>%
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Outside circle",  columns = c(Count_12, Percent_12)) %>% 
+  tab_spanner(label = "No DBS remains", columns = c(Count_13, Percent_13)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_3, Percent_3,
+                                                        Count_4, Percent_4, Count_5, Percent_5,
+                                                        Count_12, Percent_12, Count_13, Percent_13,
+                                                        Count_42, Percent_42))) 
+
+# Render the table
+print(ebv_tbl_notes) 
+
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the percentile-based allostatic load indicator.
+
+```{r ebv-dist-plots}
+#ebv_pal
+p_ebv_pal <- create_AL_plot(dbs_ebv_df, "ebv_pal", "EBV Percentile- \nDetermined AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+p_ebv_pal
+
+```
+
+#### Clinical Categories
+
+The distribution for plasma-equivalent Epstein-Barr virus values (`ebv_pe`) alongside the percentile-determined allostatic load cutoff is presented below.
+
+```{r ebv-clinical-plot}
+dbs_ebv_df %>%
+  filter(ebv_pe != "-99") %>% 
+  mutate(ebv_pe = as.numeric(ebv_pe)) %>% 
+  cutoff_plot2(
+    x = ebv_pe,
+    cutoff = 410.5
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for EBV',
+    caption = 'Percentile-determined cutoff is 411.'
+  )+
+  annotate("text", x = 482, y = 16, label = "Percentile") 
+
+```
+
+### Hemoglobin A1C (A1C) Description
+
+These data include variables related to the hemoglobin A1C assessment. *<MARIA> EXPLAIN WHY NO PE AND DIRECT VALUE BUT ONLY AIC_HB VALUE* 
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`a1c_punch_note`, `a1c_assay_note`, and `a1c_result_note`) are below: 
+
+```{r a1c-label-table, results = 'asis'}
+#specify notes
+a1c_label_df <- data.frame(
+  value = c("1", "3", "4", "5", "13", "37", "42"),
+  label = c("Blank punch",
+            "Smeared Drops/ Inconsistent Absorption",
+            "Small spot, <80%",
+            "Non-circular dried blood spot",
+            "No DBS remains",
+            "Punch did not elute",
+            "Blood from filter paper touched inside back cover")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+a1c_label_df <- setNames(a1c_label_df[-1, ], unlist(a1c_label_df[1, ]))
+
+
+#create table
+a1c_label_table <- a1c_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(a1c_label_table)
+
+```
+
+
+Allostatic load indicators, `a1c_cal` and `a1c_pal` are dichotomous:
+
+```{r a1c-dichot-value, results = 'asis'}
+# Print the table
+print(dichot_label_table)
+
+```
+
+
+#### Variables
+
+All A1C variables are presented in the following table.
+
+```{r a1c-var-table, results = 'asis'}
+#create table of info
+a1c_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "a1c_hb", "a1c_punch_note", "a1c_assay_note", "a1c_result_note", 
+            "a1c_plate", "a1c_date", "a1c_cal", "a1c_pal"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Hemoglobin A1C analyte concentrate obtained from dried blood spot",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay",
+            "Clinical allostatic load indicator for out-of-range hemoglobin A1C",
+            "Percentile-based allostatic load indicator for out-of-range hemoglobin A1C")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+a1c_var_table <- a1c_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(a1c_var_table)
+
+```
+
+#### Composite Variables
+
+Using the hemoglobin A1C value, two allostatic load indicators were calculated. One based on the clinical cut-off for high hemoglobin A1C (`a1c_cal`) and the other is a percentile-based cut-off for high hemoglobin A1C (`a1c_pal`) defined as the top 25% of hemoglobin A1C values. 
+
+```{r a1c-subscale-table, results = 'asis'}
+#create table of info for AL indicators
+a1c_scale_df <- data.frame(
+  var_name = c("a1c_cal", "a1c_pal"),
+  scale = c("Allostatic load indicator based on clinical cut-off  for high hemoglobin A1C (1)",
+            "Allostatic load indicator based on top 25% of hemoglobin A1C values (1)"),
+  scale_construction = c("`a1c_hb` > 6.4", 
+                         "Top 25% of observed `a1c_hb` values"),
+  scale_range = c("0-1", "0-1"))
+
+#create gt table
+a1c_scale_table <- a1c_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(a1c_scale_table)
+
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key A1C variables.
+
+**Raw hemoglobin A1C values:** 
+
+```{r A1C-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+a1c_sum_df <- dbs_a1c_df %>% 
+  select(a1c_hb) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+a1c_sum_tbl <- a1c_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+a1c_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r a1c-dichot-summary-table, results = 'asis'}
+
+#apply function to calculate summary stats
+a1c_dichot_df <- dbs_a1c_df %>% 
+  select(a1c_cal, a1c_pal) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+#create gt table
+a1c_tbl_dichot <- a1c_dichot_df %>%
+  gt() %>%
+  cols_label(num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+a1c_tbl_dichot
+
+```
+
+**Data collection notes:** 
+
+```{r a1c-cat-summary-table, results = 'asis'}
+#notes for a1c_df
+a1c_notes <- c(1, 3, 4, 5, 29, 42)
+
+a1c_note_df <- dbs_a1c_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+a1c_note_list <- lapply(a1c_note_df, function(column) calc_multi_column(column, a1c_notes))
+
+#combine results into df
+a1c_note_sum <- bind_rows(a1c_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+a1c_tbl_notes <- a1c_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_3 = "N", 
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_29 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_3 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_29 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100)) %>%
+  cols_align(columns = c("Count_1", "Count_3", "Count_4", "Count_5", "Count_29", "Count_42", "Percent_1", "Percent_3",
+                         "Percent_4", "Percent_5", "Percent_29", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Smeared drops",  columns =  c(Count_3, Percent_3)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Below limit", columns = c(Count_29, Percent_29)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_3, Percent_3,
+                                                        Count_4, Percent_4, Count_5, Percent_5, 
+                                                        Count_29, Percent_29, Count_42, Percent_42))) 
+
+# Render the table
+print(a1c_tbl_notes) 
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the allostatic load indicators.
+
+```{r a1c-dist-plots}
+
+#a1c_cal
+p_a1c_cal <- create_AL_plot(dbs_a1c_df, "a1c_cal", "A1C Clinical \nAllostatic Load (AL) Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#a1c_pal
+p_a1c_pal <- create_AL_plot(dbs_a1c_df, "a1c_pal", "A1C Percentile- \nDetermined AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_a1c_cal, p_a1c_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for hemoglobin A1C values (`a1c_hb`) alongside the clinical and percentile-determined allostatic load cutoffs are presented below.
+
+```{r a1c-clinical-plot}
+dbs_a1c_df %>%
+  filter(a1c_hb != "-99") %>% 
+  mutate(a1c_hb = as.numeric(a1c_hb)) %>% 
+  cutoff_plot2(
+    x = a1c_hb,
+    cutoff = 6.5,
+    cutoff_other = 5.9
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for A1C',
+    caption = 'Clinical cutoff is 6.5 and \n percentile-determined cutoff is 5.9.'
+  )+
+  annotate("text", x = 5.35, y = 56, label = "Percentile") +
+  annotate("text", x = 6.93, y = 50, label = "Clinical")
+
+```
+
+### Interleukin-6 (IL6) Description
+
+These data include variables related to the Interleukin-6 assessment, including direct and plasma equivalent (PE) Interleukin-6 values for participants. Higher values indicate higher Interleukin-6. The PE value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`il6_punch_note`, `il6_assay_note`, and `il6_result_note`) are below: 
+
+```{r il6-label-table, results = 'asis'}
+il6_label_df <- data.frame(`1` = "Blank punch", check.names = FALSE)
+
+
+#create table
+il6_label_table <- il6_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(il6_label_table)
+
+```
+
+
+Allostatic load indicators, `il6_cal` and `il6_pal` are dichotomous:
+
+```{r il6-dichot-value, results = 'asis'}
+# Print the table
+print(dichot_label_table)
+
+```
+
+
+#### Variables
+
+All IL6 variables are presented in the following table.
+
+```{r IL6-var-table, results = 'asis'}
+#create table of info
+il6_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "il6_direct", "il6_pe", "il6_punch_note", "il6_assay_note", "il6_result_note", 
+            "il6_plate", "il6_date", "il6_cal", "il6_pal"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct Interleukin-6 analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent Interleukin-6 analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay",
+            "Clinical allostatic load indicator for out-of-range Interleukin-6",
+            "Percentile-based allostatic load indicator for out-of-range Interleukin-6")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+il6_var_table <- il6_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(il6_var_table)
+
+```
+
+#### Composite Variables
+
+Using the plasma-equivalent Interleukin-6 value, two allostatic load indicators were calculated. One based on the clinical cut-off for high Interleukin-6 (`il6_cal`) and the other is a percentile-based cut-off for high Interleukin-6 (`il6_pal`) defined as the top 25% of Interleukin-6 values. 
+
+```{r il6-subscale-table, results = 'asis'}
+#create table of info for AL indicators
+il6_scale_df <- data.frame(
+  var_name = c("il6_cal", "il6_pal"),
+  scale = c("Allostatic load indicator based on clinical cut-off  for high Interleukin-6 (1)",
+            "Allostatic load indicator based on top 25% of Interleukin-6 values (1)"),
+  scale_construction = c("`il6_pe` > 6", 
+                         "Top 25% of observed `il6_pe` values"),
+  scale_range = c("0-1", "0-1"))
+
+#create gt table
+il6_scale_table <- il6_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(il6_scale_table)
+
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key IL6 variables.
+
+Raw Interleukin-6 values: 
+
+```{r IL6-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+il6_sum_df <- dbs_il6_df %>% 
+  select(il6_direct, il6_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+il6_sum_tbl <- il6_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+il6_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r il6-dichot-summary-table, results = 'asis'}
+
+#apply function to calculate summary stats
+il6_dichot_df <- dbs_il6_df %>% 
+  select(il6_cal, il6_pal) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+#create gt table
+il6_tbl_dichot <- il6_dichot_df %>%
+  gt() %>%
+  cols_label(num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+il6_tbl_dichot
+
+```
+
+**Data collection notes:** 
+
+```{r il6-cat-summary-table, results = 'asis'}
+#notes for il6_df
+il6_notes <- c(1)
+
+il6_note_df <- dbs_il6_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+il6_note_list <- lapply(il6_note_df, function(column) calc_multi_column(column, il6_notes))
+
+#combine results into df
+il6_note_sum <- bind_rows(il6_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+il6_tbl_notes <- il6_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Percent_1 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100)) %>%
+  cols_align(columns = c("Count_1", "Percent_1", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1))) 
+
+# Render the table
+print(il6_tbl_notes) 
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the allostatic load indicators.
+
+```{r il6-dist-plots}
+
+#il6_cal
+p_il6_cal <- create_AL_plot(dbs_il6_df, "il6_cal", "IL6 Clinical \nAllostatic Load (AL) Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#il6_pal
+p_il6_pal <- create_AL_plot(dbs_il6_df, "il6_pal", "IL6 Percentile- \nDetermined AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_il6_cal, p_il6_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for plasma-equivalent Interleukin-6 values (`il6_pe`) alongside the clinical and percentile-determined allostatic load cutoffs are presented below.
+
+```{r il6-clinical-plot}
+dbs_il6_df %>%
+  filter(il6_pe != "-99") %>% 
+  mutate(il6_pe = as.numeric(il6_pe)) %>% 
+  cutoff_plot2(
+    x = il6_pe,
+    cutoff = 6.1,
+    cutoff_other = 1.3
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for IL6',
+    caption = 'Clinical cutoff is 6.1 and \n percentile-determined cutoff is 1.3.'
+  )+
+  annotate("text", x = 13, y = 35, label = "Percentile") +
+  annotate("text", x = 6.5, y = 42, label = "Clinical")
+
+```
+
 
 
 ## Other Health Measures (bio measures from bio file and AL indicators, and total AL)

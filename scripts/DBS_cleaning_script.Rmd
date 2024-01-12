@@ -194,7 +194,7 @@ a1c_df <- raw_a1c_df %>%
 
 #EBV AL vars
 ebv_df <- raw_ebv_df %>% 
-  mutate(#EBV_CAL  = ifelse(PE_EBV >= #, 1, 0),
+  mutate(#EBV_CAL  = ifelse(PE_EBV >= #, 1, 0), #removed since no standard cutoff
          EBV_PAL = ifelse(PE_EBV >= quantile(PE_EBV, 0.75, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_EBV_Plate 1" ~ "1",
                               Plate_ID == "TPW_EBV_Plate 2" ~ "2",
