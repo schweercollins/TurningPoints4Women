@@ -667,7 +667,7 @@ hdl_scale_df <- data.frame(
   scale = c("Allostatic load indicator based on clinical cut-off  for high HDL cholesterol (1)",
             "Allostatic load indicator based on top 25% of HDL cholesterol values (1)"),
   scale_construction = c("`hdl_pe` < 40", 
-                         "Top 25% of observed `hdl_pe` values"),
+                         "Bottom 25% of observed `hdl_pe` values"),
   scale_range = c("0-1", "0-1"))
 
 #create gt table
@@ -840,11 +840,11 @@ dbs_hdl_df %>%
   cutoff_plot2(
     x = hdl_pe,
     cutoff = 39,
-    cutoff_other = 53
+    cutoff_other = 37.5
   ) +
   labs(
     title = 'Allostatic Load Cutoff Values for HDL',
-    caption = 'Clinical cutoff is 39 and \n percentile-determined cutoff is 53.'
+    caption = 'Clinical cutoff is <39 and \n percentile-determined cutoff is <37.'
   )+
   annotate("text", x = 58, y = 15, label = "Percentile") +
   annotate("text", x = 35, y = 15, label = "Clinical")

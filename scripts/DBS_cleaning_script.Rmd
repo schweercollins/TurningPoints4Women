@@ -117,7 +117,7 @@ il6_df <- raw_il6_df %>%
 #HDL AL vars
 hdl_df <- raw_hdl_df %>% 
   mutate(HDL_CAL  = ifelse(PE_HDL <= 39, 1, 0),
-         HDL_PAL = ifelse(PE_HDL >= quantile(PE_HDL, 0.75, na.rm = TRUE), 1, 0),
+         HDL_PAL = ifelse(PE_HDL <= quantile(PE_HDL, 0.25, na.rm = TRUE), 1, 0),
          Plate_ID = case_when(Plate_ID == "TPW_HDL_Plate 1" ~ "1",
                               Plate_ID == "TPW_HDL_Plate 2" ~ "2",
                               Plate_ID == "TPW_HDL_Plate 3" ~ "3",
@@ -238,7 +238,7 @@ al_df <- full_df %>%
   select(family, ends_with("al"))
 
 #export as same format with new AL variables in respective tabs
-#write.xlsx(list("CHO" = cho_df, "HDL" = hdl_df, "TRG" = trg_df, "CRP" = crp_df, "EBV" = ebv_df, "A1c" = a1c_df, "IL6" = il6_df), file = "do_not_push/dbs_full.xlsx")
+#write.xlsx(list("CHO" = cho_df, "HDL" = hdl_df, "TRG" = trg_df, "CRP" = crp_df, "EBV" = ebv_df, "A1c" = a1c_df, "IL6" = il6_df), file = "do_not_push/dbs_archive.xlsx")
 
 ```
 
