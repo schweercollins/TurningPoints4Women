@@ -1,19 +1,19 @@
 ---
 title: "Turning Points Codebook"
-# author: 
-#   - name: "Maria L. Schweer-Collins, PhD"
-#     email: "mschweer@uoregon.edu"
+ author: 
+   - name: "Maria L. Schweer-Collins, PhD (corresponding author)"
+     email: "mschweer@uoregon.edu"
 #     affiliations:
 #       - name: 'University of Oregon'
 #         city: 'Eugene'
 #         state: 'OR'
-#   - name: "Shaina Trevino, PhD"
+   - name: "Shaina Trevino, PhD"
 #     email: "strevino@uoregon.edu"
-#   - name: "Jonathan A. Pedroza, PhD"
+   - name: "Jonathan A. Pedroza, PhD"
 #     email: "cpppedroza@gmail.com"
-#   - name: "Min Zhang"
+   - name: "Min Zhang"
 #     email: "mzhang8@uoregon.edu"
-date: "2023-07-31"
+date: ""
 output: 
   html_document:
     toc: true
@@ -242,6 +242,9 @@ apply_labtab_theme <- function(table) {
 }
   
 ```
+# CRediT author statement
+
+**Schweer-Collins** conceptualization; software; validation; data curation (specifically checking code for data cleaning and codebook creation, managed data archival) project administration; supervision; funding acquisition; **Trevino** software; validation; data curation (specifically developing codebook, functions, and protocols, data cleaning, codebook creation; data archival); supervision; **Pedroza** software; data curation (specifically making functions used in codebook, data retrieval from Qualtrics; cleaning; codebook creation, visualization); **Zhang** software; validation; data curation (specifically making functions used in codebook, primary responsibility for data retrieval from Qualtrics; data cleaning, codebook creation, visualization)
 
 # Overview
 
@@ -570,27 +573,24 @@ complete %>%
 
 ### CES-D Description
 
-The CES-D is self-report scale used to assess major dimensions of
-depression.
+The Center for Epidemiological Studies – Depression Scale (CES-D) is a self-report measure with 20 items comprising six scales reflecting major dimensions of depression: depressed mood, feelings of guilt and worthlessness, feelings of helplessness and hopelessness, psychomotor retardation, loss of appetite, and sleep disturbance.
 
-All 20 items from the CES-D were collected and two subscales were
-calculated: positive affect and depressive symptoms. Four items (`c4`,
-`c8`, `c12`, and `c16`) should be reverse scored which is noted in the
-variable table below and the reverse scored variables are provided
+*All 20 items from the CES-D were collected and two subscales were
+calculated: **positive affect** and **depressive symptoms**. Four items (`c4`, `c8`, `c12`, and `c16`) should be reverse scored which is noted in the variable table below and the reverse scored variables are provided
 (`c4_r`, `c8_r`, `c12_r`, and `c16_r`). Higher scores indicate the
 presence of more symptoms.
 
-Four additional variables (`c21`-`c24`) were included in this section to
+*Four additional variables (`c21`-`c24`) were included in this section to
 assess suicidality. Variables `c22` and `c23` are only applicable if
 participants responded "Yes" to `c21`.
 
-The missing data rule was not applied since all participants had less
+*The missing data rule was not applied since all participants had less
 than 20% missing data. Missing data for each variable is presented in
 the descriptive statistics table below.
 
 Reference:
 [@radloff1977ces](https://journals.sagepub.com/doi/abs/10.1177/014662167700100306);
-[DOI](https://doi.org/10.1177%2F014662167700100306)
+
 
 -   Additional References:
 
@@ -611,7 +611,7 @@ All CES-D survey items (`c1`-`c20`) have the same response options.
 ```{r CESD-label-table, results = 'asis'}
 
 cesd_label_df <- data.frame(
-  value = c("1", "2", "3", "4"),
+  value = c("0", "1", "2", "3"),
   label = c("Rarely or none of the time",
             "Some or a little of the time",
             "Occasionally or a moderate amount of time",
@@ -731,7 +731,7 @@ cesd_alpha <-
   select(c1:c3,c4_r,c5:c7,c8_r,c9:c11, c12_r,c13:c15,c16_r,c17:c20) %>%
   psych::alpha(check.keys = TRUE)
 
-cesd_dep_alpha <-
+cesd_dep_alpha <- # I think this should include all scores? -- may need to edit cleaning script
   complete %>%
   select(c1:c3,c5:c6, c9:c11,c13:c15,c17:c20) %>%
   psych::alpha(check.keys = TRUE)

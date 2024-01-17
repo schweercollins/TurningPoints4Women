@@ -178,10 +178,10 @@ mutate(
     across(
       .cols = c(c1:c20),
       .fns = ~case_when(
-        .x == "Rarely or none of the time (0-1 day)" ~ "1",
-        .x == "Some or a little of the time (1-2 days)" ~ "2",
-        .x == "Occasionally or a moderate amount of time (3-4 days)" ~ "3",
-        .x == "Most or all of the time (5-7 days)" ~ "4",
+        .x == "Rarely or none of the time (0-1 day)" ~ "0",
+        .x == "Some or a little of the time (1-2 days)" ~ "1",
+        .x == "Occasionally or a moderate amount of time (3-4 days)" ~ "2",
+        .x == "Most or all of the time (5-7 days)" ~ "3",
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
@@ -198,16 +198,17 @@ mutate(
     across(
       .cols = c(c4, c8, c12, c16),
       .fns = ~case_when(
-        .x == "1" ~ "4",
-        .x == "2" ~ "3",
-        .x == "3" ~ "2",
-        .x == "4" ~ "1",
+        .x == "0" ~ "3",
+        .x == "1" ~ "2",
+        .x == "2" ~ "1",
+        .x == "3" ~ "0",
         .x == "-77" ~ "-77",
       TRUE ~ .x
       ),
       .names = '{.col}_r'
       )
 )
+# Min should we remove this? 
 # mutate(across(all_of(c("c4", "c8", "c12", "c16")), ~ ifelse(. %in% c(-77, NA), ., 3 - .), .names = "{.col}_r"))
 ```
 
@@ -230,9 +231,7 @@ cesd <- cesd %>%
 cesd_missing <- cesd %>%
   mutate(across(-c(id), as.numeric))%>%
   select(id,
-         c1:c24,
-         #TODO: Maria/Shaina, I don't think we should include revers score here. if that is correct, Please remove these two line of comment. Otherwise Min will need edits calculation section.
-         #c4_r:c16_r
+         c1:c24, # reverse scored are not included so that missing percent only involves original items (each item only represented one time)
          ) %>% 
   pct_miss_fun(
     id = 'id',
