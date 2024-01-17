@@ -19,6 +19,8 @@ output:
     toc: true
     toc_depth: 4
     toc_float: true
+    self_contained: yes
+    number_sections: no
     #html#toc_title: Contents
     #number_sections: true
     #html#number_depth: 3
@@ -33,7 +35,24 @@ editor_options:
   markdown: 
     wrap: 72
 ---
+<!-- TOC highlight color -->
+<style>
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    background-color: #246B69;
+}
 
+
+<!-- To have nice indentation in toc float -->
+.tocify-header {
+  text-indent: initial;
+}
+
+.tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 2em;
+}
+
+</style>
 TODO: double check codebook_fun.r composite_total_avg_fun
 
 ```{r setup, include = FALSE}
@@ -1207,10 +1226,14 @@ dast_word <- qualtrics %>%
 
 #create table with variable name, description, and notes
 dast_word_long <- dast_word %>% 
+  select(-D2A) %>%
+  rename(d2 = D2B) %>%
   pivot_longer(cols = everything(), 
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = case_when(var_name == "d2" ~ "Have you misused prescription drugs in the last 6 months?",
+                                 TRUE ~ description),
          var_name = str_to_lower(var_name),
          notes = case_when(var_name == "d4" ~ "This item should be reverse scored. `d4_r` is reverse scored",
                            var_name == "d5" ~ "This item should be reverse scored. `d4_r` is reverse scored",
@@ -1266,11 +1289,10 @@ dast_alpha <-
 
 ```{r DAST-scale-table, results = 'asis'}
 # Create the table as a data frame
-# TODO:Maria, should we remove d00 from total? 
 dast_scale_df <- data.frame(
   var_name = c("dast_total"),
-  scale = c("Total Score (22)"),
-  scale_construction = c("`d00`, `d1a`, `d2a`, `d2b`, `d3`, `d4_r`, `d5_r`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`"),
+  scale = c("Total Score (20)"),
+  scale_construction = c(" `d1a`, `d2`, `d3`, `d4_r`, `d5_r`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`"),
   scale_range = c("0-20"),
   alpha = c(round(dast_alpha$total$raw_alpha, 3))
 )
