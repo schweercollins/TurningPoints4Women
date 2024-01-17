@@ -288,7 +288,7 @@ know to use these data accurately*
 
 For summary or subscale scores that are computed with individual items,
 any of the above reasons are included in computing the percent of
-missing data
+missing data. The following missing data rules are below and follow procedures used throughout the history of this longitudinal study.
 
 -   For scales with [10 or more items]{.underline}, a composite score
     (average/total) is computed for each participant that have less than
@@ -305,36 +305,34 @@ missing data
 -   For scales with [only 2 items]{.underline}, composite scores
     (average/total) are calculated on a [case by case basis]{.underline}
 
-<MARIA>INSERT REFERENCE LINK (from JP?)
+
 
 # Mental Health Measures
-
-<MARIA>INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN (why distinct
-from others)
 
 ## Brief Symptom Inventory (BSI)
 
 ### BSI Description
 
-The BSI is a brief self-report scale used to assess psychological
-symptoms in adolescents and adults.
+The Brief Symptom Inventory (BSI) is designed to reflect psychological symptom patterns of psychiatric and medical patients. The BSI instrument is especially appropriate in clinical situations where debilitation results in reduced attention and endurance, in research with limited interview schedules, and in outpatient clinics where testing procedures demand brevity. The BSI instrument is also frequently used in measuring patient progress during treatment or in the assessment of treatment outcome.
 
-For the present study, 19 items from the BSI were collected in order to
-calculate the Somatization, Anxiety, and Depression subscales.
+*For the present study, 19 items from the BSI were collected in order to
+calculate the **Somatization**, **Anxiety**, and **Depression** raw subscales.
 
-Item numbers in this data set may not match original item numbers from
-the BSI exactly <MARIA> is this correct - what other info do we need to
-include about mismatch between ours and original measure?
+  +**Somatization** reflects distress arising from perceptions of bodily dysfunction.
+  +**Anxiety** reflects general signs such as nervousness and tension are included in the Anxiety dimension, as are panic attacks and feelings of terror.
+  +**Depression** reflects symptoms of dysphoric mood and affect are represented as are lack of motivation and loss of interest in life.
 
-No items need to be reverse scored. Higher scores indicate more severe
+*Item numbers in this data set may not match original item numbers from
+the BSI. Please reference this guide to see match with original BSI (original BSI item number in *italics*): 01 = *01*, 02 = *02*, 03 = *07*, 04 = *09*, 05 = *12*, 06 = *16*, 07 = *17*, 08 = *18*, 09 = *19*, 10 = *23*, 11 = *29*, 12 = *30*, 13 = *33*, 14 = *35*, 15 = *37*, 16 = *38*, 17 = *45*, 18 = *49*, 19 = *50* 
+
+*No items need to be reverse scored. Higher scores indicate more severe
 mental health symptoms.
 
-The missing data rule was not applied since there are no missing data
+*The missing data rule was not applied since there are no missing data
 among BSI variables.
 
 Reference:
 [@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F);
-[DOI](https://doi.org/10.1017/S0033291700048017)
 
 ### BSI Variables
 
@@ -345,7 +343,7 @@ All BSI variables have the same response options.
 ```{r BSI-label-table, results = 'asis'}
 
 bsi_label_df <- data.frame(
-  value = c("1", "2", "3", "4", "5"),
+  value = c("0", "1", "2", "3", "4"),
   label = c("Not at all",
             "A little bit",
             "Moderately",
@@ -376,10 +374,10 @@ print(bsi_label_table)
 
 BSI survey items are presented in the following table:
 
-During the past week, how much were you bothered by...
+**STEM**: *During the past week, how much were you bothered by...*
 
 ```{r BSI-var-prep}
-# Pull question wording from qualtrics data
+# Pull question wording from Qualtrics data
 bsi_word <- qualtrics %>% 
   select(starts_with("BSI")) %>% 
   slice(1)
@@ -453,7 +451,6 @@ bsi_alpha_dep <-
 ```
 
 ```{r BSI-scale-table, results = 'asis'}
-# TODO: Maria/Shania Please double check the score range since we changed the scale starting from 1 instead of 0. I wasn't sure if the range for total score should start from 0.  
 # Create the table as a data frame
 bsi_scale_df <- data.frame(
   var_name = c("bsi_total", "bsi_soma", "bsi_anx", "bsi_dep"),
@@ -462,7 +459,7 @@ bsi_scale_df <- data.frame(
                            "`bsi2`, `bsi3`, `bsi10`, `bsi11`, `bsi12`, `bsi13`, `bsi15`",
                            "`bsi1`, `bsi5`, `bsi9`, `bsi16`, `bsi17`, `bsi18`",
                            "`bsi4`, `bsi6`, `bsi7`, `bsi8`, `bsi14`, `bsi19`"),
-  scale_range = c("0-95", "0-35", "0-30", "0-30"),
+  scale_range = c("0-76", "0-28", "0-24", "0-24"),
   alpha = c(round(bsi_alpha$total$raw_alpha, 3), 
             round(bsi_alpha_som$total$raw_alpha, 3), 
             round(bsi_alpha_anx$total$raw_alpha, 3), 
@@ -492,7 +489,7 @@ print(bsi_scale_table)
 #### Descriptive Statistics
 
 Descriptive statistics are presented below for each item, total, and
-subscale score:
+subscale raw score:
 
 ```{r bsi-mean-items}
 # Create subset of BSI items
@@ -540,7 +537,6 @@ Distributions are presented below for the total score and each subscale:
 ```{r bsi-distributions, class.source='fold', echo = FALSE}
 p_bsi_total <- complete %>%
   composite_hist(x = bsi_total) 
-
 
 p_bsi_soma <- complete %>%
   composite_hist(x = bsi_soma) 
