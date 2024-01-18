@@ -328,8 +328,10 @@ calculate the **Somatization**, **Anxiety**, and **Depression** raw subscales.
 *Item numbers in this data set may not match original item numbers from
 the BSI. Please reference this guide to see match with original BSI (original BSI item number in *italics*): 01 = *01*, 02 = *02*, 03 = *07*, 04 = *09*, 05 = *12*, 06 = *16*, 07 = *17*, 08 = *18*, 09 = *19*, 10 = *23*, 11 = *29*, 12 = *30*, 13 = *33*, 14 = *35*, 15 = *37*, 16 = *38*, 17 = *45*, 18 = *49*, 19 = *50* 
 
-*No items need to be reverse scored. Higher scores indicate more severe
-mental health symptoms.
+*No items need to be reverse scored. 
+
+***Higher** scores indicate **more** severe
+psychological symptoms.
 
 *The missing data rule was not applied since there are no missing data
 among BSI variables.
@@ -577,8 +579,9 @@ The Center for Epidemiological Studies – Depression Scale (CES-D) is a self-re
 
 *All 20 items from the CES-D were collected and two subscales were
 calculated: **positive affect** and **depressive symptoms**. Four items (`c4`, `c8`, `c12`, and `c16`) should be reverse scored which is noted in the variable table below and the reverse scored variables are provided
-(`c4_r`, `c8_r`, `c12_r`, and `c16_r`). Higher scores indicate the
-presence of more symptoms.
+(`c4_r`, `c8_r`, `c12_r`, and `c16_r`). 
+
+***Higher** scores indicate the presence of **more** depression symptoms.
 
 *Four additional variables (`c21`-`c24`) were included in this section to
 assess suicidality. Variables `c22` and `c23` are only applicable if
@@ -871,8 +874,7 @@ ggarrange(p_cesd_total, p_cesd_dep_symp + rremove("ylab"),
 The distribution for CES-D scores alongside clinical cutoffs are
 presented below.
 
-<MARIA>INSERT MORE INFO ON 16/23 CUTOFF SCORES - what are they (what
-should plot labels be)?, how should they be used
+The clinical cutoff score of 16 or above is generally accepted (MARIA add cite); however a cutoff score of 23 or above has been found to be more valid in samples of [insert; MARIA add cite]
 
 Reference:
 [@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4);
@@ -901,15 +903,16 @@ complete %>%
 ### CIQ Description
 
 The CIQ is self-report survey used to assess the financial, resource,
-and psychological impacts of COVID-19.
+and psychological impacts of the COVID-19 pandemic.
 
-For the present study, 3 items from the CIQ were collected in order to
-construct the psychological impacts scale.
+*For the present study, 3 items from the CIQ were collected in order to
+construct the psychological impacts scale. We made this decision because data collection launched in the COVID-19 pandemic, whereas prior waves occurred before the onset of the COVID-19 pandemic.
 
-`ciq1` need to be reverse scored. Higher scores indicate increased
-psychological impacts of COVID-19.
+*`ciq1` need to be reverse scored. 
 
-The missing data rule was not applied since there is no missing data
+***Higher**scores indicate **greater** psychological impacts of COVID-19.
+
+*The missing data rule was not applied since there is no missing data
 among CIQ variables.
 
 Reference: [@conway2020social](https://psyarxiv.com/z2x9a/)
@@ -1006,8 +1009,8 @@ print(ciq_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
-Variables were constructed by summing included items.
+Information on the the subscale and associated variables are below.
+The subscale was constructed by averaging the included items.
 
 ```{r ciq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -1054,12 +1057,10 @@ print(ciq_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and the total
-score:
+Descriptive statistics are presented below for each item and the psychological impacts subscale:
 
 ```{r ciq-mean-items}
-# Create subset of BSI items
-# TODO: Maria, I didn't remove _total for this one, let me know how you like it. 
+# subset items
 ciq_data_subset <- complete %>%
   select(ciq1:ciq2, ciq3, ciq_psych_total)
 
@@ -2732,21 +2733,22 @@ ggarrange(p_bcap_risk_clin, p_bcap_lie_clin+ rremove("ylab"), p_bcap_rand_clin
 
 
 
-## Dyadic Adjustment Scale (DYADC)
+## Dyadic Adjustment Scale (DAS)
 
-### DYADC Description
+### DAS Description
 
-The DYADC is a self-report measure used to assess dyadic adjustment
+The DAS is a self-report measure used to assess dyadic adjustment
 (e.g., interpersonal tensions, dyadic satisfaction, dyadic functioning).
 
-For the present study, all 32 items from the DYADC were collected, and
+*For the present study, all 32 items from the DYADC were collected, and
 the total score and all subscales are included: Consensus, Affective
 Expression, Satisfaction, and Cohesion.
 
-Two items `e18` and `e19` should be reverse scored which is noted in the
+*Two items `e18` and `e19` should be reverse scored which is noted in the
 variable table below and the reverse scored variables are provided
-(`e18_r` and `e19_r`). Higher scores indicate more positive dyadic
-adjustment.
+(`e18_r` and `e19_r`). 
+
+***Higher** scores indicate **more** positive dyadic (couple) adjustment.
 
 <SHAINA> CONFIRM The missing data rule was Applied. Calculations were
 completed only with participants that had less than 20% missing data
@@ -2758,16 +2760,16 @@ Reference:
 2ND REF IS FOR Reference:
 [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
 
-### DYADC Variables
+### DAS Variables
 
 #### Value Labels
 
-The DYADC has multiple response options, value labels for each variable
+The DAS has multiple response options, value labels for each variable
 can be found in the survey items table below.
 
 #### Survey Items
 
-All DYADC survey items are presented in the following table:
+All DAS survey items are presented in the following table:
 
 ```{r dyadc-var-prep}
 # Pull question wording from qualtrics data
@@ -2839,8 +2841,7 @@ dyadc_word_long <- dyadc_word %>%
 
 ```
 
-Questions in this survey were not asked for TC who were incarcerated
-while the sruvey was been administered.
+Questions in this survey were not asked for participants who were incarcerated at the time of survey administration.
 
 ```{r dyadc-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
@@ -3084,7 +3085,7 @@ p_dyadc_con <- complete %>%
     x = dyadc_con
   ) +
   labs(
-    title = 'Consensus Subscale'
+    title = 'Consensus'
   )
 
 p_dyadc_aff_e <- complete %>%
@@ -3093,7 +3094,7 @@ p_dyadc_aff_e <- complete %>%
     bins = 10
   ) +
   labs(
-    title = 'Affectional Expression Subscale'
+    title = 'Affectional Expression'
   )
 
 p_dyadc_satis <- complete %>%
@@ -3101,7 +3102,7 @@ p_dyadc_satis <- complete %>%
     x = dyadc_satis
   ) +
   labs(
-    title = 'Satisfaction Subscale'
+    title = 'Satisfaction'
   )
 
 p_dyadc_choes <- complete %>%
@@ -3109,7 +3110,7 @@ p_dyadc_choes <- complete %>%
     x = dyadc_cohes
   ) +
   labs(
-    title = 'Cohesion Subscale'
+    title = 'Cohesion'
   )
 
 ggarrange(p_dyadc_total, p_dyadc_con + rremove("ylab"),
@@ -3122,26 +3123,24 @@ ggarrange(p_dyadc_total, p_dyadc_con + rremove("ylab"),
 #### Clinical Categories
 
 The distribution for the total score alongside clinical cutoffs are
-presented below.
+presented below. Cutoffs for a distressed couple (below 98) or for a satisfied and happy couple (at or above 114.8) are cited in the original Spanier, 1976 article. Other cutoffs may be established.
 
-<MARIA>INSERT MORE INFO ON CUTOFF SCORES - what are they (what should
-plot labels be)?, how should they be used
 
-Reference: <SHAINA/MARIA> INSERT REFERENCE FOR DYADC CUTOFF SCORES
+Reference for Cutoffs: [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
 
 ```{r dyadc-cutoff, class.source='fold', echo = FALSE}
 complete %>%
   cutoff_plot2(
     x = dyadc_total,
-    cutoff = 92,
-    cutoff_other = 107
+    cutoff = 98,
+    cutoff_other = 114.8
   ) +
   labs(
-    title = 'Cutoff Values for DYADC Scale',
+    title = 'Cutoff Values for DAS Scale',
     caption = 'Cutoffs are 92 and 107\nSee references for literature on cutoff scores.'
   )+
-  geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = -6)) +
-  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -9.25))
+  geom_text(aes(x = 16, y = 16.5, label = "Distressed\n Couple\n Below Cutoff", vjust = -.25, hjust = -6)) +
+  geom_text(aes(x = 16, y = 16.5, label = "Happy\n or Satisfied\n Couple\n Above Cutoff", vjust = -.25, hjust = -9.25))
 ```
 
 

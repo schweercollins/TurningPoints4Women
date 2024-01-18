@@ -56,7 +56,7 @@ na_positions <- which(is.na(df), arr.ind = TRUE)
 Min: need work on Missing data and calculation for measure after sex history 
 
 ## BSI
-### BSI Select Variabls and Recode 
+### BSI Select Variables and Recode 
 ```{r bsi}
 # Select bis questions and recede
 bsi <-
@@ -164,7 +164,7 @@ bsi_complete <-
 
 
 ## CESD 
-### CESD Select Variabls and Recode 
+### CESD Select Variables and Recode 
 ```{r cesd creation, warning = FALSE, message = FALSE}
 cesd <-
 tpw_raw %>%
@@ -249,7 +249,7 @@ cesd_missing  %>%
 ### CESD Calculations & Subscale
 ```{r cesd_calculatio}
 # Maria: Please pay extra attention on the calculations!! 
-# Below is the code that treat negative values (-77, -55) as NA
+# Below is the code that treats negative values (-77, -55) as NA
 cesd_calc <-
   cesd %>%
   mutate(across(-id, as.numeric)) %>%
@@ -272,7 +272,7 @@ cesd_complete <-
            'c8',
            'c12', 
            'c16', # c4,c8,c12, c16 was removed because we are using reverse score instead 
-           'c21', # TODO: Maria: it's correct we don't need c21-c24 for total? 
+           'c21', # C21 - c24 removed because they are address suicidality 
            'c22',
            'c23',
            'c24'), 
@@ -280,18 +280,17 @@ cesd_complete <-
   ) %>%
   subscale_create(
     total_only = FALSE,
-    scale1 = c('c1', 'c2', 'c3', 'c5',   #TODO:Shaina/Maria, please confirm cesd depression total is calculated correct; we don't need c7?
-               'c6', 'c9', 'c10', 'c11',
-               'c13', 'c14', 'c15', 'c17',
+    scale1 = c('c1', 'c2', 'c3', 'c4_r', 'c5',  
+               'c6', 'c7', 'c8_r', 'c9', 'c10', 'c11',
+               'c12_r', 'c13', 'c14', 'c15', 'c16_r', 'c17',
                'c18', 'c19', 'c20'),
-    scale1_nitems = 15,
+    scale1_nitems = 20,
     scale2 = c('c4_r', 'c8_r', 'c12_r', 'c16_r'),  #TODO: Shaina/Maria, please confirm cesd_pos_aff including correct variables, I can't find this in measure document 
     scale2_nitems = 4
   ) %>%
   rename(
-    cesd_total = sum_values,
     cesd_avg = mean_values,
-    cesd_dep_symp = total1,  #TODO: Maria, could you confirm we should remove _total for subscale score and do we need average score for subscale? 
+    cesd_dep_symp = total1,  
     cesd_dep_symp_avg = avg1,
     cesd_pos_aff = total2,
     cesd_pos_aff_avg = avg2
@@ -316,6 +315,7 @@ cesd_complete <-
 ## CIQ
 ### CIQ Select Variables and Recode 
 ```{r ciq}
+## items originally labelled as "bsiXX" as this was administered together with the BSI due to it being a related construct
 ciq <- 
 	tpw_raw %>%
 	select(
@@ -409,10 +409,8 @@ ciq_complete <-
     n_items = 3
   ) %>% 
   rename(
-    ciq_psych_total = sum_values,
-    ciq_psych_avg = mean_values
+    ciq_psych_avg = mean_values ## average based on other publications
     ) %>%
-  # TODO: Maria/Shaina please confirm we don't need average for this measure
   select(-ciq_psych_avg) %>%
   relocate(ciq3, .after = ciq2)
 
@@ -422,7 +420,7 @@ ciq_complete <- ciq_complete[!duplicated(ciq_complete), ]
 ```
 
 ## DAST
-### DAST Select Variabls and Recode 
+### DAST Select Variables and Recode 
 ```{r dast}
 # Select bis questions and recede
 dast <-
@@ -910,9 +908,10 @@ bcap_complete <-
 
 ```
 
-## DYADC 
-### DYADC Select Variables and Recode 
+## DAS 
+### DAS Select Variables and Recode 
 ```{r dyadc}
+# Referred to as dyadc in coding, but this is the DAS. 
 # TODO: Maria/Shaina, please confirm this is how it should be scored (always disagree = 0/Yes = 0), reference doc are scored differently. 
 dyadc <-
   tpw_raw %>% 
@@ -1033,8 +1032,8 @@ dyadc <-
 
 ```
 
-### DYADC Missing Data
-There are missing data in DYADC and missing rule applied. 
+### DAS Missing Data
+There are missing data in DAS and missing rule applied. 
 ```{r dyadc_missing}
 dyadc <- dyadc %>%
   # if answered no for screening question, the entire survey is skipped.
@@ -1055,7 +1054,7 @@ dyadc %>%
   )
 ```
 
-### DYADC Calculations & Subscale
+### DAS Calculations & Subscale
 ```{r dyadc_calculations}
 dyadc_calc <-dyadc %>%
   mutate(across(-id, as.numeric))%>%
@@ -4141,7 +4140,7 @@ pcl <- pcl %>%
   # relocate(pcl12_dev, .after = "pcl12a_77") 
   # 
 
-# TODO: Maria since we have developed period for combination of happened and witnessed, the following code is irrelevant, please confirm and removed. 
+# TODO: Maria since we have developed period for combination of happened and witnessed, the following code is irrelevant, please confirm and removed. # Min this is the "first" developmental period it happened in, the code I created, I believe, if you look at it, it is scanning each PCL item and seeing when it first happened. Now that you have that information can you confirm it isn't irrelevant?
   #   mutate(
   #   pcl1_devperiod = factor(
   #     case_when(
