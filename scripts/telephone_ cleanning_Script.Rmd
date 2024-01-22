@@ -4087,61 +4087,252 @@ sus_miss <- sus %>%
 
 ## PCL 
 ### PCL Select Variabl and Recode 
-Min's question: Should I rename the columns? what should I code NA to - they are not necessaryly missing; should I identify NA manually (eg. if pcl1_1, pcl1_2, pcl1_3, pcl1_4 are all NAs)
-```{r plc}
+
+```{r plc }
 pcl <- tpw_raw %>%
-  select(id, starts_with("pcl")) %>%
-  mutate(pcl1_dev = combine_columns(., c("pcl1a_1", "pcl1a_2", "pcl1a_3", "pcl1a_4"), sep = ";") )%>%
-  mutate(pcl1_dev = str_extract(pcl1_dev, "^[^;]+")) %>%
-  relocate(pcl1_dev, .after = "pcl1a_77") %>%
-  mutate(pcl2_dev = combine_columns(., c("pcl2a_1", "pcl2a_2", "pcl2a_3", "pcl2a_4"), sep = ";") )%>%
-  mutate(pcl2_dev = str_extract(pcl2_dev, "^[^;]+")) %>%
-  relocate(pcl2_dev, .after = "pcl2a_77") %>%
-  mutate(pcl3_dev = combine_columns(., c("pcl3a_1", "pcl3a_2", "pcl3a_3", "pcl3a_4"), sep = ";") )%>%
-  mutate(pcl3_dev = str_extract(pcl3_dev, "^[^;]+")) %>%
-  relocate(pcl3_dev, .after = "pcl3a_77") %>%
-  mutate(pcl4_dev = combine_columns(., c("pcl4a_1", "pcl4a_2", "pcl4a_3", "pcl4a_4"), sep = ";") )%>%
-  mutate(pcl4_dev = str_extract(pcl4_dev, "^[^;]+")) %>%
-  relocate(pcl4_dev, .after = "pcl4a_77") %>%
-  mutate(pcl5_dev = combine_columns(., c("pcl5a_1", "pcl5a_2", "pcl5a_3", "pcl5a_4"), sep = ";") )%>%
-  mutate(pcl5_dev = str_extract(pcl5_dev, "^[^;]+")) %>%
-  relocate(pcl5_dev, .after = "pcl5a_77") %>%
-  mutate(pcl6_dev = combine_columns(., c("pcl6a_1", "pcl6a_2", "pcl6a_3", "pcl6a_4"), sep = ";") )%>%
-  mutate(pcl6_dev = str_extract(pcl6_dev, "^[^;]+")) %>%
-  relocate(pcl6_dev, .after = "pcl6a_77") %>%
-  mutate(pcl7_dev = combine_columns(., c("pcl7a_1", "pcl7a_2", "pcl7a_3", "pcl7a_4"), sep = ";") )%>%
-  mutate(pcl7_dev = str_extract(pcl7_dev, "^[^;]+")) %>%
-  relocate(pcl7_dev, .after = "pcl7a_77") %>%
-  mutate(pcl8_dev = combine_columns(., c("pcl8a_1", "pcl8a_2", "pcl8a_3", "pcl8a_4"), sep = ";") )%>%
-  mutate(pcl8_dev = str_extract(pcl8_dev, "^[^;]+")) %>%
-  relocate(pcl8_dev, .after = "pcl8a_77") %>%
-  mutate(pcl9_dev = combine_columns(., c("pcl9a_1", "pcl9a_2", "pcl9a_3", "pcl9a_4"), sep = ";") )%>%
-  mutate(pcl9_dev = str_extract(pcl9_dev, "^[^;]+")) %>%
-  relocate(pcl9_dev, .after = "pcl9a_77") %>%
-  mutate(pcl10_dev = combine_columns(., c("pcl10a_1", "pcl10a_2", "pcl10a_3", "pcl10a_4"), sep = ";") )%>%
-  mutate(pcl10_dev = str_extract(pcl10_dev, "^[^;]+")) %>%
-  relocate(pcl10_dev, .after = "pcl10a_77") %>%
-  mutate(pcl11_dev = combine_columns(., c("pcl11a_1", "pcl11a_2", "pcl11a_3", "pcl11a_4"), sep = ";") )%>%
-  mutate(pcl11_dev = str_extract(pcl11_dev, "^[^;]+")) %>%
-  relocate(pcl11_dev, .after = "pcl11a_77") %>%
-  mutate(pcl12_dev = combine_columns(., c("pcl12a_1", "pcl12a_2", "pcl12a_3", "pcl12a_4"), sep = ";") )%>%
-  mutate(pcl12_dev = str_extract(pcl12_dev, "^[^;]+")) %>%
-  relocate(pcl12_dev, .after = "pcl12a_77")
+  select(id, starts_with("pcl")) %>% 
+  # Happened and Witnessed first developed period 
+  mutate(pcl1_hapWit_dev = combine_columns(., c("pcl1a_1", "pcl1a_2", "pcl1a_3", "pcl1a_4", "pcl1a_77"), sep = ";") )%>%
+  mutate(pcl1_hapWit_dev = str_extract(pcl1_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl1_hapWit_dev, .after = "pcl1a_77") %>%
+  mutate(pcl2_hapWit_dev = combine_columns(., c("pcl2a_1", "pcl2a_2", "pcl2a_3", "pcl2a_4", "pcl2a_77"), sep = ";") )%>%
+  mutate(pcl2_hapWit_dev = str_extract(pcl2_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl2_hapWit_dev, .after = "pcl2a_77") %>%
+  mutate(pcl3_hapWit_dev = combine_columns(., c("pcl3a_1", "pcl3a_2", "pcl3a_3", "pcl3a_4", "pcl3a_77"), sep = ";") )%>%
+  mutate(pcl3_hapWit_dev = str_extract(pcl3_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl3_hapWit_dev, .after = "pcl3a_77") %>%
+  mutate(pcl4_hapWit_dev = combine_columns(., c("pcl4a_1", "pcl4a_2", "pcl4a_3", "pcl4a_4", "pcl4a_77"), sep = ";") )%>%
+  mutate(pcl4_hapWit_dev = str_extract(pcl4_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl4_hapWit_dev, .after = "pcl4a_77") %>%
+  mutate(pcl5_hapWit_dev = combine_columns(., c("pcl5a_1", "pcl5a_2", "pcl5a_3", "pcl5a_4", "pcl5a_77"), sep = ";") )%>%
+  mutate(pcl5_hapWit_dev = str_extract(pcl5_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl5_hapWit_dev, .after = "pcl5a_77") %>%
+  mutate(pcl6_hapWit_dev = combine_columns(., c("pcl6a_1", "pcl6a_2", "pcl6a_3", "pcl6a_4", "pcl6a_77"), sep = ";") )%>%
+  mutate(pcl6_hapWit_dev = str_extract(pcl6_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl6_hapWit_dev, .after = "pcl6a_77") %>%
+  mutate(pcl7_hapWit_dev = combine_columns(., c("pcl7a_1", "pcl7a_2", "pcl7a_3", "pcl7a_4", "pcl7a_77"), sep = ";") )%>%
+  mutate(pcl7_hapWit_dev = str_extract(pcl7_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl7_hapWit_dev, .after = "pcl7a_77") %>%
+  mutate(pcl8_hapWit_dev = combine_columns(., c("pcl8a_1", "pcl8a_2", "pcl8a_3", "pcl8a_4", "pcl8a_77"), sep = ";") )%>%
+  mutate(pcl8_hapWit_dev = str_extract(pcl8_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl8_hapWit_dev, .after = "pcl8a_77") %>%
+  mutate(pcl9_hapWit_dev = combine_columns(., c("pcl9a_1", "pcl9a_2", "pcl9a_3", "pcl9a_4", "pcl9a_77"), sep = ";") )%>%
+  mutate(pcl9_hapWit_dev = str_extract(pcl9_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl9_hapWit_dev, .after = "pcl9a_77") %>%
+  mutate(pcl10_hapWit_dev = combine_columns(., c("pcl10a_1", "pcl10a_2", "pcl10a_3", "pcl10a_4", "pcl10a_77"), sep = ";") )%>%
+  mutate(pcl10_hapWit_dev = str_extract(pcl10_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl10_hapWit_dev, .after = "pcl10a_77") %>%
+  mutate(pcl11_hapWit_dev = combine_columns(., c("pcl11a_1", "pcl11a_2", "pcl11a_3", "pcl11a_4", "pcl11a_77"), sep = ";") )%>%
+  mutate(pcl11_hapWit_dev = str_extract(pcl11_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl11_hapWit_dev, .after = "pcl11a_77") %>%
+  mutate(pcl12_hapWit_dev = combine_columns(., c("pcl12a_1", "pcl12a_2", "pcl12a_3", "pcl12a_4", "pcl12a_77"), sep = ";") )%>%
+  mutate(pcl12_hapWit_dev = str_extract(pcl12_hapWit_dev, "^[^;]+")) %>%
+  relocate(pcl12_hapWit_dev, .after = "pcl12a_77") %>%
+  
+  #===========================Developmental Period for "Happened to me" only ============================
+  # please note this is developmental period for "Happen to me" is not accurate. Because we asked TC "how old were you when this occurred" ( they don't have a chance to specify weather this was witnessed or actually happened to them. The following code created first development period for happened to me only, i.e.: if someone selected both happen to me and witness, and they indicated it's during 0-5 years old, the only happen to me development period would be 0-5, but we don't know for sure weather that happened to them or they witnessed during this first dev period. 
+  mutate(
+    pcl1_devperiod = factor(
+      case_when(
+        !is.na(pcl1a_1) & pcl1_1 == "Happened to me" ~ "0-5",
+        is.na(pcl1a_1) & !is.na(pcl1a_2) & pcl1_1 == "Happened to me" ~ "6-11",
+        is.na(pcl1a_1) & is.na(pcl1a_2) & !is.na(pcl1_3) & pcl1_1 == "Happened to me" ~ "12-19",
+        is.na(pcl1a_1) & is.na(pcl1a_2) & is.na(pcl1a_3) & !is.na(pcl1a_4) & pcl1_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl2_devperiod = factor(
+      case_when(
+        !is.na(pcl2a_1) & pcl2_1 == "Happened to me" ~ "0-5",
+        is.na(pcl2a_1) & !is.na(pcl2a_2) & pcl2_1 == "Happened to me" ~ "6-11",
+        is.na(pcl2a_1) & is.na(pcl2a_2) & !is.na(pcl2_3) & pcl2_1 == "Happened to me" ~ "12-19",
+        is.na(pcl2a_1) & is.na(pcl2a_2) & is.na(pcl2a_3) & !is.na(pcl2a_4) & pcl2_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl3_devperiod = factor(
+      case_when(
+        !is.na(pcl3a_1) & pcl3_1 == "Happened to me" ~ "0-5",
+        is.na(pcl3a_1) & !is.na(pcl3a_2) & pcl3_1 == "Happened to me" ~ "6-11",
+        is.na(pcl3a_1) & is.na(pcl3a_2) & !is.na(pcl3_3) & pcl3_1 == "Happened to me" ~ "12-19",
+        is.na(pcl3a_1) & is.na(pcl3a_2) & is.na(pcl3a_3) & !is.na(pcl3a_4) & pcl3_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl4_devperiod = factor(
+      case_when(
+        !is.na(pcl4a_1) & pcl4_1 == "Happened to me" ~ "0-5",
+        is.na(pcl4a_1) & !is.na(pcl4a_2) & pcl4_1 == "Happened to me" ~ "6-11",
+        is.na(pcl4a_1) & is.na(pcl4a_2) & !is.na(pcl4_3) & pcl4_1 == "Happened to me" ~ "12-19",
+        is.na(pcl4a_1) & is.na(pcl4a_2) & is.na(pcl4a_3) & !is.na(pcl4a_4) & pcl4_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl5_devperiod = factor(
+      case_when(
+        !is.na(pcl5a_1) & pcl5_1 == "Happened to me" ~ "0-5",
+        is.na(pcl5a_1) & !is.na(pcl5a_2) & pcl5_1 == "Happened to me" ~ "6-11",
+        is.na(pcl5a_1) & is.na(pcl5a_2) & !is.na(pcl5_3) & pcl5_1 == "Happened to me" ~ "12-19",
+        is.na(pcl5a_1) & is.na(pcl5a_2) & is.na(pcl5a_3) & !is.na(pcl5a_4) & pcl5_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl6_devperiod = factor(
+      case_when(
+        !is.na(pcl6a_1) & pcl6_1 == "Happened to me" ~ "0-5",
+        is.na(pcl6a_1) & !is.na(pcl6a_2) & pcl6_1 == "Happened to me" ~ "6-11",
+        is.na(pcl6a_1) & is.na(pcl6a_2) & !is.na(pcl6_3) & pcl6_1 == "Happened to me" ~ "12-19",
+        is.na(pcl6a_1) & is.na(pcl6a_2) & is.na(pcl6a_3) & !is.na(pcl6a_4) & pcl6_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl7_devperiod = factor(
+      case_when(
+        !is.na(pcl7a_1) & pcl7_1 == "Happened to me" ~ "0-5",
+        is.na(pcl7a_1) & !is.na(pcl7a_2) & pcl7_1 == "Happened to me" ~ "6-11",
+        is.na(pcl7a_1) & is.na(pcl7a_2) & !is.na(pcl7_3) & pcl7_1 == "Happened to me" ~ "12-19",
+        is.na(pcl7a_1) & is.na(pcl7a_2) & is.na(pcl7a_3) & !is.na(pcl7a_4) & pcl7_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl8_devperiod = factor(
+      case_when(
+        !is.na(pcl8a_1) & pcl8_1 == "Happened to me" ~ "0-5",
+        is.na(pcl8a_1) & !is.na(pcl8a_2) & pcl8_1 == "Happened to me" ~ "6-11",
+        is.na(pcl8a_1) & is.na(pcl8a_2) & !is.na(pcl8_3) & pcl8_1 == "Happened to me" ~ "12-19",
+        is.na(pcl8a_1) & is.na(pcl8a_2) & is.na(pcl8a_3) & !is.na(pcl8a_4) & pcl8_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl9_devperiod = factor(
+      case_when(
+        !is.na(pcl9a_1) & pcl9_1 == "Happened to me" ~ "0-5",
+        is.na(pcl9a_1) & !is.na(pcl9a_2) & pcl9_1 == "Happened to me" ~ "6-11",
+        is.na(pcl9a_1) & is.na(pcl9a_2) & !is.na(pcl9_3) & pcl9_1 == "Happened to me" ~ "12-19",
+        is.na(pcl9a_1) & is.na(pcl9a_2) & is.na(pcl9a_3) & !is.na(pcl9a_4) & pcl9_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl10_devperiod = factor(
+      case_when(
+        !is.na(pcl10a_1) & pcl10_1 == "Happened to me" ~ "0-5",
+        is.na(pcl10a_1) & !is.na(pcl10a_2) & pcl10_1 == "Happened to me" ~ "6-11",
+        is.na(pcl10a_1) & is.na(pcl10a_2) & !is.na(pcl10_3) & pcl10_1 == "Happened to me" ~ "12-19",
+        is.na(pcl10a_1) & is.na(pcl10a_2) & is.na(pcl10a_3) & !is.na(pcl10a_4) & pcl10_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl11_devperiod = factor(
+      case_when(
+        !is.na(pcl11a_1) & pcl11_1 == "Happened to me" ~ "0-5",
+        is.na(pcl11a_1) & !is.na(pcl11a_2) & pcl11_1 == "Happened to me" ~ "6-11",
+        is.na(pcl11a_1) & is.na(pcl11a_2) & !is.na(pcl11_3) & pcl11_1 == "Happened to me" ~ "12-19",
+        is.na(pcl11a_1) & is.na(pcl11a_2) & is.na(pcl11a_3) & !is.na(pcl11a_4) & pcl11_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl12_devperiod = factor(
+      case_when(
+        !is.na(pcl12a_1) & pcl12_1 == "Happened to me" ~ "0-5",
+        is.na(pcl12a_1) & !is.na(pcl12a_2) & pcl12_1 == "Happened to me" ~ "6-11",
+        is.na(pcl12a_1) & is.na(pcl12a_2) & !is.na(pcl12_3) & pcl12_1 == "Happened to me" ~ "12-19",
+        is.na(pcl12a_1) & is.na(pcl12a_2) & is.na(pcl12a_3) & !is.na(pcl12a_4) & pcl12_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl13_devperiod = factor(
+      case_when(
+        !is.na(pcl13a_1) & pcl13_1 == "Happened to me" ~ "0-5",
+        is.na(pcl13a_1) & !is.na(pcl13a_2) & pcl13_1 == "Happened to me" ~ "6-11",
+        is.na(pcl13a_1) & is.na(pcl13a_2) & !is.na(pcl13_3) & pcl13_1 == "Happened to me" ~ "12-19",
+        is.na(pcl13a_1) & is.na(pcl13a_2) & is.na(pcl13a_3) & !is.na(pcl13a_4) & pcl13_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl14_devperiod = factor(
+      case_when(
+        !is.na(pcl14a_1) & pcl14_1 == "Happened to me" ~ "0-5",
+        is.na(pcl14a_1) & !is.na(pcl14a_2) & pcl14_1 == "Happened to me" ~ "6-11",
+        is.na(pcl14a_1) & is.na(pcl14a_2) & !is.na(pcl14_3) & pcl14_1 == "Happened to me" ~ "12-19",
+        is.na(pcl14a_1) & is.na(pcl14a_2) & is.na(pcl14a_3) & !is.na(pcl14a_4) & pcl14_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl15_devperiod = factor(
+      case_when(
+        !is.na(pcl15a_1) & pcl15_1 == "Happened to me" ~ "0-5",
+        is.na(pcl15a_1) & !is.na(pcl15a_2) & pcl15_1 == "Happened to me" ~ "6-11",
+        is.na(pcl15a_1) & is.na(pcl15a_2) & !is.na(pcl15_3) & pcl15_1 == "Happened to me" ~ "12-19",
+        is.na(pcl15a_1) & is.na(pcl15a_2) & is.na(pcl15a_3) & !is.na(pcl15a_4) & pcl15_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl16_devperiod = factor(
+      case_when(
+        !is.na(pcl16a_1) & pcl16_1 == "Happened to me" ~ "0-5",
+        is.na(pcl16a_1) & !is.na(pcl16a_2) & pcl16_1 == "Happened to me" ~ "6-11",
+        is.na(pcl16a_1) & is.na(pcl16a_2) & !is.na(pcl16_3) & pcl16_1 == "Happened to me" ~ "12-19",
+        is.na(pcl16a_1) & is.na(pcl16a_2) & is.na(pcl16a_3) & !is.na(pcl16a_4) & pcl16_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl17_devperiod = factor(
+      case_when(
+        !is.na(pcl17a_1) & pcl17_1 == "Happened to me" ~ "0-5",
+        is.na(pcl17a_1) & !is.na(pcl17a_2) & pcl17_1 == "Happened to me" ~ "6-11",
+        is.na(pcl17a_1) & is.na(pcl17a_2) & !is.na(pcl17_3) & pcl17_1 == "Happened to me" ~ "12-19",
+        is.na(pcl17a_1) & is.na(pcl17a_2) & is.na(pcl17a_3) & !is.na(pcl17a_4) & pcl17_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    #TODO: Maria please double check I changed 16 to 18
+    pcl18_devperiod = factor(
+      case_when(
+        !is.na(pcl18a_1) & pcl18_1 == "Happened to me" ~ "0-5",
+        is.na(pcl18a_1) & !is.na(pcl18a_2) & pcl18_1 == "Happened to me" ~ "6-11",
+        is.na(pcl18a_1) & is.na(pcl18a_2) & !is.na(pcl18_3) & pcl18_1 == "Happened to me" ~ "12-19",
+        is.na(pcl18a_1) & is.na(pcl18a_2) & is.na(pcl18a_3) & !is.na(pcl18a_4) & pcl18_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    ),
+    pcl19_devperiod = factor(
+      case_when(
+        !is.na(pcl19a_1) & pcl19_1 == "Happened to me" ~ "0-5",
+        is.na(pcl19a_1) & !is.na(pcl19a_2) & pcl19_1 == "Happened to me" ~ "6-11",
+        is.na(pcl19a_1) & is.na(pcl19a_2) & !is.na(pcl19_3) & pcl19_1 == "Happened to me" ~ "12-19",
+        is.na(pcl19a_1) & is.na(pcl19a_2) & is.na(pcl19a_3) & !is.na(pcl19a_4) & pcl19_1 == "Happened to me" ~ "adulthood",
+        TRUE ~ NA_character_
+      ),
+      levels = c("0-5", "6-11", "12-19", "adulthood")
+    )
+  )
 
 
-# Happened and Witnessed first developed period 
-  # mutate(pcl1_dev = combine_columns(., c("pcl1a_1", "pcl1a_2", "pcl1a_3", "pcl1a_4"), sep = ";") )%>%
-  # mutate(pcl1_dev = str_extract(pcl1_dev, "^[^;]+")) %>%
-  # relocate(pcl1_dev, .after = "pcl1a_77") %>%
-dev_column_names <- paste0("pcl", 1:12, "a_", 1:4)
-pcl <- pcl %>%
-  mutate(across(all_of(dev_column_names), ~str_extract(combine_columns(., across(starts_with(cur_column()), sep = ";")), "^[^;]+")) %>%
-  relocate(paste0(cur_column(), "_dev"), .after = str_replace(cur_column(), "a_", "a_77")) )
+
+
 
 pcl <- pcl %>%
   mutate(
+    # Re-coding 
     across(
-      # had you experienced and how
       .cols = c(matches("^pcl\\d+_\\d+")),
       .fns = ~case_when(
         .x == "Happened to me" ~ "1",
@@ -4152,29 +4343,54 @@ pcl <- pcl %>%
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
+    ),
+    across(
+    .cols = c(matches("^pcl\\d+a_\\d+")),
+      .fns = ~case_when(
+         .x == "Ages 0-5" ~ "1",
+         .x == "Ages 6-11" ~ "1",
+         .x == "Ages 12-19" ~ "1",
+         .x == "Adulthood" ~ "1",
+         .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = c(matches("^pcl\\d+_hapWit_dev")),
+      .fns = ~case_when(
+        .x == "Ages 0-5" ~ "1",
+         .x == "Ages 6-11" ~ "2",
+         .x == "Ages 12-19" ~ "3",
+         .x == "Adulthood" ~ "4",
+         .x == "Decline to Answer" ~ "-77",
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = c(matches("^pcl\\d+b\\d+")),
+      .fns = ~ case_when(
+        .x == "None - did not experience" ~ "0", 
+        .x == "1 time ever" ~ "1",
+        .x == "2 or more times: Specify" ~ "2",
+        .x == "1-2 month" ~ "3",
+        .x == "1-2 times per week" ~ "4",
+        .x == "2-3 times each week" ~ "5",
+        .x == "Almost daily" ~ "6",
+        .x == "Decline to Answer" ~ "7",
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .cols = c(matches("devperiod$")),
+      .fns = ~ case_when(
+        .x == "0-5" ~ "0", 
+        .x == "6-11" ~ "1",
+        .x == "12-19" ~ "2",
+        .x == "adulthood" ~ "3",
+        TRUE ~ .x
     )
-    # ,
-    # across(
-    # .cols = c(matches("^pcl\\d+a_\\d+")),
-    #   .fns = ~case_when(
-    #     .x == "Ages 0-5" ~ "1",
-    #      .x == "Ages 6-11" ~ "1",
-    #      .x == "Ages 12-19" ~ "1",
-    #      .x == "Adulthood" ~ "1",
-    #      .x == "Decline to Answer" ~ "-77",
-    #     TRUE ~ .x
-    #   )
-    # )
-    # ,
-    # across(
-    #   .cols = c(pcl1_1, pcl1_2, pcl1_3),
-    #   .fns = ~case_when(
-    #     pcl1_77 == "-77" ~ "-77",
-    #     pcl1_4 == "0" ~ "0",
-    #     is.na(.x) ~ "0",
-    #     TRUE ~ .x
-    #   )
-  ) %>%
+  )
+  )%>%
   #rename column names to reflect what happened to this situation.
   rename_with(
     .fn = ~ gsub("pcl(\\d+)_1", "pcl\\1_happen", .),
@@ -4192,6 +4408,7 @@ pcl <- pcl %>%
     .fn = ~ gsub("pcl(\\d+)_4", "pcl\\1_no", .),
     .cols = matches("pcl\\d+_4")
   ) %>%
+  # rename column names to reflect when was this ssitution developed 
   rename_with(
     .fn = ~ gsub("pcl(\\d+)a_1", "pcl\\1_hapWit_ages_0_5", .),
     .cols = matches("pcl\\d+a_1")
@@ -4211,246 +4428,312 @@ pcl <- pcl %>%
   rename_with(
     .fn = ~ gsub("pcl(\\d+)a_77", "pcl\\1_hapWit_ages_77", .),
     .cols = matches("pcl\\d+a_77")
-  ) 
-
-
-# fund a more effection way to write these 
-  # mutate(pcl1_dev = combine_columns(., c("pcl1a_1", "pcl1a_2", "pcl1a_3", "pcl1a_4"), sep = ";") )%>%
-  # mutate(pcl1_dev = str_extract(pcl1_dev, "^[^;]+")) %>%
-  # relocate(pcl1_dev, .after = "pcl1a_77") %>%
-  # mutate(pcl2_dev = combine_columns(., c("pcl2a_1", "pcl2a_2", "pcl2a_3", "pcl2a_4"), sep = ";") )%>%
-  # mutate(pcl2_dev = str_extract(pcl2_dev, "^[^;]+")) %>%
-  # relocate(pcl2_dev, .after = "pcl2a_77") %>%
-  # mutate(pcl3_dev = combine_columns(., c("pcl3a_1", "pcl3a_2", "pcl3a_3", "pcl3a_4"), sep = ";") )%>%
-  # mutate(pcl3_dev = str_extract(pcl3_dev, "^[^;]+")) %>%
-  # relocate(pcl3_dev, .after = "pcl3a_77") %>%
-  # mutate(pcl4_dev = combine_columns(., c("pcl4a_1", "pcl4a_2", "pcl4a_3", "pcl4a_4"), sep = ";") )%>%
-  # mutate(pcl4_dev = str_extract(pcl4_dev, "^[^;]+")) %>%
-  # relocate(pcl4_dev, .after = "pcl4a_77") %>%
-  # mutate(pcl5_dev = combine_columns(., c("pcl5a_1", "pcl5a_2", "pcl5a_3", "pcl5a_4"), sep = ";") )%>%
-  # mutate(pcl5_dev = str_extract(pcl5_dev, "^[^;]+")) %>%
-  # relocate(pcl5_dev, .after = "pcl5a_77") %>%
-  # mutate(pcl6_dev = combine_columns(., c("pcl6a_1", "pcl6a_2", "pcl6a_3", "pcl6a_4"), sep = ";") )%>%
-  # mutate(pcl6_dev = str_extract(pcl6_dev, "^[^;]+")) %>%
-  # relocate(pcl6_dev, .after = "pcl6a_77") %>%
-  # mutate(pcl7_dev = combine_columns(., c("pcl7a_1", "pcl7a_2", "pcl7a_3", "pcl7a_4"), sep = ";") )%>%
-  # mutate(pcl7_dev = str_extract(pcl7_dev, "^[^;]+")) %>%
-  # relocate(pcl7_dev, .after = "pcl7a_77") %>%
-  # mutate(pcl8_dev = combine_columns(., c("pcl8a_1", "pcl8a_2", "pcl8a_3", "pcl8a_4"), sep = ";") )%>%
-  # mutate(pcl8_dev = str_extract(pcl8_dev, "^[^;]+")) %>%
-  # relocate(pcl8_dev, .after = "pcl8a_77") %>%
-  # mutate(pcl9_dev = combine_columns(., c("pcl9a_1", "pcl9a_2", "pcl9a_3", "pcl9a_4"), sep = ";") )%>%
-  # mutate(pcl9_dev = str_extract(pcl9_dev, "^[^;]+")) %>%
-  # relocate(pcl9_dev, .after = "pcl9a_77") %>%
-  # mutate(pcl10_dev = combine_columns(., c("pcl10a_1", "pcl10a_2", "pcl10a_3", "pcl10a_4"), sep = ";") )%>%
-  # mutate(pcl10_dev = str_extract(pcl10_dev, "^[^;]+")) %>%
-  # relocate(pcl10_dev, .after = "pcl10a_77") %>%
-  # mutate(pcl11_dev = combine_columns(., c("pcl11a_1", "pcl11a_2", "pcl11a_3", "pcl11a_4"), sep = ";") )%>%
-  # mutate(pcl11_dev = str_extract(pcl11_dev, "^[^;]+")) %>%
-  # relocate(pcl11_dev, .after = "pcl11a_77") %>%
-  # mutate(pcl12_dev = combine_columns(., c("pcl12a_1", "pcl12a_2", "pcl12a_3", "pcl12a_4"), sep = ";") )%>%
-  # mutate(pcl12_dev = str_extract(pcl12_dev, "^[^;]+")) %>%
-  # relocate(pcl12_dev, .after = "pcl12a_77") 
-  # 
-
-# TODO: Maria since we have developed period for combination of happened and witnessed, the following code is irrelevant, please confirm and removed. # Min this is the "first" developmental period it happened in, the code I created, I believe, if you look at it, it is scanning each PCL item and seeing when it first happened. Now that you have that information can you confirm it isn't irrelevant?
-  #   mutate(
-  #   pcl1_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl1a_1) & pcl1_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl1a_1) & !is.na(pcl1a_2) & pcl1_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl1a_1) & is.na(pcl1a_2) & !is.na(pcl1_3) & pcl1_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl1a_1) & is.na(pcl1a_2) & is.na(pcl1a_3) & !is.na(pcl1a_4) & pcl1_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl2_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl2a_1) & pcl2_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl2a_1) & !is.na(pcl2a_2) & pcl2_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl2a_1) & is.na(pcl2a_2) & !is.na(pcl2_3) & pcl2_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl2a_1) & is.na(pcl2a_2) & is.na(pcl2a_3) & !is.na(pcl2a_4) & pcl2_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl3_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl3a_1) & pcl3_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl3a_1) & !is.na(pcl3a_2) & pcl3_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl3a_1) & is.na(pcl3a_2) & !is.na(pcl3_3) & pcl3_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl3a_1) & is.na(pcl3a_2) & is.na(pcl3a_3) & !is.na(pcl3a_4) & pcl3_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl4_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl4a_1) & pcl4_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl4a_1) & !is.na(pcl4a_2) & pcl4_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl4a_1) & is.na(pcl4a_2) & !is.na(pcl4_3) & pcl4_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl4a_1) & is.na(pcl4a_2) & is.na(pcl4a_3) & !is.na(pcl4a_4) & pcl4_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl5_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl5a_1) & pcl5_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl5a_1) & !is.na(pcl5a_2) & pcl5_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl5a_1) & is.na(pcl5a_2) & !is.na(pcl5_3) & pcl5_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl5a_1) & is.na(pcl5a_2) & is.na(pcl5a_3) & !is.na(pcl5a_4) & pcl5_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl6_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl6a_1) & pcl6_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl6a_1) & !is.na(pcl6a_2) & pcl6_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl6a_1) & is.na(pcl6a_2) & !is.na(pcl6_3) & pcl6_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl6a_1) & is.na(pcl6a_2) & is.na(pcl6a_3) & !is.na(pcl6a_4) & pcl6_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl7_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl7a_1) & pcl7_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl7a_1) & !is.na(pcl7a_2) & pcl7_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl7a_1) & is.na(pcl7a_2) & !is.na(pcl7_3) & pcl7_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl7a_1) & is.na(pcl7a_2) & is.na(pcl7a_3) & !is.na(pcl7a_4) & pcl7_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl8_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl8a_1) & pcl8_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl8a_1) & !is.na(pcl8a_2) & pcl8_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl8a_1) & is.na(pcl8a_2) & !is.na(pcl8_3) & pcl8_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl8a_1) & is.na(pcl8a_2) & is.na(pcl8a_3) & !is.na(pcl8a_4) & pcl8_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl9_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl9a_1) & pcl9_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl9a_1) & !is.na(pcl9a_2) & pcl9_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl9a_1) & is.na(pcl9a_2) & !is.na(pcl9_3) & pcl9_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl9a_1) & is.na(pcl9a_2) & is.na(pcl9a_3) & !is.na(pcl9a_4) & pcl9_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl10_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl10a_1) & pcl10_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl10a_1) & !is.na(pcl10a_2) & pcl10_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl10a_1) & is.na(pcl10a_2) & !is.na(pcl10_3) & pcl10_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl10a_1) & is.na(pcl10a_2) & is.na(pcl10a_3) & !is.na(pcl10a_4) & pcl10_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl11_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl11a_1) & pcl11_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl11a_1) & !is.na(pcl11a_2) & pcl11_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl11a_1) & is.na(pcl11a_2) & !is.na(pcl11_3) & pcl11_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl11a_1) & is.na(pcl11a_2) & is.na(pcl11a_3) & !is.na(pcl11a_4) & pcl11_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl12_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl12a_1) & pcl12_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl12a_1) & !is.na(pcl12a_2) & pcl12_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl12a_1) & is.na(pcl12a_2) & !is.na(pcl12_3) & pcl12_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl12a_1) & is.na(pcl12a_2) & is.na(pcl12a_3) & !is.na(pcl12a_4) & pcl12_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl13_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl13a_1) & pcl13_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl13a_1) & !is.na(pcl13a_2) & pcl13_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl13a_1) & is.na(pcl13a_2) & !is.na(pcl13_3) & pcl13_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl13a_1) & is.na(pcl13a_2) & is.na(pcl13a_3) & !is.na(pcl13a_4) & pcl13_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl14_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl14a_1) & pcl14_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl14a_1) & !is.na(pcl14a_2) & pcl14_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl14a_1) & is.na(pcl14a_2) & !is.na(pcl14_3) & pcl14_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl14a_1) & is.na(pcl14a_2) & is.na(pcl14a_3) & !is.na(pcl14a_4) & pcl14_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl15_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl15a_1) & pcl15_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl15a_1) & !is.na(pcl15a_2) & pcl15_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl15a_1) & is.na(pcl15a_2) & !is.na(pcl15_3) & pcl15_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl15a_1) & is.na(pcl15a_2) & is.na(pcl15a_3) & !is.na(pcl15a_4) & pcl15_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl16_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl16a_1) & pcl16_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl16a_1) & !is.na(pcl16a_2) & pcl16_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl16a_1) & is.na(pcl16a_2) & !is.na(pcl16_3) & pcl16_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl16a_1) & is.na(pcl16a_2) & is.na(pcl16a_3) & !is.na(pcl16a_4) & pcl16_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl17_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl17a_1) & pcl17_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl17a_1) & !is.na(pcl17a_2) & pcl17_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl17a_1) & is.na(pcl17a_2) & !is.na(pcl17_3) & pcl17_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl17a_1) & is.na(pcl17a_2) & is.na(pcl17a_3) & !is.na(pcl17a_4) & pcl17_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   #TODO: Maria please double check I changed 16 to 18 
-  #   pcl18_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl18a_1) & pcl18_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl18a_1) & !is.na(pcl18a_2) & pcl18_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl18a_1) & is.na(pcl18a_2) & !is.na(pcl18_3) & pcl18_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl18a_1) & is.na(pcl18a_2) & is.na(pcl18a_3) & !is.na(pcl18a_4) & pcl18_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   ),
-  #   pcl19_devperiod = factor(
-  #     case_when(
-  #       !is.na(pcl19a_1) & pcl19_1 == "Happened to me" ~ "0-5",
-  #       is.na(pcl19a_1) & !is.na(pcl19a_2) & pcl19_1 == "Happened to me" ~ "6-11",
-  #       is.na(pcl19a_1) & is.na(pcl19a_2) & !is.na(pcl19_3) & pcl19_1 == "Happened to me" ~ "12-19",
-  #       is.na(pcl19a_1) & is.na(pcl19a_2) & is.na(pcl19a_3) & !is.na(pcl19a_4) & pcl19_1 == "Happened to me" ~ "adulthood",
-  #       TRUE ~ NA_character_
-  #     ),
-  #     levels = c("0-5", "6-11", "12-19", "adulthood")
-  #   )
-  # )
-
-  
-  
-  
+  ) %>%
+  # combine multiple choice question columns 
+  # PCL1
+  mutate(pcl1c1 = combine_columns(., c("pcl1c1_1", "pcl1c1_2", "pcl1c1_3", "pcl1c1_9999", "pcl1c1_77"), sep = ";") )%>%
+  mutate(pcl1c2 = combine_columns(., c("pcl1c2_1", "pcl1c2_2", "pcl1c2_3", "pcl1c2_9999", "pcl1c2_77"), sep = ";") )%>%
+  mutate(pcl1c3 = combine_columns(., c("pcl1c3_1", "pcl1c3_2", "pcl1c3_3", "pcl1c3_9999", "pcl1c3_77"), sep = ";") )%>%
+  mutate(pcl1c4 = combine_columns(., c("pcl1c4_1", "pcl1c4_2", "pcl1c4_3", "pcl1c4_9999", "pcl1c4_77"), sep = ";") )%>%
+  mutate(pcl1d = combine_columns(., c("pcl1d_1", "pcl1d_2", "pcl1d_3", "pcl1d_77"), sep = ";") )%>%
+  relocate(pcl1c1, .after = "pcl1c1_77") %>%
+  relocate(pcl1c2, .after = "pcl1c2_77") %>%
+  relocate(pcl1c3, .after = "pcl1c3_77") %>%
+  relocate(pcl1c4, .after = "pcl1c4_77") %>%
+  relocate(pcl1d, .after = "pcl1d_77") %>%
+  select(-c("pcl1c1_1", "pcl1c1_2", "pcl1c1_3", "pcl1c1_9999", "pcl1c1_77",
+            "pcl1c2_1", "pcl1c2_2", "pcl1c2_3", "pcl1c2_9999", "pcl1c2_77",
+            "pcl1c3_1", "pcl1c3_2", "pcl1c3_3", "pcl1c3_9999", "pcl1c3_77",
+            "pcl1c4_1", "pcl1c4_2", "pcl1c4_3", "pcl1c4_9999", "pcl1c4_77",
+            "pcl1d_1", "pcl1d_2", "pcl1d_3", "pcl1c1_77")) %>%
+  # PCL2
+  mutate(pcl2c1 = combine_columns(., c("pcl2c1_1", "pcl2c1_2", "pcl2c1_3", "pcl2c1_9999", "pcl2c1_77"), sep = ";") )%>%
+  mutate(pcl2c2 = combine_columns(., c("pcl2c2_1", "pcl2c2_2", "pcl2c2_3", "pcl2c2_9999", "pcl2c2_77"), sep = ";") )%>%
+  mutate(pcl2c3 = combine_columns(., c("pcl2c3_1", "pcl2c3_2", "pcl2c3_3", "pcl2c3_9999", "pcl2c3_77"), sep = ";") )%>%
+  mutate(pcl2c4 = combine_columns(., c("pcl2c4_1", "pcl2c4_2", "pcl2c4_3", "pcl2c4_9999", "pcl2c4_77"), sep = ";") )%>%
+  mutate(pcl2d = combine_columns(., c("pcl2d_1", "pcl2d_2", "pcl2d_3", "pcl2d_77"), sep = ";") )%>%
+  relocate(pcl2c1, .after = "pcl2c1_77") %>%
+  relocate(pcl2c2, .after = "pcl2c2_77") %>%
+  relocate(pcl2c3, .after = "pcl2c3_77") %>%
+  relocate(pcl2c4, .after = "pcl2c4_77") %>%
+  relocate(pcl2d, .after = "pcl2d_77") %>%
+  select(-c("pcl2c1_1", "pcl2c1_2", "pcl2c1_3", "pcl2c1_9999", "pcl2c1_77",
+            "pcl2c2_1", "pcl2c2_2", "pcl2c2_3", "pcl2c2_9999", "pcl2c2_77",
+            "pcl2c3_1", "pcl2c3_2", "pcl2c3_3", "pcl2c3_9999", "pcl2c3_77",
+            "pcl2c4_1", "pcl2c4_2", "pcl2c4_3", "pcl2c4_9999", "pcl2c4_77",
+            "pcl2d_1", "pcl2d_2", "pcl2d_3", "pcl2d_77")) %>%
+  # PCL3
+  mutate(pcl3c1 = combine_columns(., c("pcl3c1_1", "pcl3c1_2", "pcl3c1_3", "pcl3c1_9999", "pcl3c1_77"), sep = ";") )%>%
+  mutate(pcl3c2 = combine_columns(., c("pcl3c2_1", "pcl3c2_2", "pcl3c2_3", "pcl3c2_9999", "pcl3c2_77"), sep = ";") )%>%
+  mutate(pcl3c3 = combine_columns(., c("pcl3c3_1", "pcl3c3_2", "pcl3c3_3", "pcl3c3_9999", "pcl3c3_77"), sep = ";") )%>%
+  mutate(pcl3c4 = combine_columns(., c("pcl3c4_1", "pcl3c4_2", "pcl3c4_3", "pcl3c4_9999", "pcl3c4_77"), sep = ";") )%>%
+  mutate(pcl3d = combine_columns(., c("pcl3d_1", "pcl3d_2", "pcl3d_3", "pcl3d_77"), sep = ";") )%>%
+  relocate(pcl3c1, .after = "pcl3c1_77") %>%
+  relocate(pcl3c2, .after = "pcl3c2_77") %>%
+  relocate(pcl3c3, .after = "pcl3c3_77") %>%
+  relocate(pcl3c4, .after = "pcl3c4_77") %>%
+  relocate(pcl3d, .after = "pcl3d_77") %>%
+  select(-c("pcl3c1_1", "pcl3c1_2", "pcl3c1_3", "pcl3c1_9999", "pcl3c1_77",
+            "pcl3c2_1", "pcl3c2_2", "pcl3c2_3", "pcl3c2_9999", "pcl3c2_77",
+            "pcl3c3_1", "pcl3c3_2", "pcl3c3_3", "pcl3c3_9999", "pcl3c3_77",
+            "pcl3c4_1", "pcl3c4_2", "pcl3c4_3", "pcl3c4_9999", "pcl3c4_77",
+            "pcl3d_1", "pcl3d_2", "pcl3d_3", "pcl3d_77")) %>%
+  # PCL4
+  mutate(pcl4c1 = combine_columns(., c("pcl4c1_1", "pcl4c1_2", "pcl4c1_3", "pcl4c1_9999", "pcl4c1_77"), sep = ";") )%>%
+  mutate(pcl4c2 = combine_columns(., c("pcl4c2_1", "pcl4c2_2", "pcl4c2_3", "pcl4c2_9999", "pcl4c2_77"), sep = ";") )%>%
+  mutate(pcl4c3 = combine_columns(., c("pcl4c3_1", "pcl4c3_2", "pcl4c3_3", "pcl4c3_9999", "pcl4c3_77"), sep = ";") )%>%
+  mutate(pcl4c4 = combine_columns(., c("pcl4c4_1", "pcl4c4_2", "pcl4c4_3", "pcl4c4_9999", "pcl4c4_77"), sep = ";") )%>%
+  mutate(pcl4d = combine_columns(., c("pcl4d_1", "pcl4d_2", "pcl4d_3", "pcl4d_77"), sep = ";") )%>%
+  relocate(pcl4c1, .after = "pcl4c1_77") %>%
+  relocate(pcl4c2, .after = "pcl4c2_77") %>%
+  relocate(pcl4c3, .after = "pcl4c3_77") %>%
+  relocate(pcl4c4, .after = "pcl4c4_77") %>%
+  relocate(pcl4d, .after = "pcl4d_77") %>%
+  select(-c("pcl4c1_1", "pcl4c1_2", "pcl4c1_3", "pcl4c1_9999", "pcl4c1_77",
+            "pcl4c2_1", "pcl4c2_2", "pcl4c2_3", "pcl4c2_9999", "pcl4c2_77",
+            "pcl4c3_1", "pcl4c3_2", "pcl4c3_3", "pcl4c3_9999", "pcl4c3_77",
+            "pcl4c4_1", "pcl4c4_2", "pcl4c4_3", "pcl4c4_9999", "pcl4c4_77",
+            "pcl4d_1", "pcl4d_2", "pcl4d_3", "pcl4d_77")) %>%  
+  # PCL5
+  mutate(pcl5c1 = combine_columns(., c("pcl5c1_1", "pcl5c1_2", "pcl5c1_3", "pcl5c1_9999", "pcl5c1_77"), sep = ";") )%>%
+  mutate(pcl5c2 = combine_columns(., c("pcl5c2_1", "pcl5c2_2", "pcl5c2_3", "pcl5c2_9999", "pcl5c2_77"), sep = ";") )%>%
+  mutate(pcl5c3 = combine_columns(., c("pcl5c3_1", "pcl5c3_2", "pcl5c3_3", "pcl5c3_9999", "pcl5c3_77"), sep = ";") )%>%
+  mutate(pcl5c4 = combine_columns(., c("pcl5c4_1", "pcl5c4_2", "pcl5c4_3", "pcl5c4_9999", "pcl5c4_77"), sep = ";") )%>%
+  mutate(pcl5d = combine_columns(., c("pcl5d_1", "pcl5d_2", "pcl5d_3", "pcl5d_77"), sep = ";") )%>%
+  relocate(pcl5c1, .after = "pcl5c1_77") %>%
+  relocate(pcl5c2, .after = "pcl5c2_77") %>%
+  relocate(pcl5c3, .after = "pcl5c3_77") %>%
+  relocate(pcl5c4, .after = "pcl5c4_77") %>%
+  relocate(pcl5d, .after = "pcl5d_77") %>%
+  select(-c("pcl5c1_1", "pcl5c1_2", "pcl5c1_3", "pcl5c1_9999", "pcl5c1_77",
+            "pcl5c2_1", "pcl5c2_2", "pcl5c2_3", "pcl5c2_9999", "pcl5c2_77",
+            "pcl5c3_1", "pcl5c3_2", "pcl5c3_3", "pcl5c3_9999", "pcl5c3_77",
+            "pcl5c4_1", "pcl5c4_2", "pcl5c4_3", "pcl5c4_9999", "pcl5c4_77",
+            "pcl5d_1", "pcl5d_2", "pcl5d_3", "pcl5d_77")) %>%  
+    # PCL6
+  mutate(pcl6c1 = combine_columns(., c("pcl6c1_1", "pcl6c1_2", "pcl6c1_3", "pcl6c1_9999", "pcl6c1_77"), sep = ";") )%>%
+  mutate(pcl6c2 = combine_columns(., c("pcl6c2_1", "pcl6c2_2", "pcl6c2_3", "pcl6c2_9999", "pcl6c2_77"), sep = ";") )%>%
+  mutate(pcl6c3 = combine_columns(., c("pcl6c3_1", "pcl6c3_2", "pcl6c3_3", "pcl6c3_9999", "pcl6c3_77"), sep = ";") )%>%
+  mutate(pcl6c4 = combine_columns(., c("pcl6c4_1", "pcl6c4_2", "pcl6c4_3", "pcl6c4_9999", "pcl6c4_77"), sep = ";") )%>%
+  mutate(pcl6d = combine_columns(., c("pcl6d_1", "pcl6d_2", "pcl6d_3", "pcl6d_77"), sep = ";") )%>%
+  relocate(pcl6c1, .after = "pcl6c1_77") %>%
+  relocate(pcl6c2, .after = "pcl6c2_77") %>%
+  relocate(pcl6c3, .after = "pcl6c3_77") %>%
+  relocate(pcl6c4, .after = "pcl6c4_77") %>%
+  relocate(pcl6d, .after = "pcl6d_77") %>%
+  select(-c("pcl6c1_1", "pcl6c1_2", "pcl6c1_3", "pcl6c1_9999", "pcl6c1_77",
+            "pcl6c2_1", "pcl6c2_2", "pcl6c2_3", "pcl6c2_9999", "pcl6c2_77",
+            "pcl6c3_1", "pcl6c3_2", "pcl6c3_3", "pcl6c3_9999", "pcl6c3_77",
+            "pcl6c4_1", "pcl6c4_2", "pcl6c4_3", "pcl6c4_9999", "pcl6c4_77",
+            "pcl6d_1", "pcl6d_2", "pcl6d_3", "pcl6d_77")) %>%  
+    # PCL7
+  mutate(pcl7c1 = combine_columns(., c("pcl7c1_1", "pcl7c1_2", "pcl7c1_3", "pcl7c1_9999", "pcl7c1_77"), sep = ";") )%>%
+  mutate(pcl7c2 = combine_columns(., c("pcl7c2_1", "pcl7c2_2", "pcl7c2_3", "pcl7c2_9999", "pcl7c2_77"), sep = ";") )%>%
+  mutate(pcl7c3 = combine_columns(., c("pcl7c3_1", "pcl7c3_2", "pcl7c3_3", "pcl7c3_9999", "pcl7c3_77"), sep = ";") )%>%
+  mutate(pcl7c4 = combine_columns(., c("pcl7c4_1", "pcl7c4_2", "pcl7c4_3", "pcl7c4_9999", "pcl7c4_77"), sep = ";") )%>%
+  mutate(pcl7d = combine_columns(., c("pcl7d_1", "pcl7d_2", "pcl7d_3", "pcl7d_77"), sep = ";") )%>%
+  relocate(pcl7c1, .after = "pcl7c1_77") %>%
+  relocate(pcl7c2, .after = "pcl7c2_77") %>%
+  relocate(pcl7c3, .after = "pcl7c3_77") %>%
+  relocate(pcl7c4, .after = "pcl7c4_77") %>%
+  relocate(pcl7d, .after = "pcl7d_77") %>%
+  select(-c("pcl7c1_1", "pcl7c1_2", "pcl7c1_3", "pcl7c1_9999", "pcl7c1_77",
+            "pcl7c2_1", "pcl7c2_2", "pcl7c2_3", "pcl7c2_9999", "pcl7c2_77",
+            "pcl7c3_1", "pcl7c3_2", "pcl7c3_3", "pcl7c3_9999", "pcl7c3_77",
+            "pcl7c4_1", "pcl7c4_2", "pcl7c4_3", "pcl7c4_9999", "pcl7c4_77",
+            "pcl7d_1", "pcl7d_2", "pcl7d_3", "pcl7d_77")) %>% 
+    # PCL8
+  mutate(pcl8c1 = combine_columns(., c("pcl8c1_1", "pcl8c1_2", "pcl8c1_3", "pcl8c1_9999", "pcl8c1_77"), sep = ";") )%>%
+  mutate(pcl8c2 = combine_columns(., c("pcl8c2_1", "pcl8c2_2", "pcl8c2_3", "pcl8c2_9999", "pcl8c2_77"), sep = ";") )%>%
+  mutate(pcl8c3 = combine_columns(., c("pcl8c3_1", "pcl8c3_2", "pcl8c3_3", "pcl8c3_9999", "pcl8c3_77"), sep = ";") )%>%
+  mutate(pcl8c4 = combine_columns(., c("pcl8c4_1", "pcl8c4_2", "pcl8c4_3", "pcl8c4_9999", "pcl8c4_77"), sep = ";") )%>%
+  mutate(pcl8d = combine_columns(., c("pcl8d_1", "pcl8d_2", "pcl8d_3", "pcl8d_77"), sep = ";") )%>%
+  relocate(pcl8c1, .after = "pcl8c1_77") %>%
+  relocate(pcl8c2, .after = "pcl8c2_77") %>%
+  relocate(pcl8c3, .after = "pcl8c3_77") %>%
+  relocate(pcl8c4, .after = "pcl8c4_77") %>%
+  relocate(pcl8d, .after = "pcl8d_77") %>%
+  select(-c("pcl8c1_1", "pcl8c1_2", "pcl8c1_3", "pcl8c1_9999", "pcl8c1_77",
+            "pcl8c2_1", "pcl8c2_2", "pcl8c2_3", "pcl8c2_9999", "pcl8c2_77",
+            "pcl8c3_1", "pcl8c3_2", "pcl8c3_3", "pcl8c3_9999", "pcl8c3_77",
+            "pcl8c4_1", "pcl8c4_2", "pcl8c4_3", "pcl8c4_9999", "pcl8c4_77",
+            "pcl8d_1", "pcl8d_2", "pcl8d_3", "pcl8d_77")) %>%  
+    # PCL9
+  mutate(pcl9c1 = combine_columns(., c("pcl9c1_1", "pcl9c1_2", "pcl9c1_3", "pcl9c1_9999", "pcl9c1_77"), sep = ";") )%>%
+  mutate(pcl9c2 = combine_columns(., c("pcl9c2_1", "pcl9c2_2", "pcl9c2_3", "pcl9c2_9999", "pcl9c2_77"), sep = ";") )%>%
+  mutate(pcl9c3 = combine_columns(., c("pcl9c3_1", "pcl9c3_2", "pcl9c3_3", "pcl9c3_9999", "pcl9c3_77"), sep = ";") )%>%
+  mutate(pcl9c4 = combine_columns(., c("pcl9c4_1", "pcl9c4_2", "pcl9c4_3", "pcl9c4_9999", "pcl9c4_77"), sep = ";") )%>%
+  mutate(pcl9d = combine_columns(., c("pcl9d_1", "pcl9d_2", "pcl9d_3", "pcl9d_77"), sep = ";") )%>%
+  relocate(pcl9c1, .after = "pcl9c1_77") %>%
+  relocate(pcl9c2, .after = "pcl9c2_77") %>%
+  relocate(pcl9c3, .after = "pcl9c3_77") %>%
+  relocate(pcl9c4, .after = "pcl9c4_77") %>%
+  relocate(pcl9d, .after = "pcl9d_77") %>%
+  select(-c("pcl9c1_1", "pcl9c1_2", "pcl9c1_3", "pcl9c1_9999", "pcl9c1_77",
+            "pcl9c2_1", "pcl9c2_2", "pcl9c2_3", "pcl9c2_9999", "pcl9c2_77",
+            "pcl9c3_1", "pcl9c3_2", "pcl9c3_3", "pcl9c3_9999", "pcl9c3_77",
+            "pcl9c4_1", "pcl9c4_2", "pcl9c4_3", "pcl9c4_9999", "pcl9c4_77",
+            "pcl9d_1", "pcl9d_2", "pcl9d_3", "pcl9d_77")) %>%  
+    # PCL10
+  mutate(pcl10c1 = combine_columns(., c("pcl10c1_1", "pcl10c1_2", "pcl10c1_3", "pcl10c1_9999", "pcl10c1_77"), sep = ";") )%>%
+  mutate(pcl10c2 = combine_columns(., c("pcl10c2_1", "pcl10c2_2", "pcl10c2_3", "pcl10c2_9999", "pcl10c2_77"), sep = ";") )%>%
+  mutate(pcl10c3 = combine_columns(., c("pcl10c3_1", "pcl10c3_2", "pcl10c3_3", "pcl10c3_9999", "pcl10c3_77"), sep = ";") )%>%
+  mutate(pcl10c4 = combine_columns(., c("pcl10c4_1", "pcl10c4_2", "pcl10c4_3", "pcl10c4_9999", "pcl10c4_77"), sep = ";") )%>%
+  mutate(pcl10d = combine_columns(., c("pcl10d_1", "pcl10d_2", "pcl10d_3", "pcl10d_77"), sep = ";") )%>%
+  relocate(pcl10c1, .after = "pcl10c1_77") %>%
+  relocate(pcl10c2, .after = "pcl10c2_77") %>%
+  relocate(pcl10c3, .after = "pcl10c3_77") %>%
+  relocate(pcl10c4, .after = "pcl10c4_77") %>%
+  relocate(pcl10d, .after = "pcl10d_77") %>%
+  select(-c("pcl10c1_1", "pcl10c1_2", "pcl10c1_3", "pcl10c1_9999", "pcl10c1_77",
+            "pcl10c2_1", "pcl10c2_2", "pcl10c2_3", "pcl10c2_9999", "pcl10c2_77",
+            "pcl10c3_1", "pcl10c3_2", "pcl10c3_3", "pcl10c3_9999", "pcl10c3_77",
+            "pcl10c4_1", "pcl10c4_2", "pcl10c4_3", "pcl10c4_9999", "pcl10c4_77",
+            "pcl10d_1", "pcl10d_2", "pcl10d_3", "pcl10d_77")) %>%
+    # PCL11
+  mutate(pcl11c1 = combine_columns(., c("pcl11c_1", "pcl11c_2", "pcl11c_3", "pcl11c_9999", "pcl11c_77"), sep = ";") )%>%
+  mutate(pcl11c2 = combine_columns(., c("pcl11c2_1", "pcl11c2_2", "pcl11c2_3", "pcl11c2_9999", "pcl11c2_77"), sep = ";") )%>%
+  mutate(pcl11c3 = combine_columns(., c("pcl11c3_1", "pcl11c3_2", "pcl11c3_3", "pcl11c3_9999", "pcl11c3_77"), sep = ";") )%>%
+  mutate(pcl11c4 = combine_columns(., c("pcl11c4_1", "pcl11c4_2", "pcl11c4_3", "pcl11c4_9999", "pcl11c4_77"), sep = ";") )%>%
+  mutate(pcl11d = combine_columns(., c("pcl11d_1", "pcl11d_2", "pcl11d_3", "pcl11d_77"), sep = ";") )%>%
+  relocate(pcl11c1, .after = "pcl11c_77") %>%
+  relocate(pcl11c2, .after = "pcl11c2_77") %>%
+  relocate(pcl11c3, .after = "pcl11c3_77") %>%
+  relocate(pcl11c4, .after = "pcl11c4_77") %>%
+  relocate(pcl11d, .after = "pcl11d_77") %>%
+  select(-c("pcl11c_1", "pcl11c_2", "pcl11c_3", "pcl11c_9999", "pcl11c_77",
+            "pcl11c2_1", "pcl11c2_2", "pcl11c2_3", "pcl11c2_9999", "pcl11c2_77",
+            "pcl11c3_1", "pcl11c3_2", "pcl11c3_3", "pcl11c3_9999", "pcl11c3_77",
+            "pcl11c4_1", "pcl11c4_2", "pcl11c4_3", "pcl11c4_9999", "pcl11c4_77",
+            "pcl11d_1", "pcl11d_2", "pcl11d_3", "pcl11d_77")) %>%
+    # PCL12
+  mutate(pcl12c1 = combine_columns(., c("pcl12c1_1", "pcl12c1_2", "pcl12c1_3", "pcl12c1_9999", "pcl12c1_77"), sep = ";") )%>%
+  mutate(pcl12c2 = combine_columns(., c("pcl12c2_1", "pcl12c2_2", "pcl12c2_3", "pcl12c2_9999", "pcl12c2_77"), sep = ";") )%>%
+  mutate(pcl12c3 = combine_columns(., c("pcl12c3_1", "pcl12c3_2", "pcl12c3_3", "pcl12c3_9999", "pcl12c3_77"), sep = ";") )%>%
+  mutate(pcl12c4 = combine_columns(., c("pcl12c4_1", "pcl12c4_2", "pcl12c4_3", "pcl12c4_9999", "pcl12c4_77"), sep = ";") )%>%
+  mutate(pcl12d = combine_columns(., c("pcl12d_1", "pcl12d_2", "pcl12d_3", "pcl12d_77"), sep = ";") )%>%
+  relocate(pcl12c1, .after = "pcl12c1_77") %>%
+  relocate(pcl12c2, .after = "pcl12c2_77") %>%
+  relocate(pcl12c3, .after = "pcl12c3_77") %>%
+  relocate(pcl12c4, .after = "pcl12c4_77") %>%
+  relocate(pcl12d, .after = "pcl12d_77") %>%
+  select(-c("pcl12c1_1", "pcl12c1_2", "pcl12c1_3", "pcl12c1_9999", "pcl12c1_77",
+            "pcl12c2_1", "pcl12c2_2", "pcl12c2_3", "pcl12c2_9999", "pcl12c2_77",
+            "pcl12c3_1", "pcl12c3_2", "pcl12c3_3", "pcl12c3_9999", "pcl12c3_77",
+            "pcl12c4_1", "pcl12c4_2", "pcl12c4_3", "pcl12c4_9999", "pcl12c4_77",
+            "pcl12d_1", "pcl12d_2", "pcl12d_3", "pcl12d_77")) %>%
+      # PCL13
+  mutate(pcl13c1 = combine_columns(., c("pcl13c1_1", "pcl13c1_2", "pcl13c1_3", "pcl13c1_9999", "pcl13c1_77"), sep = ";") )%>%
+  mutate(pcl13c2 = combine_columns(., c("pcl13c2_1", "pcl13c2_2", "pcl13c2_3", "pcl13c2_9999", "pcl13c2_77"), sep = ";") )%>%
+  mutate(pcl13c3 = combine_columns(., c("pcl13c3_1", "pcl13c3_2", "pcl13c3_3", "pcl13c3_9999", "pcl13c3_77"), sep = ";") )%>%
+  mutate(pcl13c4 = combine_columns(., c("pcl13c4_1", "pcl13c4_2", "pcl13c4_3", "pcl13c4_9999", "pcl13c4_77"), sep = ";") )%>%
+  mutate(pcl13d = combine_columns(., c("pcl13d_1", "pcl13d_2", "pcl13d_3", "pcl13d_77"), sep = ";") )%>%
+  relocate(pcl13c1, .after = "pcl13c1_77") %>%
+  relocate(pcl13c2, .after = "pcl13c2_77") %>%
+  relocate(pcl13c3, .after = "pcl13c3_77") %>%
+  relocate(pcl13c4, .after = "pcl13c4_77") %>%
+  relocate(pcl13d, .after = "pcl13d_77") %>%
+  select(-c("pcl13c1_1", "pcl13c1_2", "pcl13c1_3", "pcl13c1_9999", "pcl13c1_77",
+            "pcl13c2_1", "pcl13c2_2", "pcl13c2_3", "pcl13c2_9999", "pcl13c2_77",
+            "pcl13c3_1", "pcl13c3_2", "pcl13c3_3", "pcl13c3_9999", "pcl13c3_77",
+            "pcl13c4_1", "pcl13c4_2", "pcl13c4_3", "pcl13c4_9999", "pcl13c4_77",
+            "pcl13d_1", "pcl13d_2", "pcl13d_3", "pcl13d_77")) %>%
+      # PCL14
+  mutate(pcl14c1 = combine_columns(., c("pcl14c1_1", "pcl14c1_2", "pcl14c1_3", "pcl14c1_9999", "pcl14c1_77"), sep = ";") )%>%
+  mutate(pcl14c2 = combine_columns(., c("pcl14c2_1", "pcl14c2_2", "pcl14c2_3", "pcl14c2_9999", "pcl14c2_77"), sep = ";") )%>%
+  mutate(pcl14c3 = combine_columns(., c("pcl14c3_1", "pcl14c3_2", "pcl14c3_3", "pcl14c3_9999", "pcl14c3_77"), sep = ";") )%>%
+  mutate(pcl14c4 = combine_columns(., c("pcl14c4_1", "pcl14c4_2", "pcl14c4_3", "pcl14c4_9999", "pcl14c4_77"), sep = ";") )%>%
+  mutate(pcl14d = combine_columns(., c("pcl14d_1", "pcl14d_2", "pcl14d_3", "pcl14d_77"), sep = ";") )%>%
+  relocate(pcl14c1, .after = "pcl14c1_77") %>%
+  relocate(pcl14c2, .after = "pcl14c2_77") %>%
+  relocate(pcl14c3, .after = "pcl14c3_77") %>%
+  relocate(pcl14c4, .after = "pcl14c4_77") %>%
+  relocate(pcl14d, .after = "pcl14d_77") %>%
+  select(-c("pcl14c1_1", "pcl14c1_2", "pcl14c1_3", "pcl14c1_9999", "pcl14c1_77",
+            "pcl14c2_1", "pcl14c2_2", "pcl14c2_3", "pcl14c2_9999", "pcl14c2_77",
+            "pcl14c3_1", "pcl14c3_2", "pcl14c3_3", "pcl14c3_9999", "pcl14c3_77",
+            "pcl14c4_1", "pcl14c4_2", "pcl14c4_3", "pcl14c4_9999", "pcl14c4_77",
+            "pcl14d_1", "pcl14d_2", "pcl14d_3", "pcl14d_77")) %>%
+      # PCL15
+  mutate(pcl15c1 = combine_columns(., c("pcl15c1_1", "pcl15c1_2", "pcl15c1_3", "pcl15c1_9999", "pcl15c1_77"), sep = ";") )%>%
+  mutate(pcl15c2 = combine_columns(., c("pcl15c2_1", "pcl15c2_2", "pcl15c2_3", "pcl15c2_9999", "pcl15c2_77"), sep = ";") )%>%
+  mutate(pcl15c3 = combine_columns(., c("pcl15c3_1", "pcl15c3_2", "pcl15c3_3", "pcl15c3_9999", "pcl15c3_77"), sep = ";") )%>%
+  mutate(pcl15c4 = combine_columns(., c("pcl15c4_1", "pcl15c4_2", "pcl15c4_3", "pcl15c4_9999", "pcl15c4_77"), sep = ";") )%>%
+  mutate(pcl15d = combine_columns(., c("pcl15d_1", "pcl15d_2", "pcl15d_3", "pcl15d_77"), sep = ";") )%>%
+  relocate(pcl15c1, .after = "pcl15c1_77") %>%
+  relocate(pcl15c2, .after = "pcl15c2_77") %>%
+  relocate(pcl15c3, .after = "pcl15c3_77") %>%
+  relocate(pcl15c4, .after = "pcl15c4_77") %>%
+  relocate(pcl15d, .after = "pcl15d_77") %>%
+  select(-c("pcl15c1_1", "pcl15c1_2", "pcl15c1_3", "pcl15c1_9999", "pcl15c1_77",
+            "pcl15c2_1", "pcl15c2_2", "pcl15c2_3", "pcl15c2_9999", "pcl15c2_77",
+            "pcl15c3_1", "pcl15c3_2", "pcl15c3_3", "pcl15c3_9999", "pcl15c3_77",
+            "pcl15c4_1", "pcl15c4_2", "pcl15c4_3", "pcl15c4_9999", "pcl15c4_77",
+            "pcl15d_1", "pcl15d_2", "pcl15d_3", "pcl15d_77")) %>% 
+    # PCL16
+  mutate(pcl16c1 = combine_columns(., c("pcl16c1_1", "pcl16c1_2", "pcl16c1_3", "pcl16c1_9999", "pcl16c1_77"), sep = ";") )%>%
+  mutate(pcl16c2 = combine_columns(., c("pcl16c2_1", "pcl16c2_2", "pcl16c2_3", "pcl16c2_9999", "pcl16c2_77"), sep = ";") )%>%
+  mutate(pcl16c3 = combine_columns(., c("pcl16c3_1", "pcl16c3_2", "pcl16c3_3", "pcl16c3_9999", "pcl16c3_77"), sep = ";") )%>%
+  mutate(pcl16c4 = combine_columns(., c("pcl16c4_1", "pcl16c4_2", "pcl16c4_3", "pcl16c4_9999", "pcl16c4_77"), sep = ";") )%>%
+  mutate(pcl16d = combine_columns(., c("pcl16d_1", "pcl16d_2", "pcl16d_3", "pcl16d_77"), sep = ";") )%>%
+  relocate(pcl16c1, .after = "pcl16c1_77") %>%
+  relocate(pcl16c2, .after = "pcl16c2_77") %>%
+  relocate(pcl16c3, .after = "pcl16c3_77") %>%
+  relocate(pcl16c4, .after = "pcl16c4_77") %>%
+  relocate(pcl16d, .after = "pcl16d_77") %>%
+  select(-c("pcl16c1_1", "pcl16c1_2", "pcl16c1_3", "pcl16c1_9999", "pcl16c1_77",
+            "pcl16c2_1", "pcl16c2_2", "pcl16c2_3", "pcl16c2_9999", "pcl16c2_77",
+            "pcl16c3_1", "pcl16c3_2", "pcl16c3_3", "pcl16c3_9999", "pcl16c3_77",
+            "pcl16c4_1", "pcl16c4_2", "pcl16c4_3", "pcl16c4_9999", "pcl16c4_77",
+            "pcl16d_1", "pcl16d_2", "pcl16d_3", "pcl16d_77")) %>% 
+      # PCL17
+  mutate(pcl17c1 = combine_columns(., c("pcl17c1_1", "pcl17c1_2", "pcl17c1_3", "pcl17c1_9999", "pcl17c1_77"), sep = ";") )%>%
+  mutate(pcl17c2 = combine_columns(., c("pcl17c2_1", "pcl17c2_2", "pcl17c2_3", "pcl17c2_9999", "pcl17c2_77"), sep = ";") )%>%
+  mutate(pcl17c3 = combine_columns(., c("pcl17c3_1", "pcl17c3_2", "pcl17c3_3", "pcl17c3_9999", "pcl17c3_77"), sep = ";") )%>%
+  mutate(pcl17c4 = combine_columns(., c("pcl17c4_1", "pcl17c4_2", "pcl17c4_3", "pcl17c4_9999", "pcl17c4_77"), sep = ";") )%>%
+  mutate(pcl17d = combine_columns(., c("pcl17d_1", "pcl17d_2", "pcl17d_3", "pcl17d_77"), sep = ";") )%>%
+  relocate(pcl17c1, .after = "pcl17c1_77") %>%
+  relocate(pcl17c2, .after = "pcl17c2_77") %>%
+  relocate(pcl17c3, .after = "pcl17c3_77") %>%
+  relocate(pcl17c4, .after = "pcl17c4_77") %>%
+  relocate(pcl17d, .after = "pcl17d_77") %>%
+  select(-c("pcl17c1_1", "pcl17c1_2", "pcl17c1_3", "pcl17c1_9999", "pcl17c1_77",
+            "pcl17c2_1", "pcl17c2_2", "pcl17c2_3", "pcl17c2_9999", "pcl17c2_77",
+            "pcl17c3_1", "pcl17c3_2", "pcl17c3_3", "pcl17c3_9999", "pcl17c3_77",
+            "pcl17c4_1", "pcl17c4_2", "pcl17c4_3", "pcl17c4_9999", "pcl17c4_77",
+            "pcl17d_1", "pcl17d_2", "pcl17d_3", "pcl17d_77")) %>%
+      # PCL18
+  mutate(pcl18c1 = combine_columns(., c("pcl18c1_1", "pcl18c1_2", "pcl18c1_3", "pcl18c1_9999", "pcl18c1_77"), sep = ";") )%>%
+  mutate(pcl18c2 = combine_columns(., c("pcl18c2_1", "pcl18c2_2", "pcl18c2_3", "pcl18c2_9999", "pcl18c2_77"), sep = ";") )%>%
+  mutate(pcl18c3 = combine_columns(., c("pcl18c3_1", "pcl18c3_2", "pcl18c3_3", "pcl18c3_9999", "pcl18c3_77"), sep = ";") )%>%
+  mutate(pcl18c4 = combine_columns(., c("pcl18c4_1", "pcl18c4_2", "pcl18c4_3", "pcl18c4_9999", "pcl18c4_77"), sep = ";") )%>%
+  mutate(pcl18d = combine_columns(., c("pcl18d_1", "pcl18d_2", "pcl18d_3", "pcl18d_77"), sep = ";") )%>%
+  relocate(pcl18c1, .after = "pcl18c1_77") %>%
+  relocate(pcl18c2, .after = "pcl18c2_77") %>%
+  relocate(pcl18c3, .after = "pcl18c3_77") %>%
+  relocate(pcl18c4, .after = "pcl18c4_77") %>%
+  relocate(pcl18d, .after = "pcl18d_77") %>%
+  select(-c("pcl18c1_1", "pcl18c1_2", "pcl18c1_3", "pcl18c1_9999", "pcl18c1_77",
+            "pcl18c2_1", "pcl18c2_2", "pcl18c2_3", "pcl18c2_9999", "pcl18c2_77",
+            "pcl18c3_1", "pcl18c3_2", "pcl18c3_3", "pcl18c3_9999", "pcl18c3_77",
+            "pcl18c4_1", "pcl18c4_2", "pcl18c4_3", "pcl18c4_9999", "pcl18c4_77",
+            "pcl18d_1", "pcl18d_2", "pcl18d_3", "pcl18d_77")) %>%  
+      # PCL19
+  mutate(pcl19c1 = combine_columns(., c("pcl19c1_1", "pcl19c1_2", "pcl19c1_3", "pcl19c1_9999", "pcl19c1_77"), sep = ";") )%>%
+  mutate(pcl19c2 = combine_columns(., c("pcl19c2_1", "pcl19c2_2", "pcl19c2_3", "pcl19c2_9999", "pcl19c2_77"), sep = ";") )%>%
+  mutate(pcl19c3 = combine_columns(., c("pcl19c3_1", "pcl19c3_2", "pcl19c3_3", "pcl19c3_9999", "pcl19c3_77"), sep = ";") )%>%
+  mutate(pcl19c4 = combine_columns(., c("pcl19c4_1", "pcl19c4_2", "pcl19c4_3", "pcl19c4_9999", "pcl19c4_77"), sep = ";") )%>%
+  mutate(pcl19d = combine_columns(., c("pcl19d_1", "pcl19d_2", "pcl19d_3", "pcl19d_77"), sep = ";") )%>%
+  relocate(pcl19c1, .after = "pcl19c1_77") %>%
+  relocate(pcl19c2, .after = "pcl19c2_77") %>%
+  relocate(pcl19c3, .after = "pcl19c3_77") %>%
+  relocate(pcl19c4, .after = "pcl19c4_77") %>%
+  relocate(pcl19d, .after = "pcl19d_77") %>%
+  select(-c("pcl19c1_1", "pcl19c1_2", "pcl19c1_3", "pcl19c1_9999", "pcl19c1_77",
+            "pcl19c2_1", "pcl19c2_2", "pcl19c2_3", "pcl19c2_9999", "pcl19c2_77",
+            "pcl19c3_1", "pcl19c3_2", "pcl19c3_3", "pcl19c3_9999", "pcl19c3_77",
+            "pcl19c4_1", "pcl19c4_2", "pcl19c4_3", "pcl19c4_9999", "pcl19c4_77",
+            "pcl19d_1", "pcl19d_2", "pcl19d_3", "pcl19d_77"))
   
 # TODO: Maria, I think below are duplicated code, if so, you can go ahead remove them. 
 # pcl <- pcl %>%
@@ -4500,6 +4783,28 @@ pcl <- pcl %>%
 #          pcl19_yes = if_else(pcl19_1 == "Happened to me", 1, 0, missing = 0)
 #          )
 # okay here is a basic by time period
+
+
+
+```
+
+
+### PCL Missing 
+```{r pcl_missing }
+pcl_miss <- pcl %>%
+  pct_miss_fun(
+    id = c("id", matches("_text$")),
+    n_items = 521
+  )
+
+pcl_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'PCL Missing Data',
+    subtitle = 'by Participant'
+  )
+
+pcl_remove <- pcl_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
 ## Merge
