@@ -3570,12 +3570,10 @@ cts_pc <- cts_pc%>%
       ))
 
 cts_pc_miss <- cts_pc %>%
-  # Shaina: I was expected pct_miss_fun would count -2 but it didn't 
-  # Min did we resolve this in our meeting?
   mutate(across(-c(id), as.numeric))%>%
   pct_miss_fun(
     id = c("id", -matches("\\d$")),
-    n_items = 24 # does not seem correct
+    n_items = 46 # updated to reflect the coding
   )
 
 cts_pc_miss %>% 
@@ -3589,7 +3587,7 @@ cts_pc_remove <- cts_pc_miss %>% filter(miss_pct >= 20) %>% pull(id)
 
 ### CTS_PC Calculations 
 ```{r cts-pc calculation & sbuscale}
-# TODO: Maria, please pay extra attention to this section, since I use SPSS code as reference 
+
 cts_pc_calc <-
   cts_pc %>%
     mutate(across(-c(id), as.numeric)) %>%
@@ -3608,29 +3606,29 @@ cts_pc_complete <-
   # NVD items: 1,2,5,12
   mutate(
   # Raw Scoring for Nonviolent Discipline - Past Year (Chronicity)
-         cts_pc_NVDP = rowSums(select(., 'a1_r', 'a2_r','a5_r', 'a12_r'), na.rm = T), 
+         cts_pc_NVDP = rowSums(select(., 'a1_r', 'a2_r', 'a5_r', 'a12_r') * (select(., 'a1_r', 'a2_r', 'a5_r', 'a12_r') > 0), na.rm = TRUE),
   # Count of Nonviolent Discipline Responses 
-         cts_pc_NVDC = rowSums(!is.na(select(., a1_r, a2_r, a5_r, a12_r))), 
-  # Raw Scoring for Nonviolent Discipline Past Year - Mean (Chronicity)
-         cts_pc_NVDM = cts_pc_NVDP/cts_pc_NVDC,    
+        cts_pc_NVDC = rowSums(select(., a1_r, a2_r, a5_r, a12_r) > 0, na.rm = TRUE),
+  # # Raw Scoring for Nonviolent Discipline Past Year - Mean (Chronicity)
+        cts_pc_NVDM = ifelse(cts_pc_NVDC == 0 & cts_pc_NVDP == 0, 0, round(cts_pc_NVDP / cts_pc_NVDC, 2)),
   # Raw Scoring for Nonviolent Discipline Past Year (Prevalence) 
-         cts_pc_NVDPP= rowSums(select(., a1_r, a2_r, a5_r, a12_r) > 0, na.rm = T), 
-  # Raw Scoring for Nonviolent Discipline - Lifetime (Ever Prevalence)
-         cts_pc_NVDL = rowSums(select(., a1_r, a2_r, a5_r, a12_r) == -2, na.rm = T),  
+         cts_pc_NVDPP= rowSums(select(., 'a1_r', 'a2_r', 'a5_r', 'a12_r') > 0, na.rm = T), 
+  # Raw Scoring for Nonviolent Discipline - Lifetime (Greater than past year Prevalence)
+         cts_pc_NVDL = rowSums(select(., 'a1_r', 'a2_r', 'a5_r', 'a12_r') == -2, na.rm = T),  
   # Raw Scoring for Nonviolent Discipline (Ever Prevalence)
          cts_pc_NVDEP = cts_pc_NVDL + cts_pc_NVDPP 
 ) %>% 
   # PSA items: 6,8,9,10,14
+    # Raw Scoring for Psychological Aggression - Past Year (Chronicity)
     mutate(
-  # Raw Scoring for Psychological Aggression - Past Year (Chronicity)
-      cts_pc_PSAP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r'), na.rm = T), 
+      cts_pc_PSAP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') * (select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0), na.rm = TRUE),
   # Count of Psychological Aggression Responses
-      cts_pc_PSAC = rowSums(!is.na(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r'))),
+      cts_pc_PSAC = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0, na.rm = TRUE),
   # Raw Scoring for Psychological Aggression Past Year - Mean (Chronicity)
-      cts_pc_PSAM = cts_pc_PSAP/cts_pc_PSAC,
-  # Raw Scoring for Psychological Aggression - Past Year (Prevalence)
+     cts_pc_PSAM = ifelse(cts_pc_PSAC == 0 & cts_pc_PSAP == 0, 0, round(cts_pc_PSAP / cts_pc_PSAC, 2)),
+  #  Raw Scoring for Psychological Aggression - Past Year (Prevalence)
       cts_pc_PSAPP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0, na.rm = T),
-  # Raw Scoring for Psychological Aggression Discipline - Lifetime (Ever Prevalence)
+  # Raw Scoring for Psychological Aggression Discipline - Lifetime (Ever Prevalence greater than past year)
       cts_pc_PSAL = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') == -2, na.rm = T),
   # Raw Scoring for Psychological Aggression (Ever Prevalance)
       cts_pc_PSAEP = cts_pc_PSAL + cts_pc_PSAPP
@@ -3638,20 +3636,20 @@ cts_pc_complete <-
   # PHA Items: 3,4,7,11,13
   mutate(
   # Raw Scoring for Physical Assault - Past Year (Chronicity)
-    cts_pc_PHAP = rowSums(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r'), na.rm = T), 
+    cts_pc_PHAP = rowSums(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r') * (select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r') > 0), na.rm = TRUE),
   # Count of Physical Assault Responses
-    cts_pc_PHAC = rowSums(!is.na(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r'))),
+    cts_pc_PHAC = rowSums(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r') > 0, na.rm = TRUE),
   # Raw Scoring for Physical Assault Past Year - Mean (Chronicity)
-    cts_pc_PHAM = cts_pc_PHAP/cts_pc_PHAC, 
+    cts_pc_PHAM = ifelse(cts_pc_PHAC == 0 & cts_pc_PHAP == 0, 0, round(cts_pc_PHAP / cts_pc_PHAC, 2)),
   # Raw Scoring for Physical Assault - Past Year (Prevalence)
     cts_pc_PHAPP =  rowSums(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r') > 0, na.rm = T),
-  # Raw Scoring for Physical Assault - Lifetime (Ever Prevalence)
+  # Raw Scoring for Physical Assault - Lifetime (Ever Prevalence greater than 1 year)
     cts_pc_PHAL = rowSums(select(., 'a3_r', 'a4_r', 'a7_r', 'a11_r', 'a13_r') == -2, na.rm = T),
   # Raw Scoring for Physical Assault (Ever Prevalence)
-    cts_pc_PHAEP = cts_pc_PHAL/cts_pc_PHAPP
+    cts_pc_PHAEP = cts_pc_PHAL + cts_pc_PHAPP
   ) %>%
   # WKD Items: 16, 17, 18
-  # Maria: WKD items need extra attention 
+  # It is correct for 15_r to be checked but not included in computations
   mutate(
     # Raw Scoring for Weekly Discipline - Past Week (Chronicity)
     cts_pc_WKDP = if_else(!is.na(a15_r) & !is.na(a16_r) & !is.na(a17_r) & !is.na(a18_r), 0, NA),
@@ -3660,35 +3658,36 @@ cts_pc_complete <-
     cts_pc_WKDC = if_else(!is.na(a15_r) & !is.na(a16_r) & !is.na(a17_r) & !is.na(a18_r), 0, NA),
     cts_pc_WKDC = cts_pc_WKDC + ifelse(!is.na(a16_r), 1, 0) + ifelse(!is.na(a17_r), 1, 0) + ifelse(!is.na(a18_r), 1, 0),
     # Raw Scoring for Weekly Discipline Past Week - Mean (Chronicity)
-    cts_pc_WKDM = cts_pc_WKDP/cts_pc_WKDC,
+    cts_pc_WKDM = ifelse(cts_pc_WKDC == 0 & cts_pc_WKDP == 0, 0, round(cts_pc_WKDP / cts_pc_WKDC, 2)),
     # Raw Scoring for Weekly Discipline - Past Week (Prevalence)
     cts_pc_WKDPP = rowSums(select(., 'a16_r', 'a17_r', 'a18_r') > 0, na.rm = T)
   )%>%
-  # NEG Items: 19 20 21 22 23
+    # NEG Items: 19 20 21 22 23
   mutate(
     # Raw Scoring for Neglect - Past Year (Chronicity)
-    cts_pc_NEGP = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r'), na.rm = T), 
+    cts_pc_NEGP = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r') * (select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r') > 0), na.rm = TRUE),
     # Count of Neglect Responses
-    cts_pc_NEGC = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r'), na.rm = T), 
+    cts_pc_NEGC = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r') > 0, na.rm = TRUE),
     # Raw Scoring for Neglect Past Year - Mean (Chronicity)
-    cts_pc_NEGM = cts_pc_NEGP/cts_pc_NEGC,
+    cts_pc_NEGM = ifelse(cts_pc_NEGC == 0 & cts_pc_NEGP == 0, 0, round(cts_pc_NEGP / cts_pc_NEGC, 2)),
     # Raw Scoring for Neglect - Past Year (Prevalence)
     cts_pc_NEGPP = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r') > 0, na.rm = T),
     # Raw Scoring for Neglect - Lifetime (Ever Prevalence)
     cts_pc_NEGL = rowSums(select(., 'a19_r', 'a20_r', 'a21_r', 'a22_r', 'a23_r') == -2, na.rm = T),
     # Raw Scoring for Neglect (Ever Prevalance)
-    cts_pc_NEGEP = cts_pc_NEGL/cts_pc_NEGPP
-  )%>%
-  mutate(
-    across(
-      -c(id),
-      ~case_when(
-        id %in% cts_pc_remove ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  ) %>% 
-      rename_all(tolower)
+    cts_pc_NEGEP = cts_pc_NEGL + cts_pc_NEGPP)
+
+
+# finalize to add back in appropriate missing values
+cts_pc_complete <- cts_pc_complete %>%
+  rename_all(tolower) %>%
+  mutate(across(c(a1:a23, a1_r:a23_r), ~ifelse(cts_parent_screen == 0, -55, ifelse(is.na(.), -77, as.numeric(.))))) %>%
+  mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.)))))
+
+
+
+  
+
 ```
 
 ## PCT - Pregnancy and Childbirth Trauma
