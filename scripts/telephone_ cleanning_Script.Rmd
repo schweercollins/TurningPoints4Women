@@ -292,9 +292,12 @@ cesd_complete <-
     scale2_nitems = 4
   ) %>%
   rename(
+    cesd_total = sum_values,
     cesd_avg = mean_values,
+    
     cesd_dep_symp = total1,  
     cesd_dep_symp_avg = avg1,
+    
     cesd_pos_aff = total2,
     cesd_pos_aff_avg = avg2
   ) %>%
@@ -1115,6 +1118,7 @@ dyadc_calc <- dyadc_calc %>%
 
 dyadc_complete <- dyadc_calc %>%
   rowwise() %>%
+ mutate_at(vars(dyadc_screener :COUNTD5), as.numeric) %>%
   mutate(
     dyadc_con = das1+ das2+ das3+ das5+ das7+ das8+ das10+ das11+ das12+ das13+ das14+ das15,
     dyadc_aff_exp = case_when(
@@ -2677,23 +2681,24 @@ sex <- sex %>%
 # We do not apply the missing data rule due to how items are used
 # Min needs to address as this code no longer works
 # Min can we have all NA or "NA" be -55 now?
-sex_miss <- sex %>%
-  pct_miss_fun(
-    id = c("id", matches("_text$")),
-    n_items = 61 # Min double check # of variables
-  )
+# sex_miss <- sex %>%
+#   mutate_all(as.character()) %>%
+#   pct_miss_fun(
+#     id = c("id"),
+#     n_items = 61 # Min double check # of variables
+#   )
 
 # most missing data is by design (-55) versus declined (-77)
-sex_miss %>% 
-  gt::gt() %>% 
-  gt::tab_header(
-    title = 'sex Missing Data',
-    subtitle = 'By Participant')
+# sex_miss %>% 
+#   gt::gt() %>% 
+#   gt::tab_header(
+#     title = 'sex Missing Data',
+#     subtitle = 'By Participant')
 
 # before next steps, editing dates so only mm/dddd and DD 01 for s2, s5, and s7
 
-## Function to convert charcater to date with day to 01
-
+## Function to convert character to date with day to 01
+# MARIA/Min, thoe funtion does not seems to work 
 convert_to_date <- function(x) {
   date <- tryCatch({
     parsed_date <- as.Date(as.yearmon(x, "%m/%Y"))
@@ -2808,12 +2813,13 @@ cint_socio <- tpw_raw %>%
 # Combine cint1 responses to cint1 
 cint_socio$cint1 <- apply(cint_socio[, c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
 
-# since participants selected up to 2 options we are creating the following variables 
+#Although these were created from the above 9 variables, each participant only selected no more than two choices, so we recoded according to choice 1 and choice 2
 cint_socio <- cint_socio %>%
   separate(cint1, into = c("cint1_choice1", "cint1_choice2"), sep = ";", remove = FALSE) %>%
   mutate(
     cint1_choice1 = as.numeric(cint1_choice1),
     cint1_choice2 = as.numeric(cint1_choice2),
+    cint1_choice1 = coalesce(cint1_choice1, -55),
     cint1_choice2 = coalesce(cint1_choice2, -55)
   ) %>%
   select(-cint1)
@@ -2835,6 +2841,11 @@ cint_socio <- cint_socio %>%
    mutate(cint4 = case_when(is.na(cint1_3) ~ "-55", TRUE ~ cint4)) %>%
   # if cint1_4 is not selected cint5 will not be asked 
    mutate(cint5 = case_when(is.na(cint1_4) ~ "-55", TRUE ~ cint5)) %>%
+  # if they did not select others (cint1_8, and cint_identity_8), the _text column should be -55
+  mutate(cint1_8_text = case_when(is.na(cint1_8) ~ "-55", TRUE ~ cint1_8_text)) %>%
+  mutate(cint_identity_8_text = case_when(is.na(cint_identity_8_text) ~ "-55", TRUE ~ cint_identity_8_text)) %>%
+  # cint_income_support: this was request to answer, so if it's NA, it should be TC refuse to answer 
+   mutate(cint_income_support = case_when(is.na(cint_income_support) ~ "-55", TRUE ~ cint_income_support)) %>%
   select(-c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77"))
 
 cint_socio_miss <- cint_socio %>%
@@ -2853,21 +2864,22 @@ cint_socio_miss %>%
 
 
 
-# Below is the code that treats -77, -55 values as NA
-## we do not apply missing data rules because not a standardizedquestionnaire
+
+## we do not apply missing data rules because not a standardized questionnaire
 cint_socio_complete <-
   cint_socio %>%
   mutate(across(-c(id, matches("_8_text$")), as.numeric)) %>%
-  mutate(
-    across(
-      .cols = -c(id,matches("_8_text$")),
-      .fns = ~case_when(
-        .x < 0 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  ) %>%
- select(-cint_identity_8_text) # no participant selected other not lsited gender identity
+  # Below is the code that treats -77, -55 values as NA
+  # mutate(
+  #   across(
+  #     .cols = -c(id,matches("_8_text$")),
+  #     .fns = ~case_when(
+  #       .x < 0 ~ NA_real_,
+  #       TRUE ~ .x
+  #     )
+  #   )
+  # ) %>%
+ select(-cint_identity_8_text) # no participant selected other not listed gender identity
 ```
 
 ### CINT-Ladder Select Variable & Recode
