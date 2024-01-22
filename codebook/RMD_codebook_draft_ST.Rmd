@@ -243,7 +243,7 @@ apply_labtab_theme <- function(table) {
 }
   
 ```
-# CRediT Author Statement
+# Credit Author Statement
 
 **Schweer-Collins** conceptualization; software; validation; data curation (specifically checking code for data cleaning and codebook creation, managed data archival) project administration; supervision; funding acquisition; **Trevino** software; validation; data curation (specifically developing codebook, functions, and protocols, data cleaning, codebook creation; data archival); supervision; **Pedroza** software; data curation (specifically making functions used in codebook, data retrieval from Qualtrics; cleaning; codebook creation, visualization); **Zhang** software; validation; data curation (specifically making functions used in codebook, primary responsibility for data retrieval from Qualtrics; data cleaning, codebook creation, visualization)
 
@@ -750,15 +750,14 @@ cesd_alpha_table <- tibble(
 # TODO: should the calculation use revers score?
 #TODO: Total range should be changed since we change the scale starting from 1
 cesd_scale_df <- data.frame(
-  var_name = c("cesd_total", "cesd_dep_symp_total", "cesd_pos_aff_total"),
-  scale = c("Total Score (20)", "Depression (16)", "Positive Affect (4)"),
+  var_name = c("cesd_total", "cesd_dep_symp_total"),
+  scale = c("Total Score (20)", "Depression (16)"),
   scale_construction = c("`c1`, `c2`, `c3`, `c4_r`, `c5`, `c6`, `c7`, `c8_r`, `c9`, `c10`, `c11`, `c12_r`, `c13`, `c14`, `c15`, `c16_r`, `c17`, `c18`, `c19`, `c20`",
                            "`c1`, `c2`, `c3`, `c5`, `c6`, 
                          #`c7`, 
-                         `c9`, `c10`, `c11`, `c13`, `c14`, `c15`, `c17`, `c18`, `c19`, `c20`",
-                           "`c4_r`, `c8_r`, `c12_r`, `c16_r`"),
-  scale_range = c("0-80", "0-64", "0-16"),
-  alpha = c(round(cesd_alpha$total$raw_alpha, 3), round(cesd_dep_alpha$total$raw_alpha, 3), round(cesd_pos_aff_alpha$total$raw_alpha, 3))
+                         `c9`, `c10`, `c11`, `c13`, `c14`, `c15`, `c17`, `c18`, `c19`, `c20`"),
+  scale_range = c("0-80", "0-64"),
+  alpha = c(round(cesd_alpha$total$raw_alpha, 3), round(cesd_dep_alpha$total$raw_alpha, 3))
 )
 
 # Create the gt table object
@@ -830,18 +829,24 @@ cesd_tbl
 Distributions are presented below for the total score and each subscale:
 
 ```{r cesd-distributions, class.source='fold', echo = FALSE}
+p_cesd_total <- complete %>%
+  composite_hist(
+    cesd_total
+    ) +
+  labs(
+    title = 'CESD Total'
+    )
 
 p_cesd_dep_symp <- complete %>%
   composite_hist(
     cesd_dep_symp
     ) +
   labs(
-    title = 'Depressive Symptoms Subscale Distribution'
+    title = 'Depressive Symptoms Subscale'
     )
 
 # MARIA make sure only shows the one
-ggarrange(p_cesd_total, p_cesd_dep_symp + rremove("ylab"), 
-          p_cesd_pos_aff) %>%
+ggarrange(p_cesd_total, p_cesd_dep_symp + rremove("ylab")) %>%
   annotate_figure(top = text_grob( "Distribution for CESD Subscales \n(x-axis and y-axis are in different scales)"))
 
 ```
@@ -2750,7 +2755,8 @@ All DAS survey items are presented in the following table:
 dyadc_word <- qualtrics %>% 
   select(starts_with("E")) %>%
   slice(1) %>%
-  select(-(1:2))
+  select(-(1:2)) %>%
+  rename_with(~sub("^E", "das", .), starts_with("E"))
 
 #create table with variable name, description, and notes
 dyadc_word_long <- dyadc_word %>% 
@@ -2803,10 +2809,10 @@ dyadc_word_long <- dyadc_word %>%
                                                  \n3 =	I want very much for my relationship to succeed, and will do my fair share to see that it does.
                                                  \n4 =	I want very much for my relationship to succeed, and will do all I can to see that it does.
                                                  \n5 =	I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
-                           ) %>%
+                           ))%>% 
    mutate(description = if_else(var_name == "das31", " Please indicate the number that best describes the degree of happiness in your relationship.",
                                if_else(var_name == "das32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
-  slice(1:32))
+  slice(1:32)
 
 
 ```
@@ -2834,11 +2840,12 @@ dyadc_gt_table <- dyadc_gt_table %>%
                 id = "set1")%>%
   cols_label(var_name = "Variable", 
             description = "Description",
-            notes = "Notes") %>% 
+            #notes = "Notes"
+            ) %>% 
   tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
                          cell_borders(sides = c("left", "right", "top", "bottom"))),
             locations = cells_row_groups(groups = c("set1", "set2", "set3", "set4"))) %>%
-  cols_width(notes ~ px(150),
+  cols_width(#notes ~ px(150),
              var_name ~ px(100),
              value ~ px(225)) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
@@ -2945,7 +2952,7 @@ For continuous items:
 ```{r dyadc-mean-items}
 # Create subset of dyadc items
 dyadc_data_subset <- complete %>%
-  select(e1:e28, das31:das32, dyadc_total,
+  select(das1:das28, das31:das32, dyadc_total,
          dyadc_con, dyadc_aff_exp,
          dyadc_satis, dyadc_cohes)  
 
@@ -5041,11 +5048,11 @@ itq_alpha <- itq_complete %>%
 itq_scale_df <- data.frame(
   var_name = c("Re-experiencing Subscale (2)", " Avoidance Subscale (2)", 
                "Thread Subscale (2)", "Functioninal Impairment (3)", "PTSD Total (6)"),
-  scale = c("itq_re_total", "itq_av_total", "itq_th_total", "itq_fi_total", ),
+  scale = c("itq_re_total", "itq_av_total", "itq_th_total", "itq_fi_total", ""),
   scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`", 
-                         "`itq1`, `itq2`, `itq3`, `itq4`, `itq5`,`itq6`"),
-  scale_range = c("","","",""), #TODO fill in range 
-  alpha = c("","","","")
+                         "`itq1`, `itq2`, `itq3`, `itq4`, `itq5`,`itq6`", ""), # Maria, after you figure this out, please double check the scale construction 
+  scale_range = c("","","","", ""), #TODO fill in range 
+  alpha = c("","","","", "")
 )
 
 # Create the gt table object
@@ -5115,39 +5122,40 @@ itq_tbl
 Distributions are presented below for the total score and each subscale:
 
 ```{r itq-distributions, class.source='fold', echo = FALSE}
-p_itq_ad_total <- itq_complete %>%
-  composite_hist(
-    x = itq_ad_total,
-    bins = 15
-  ) +
-  labs(title = "Affective Dysregulation Subscale")
-
-p_itq_nsc_total <- itq_complete %>%
-  composite_hist(
-    x = itq_nsc_total,
-    bins = 15
-  ) +
-  labs(title = "Negative Self-Concept Subscale")
-
-p_itq_dr_total <- itq_complete %>%
-  composite_hist(
-    x = itq_dr_total,
-    bins = 15
-  ) +
-  labs(title = "Relationships Subscale")
-
-
-p_itq_dso <- itq_complete %>%
-  composite_hist(
-    x = itq_dso,
-    bins = 15
-  ) +
-  labs(title = "DSO Subscale")
-
-ggarrange(p_itq_ad_total, p_itq_nsc_total + rremove("ylab"),
-          p_itq_dr_total, p_itq_dso + rremove("ylab")
-          ) %>%
-  annotate_figure(top = text_grob( "Distribution for ITQ Subscale \n(x-axis and y-axis are in different scales)"))
+# Maria, I'm comment out this section, so I can render, after we have the computation figured out we can work on this section
+# p_itq_ad_total <- itq_complete %>%
+#   composite_hist(
+#     x = itq_ad_total,
+#     bins = 15
+#   ) +
+#   labs(title = "Affective Dysregulation Subscale")
+# 
+# p_itq_nsc_total <- itq_complete %>%
+#   composite_hist(
+#     x = itq_nsc_total,
+#     bins = 15
+#   ) +
+#   labs(title = "Negative Self-Concept Subscale")
+# 
+# p_itq_dr_total <- itq_complete %>%
+#   composite_hist(
+#     x = itq_dr_total,
+#     bins = 15
+#   ) +
+#   labs(title = "Relationships Subscale")
+# 
+# 
+# p_itq_dso <- itq_complete %>%
+#   composite_hist(
+#     x = itq_dso,
+#     bins = 15
+#   ) +
+#   labs(title = "DSO Subscale")
+# 
+# ggarrange(p_itq_ad_total, p_itq_nsc_total + rremove("ylab"),
+#           p_itq_dr_total, p_itq_dso + rremove("ylab")
+#           ) %>%
+#   annotate_figure(top = text_grob( "Distribution for ITQ Subscale \n(x-axis and y-axis are in different scales)"))
 
 ```
 
@@ -5382,4 +5390,130 @@ ibq_complete %>%
 
 ```
 
+
+# CINT-SOCIODEMS 
+<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+
+## <Maria, I wasn't sure what's the full name is>  (CINT-SOCIODEMS)
+
+### CINT-SOCIODEMS Description
+
+<MARIA> please insert a breif description for this measure 
+
+
+  * No items need to be reverse scored. 
+
+  * This is not a a standardized questionnaire, so missing data rule was not applied. And no sub scale was computed. 
+
+
+
+Reference:
+ <Maria, please add a reference if needed> 
+
+### CINT-SOCIODEMS Variables
+
+#### Value Labels and Survey Items 
+
+All CINT-SOCIODEMS variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+
+CINT-SOCIODEMS survey items are presented in the following table:
+
+
+```{r CINT-SOCIODEMS-var-prep}
+# Pull question wording from Qualtrics data
+cint_sociodems_word <- qualtrics %>% 
+  select(`CINTPregnancy Screen`: `CINT Income Support`, CINTIdentity, CINTIdentity_8_TEXT) %>%
+  slice(1)
+
+#create table with variable name, description, and notes
+cint_sociodems_word_long <- cint_sociodems_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "READ:", ""),
+         description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", ""),
+         var_name = str_to_lower(var_name),
+         value = case_when(row_number() %in% c(1,5,6,7,8) ~ "1 = Yes, 
+                                             \n0 = No",
+                           row_number() %in% c(2) ~ "1 = 1. 8th grade or less or working towards GED
+                                            \n 2 = 2. Completed GED/Alternative H.S. diploma
+                                            \n 3 = 3. Completed some high school, but did not graduate
+                                            \n 4 = 4. Graduated high school
+                                            \n 5 = 5. Taking/have taken community college classes or working toward Associates Degree
+                                            \n 6 = 6. Completed/obtained an Associate's Degree
+                                            \n 7 = 7. Taking/have taken vocational classes or working toward Vocational Training
+                                            \n 8 = 8. Completed Vocational Training
+                                            \n 9 = 9. Taking/have taken 4 yr college classes or working toward 4 year college degree
+                                            \n 10 = 10. Completed 4 year college degree
+                                            \n 11 = 11. Taking/have taken graduate classes or working toward post-college degree
+                                            \n 12 = 12. Completed post-college degree
+                                            \n -77 = Decline to Answer",
+                           row_number() %in% c(3) ~ "1 = 1. Currently Working
+                                            \n 2 = 2. Temporarily laid off
+                                            \n 3 = 3. On Leave
+                                            \n 4 = 4. Unemployed or looking for work
+                                            \n 5 = 5. Retired
+                                            \n 6 = 6. Disabled, permanently or temporarily
+                                            \n 7 = 7. Student
+                                            \n 8 = 8. Something else, please briefly describe
+                                            \n -77 = Decline to Answer",
+                           row_number() %in% c(9) ~ "1 = 1. Always or almost always
+                                            \n 2 = 2. Often
+                                            \n 3 = 3. About half the time
+                                            \n 4 = 4. Occasionally
+                                            \n 5 = 5. Never or almost never
+                                            \n 6 = 8. N/A, no bills to pay
+                                            \n -77 = Decline to Answer", 
+                           row_number() %in% c(10) ~ "1 = 1. Always or almost always
+                                            \n 2 = 2. Often
+                                            \n 3 = 3. About half the time
+                                            \n 4 = 4. Occasionally
+                                            \n 5 = 5. Never or almost never
+                                            \n -77 = Decline to Answer", 
+                           row_number() %in% c(13) ~ "1 = Cisgender female or woman
+                                            \n 2 = Cisgender male or man
+                                            \n 3 = Female/Woman
+                                            \n 4 = Male/Man
+                                            \n 5 = Trans female/woman
+                                            \n 6 = Trans male/man
+                                            \n 7 = Non-binary
+                                            \n 8 = Prefer to self-identify
+                                            \n -77 = Decline to Answer")
+         ) %>% 
+# Edits Variable description and value
+  mutate(description = if_else(var_name == "cint-0", "I have some questions about your school and work experiences. What is the highest level of education you have completed?", description)) %>%
+  mutate(description = if_else(var_name == "cint1", "What is your current employment status? (Indicate all that apply)", description)) %>%
+  mutate(description = if_else(var_name == "cint18", "During the past 6 months, how often have you had enough money to pay your bills/make your payments?", description)) %>%
+  mutate(description = if_else(var_name == "cint-income", "What is your annual (gross) household income?", description)) %>%
+  mutate(description = if_else(var_name == "cint income support", "How many people does that income support?", description)) %>%
+  mutate(description = if_else(var_name == "cintpregnancy screen", "Has TC reported that she is currently pregnant?", description)) %>%
+  mutate(value = if_else(var_name == "cint1_8_text", "Open Text Entry", value)) %>%
+  mutate(value = if_else(var_name == "cint-income", "Open Text Entry", value)) %>%
+  mutate(value = if_else(var_name == "cint income support", "Open Text Entry", value)) %>%
+  mutate(value = if_else(var_name == "cintidentity_8_text", "Open Text Entry", value))
+```
+
+```{r cint_sociodems-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cint_sociodems_gt_table <- gt(cint_sociodems_word_long)
+
+# Table-specific formatting (col width, names)
+cint_sociodems_gt_table <- cint_sociodems_gt_table %>% 
+  cols_label(var_name = "Variable", 
+            description = "Description"
+            #notes = "Notes"
+            ) %>% 
+  apply_tbl_theme() %>% 
+  cols_width(description ~ px(300),
+             var_name ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cint_sociodems_gt_table)
+
+#WHEN RENDERING WITH PDF USE: 
+#my_gt_table
+```
 
