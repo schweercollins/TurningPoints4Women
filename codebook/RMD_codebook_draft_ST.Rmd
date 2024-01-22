@@ -1,18 +1,18 @@
 ---
 title: "Turning Points Codebook"
- author: 
-   - name: "Maria L. Schweer-Collins, PhD (corresponding author)"
-     email: "mschweer@uoregon.edu"
-#     affiliations:
-#       - name: 'University of Oregon'
-#         city: 'Eugene'
-#         state: 'OR'
-   - name: "Shaina Trevino, PhD"
-#     email: "strevino@uoregon.edu"
-   - name: "Jonathan A. Pedroza, PhD"
-#     email: "cpppedroza@gmail.com"
-   - name: "Min Zhang"
-#     email: "mzhang8@uoregon.edu"
+#  author: 
+#    - name: "Maria L. Schweer-Collins, PhD (corresponding author)"
+#      email: "mschweer@uoregon.edu"
+# #     affiliations:
+# #       - name: 'University of Oregon'
+# #         city: 'Eugene'
+# #         state: 'OR'
+#    - name: "Shaina Trevino, PhD"
+# #     email: "strevino@uoregon.edu"
+#    - name: "Jonathan A. Pedroza, PhD"
+# #     email: "cpppedroza@gmail.com"
+#    - name: "Min Zhang"
+# #     email: "mzhang8@uoregon.edu"
 date: ""
 output: 
   html_document:
@@ -75,10 +75,11 @@ theme_set(theme_light())
 #import df of calculated survey items
 #complete_rnd2 <- read_csv(here("do_not_push", "round_two_measures_data_calc.csv"))
 
-#import telephone survey data 
+# import telephone survey data 
 complete <- read_csv(here("do_not_push","tpw_archive_calc.csv"))
 
-#import raw qualtrics data for parsing question text
+# import survey data header for parsing question text
+# Maria to update filename
 qualtrics <- read_csv(here("do_not_push", "tpw_raw_qualtrics_5-30-23.csv"))
 
 source(here("functions", "codebook_fun.R"))
@@ -242,9 +243,20 @@ apply_labtab_theme <- function(table) {
 }
   
 ```
-# CRediT author statement
+# CRediT Author Statement
 
 **Schweer-Collins** conceptualization; software; validation; data curation (specifically checking code for data cleaning and codebook creation, managed data archival) project administration; supervision; funding acquisition; **Trevino** software; validation; data curation (specifically developing codebook, functions, and protocols, data cleaning, codebook creation; data archival); supervision; **Pedroza** software; data curation (specifically making functions used in codebook, data retrieval from Qualtrics; cleaning; codebook creation, visualization); **Zhang** software; validation; data curation (specifically making functions used in codebook, primary responsibility for data retrieval from Qualtrics; data cleaning, codebook creation, visualization)
+
+# Data and Study Author Contact
+
+If you have questions about the data or study, please contact the Principal Investigator, Maria Schweer-Collins through email and please use the subject "NACJD Turning Points Data Query" in the subject line. You can contact Maria at the following emails: 
+
+[insert new email] (through August 1st, 2024 and thereafter)
+mschweer@uoregon.edu (through July 31st, 2024)
+
+# Acronymns
+
+# Maria TODO insert TP and TC
 
 # Overview
 
@@ -291,7 +303,7 @@ know to use these data accurately*
 
 For summary or subscale scores that are computed with individual items,
 any of the above reasons are included in computing the percent of
-missing data. The following missing data rules are below and follow procedures used throughout the history of this longitudinal study.
+missing data. The following missing data rules are below and follow procedures used throughout the history of this longitudinal study. In some cases, measure specific guidelines for handling missing data were used when those guidelines were more stringent. Exceptions are called out within individual measure documentation.
 
 -   For scales with [10 or more items]{.underline}, a composite score
     (average/total) is computed for each participant that have less than
@@ -310,7 +322,7 @@ missing data. The following missing data rules are below and follow procedures u
 
 
 
-# Mental Health Measures
+# Mental Health/Psychological Measures
 
 ## Brief Symptom Inventory (BSI)
 
@@ -318,22 +330,21 @@ missing data. The following missing data rules are below and follow procedures u
 
 The Brief Symptom Inventory (BSI) is designed to reflect psychological symptom patterns of psychiatric and medical patients. The BSI instrument is especially appropriate in clinical situations where debilitation results in reduced attention and endurance, in research with limited interview schedules, and in outpatient clinics where testing procedures demand brevity. The BSI instrument is also frequently used in measuring patient progress during treatment or in the assessment of treatment outcome.
 
-*For the present study, 19 items from the BSI were collected in order to
-calculate the **Somatization**, **Anxiety**, and **Depression** raw subscales.
+*   For the present study, 19 items from the BSI were collected in order to calculate the **Somatization**, **Anxiety**, and **Depression** raw        subscales.
 
-  +**Somatization** reflects distress arising from perceptions of bodily dysfunction.
-  +**Anxiety** reflects general signs such as nervousness and tension are included in the Anxiety dimension, as are panic attacks and feelings of terror.
-  +**Depression** reflects symptoms of dysphoric mood and affect are represented as are lack of motivation and loss of interest in life.
+    + **Somatization** reflects distress arising from perceptions of bodily dysfunction.
+    + **Anxiety** reflects general signs such as nervousness and tension are included in the Anxiety dimension, as are panic attacks and feelings of terror.
+    + **Depression** reflects symptoms of dysphoric mood and affect are represented as are lack of motivation and loss of interest in life.
 
-*Item numbers in this data set may not match original item numbers from
+  * Item numbers in this data set may not match original item numbers from
 the BSI. Please reference this guide to see match with original BSI (original BSI item number in *italics*): 01 = *01*, 02 = *02*, 03 = *07*, 04 = *09*, 05 = *12*, 06 = *16*, 07 = *17*, 08 = *18*, 09 = *19*, 10 = *23*, 11 = *29*, 12 = *30*, 13 = *33*, 14 = *35*, 15 = *37*, 16 = *38*, 17 = *45*, 18 = *49*, 19 = *50* 
 
-*No items need to be reverse scored. 
+  * No items need to be reverse scored. 
 
-***Higher** scores indicate **more** severe
+  * **Higher** scores indicate **more** severe
 psychological symptoms.
 
-*The missing data rule was not applied since there are no missing data
+  * The missing data rule was not applied since there are no missing data
 among BSI variables.
 
 Reference:
@@ -502,6 +513,7 @@ data_subset <- complete %>%
   select(bsi1:bsi19, bsi_total, bsi_soma, bsi_anx, bsi_dep)
 
 # Calculate the summary statistics for each variable
+## mean is showing 2 decimals per authors
 summary_data <- lapply(data_subset, function(x) {
   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
   sd_val <- round(sd(x, na.rm = TRUE), 2)
@@ -554,20 +566,7 @@ p_bsi_dep <- complete %>%
 
 ggarrange(p_bsi_total, p_bsi_soma + rremove("ylab"), 
           p_bsi_anx, p_bsi_dep + rremove("ylab")) %>%
-  annotate_figure(top = text_grob( "Distribution for BSI Subscals \n(x-axis and y-axis are in different scales)"))
-```
-
-#### Clinical cutoff
-
-TODO: Maria/Shaina, please confirm weather we need this section or not.
-
-```{r bsi-clinical}
-complete %>%
-  cutoff_plot2(
-    x = bsi_total,
-    cutoff = 0
-  ) +
-  labs(title = 'Cutoff Value for BSI Measure')
+  annotate_figure(top = text_grob( "Distribution for BSI Subscales \n(x-axis and y-axis are in different scales)"))
 ```
 
 
@@ -577,17 +576,14 @@ complete %>%
 
 The Center for Epidemiological Studies – Depression Scale (CES-D) is a self-report measure with 20 items comprising six scales reflecting major dimensions of depression: depressed mood, feelings of guilt and worthlessness, feelings of helplessness and hopelessness, psychomotor retardation, loss of appetite, and sleep disturbance.
 
-*All 20 items from the CES-D were collected and two subscales were
-calculated: **positive affect** and **depressive symptoms**. Four items (`c4`, `c8`, `c12`, and `c16`) should be reverse scored which is noted in the variable table below and the reverse scored variables are provided
-(`c4_r`, `c8_r`, `c12_r`, and `c16_r`). 
+  * All 20 items from the CES-D were collected and a depression subscale was calculated: **depressive symptoms**. Four items (`c4`, `c8`, `c12`, and `c16`) should be reverse scored which is noted in the variable table below and the reverse scored variables are provided (`c4_r`, `c8_r`, `c12_r`, and `c16_r`). 
 
-***Higher** scores indicate the presence of **more** depression symptoms.
+  * **Higher** scores indicate the presence of **more** depression symptoms.
 
-*Four additional variables (`c21`-`c24`) were included in this section to
-assess suicidality. Variables `c22` and `c23` are only applicable if
+  * Four additional variables (`c21`-`c24`) were included in this section to assess suicidality. Variables `c22` and `c23` are only applicable if
 participants responded "Yes" to `c21`.
 
-*The missing data rule was not applied since all participants had less
+  * The missing data rule was not applied since all participants had less
 than 20% missing data. Missing data for each variable is presented in
 the descriptive statistics table below.
 
@@ -722,41 +718,35 @@ print(cesd_gt_table)
 
 #### Scale and Subscales
 
-Information on the aggregated scale and subscale variables are below.
-Total and subscale variables were constructed by summing corresponding
+Information on the depression subscale is shown below.
+The depression symptoms subscale was constructed by summing corresponding
 items.
 
 ```{r cesd-alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-#TODO: After Maria confirm if the items are right this one, Min will need edits either this one or cleanning script. 
+# total and depression are the same so only including dep. subscale
+
 cesd_alpha <-
   complete %>%
-  select(c1:c3,c4_r,c5:c7,c8_r,c9:c11, c12_r,c13:c15,c16_r,c17:c20) %>%
+  select(c1:c3,c4_r,c5:c7,c8_r,c9:c11,c12_r,c13:c15,c16_r,c17:c20) %>%
   psych::alpha(check.keys = TRUE)
 
-cesd_dep_alpha <- # I think this should include all scores? -- may need to edit cleaning script
+cesd_dep_alpha <- 
   complete %>%
-  select(c1:c3,c5:c6, c9:c11,c13:c15,c17:c20) %>%
-  psych::alpha(check.keys = TRUE)
-
-cesd_pos_aff_alpha <-
-  complete %>%
-  select(c4_r, c8_r, c12_r, c16_r) %>%
+  select(c1:c3,c4_r,c5:c7,c8_r, c9:c11,c12_r, c13:c15,c16_r, c17:c20) %>%
   psych::alpha(check.keys = TRUE)
 
 
 cesd_alpha_table <- tibble(
-  Scale = c('CESD', 'CESD - Depressive Symptoms',
-            'CESD - Positive Affect'),
-  Alpha = c(round(cesd_alpha$total$raw_alpha, 3),
-            round(cesd_dep_alpha$total$raw_alpha, 3),
-            round(cesd_pos_aff_alpha$total$raw_alpha, 3)
+  Scale = c('CESD - Depressive Symptoms'),
+  Alpha = c(round(cesd_dep_alpha$total$raw_alpha, 3)
   )
 )
 ```
 
 ```{r CESD-scale-table, results = 'asis'}
 # Create the table as a data frame
+# Maria start here
 # TODO: should the calculation use revers score?
 #TODO: Total range should be changed since we change the scale starting from 1
 cesd_scale_df <- data.frame(
@@ -799,7 +789,7 @@ subscale score:
 ```{r cesd-mean-items}
 # Create subset of CESD items
 data_subset_cesd <- complete %>%
-  select(c1:c24, cesd_total, cesd_dep_symp, cesd_pos_aff)
+  select(c1:c24, cesd_dep_symp)
 
 # Calculate the summary statistics for each variable
 summary_data_cesd <- lapply(data_subset_cesd, function(x) {
@@ -840,11 +830,6 @@ cesd_tbl
 Distributions are presented below for the total score and each subscale:
 
 ```{r cesd-distributions, class.source='fold', echo = FALSE}
-p_cesd_total <- complete %>%
-  composite_hist(cesd_total) +
-  labs(
-    title = 'CESD Total Score Distribution'
-    )
 
 p_cesd_dep_symp <- complete %>%
   composite_hist(
@@ -854,22 +839,16 @@ p_cesd_dep_symp <- complete %>%
     title = 'Depressive Symptoms Subscale Distribution'
     )
 
-p_cesd_pos_aff <- complete %>%
-  composite_hist(
-    cesd_pos_aff,
-    bins = 10
-    ) +
-  labs(
-    title = 'Positive Affect Subscale Distribution'
-    )
-
+# MARIA make sure only shows the one
 ggarrange(p_cesd_total, p_cesd_dep_symp + rremove("ylab"), 
           p_cesd_pos_aff) %>%
-  annotate_figure(top = text_grob( "Distribution for CESD Subscals \n(x-axis and y-axis are in different scales)"))
+  annotate_figure(top = text_grob( "Distribution for CESD Subscales \n(x-axis and y-axis are in different scales)"))
 
 ```
 
 #### Clinical Categories
+
+## Maria TODO edit here
 
 The distribution for CES-D scores alongside clinical cutoffs are
 presented below.
@@ -905,14 +884,13 @@ complete %>%
 The CIQ is self-report survey used to assess the financial, resource,
 and psychological impacts of the COVID-19 pandemic.
 
-*For the present study, 3 items from the CIQ were collected in order to
-construct the psychological impacts scale. We made this decision because data collection launched in the COVID-19 pandemic, whereas prior waves occurred before the onset of the COVID-19 pandemic.
+  * For the present study, only 3 items from the CIQ were collected in order to construct the psychological impacts scale. We made this decision because data collection launched in the COVID-19 pandemic, whereas prior waves occurred before the onset of the COVID-19 pandemic.
 
-*`ciq1` need to be reverse scored. 
+  * `ciq1` need to be reverse scored. 
 
-***Higher**scores indicate **greater** psychological impacts of COVID-19.
+  * **Higher**scores indicate **greater** psychological impacts of COVID-19.
 
-*The missing data rule was not applied since there is no missing data
+  * The missing data rule was not applied since there is no missing data
 among CIQ variables.
 
 Reference: [@conway2020social](https://psyarxiv.com/z2x9a/)
@@ -960,7 +938,7 @@ All CIQ survey items are presented in the following table:
 
 ```{r ciq-var-prep}
 # Pull question wording from qualtrics data
-# ciq is from BIS question 20-22
+# ciq is from BSI question 20-22
 # TODO: Check range of possible values 
 ciq_word <- qualtrics %>% 
   select(starts_with("BSI")) %>% 
@@ -1009,7 +987,7 @@ print(ciq_gt_table)
 
 #### Scale and Subscales
 
-Information on the the subscale and associated variables are below.
+Information on the psychological impacts subscale and associated variables are below.
 The subscale was constructed by averaging the included items.
 
 ```{r ciq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
@@ -1027,7 +1005,7 @@ ciq_scale_df <- data.frame(
   var_name = c("ciq_psych_total"),
   scale = c("Total Score (3)"),
   scale_construction = c("`ciq1`, `ciq2`, `ciq3_r`"),
-  scale_range = c("3-21"),
+  scale_range = c("1-7"),
   alpha = c(round(ciq_alpha$total$raw_alpha, 3))
 )
 
@@ -1108,9 +1086,10 @@ complete %>%
     x = ciq_psych_total,
     bins = 10
     ) +
-  labs(title = 'Distribution for CIQ Psychological Scale')
+  labs(title = 'Distribution for CIQ Psychological Subscale')
 ```
 
+# Substance Use Measures
 
 ## The Drug Abuse Screening Test (DAST)
 
@@ -1271,14 +1250,15 @@ Information on the total score is below. The total score was constructed
 by summing all items.
 
 ```{r dast alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#turn eval to TRUE MARIA TO DO
 #Calculate internal reliability 
-dast_alpha <-
-  complete %>%
-  select(d1a:d3, d6:d5_r) %>%
-  mutate(d2 = coalesce(d2a, d2b)) %>% 
-  select(-d2a, -d2b) %>% 
-  drop_na(d2) %>% 
-  psych::alpha(check.keys = TRUE)
+# dast_alpha <-
+#   complete %>%
+#   select(d1a:d3, d6:d5_r) %>%
+#   mutate(d2 = coalesce(d2a, d2b)) %>% 
+#   select(-d2a, -d2b) %>% 
+#   drop_na(d2) %>% 
+#   psych::alpha(check.keys = TRUE)
 
 ```
 
@@ -1286,31 +1266,31 @@ dast_alpha <-
 
 ```{r DAST-scale-table, results = 'asis'}
 # Create the table as a data frame
-dast_scale_df <- data.frame(
-  var_name = c("dast_total"),
-  scale = c("Total Score (20)"),
-  scale_construction = c(" `d1a`, `d2`, `d3`, `d4_r`, `d5_r`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`"),
-  scale_range = c("0-20"),
-  alpha = c(round(dast_alpha$total$raw_alpha, 3))
-)
-
-# Create the gt table object
-dast_scale_table <- gt(dast_scale_df) %>%
-  cols_align(columns = c("scale_range"), align = "center") %>% 
-  cols_label(var_name = "Variable Name",
-             scale = "Scale (# of items)", 
-             scale_construction = "Scale Construction",
-             scale_range = "Range*",
-             alpha = "Alpha") %>% 
-  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(150),
-             scale_construction ~ pct(50)) %>% 
-  tab_options(table.width = pct(100))%>%
-  apply_tbl_theme() 
-
-# Print the table
-print(dast_scale_table)
+# dast_scale_df <- data.frame(
+#   var_name = c("dast_total"),
+#   scale = c("Total Score (20)"),
+#   scale_construction = c(" `d1a`, `d2`, `d3`, `d4_r`, `d5_r`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`"),
+#   scale_range = c("0-20"),
+#   alpha = c(round(dast_alpha$total$raw_alpha, 3))
+# )
+# 
+# # Create the gt table object
+# dast_scale_table <- gt(dast_scale_df) %>%
+#   cols_align(columns = c("scale_range"), align = "center") %>% 
+#   cols_label(var_name = "Variable Name",
+#              scale = "Scale (# of items)", 
+#              scale_construction = "Scale Construction",
+#              scale_range = "Range*",
+#              alpha = "Alpha") %>% 
+#   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+#   tab_options(table.border.bottom.style = "hidden") %>% 
+#   cols_width(scale ~ px(150),
+#              scale_construction ~ pct(50)) %>% 
+#   tab_options(table.width = pct(100))%>%
+#   apply_tbl_theme() 
+# 
+# # Print the table
+# print(dast_scale_table)
 
 ```
 
@@ -2740,25 +2720,19 @@ ggarrange(p_bcap_risk_clin, p_bcap_lie_clin+ rremove("ylab"), p_bcap_rand_clin
 The DAS is a self-report measure used to assess dyadic adjustment
 (e.g., interpersonal tensions, dyadic satisfaction, dyadic functioning).
 
-*For the present study, all 32 items from the DYADC were collected, and
+  * For the present study, all 32 items from the DAS were collected, and
 the total score and all subscales are included: Consensus, Affective
 Expression, Satisfaction, and Cohesion.
 
-*Two items `e18` and `e19` should be reverse scored which is noted in the
-variable table below and the reverse scored variables are provided
-(`e18_r` and `e19_r`). 
+  * **Higher** scores indicate **more** positive dyadic (couple) adjustment.
 
-***Higher** scores indicate **more** positive dyadic (couple) adjustment.
-
-<SHAINA> CONFIRM The missing data rule was Applied. Calculations were
+  * The missing data rule was Applied. Calculations were
 completed only with participants that had less than 20% missing data
 (this includes `-77` responses)
 
-Reference:
-[@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug);
-[DOI](https://doi.org/10.1207/s15374424jccp3402_9) <SHIANA> EXPLAIN WHAT
-2ND REF IS FOR Reference:
-[@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
+References:
+[@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547);
+[@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug)
 
 ### DAS Variables
 
@@ -2829,14 +2803,10 @@ dyadc_word_long <- dyadc_word %>%
                                                  \n3 =	I want very much for my relationship to succeed, and will do my fair share to see that it does.
                                                  \n4 =	I want very much for my relationship to succeed, and will do all I can to see that it does.
                                                  \n5 =	I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
-                           ),
-         notes = case_when(var_name == "e18" ~ "This item should be reverse scored. `e18_r` is reverse scored",
-                           var_name == "e19" ~ "This item should be reverse scored. `e19_r` is reverse scored",
-                           TRUE ~ as.character(""))
-         ) %>%
-   mutate(description = if_else(var_name == "e31", " Please indicate the number that best describes the degree of happiness in your relationship.",
-                               if_else(var_name == "e32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
-  slice(1:32)
+                           ) %>%
+   mutate(description = if_else(var_name == "das31", " Please indicate the number that best describes the degree of happiness in your relationship.",
+                               if_else(var_name == "das32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
+  slice(1:32))
 
 
 ```
@@ -2885,44 +2855,44 @@ print(dyadc_gt_table)
 #### Scale and Subscales
 
 Information on total score and subscale variables are below.
-<SHAINA/MARIA> INSERT Variables were constructed by ...
+See cleaning syntax and annotations for guidance on how variables were constructed. 
 
 ```{r dyadc alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
 dyadc_alpha <-
   complete %>% 
   select(
-    e1:e32
+    das1:das32
   ) %>% 
   psych::alpha(check.keys = TRUE)
 
 dyadc_con_alpha <-
   complete %>% 
   select(
-    e1:e13
+    das1, das2, das3, das5, das7, das8,das9,das10,das11,das12,das13,das14,das15
   ) %>% 
   psych::alpha(check.keys = TRUE)
 
 dyadc_aff_exp_alpha <-
   complete %>% 
   select(
-    e4, e6, e29, e30
+    das4, das6, das29, das30
   ) %>% 
   psych::alpha(check.keys = TRUE)
 
 dyadc_satis_alpha <-
   complete %>% 
   select(
-    e16:e23,
-    e31,
-    e32
+    das16:das23,
+    das31,
+    das32
   ) %>% 
   psych::alpha(check.keys = TRUE)
 
 dyadc_cohes_alpha <-
   complete %>% 
   select(
-    e24:e28
+    das24:das28
   ) %>% 
   psych::alpha(check.keys = TRUE)
 ```
@@ -2932,11 +2902,11 @@ dyadc_cohes_alpha <-
 dyadc_scale_df <- data.frame(
   var_name = c("dyadc_total", "dyadc_con", "dyadc_aff_exp", "dyadc_satis", "dyadc_cohes"),
   scale = c("DYADC Total score (32) ", "Consensus (13)", "Affective Expression (4)", "Satisfaction (10)", "Cohesion (5)"),
-  scale_construction = c("`e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`, `e14`, `e15`, `e16`, `e17`, `e18_r`, `e19_r`, `e20`, `e21`, `e22`, `e23`, `e24`, `e25`, `e26`, `e27`, `e28`, `e29`, `e30`, `e31`, `e32`", 
-                         "`e1`, `e2`, `e3`, `e4`, `e5`, `e6`, `e7`, `e8`, `e9`, `e10`, `e11`, `e12`, `e13`", 
-                         "`e4`, `e6`, `e29`, `e30`", 
-                         "`e16`, `e17`, `e18_r`, `e19_r`, `e20`, `e21`, `e22`, `e23`, `e31`, `e32`", "`e24`, `e25`, `e26`, `e27`, `e28`"),
-  scale_range = c("0-151","","","",""), #TODO fill in range 
+  scale_construction = c("`das1`, `das2`, `das3`, `das4`, `das5`, `das6`, `das7`, `das8`, `das9`, `das10`, `das11`, `das12`, `das13`, `das14`, `das15`, `das16`, `das17`, `das18_r`, `das19_r`, `das20`, `das21`, `das22`, `das23`, `das24`, `das25`, `das26`, `das27`, `das28`, `das29`, `das30`, `das31`, `das32`", 
+                         "`das1`, `das2`, `das3`, `das5`, `das7`, `das8`, `das9`, `das10`, `das11`, `das12`, `das13`, `das14`, `das15`", 
+                         "`das4`, `das6`, `das29`, `das30`", 
+                         "`das16`, `das17`, `das18_r`, `das19_r`, `das20`, `das21`, `das22`, `das23`, `das31`, `das32`", "`das24`, `das25`, `das26`, `das27`, `das28`"),
+  scale_range = c("0-151","0-65","0-12","0-50","0-24"), 
    alpha = c(round(dyadc_alpha$total$raw_alpha, 3),
               round(dyadc_con_alpha$total$raw_alpha, 3),
               round(dyadc_aff_exp_alpha$total$raw_alpha, 3),
@@ -2975,8 +2945,8 @@ For continuous items:
 ```{r dyadc-mean-items}
 # Create subset of dyadc items
 dyadc_data_subset <- complete %>%
-  select(e1:e28, e31:e32, dyadc_total,
-         dyadc_con, ,dyadc_aff_exp,
+  select(e1:e28, das31:das32, dyadc_total,
+         dyadc_con, dyadc_aff_exp,
          dyadc_satis, dyadc_cohes)  
 
 
@@ -3021,7 +2991,7 @@ For binary items:
 
 # Create subset of BCAP items
 dyadc_data_subset_binary <- complete %>%
-  select(e29, e30)
+  select(das29, das30)
 
 # Calculate the dichotomous summary statistics for each variable
 dyadc_summary_data_binary <- lapply(dyadc_data_subset_binary, function(x) {
@@ -3123,7 +3093,7 @@ ggarrange(p_dyadc_total, p_dyadc_con + rremove("ylab"),
 #### Clinical Categories
 
 The distribution for the total score alongside clinical cutoffs are
-presented below. Cutoffs for a distressed couple (below 98) or for a satisfied and happy couple (at or above 114.8) are cited in the original Spanier, 1976 article. Other cutoffs may be established.
+presented below. Cutoffs for a distressed couple (below 98) or for a satisfied and happy couple (at or above 114.8) are cited in the original Spanier, 1976 article. Other cutoffs may be established so data users should review appropriateness of cutoffs for their specific question of interest.
 
 
 Reference for Cutoffs: [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
@@ -3137,7 +3107,7 @@ complete %>%
   ) +
   labs(
     title = 'Cutoff Values for DAS Scale',
-    caption = 'Cutoffs are 92 and 107\nSee references for literature on cutoff scores.'
+    caption = 'Cutoffs are 98 and 114.8\nSee references for literature on cutoff scores.'
   )+
   geom_text(aes(x = 16, y = 16.5, label = "Distressed\n Couple\n Below Cutoff", vjust = -.25, hjust = -6)) +
   geom_text(aes(x = 16, y = 16.5, label = "Happy\n or Satisfied\n Couple\n Above Cutoff", vjust = -.25, hjust = -9.25))
@@ -4435,37 +4405,37 @@ subscale score:
 
 ```{r ell-mean-items}
 # Calculate the summary statistics for each variable
-ell_summary_data <- lapply(ell, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
-  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
-})
-
-# Convert summary_data to a data frame
-ell_summary_data <- as.data.frame(ell_summary_data)
-
-# Set items as first row
-ell_summary_data <- rbind(names(ell_summary_data), ell_summary_data) %>% 
-  t() %>% 
-  as.data.frame()
-
-# Create the gt table
-ell_tbl <- ell_summary_data %>%
-  gt() %>%
-  cols_label(`1` = "Variable",
-             Range = "Range*",
-             Missing = "% Missing") %>% 
-  #cols_width(everything() ~ px(115)) %>%
-  tab_options(table.width = pct(100))%>%
-  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
-  tab_footnote("*Range of data values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>%
-  apply_tbl_theme()
-
-# Render the table
-ell_tbl
+# ell_summary_data <- lapply(ell, function(x) {
+#   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+#   sd_val <- round(sd(x, na.rm = TRUE), 2)
+#   range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+#   miss_val <- round(mean(is.na(x)) * 100, 2)
+#   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+# })
+# 
+# # Convert summary_data to a data frame
+# ell_summary_data <- as.data.frame(ell_summary_data)
+# 
+# # Set items as first row
+# ell_summary_data <- rbind(names(ell_summary_data), ell_summary_data) %>% 
+#   t() %>% 
+#   as.data.frame()
+# 
+# # Create the gt table
+# ell_tbl <- ell_summary_data %>%
+#   gt() %>%
+#   cols_label(`1` = "Variable",
+#              Range = "Range*",
+#              Missing = "% Missing") %>% 
+#   #cols_width(everything() ~ px(115)) %>%
+#   tab_options(table.width = pct(100))%>%
+#   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+#   tab_footnote("*Range of data values") %>% 
+#   tab_options(table.border.bottom.style = "hidden") %>%
+#   apply_tbl_theme()
+# 
+# # Render the table
+# ell_tbl
 
 ```
 
@@ -5067,10 +5037,11 @@ itq_alpha <- itq_complete %>%
 
 ```{r itq-scale-table, results = 'asis'}
 # Create the table as a data frame
+# MARIA TO DO SHIFT
 itq_scale_df <- data.frame(
-  var_name = c("Affective Dysregulation Subscale (2)", "Negative Self-Concept Subscale (2)", 
-               "Disturbances in Relationships Subscale (2)", "DSO (6)"),
-  scale = c("itq_ad_total", "itq_nsc_total", "itq_dr_total", "itq_dso"),
+  var_name = c("Re-experiencing Subscale (2)", " Avoidance Subscale (2)", 
+               "Thread Subscale (2)", "Functioninal Impairment (3)", "PTSD Total (6)"),
+  scale = c("itq_re_total", "itq_av_total", "itq_th_total", "itq_fi_total", ),
   scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`", 
                          "`itq1`, `itq2`, `itq3`, `itq4`, `itq5`,`itq6`"),
   scale_range = c("","","",""), #TODO fill in range 
