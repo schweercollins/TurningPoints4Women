@@ -3140,11 +3140,11 @@ then rate their agreement with each attachment style for `rqa` - `rqd`.
 Higher ratings indicate more agreement with the statement.
 
 The missing data rule is applied. Calculations were completed for
-participants with 33% or less missing data (this includes -77 responses)
+participants with 20% or less missing data (this includes -77 responses)
 
 Reference:
 [@bartholomew1991attachment](https://psycnet.apa.org/record/1991-33075-001);[DOI](https://doi.org/10.1037/0022-3514.61.2.226)
-
+# add this references MARIA https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8470855/
 ### ARQ Variables
 
 #### Value Labels
@@ -3157,7 +3157,7 @@ arq_label_df <- data.frame(
   value = c("A", "B", "C", "D"),
   label = c("It is easy for me to become emotionally close to others. I am comfortable dependingon them and having them depend on me. I don't worry about being alone or havingothers not accept me.",
             "I am uncomfortable getting close to others. I want emotionally close relationships, but Ifind it difficult to trust others completely, or to depend on them. I worry that I will be hurt ifI allow myself to become too close to others.",
-            "I want to be completely emotionally intimate with others, but I often find that others arereluctant to get as close as I would like. I am uncomfortable being without closerelationships, but I sometimes worry that others don't value me as much as I value them.",
+            "I want to be completely emotionally intimate with others, but I often find that others arereluctant to get as close as I would like. I am uncomfortable being without close relationships, but I sometimes worry that others don't value me as much as I value them.",
             "I am comfortable without close emotional relationships. It is very important to me tofeel independent and self-sufficient, and I prefer not to depend on others or have othersdepend on me.")
 ) %>% 
   t() %>% 
@@ -3274,18 +3274,10 @@ subtracting the sum of dismissing and fearful items. Higher scores on
 attachment models indicate more positive attachment models. <MARIA>
 CONFIRM THIS IS CORRECT
 
-<SHAINA/MARIA> CONFIRM ALPHA IS NEEDED
-
-```{r arq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-#Calculate internal reliability 
-arq_alpha <-
-  complete %>%
-  select(rqa,	rqb, rqc, rqd) %>%
-  psych::alpha(check.keys = TRUE)
-```
 
 ```{r arq-subscales}
-#DATA CLEANING CODE - create arq categories
+# no internal consistency should be calculated
+# DATA CLEANING CODE - create arq categories
 vars_to_check <- c("rqa", "rqb", "rqc", "rqd")
 
 arq_subscale <- complete %>% 
@@ -3306,6 +3298,7 @@ arq_subscale <- complete %>%
 
 ```{r ARQ-scale-table, results = 'asis'}
 # Create the table as a data frame
+# Maria to update these names
 arq_scale_df <- data.frame(
   var_name = c("arq_group", "arq_model_self", "arq_model_other"),
   scale = c("Attachment Group", "Model of Self", "Model of Other"),
@@ -3332,7 +3325,8 @@ Descriptive statistics are presented below for each item and
 total/subscale score
 
 ```{r ARQ-mean-items}
-# Create subset of BSI items
+# Create subset of ARQ items
+# Maria to do, this should not inlcude rq1 and arq_group, but all other subscales should also be included 
 arq_data_subset <- complete %>%
   select(rq1,rqa,	rqb, rqc, rqd)
 
@@ -3373,7 +3367,8 @@ arq_tbl
 
 #### Distributions
 
-Distributions are presented for the total score and each subscale *TODO:
+Distributions are presented for the two subscales only 
+*TODO:
 JP's graphs are count on x axis*
 
 ```{r ARQ-distributions, class.source='fold', echo = FALSE}

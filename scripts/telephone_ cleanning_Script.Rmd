@@ -250,7 +250,7 @@ cesd_missing  %>%
 
 ### CESD Calculations & Subscale
 ```{r cesd_calculatio}
-# MIN Please remove the positive affect scores completely
+
 # Below is the code that treats negative values (-77, -55) as NA
 cesd_calc <-
   cesd %>%
@@ -287,7 +287,7 @@ cesd_complete <-
                'c12_r', 'c13', 'c14', 'c15', 'c16_r', 'c17',
                'c18', 'c19', 'c20'),
     scale1_nitems = 20,
-    scale2 = c('c1'),  # These are inrevelent, and removed below 
+    scale2 = c('c1'),  # These are irrelevent, and removed below 
     scale2_nitems = 1
   ) %>%
   rename(
@@ -465,7 +465,8 @@ There are missing data in DAST and missing rule applied.
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 dast <- dast %>% 
   #TODO:Maria please double check the skip rule that is correct
-  # for incarcerated TC, entire dast survey wasn't shown 
+  # for incarcerated TC, entire dast survey wasn't shown
+  # MIN this is correct, the incarcerated TX could not answer this questionnaires
   mutate_at(vars(dast_screen:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) %>%
   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
   mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
@@ -596,7 +597,7 @@ cts <-
     across(
       .cols = c(ct1:ct20),
       .fns = ~case_when(
-        #TODO: Maria/Shaina, we talked about never happened should be code as 0, but I looked at the reference and it coded as following. Please confirm this should be the way to score. 
+        # Keeping "this has never happened" as 8 to fit with historical longitudinal data
         .x == "Once in the past year" ~ "1",
         .x == "Twice in the past year" ~ "2",
         .x == "3-5 times in the past year" ~ "3",
@@ -1168,15 +1169,13 @@ dyadc_complete <- dyadc_calc %>%
 
 ## ARQ
 ### ARQ Select Variables and Recode
-<Maria>: Do we want to recode rqa?
 ```{r arq}
-# Select arq questions and recode
-arq <-
-  tpw_raw %>%
+# Select ARQ questions and recode
+arq <- tpw_raw %>%
   select(id, rq1:rqd) %>%
- mutate(
+  mutate(
     across(
-      .cols = -c(id,rq1),
+      .cols = -c(id, rq1),
       .fns = ~case_when(
         .x == "1- Disagree Strongly" ~ 1,
         .x == 2 ~ 2,
@@ -1188,8 +1187,17 @@ arq <-
         .x == "Decline to Answer" ~ -77,
         TRUE ~ NA_real_
       )
-    )
-    )
+    ),
+    rq1 = case_when(
+      rq1 == "A" ~ "Secure",
+      rq1 == "B" ~ "Disorganized/Fearful",
+      rq1 == "C" ~ "Ambivalent/Anxious-Preoccupied",
+      rq1 == "D" ~ "Avoidant-Dismissive",
+      TRUE ~ rq1  # Keep other values unchanged
+    ),
+    rq1 = factor(rq1, levels = c("Secure", "Disorganized/Fearful", "Ambivalent/Anxious-Preoccupied", "Avoidant-Dismissive"))
+  )
+
   
 ```
 
@@ -1199,8 +1207,8 @@ There are missing data in ARQ and missing rule applied.
 arq %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
-    id = c("id","rq1"), # Shaina: the missing data doesn't include rq1, I manually checked we don't have missing value in this column, I wasn't sure how to do this automatically. 
-    n_items = 4
+    id = c("id","rq1"), # does not include rq1, no missing data 
+    n_items = 5
   )%>%
   gt::gt() %>%
   gt::tab_header(
@@ -1212,16 +1220,16 @@ arq %>%
 ### ARQ Calculation & Subscale
 ```{r arq_calculations}
 # Below is the code that treats -77, -55 values as NA
-# TODO Shaina: please double check this section as JP doesn't have this section in his code 
+
 arq_calc <- arq %>%
   pct_miss_fun(
-    id = c("id","rq1"), # Shaina: the missing data doesn't include rq1, I manually checked we don't have missing value in this column, I wasn't sure how to do this automatically. 
+    id = c("id","rq1"),  
     n_items = 4
   )%>%
   full_join(arq, by = "id") %>%
   filter(
     is.na(miss_pct) |
-      miss_pct < 33
+      miss_pct < 20
   )%>%
   mutate(
     across(
@@ -1235,15 +1243,32 @@ arq_calc <- arq %>%
   )
 
 
+# compute subscales
 arq_complete <- arq_calc %>%
   select(
     -missing_n,
     -miss_pct
-  )%>%
+  ) %>%
   rowwise() %>%
-  mutate(arq_group = max(c_across(rqa:rqd))) %>%
-  mutate(arq_model_self = (rqa + rqd) - (rqc + rqb)) %>%
-  mutate(arq_model_other = (rqa + rqc) - (rqd + rqb))
+  mutate(
+    arq_group = ifelse(all(c(rqa, rqb, rqc, rqd) == max(rqa, rqb, rqc, rqd)), "-55",
+      case_when(
+        rqa == max(rqa, rqb, rqc, rqd) & sum(c(rqa, rqb, rqc, rqd) == max(rqa, rqb, rqc, rqd)) == 1 ~ "Secure",
+        rqb == max(rqa, rqb, rqc, rqd) & sum(c(rqa, rqb, rqc, rqd) == max(rqa, rqb, rqc, rqd)) == 1 ~ "Disorganized/Fearful",
+        rqc == max(rqa, rqb, rqc, rqd) & sum(c(rqa, rqb, rqc, rqd) == max(rqa, rqb, rqc, rqd)) == 1 ~ "Ambivalent/Anxious-Preoccupied",
+        rqd == max(rqa, rqb, rqc, rqd) & sum(c(rqa, rqb, rqc, rqd) == max(rqa, rqb, rqc, rqd)) == 1 ~ "Avoidant-Dismissive",
+        TRUE ~ NA_character_
+      )
+    )
+  ) %>%
+  mutate(
+      arq_group = factor(replace_na(arq_group, "-99"), levels = c("-99", "Secure", "Disorganized/Fearful", "Ambivalent/Anxious-Preoccupied", "Avoidant-Dismissive")),
+    arq_model_self_attach_anxiety = (rqa + rqd) - (rqc + rqb),
+    arq_model_other_attach_avoid = (rqa + rqc) - (rqd + rqb)
+  ) 
+
+# -99 when there is a tie, because missing due to not being able to determine a top score for arq_group
+# more positive scores indicate more positive models, and more negative scores indicate more negative models
 ```
 
 
@@ -3278,8 +3303,7 @@ cint_substance <- cint_substance %>%
 ```{r}
 
 ## Note made during cleaning process on 12/2023 -- there are no psychometrics or optimal scoring methods published. Please reach out to Dr. Damion Grasso dgrasso@uchc.edu with questions if you wish to use. 
-
-  # TODO: Maria, on Qualtrics, I saw there is an answer option N/A, but I didn't see column for NAs. I compired couple of them with Qualtric response, seems like all the empty ones are N/A so I coded all the empty ones to NA, Let me know if this should be code to something else. 
+ 
 cint_covid <- tpw_raw %>%
   select(id, starts_with("cintc")) %>%
     mutate(
@@ -4339,7 +4363,6 @@ pcl <- tpw_raw %>%
       ),
       levels = c("0-5", "6-11", "12-19", "adulthood")
     ),
-    #TODO: Maria please double check I changed 16 to 18
     pcl18_devperiod = factor(
       case_when(
         !is.na(pcl18a_1) & pcl18_1 == "Happened to me" ~ "0-5",
