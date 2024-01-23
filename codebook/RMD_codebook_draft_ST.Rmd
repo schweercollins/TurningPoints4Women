@@ -792,6 +792,7 @@ data_subset_cesd <- complete %>%
 
 # Calculate the summary statistics for each variable
 summary_data_cesd <- lapply(data_subset_cesd, function(x) {
+  x <- replace(x, x < -40, NA)
   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
   sd_val <- sprintf("%.2f", round(sd(x, na.rm = TRUE), 2))
   range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
