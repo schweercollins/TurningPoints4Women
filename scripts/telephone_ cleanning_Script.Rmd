@@ -3066,33 +3066,38 @@ cint_relation <- cint_relation %>%
    mutate_at(vars(cint31_7_text), ~case_when(cint31 != 7 ~ "-55", TRUE ~ .)) %>% 
    mutate_at(vars(cint32_7_text), ~case_when(cint32 != 7 ~ "-55", TRUE ~ .))
 
-cint_relation_miss <- cint_relation %>%
-  mutate(across(-c(id, matches("_7_text$")), as.numeric))%>%
-  pct_miss_fun(
-    id = c("id", matches("_7_text$")),
-    n_items = 15
-  )
+# Correct data type and create _complet df 
+cint_relation_complete <- cint_relation %>%
+  mutate(across(-c(id, matches("text$")), as.numeric))
 
-cint_relation_miss%>% gt::gt() %>% 
-  gt::tab_header(
-    title = 'CINT- Ramantic and Friend Relationship Missing Data',
-    subtitle = 'By Participant')
-
-
-
-# Below is the code that treats -77, -55 values as NA
-cint_relation_complete <-
-  cint_relation %>%
-  mutate(across(-c(id, matches("_7_text$")), as.numeric)) %>%
-  mutate(
-    across(
-      .cols = -c(id, matches("_7_text$")),
-      .fns = ~case_when(
-        .x < 0 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  ) 
+## we do not apply missing data rules because not a standardized questionnaire
+# cint_relation_miss <- cint_relation %>%
+#   mutate(across(-c(id, matches("_7_text$")), as.numeric))%>%
+#   pct_miss_fun(
+#     id = c("id", matches("_7_text$")),
+#     n_items = 15
+#   )
+# 
+# cint_relation_miss%>% gt::gt() %>% 
+#   gt::tab_header(
+#     title = 'CINT- Ramantic and Friend Relationship Missing Data',
+#     subtitle = 'By Participant')
+# 
+# 
+# 
+# # Below is the code that treats -77, -55 values as NA
+# cint_relation_complete <-
+#   cint_relation %>%
+#   mutate(across(-c(id, matches("_7_text$")), as.numeric)) %>%
+#   mutate(
+#     across(
+#       .cols = -c(id, matches("_7_text$")),
+#       .fns = ~case_when(
+#         .x < 0 ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   ) 
 ```
 
 ### CINT-Substance Use Select Variable & Recode
@@ -3232,40 +3237,41 @@ cint_substance <- cint_substance %>%
 
 # HR166 has cint84 missing; checked this and we are using code of -99   
 
-cint_substance_miss <- cint_substance %>%
-  mutate(across(-c(id, matches("_6_text$")), as.numeric))%>%
-  pct_miss_fun(
-    id = c("id", matches("_6_text$")),
-    n_items = 47
-  )
-
-cint_substance_miss%>% gt::gt() %>% 
-  gt::tab_header(
-    title = 'CINT- Subtance use Missing Data',
-    subtitle = 'By Participant')
-
-
-
-# Below is the code that treats -77, -55 values as NA
-cint_substance_complete <-
-  cint_substance %>%
-mutate(across(-c(id, matches("_6_text$"), cint84), as.numeric)) %>% # cint84 is multiple choice
-  mutate(
-    across(
-      .cols = -c(id, matches("_6_text$")),
-      .fns = ~case_when(
-        .x < 0 ~ NA,
-        TRUE ~ .x
-      )
-    ),
-    across(
-      .cols = matches("_6_text$"),
-      .fns = ~case_when(
-        .x == -55 ~ NA,
-        TRUE ~ .x
-      )
-    )
-  ) 
+## we do not apply missing data rules because not a standardized questionnaire
+# cint_substance_miss <- cint_substance %>%
+#   mutate(across(-c(id, matches("_6_text$")), as.numeric))%>%
+#   pct_miss_fun(
+#     id = c("id", matches("_6_text$")),
+#     n_items = 47
+#   )
+# 
+# cint_substance_miss%>% gt::gt() %>% 
+#   gt::tab_header(
+#     title = 'CINT- Subtance use Missing Data',
+#     subtitle = 'By Participant')
+# 
+# 
+# 
+# # Below is the code that treats -77, -55 values as NA
+# cint_substance_complete <-
+#   cint_substance %>%
+# mutate(across(-c(id, matches("_6_text$"), cint84), as.numeric)) %>% # cint84 is multiple choice
+#   mutate(
+#     across(
+#       .cols = -c(id, matches("_6_text$")),
+#       .fns = ~case_when(
+#         .x < 0 ~ NA,
+#         TRUE ~ .x
+#       )
+#     ),
+#     across(
+#       .cols = matches("_6_text$"),
+#       .fns = ~case_when(
+#         .x == -55 ~ NA,
+#         TRUE ~ .x
+#       )
+#     )
+#   ) 
 ```
 
 ### CINT-COVID Select Variables and Recode 
