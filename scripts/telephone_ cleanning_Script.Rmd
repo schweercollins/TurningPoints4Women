@@ -3710,19 +3710,22 @@ pct <- tpw_raw %>%
 
 ### PCT Missing 
 ```{r pct_missing}
-pct <- pct%>%  
+pct <- pct %>%  
+  # if p00a is NO/0 or -77, the entire questionnaire was not administered because participant had no prior pregnancies
   mutate_at(vars(pct0), ~case_when(p00a == 0 | p00a == NA ~ "-55", TRUE ~ .)) %>%
-  mutate_at(vars(pct1:pct3e), ~case_when(pct0 == 0 ~ "-55", TRUE ~ .)) %>%
-  # if pct1 is NO/0 or -77, the entire questionnaire was not administered. 
-  mutate_at(vars(pct2a:pct3e), ~case_when(pct1 != 1 ~ "-55", TRUE ~ .)) 
-#TODO: Maria if pct0 is not displayed does the rest of pct will be skipped? YES because it means that TC has never been pregnant
-# if it is NA it is because the TC reported a pregnancy earlier in the interview so the interviewer wasn't asked the screener
+  mutate_at(vars(pct1:pct3e), ~case_when(pct0 == "-55" ~ "-55", TRUE ~ .)) %>%
+  # if pct1 is NO/0 or -77, the entire questionnaire was not administered because participant endorsed no prior traumatic pregnancies or childbirth experiences
+   mutate_at(vars(pct2a:pct3e), ~case_when(pct1 == "0" ~ "-55", TRUE ~ .)) %>%
+  # dropping pct2e and pct3e as all contain identifying child name and sometimes DOB; dropping pct0 as no new information from screener p00a; was only skip rule question
+  select(-pct2e, -pct3e, -pct0) 
+
+
 
 pct_miss <- pct %>%
-  mutate(across(-c(id, pct2e, pct3e), as.numeric)) %>%
+  mutate(across(-c(id), as.numeric)) %>%
   pct_miss_fun(
-    id = c("id", "pct2e", "pct3e"),
-    n_items = 13
+    id = c("id"),
+    n_items = 10
   )
 
 pct_miss %>%
@@ -3731,8 +3734,9 @@ pct_miss %>%
     title = 'PCT Missing Data',
     subtitle = 'by Participant'
   )
-
-pct_remove <- pct_miss %>% filter(miss_pct >= 20) %>% pull(id)
+# primarily missing due to not having prior pregnancy (p00a) or due to not having a traumatic childbirth (pct1)
+pct_remove <- pct_miss %>% filter(miss_pct >= 20) %>% filter(id != "P836") %>% pull(id)
+# above we retain P836 because they are only missing items from one subscale
 ```
 
 PCT Calculation & Subscale 
@@ -3740,10 +3744,10 @@ PCT Calculation & Subscale
 # Below is the code that treats -77, -55 values as NA
 pct_calc <-
   pct %>%
-  mutate(across(-c(id,pct2e,pct3e), as.numeric)) %>%
+  mutate(across(-c(id), as.numeric)) %>%
   mutate(
     across(
-      .cols = -c(id,pct2e,pct3e),
+      .cols = -c(id),
       .fns = ~case_when(
         .x < 0 ~ NA_real_,
         TRUE ~ .x
@@ -3752,21 +3756,26 @@ pct_calc <-
   )
 
 # pct Composite & Subscale Score Creation 
-pct_complete <-
-  pct_calc %>%
-  # TODO: Maria, please double check the calculation were 
-  mutate(pct_preg_total = rowSums(select(., pct2a:pct2d), na.rm = T)) %>%
-  mutate(pct_childbirth_total = rowSums(select(., pct3a:pct3d), na.rm = T)) %>%
+
+pct_complete <- pct_calc %>%
   mutate(
-    across(
-      -c(id
-      ),
-      ~case_when(
-        id %in% pct_remove ~ NA,
-        TRUE ~ .x
-      )
-    )
-  )
+    pct_preg_total = rowSums(select(., pct2a:pct2d), na.rm = TRUE),
+    pct_childbirth_total = rowSums(select(., pct3a:pct3d), na.rm = TRUE)
+  ) %>%
+  # making those with missing data have appropriate missing data codes
+  mutate(
+    pct_preg_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_preg_total), "-99", as.character(pct_preg_total))),
+  pct_childbirth_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_childbirth_total), "-99", as.character(pct_childbirth_total)))
+  ) %>%
+  # Adding back in -55 and -77
+  mutate_at(vars(pct1:pct3d), ~ifelse(p00a == 0, "-55", as.character(.))) %>%
+  mutate_at(vars(pct2a:pct3d), ~ifelse(pct1 == 0, "-55", as.character(.))) %>%
+  mutate(
+    pct3a = ifelse(id == "P836" & is.na(pct3a), -77, pct3a),
+    pct3b = ifelse(id == "P836" & is.na(pct3b), -77, pct3b),
+    pct3c = ifelse(id == "P836" & is.na(pct3c), -77, pct3c),
+    pct3d = ifelse(id == "P836" & is.na(pct3d), -77, pct3d))
+  
 
 ```
 
