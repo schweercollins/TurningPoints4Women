@@ -211,8 +211,7 @@ mutate(
       .names = '{.col}_r'
       )
 )
-# Min should we remove this? 
-# mutate(across(all_of(c("c4", "c8", "c12", "c16")), ~ ifelse(. %in% c(-77, NA), ., 3 - .), .names = "{.col}_r"))
+
 ```
 
 ### CESD Missing Data
@@ -288,25 +287,22 @@ cesd_complete <-
                'c12_r', 'c13', 'c14', 'c15', 'c16_r', 'c17',
                'c18', 'c19', 'c20'),
     scale1_nitems = 20,
-    scale2 = c('c4_r', 'c8_r', 'c12_r', 'c16_r'),  #TODO: MIN Remove
-    scale2_nitems = 4
+    scale2 = c('c1'),  # These are inrevelent, and removed below 
+    scale2_nitems = 1
   ) %>%
   rename(
     cesd_total = sum_values,
     cesd_avg = mean_values,
     
     cesd_dep_symp = total1,  
-    cesd_dep_symp_avg = avg1,
-    
-    cesd_pos_aff = total2,
-    cesd_pos_aff_avg = avg2
+    cesd_dep_symp_avg = avg1
   ) %>%
   distinct(
     across(
       .cols = everything()
     )
   )%>%
-  select(-cesd_avg) %>%
+  select(-cesd_avg, -total2, -avg2) %>%
   relocate(id, .before = c1) %>%
   relocate(c4, .after = c3) %>%
   relocate(c8, .after = c7) %>%
@@ -315,6 +311,11 @@ cesd_complete <-
   relocate(c21:c24, .after = c20) 
   
 
+# Merge _calc and _complete 
+cesd_complete <- cesd_complete %>%
+  select(id, cesd_total:cesd_dep_symp_avg) %>%
+  merge(cesd, by = "id") %>% 
+  relocate(cesd_total:cesd_dep_symp_avg, .after = c16_r)
 ```
 
 
@@ -2844,42 +2845,46 @@ cint_socio <- cint_socio %>%
   # if they did not select others (cint1_8, and cint_identity_8), the _text column should be -55
   mutate(cint1_8_text = case_when(is.na(cint1_8) ~ "-55", TRUE ~ cint1_8_text)) %>%
   mutate(cint_identity_8_text = case_when(is.na(cint_identity_8_text) ~ "-55", TRUE ~ cint_identity_8_text)) %>%
-  # cint_income_support: this was request to answer, so if it's NA, it should be TC refuse to answer 
-   mutate(cint_income_support = case_when(is.na(cint_income_support) ~ "-55", TRUE ~ cint_income_support)) %>%
+  # cint_income & cint_income_support: this was request to answer, so if it's NA, it should be TC refuse to answer 
+  mutate(cint_income = case_when(is.na(cint_income) ~ "-55", TRUE ~ cint_income)) %>%
+  mutate(cint_income_support = case_when(is.na(cint_income_support) ~ "-55", TRUE ~ cint_income_support)) %>%
   select(-c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77"))
 
-cint_socio_miss <- cint_socio %>%
-  mutate(across(-c(id, matches("_8_text$")), as.numeric))%>%
-  pct_miss_fun(
-    id = c("id", "cint1_8_text", "cint_identity_8_text"),
-    n_items = 12
-  )
 
 
-cint_socio_miss %>% 
-  gt::gt() %>% 
-  gt::tab_header(
-    title = 'CINT-SOCIODEMS Missing Data',
-    subtitle = 'By Participant')
-
-
+cint_socio_complete <-
+  cint_socio %>%
+  select(-cint_identity_8_text) # no participant selected other not listed gender identity
 
 
 ## we do not apply missing data rules because not a standardized questionnaire
-cint_socio_complete <-
-  cint_socio %>%
-  mutate(across(-c(id, matches("_8_text$")), as.numeric)) %>%
-  # Below is the code that treats -77, -55 values as NA
-  # mutate(
-  #   across(
-  #     .cols = -c(id,matches("_8_text$")),
-  #     .fns = ~case_when(
-  #       .x < 0 ~ NA_real_,
-  #       TRUE ~ .x
-  #     )
-  #   )
-  # ) %>%
- select(-cint_identity_8_text) # no participant selected other not listed gender identity
+# cint_socio_miss <- cint_socio %>%
+#   mutate(across(-c(id, matches("_8_text$")), as.numeric))%>%
+#   pct_miss_fun(
+#     id = c("id", "cint1_8_text", "cint_identity_8_text"),
+#     n_items = 12
+#   )
+# 
+# 
+# cint_socio_miss %>% 
+#   gt::gt() %>% 
+#   gt::tab_header(
+#     title = 'CINT-SOCIODEMS Missing Data',
+#     subtitle = 'By Participant')
+# 
+# 
+# cint_socio_complete <-
+#   cint_socio %>%
+#   #Below is the code that treats -77, -55 values as NA
+#   mutate(
+#     across(
+#       .cols = -c(id,matches("_8_text$")),
+#       .fns = ~case_when(
+#         .x < 0 ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
 ```
 
 ### CINT-Ladder Select Variable & Recode
@@ -2895,36 +2900,42 @@ cint_ladder <- tpw_raw %>%
         )
       )
   )
+
+# correct data type 
+cint_ladder_complete <- cint_ladder %>%
+  mutate(across(-c(id), as.numeric))
 ```
 
 ### CINT-Ladder Missing 
 ```{r cint-ladder-missing}
-cint_ladder_missing <- cint_ladder %>%
-  mutate(across(-c(id), as.numeric)) %>%
-  pct_miss_fun(
-    id = c("id"),
-    n_items = 2
-  )
-
-cint_ladder_missing %>% gt::gt() %>% 
-  gt::tab_header(
-    title = 'CINT-LADDDER Missing Data',
-    subtitle = 'By Participant')
-
-
-# Below is the code that treats -77, -55 values as NA
-cint_ladder_complete <-
-  cint_ladder %>%
-  mutate(across(-c(id), as.numeric)) %>%
-  mutate(
-    across(
-      .cols = -c(id),
-      .fns = ~case_when(
-        .x < 0 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  ) 
+## we do not apply missing data rules because not a standardized questionnaire
+# cint_ladder_missing <- cint_ladder %>%
+#   mutate(across(-c(id), as.numeric)) %>%
+#   pct_miss_fun(
+#     id = c("id"),
+#     n_items = 2
+#   )
+# 
+# 
+# cint_ladder_missing %>% gt::gt() %>% 
+#   gt::tab_header(
+#     title = 'CINT-LADDDER Missing Data',
+#     subtitle = 'By Participant')
+# 
+# 
+# # Below is the code that treats -77, -55 values as NA
+# cint_ladder_complete <-
+#   cint_ladder %>%
+#   mutate(across(-c(id), as.numeric)) %>%
+#   mutate(
+#     across(
+#       .cols = -c(id),
+#       .fns = ~case_when(
+#         .x < 0 ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   ) 
 ```
 
 ### CINT-Romantic and friend relationships Select Variable & Recode
