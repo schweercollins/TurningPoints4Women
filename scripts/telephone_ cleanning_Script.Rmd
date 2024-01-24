@@ -163,6 +163,11 @@ bsi_complete <-
     bsi_dep = total3
   ) %>%
   select(-bsi_avg)
+
+bsi_test <- bsi_complete %>%
+  select(id, bsi_total, bsi_soma, bsi_anx, bsi_dep) %>%
+  merge(bsi, by="id") %>%
+  relocate(bsi_total:bsi_dep, .after = "bsi19")
 ```
 
 
@@ -412,9 +417,11 @@ ciq_calc <- ciq_calc %>%
   mutate(ciq_psych_total = rowMeans(select(., starts_with("ciq"), -ciq3), na.rm = TRUE), ## average vs sum based on other publications; no missing data
          ciq_psych_total = round(ciq_psych_total, 2))
 
-# Reorder the columns and make complete dataset
+# Reorder the columns and make complete data set
 ciq_complete <- ciq_calc %>%
-  select(id, ciq1, ciq2, ciq3, ciq3_r, ciq_psych_total)
+  select(id, ciq_psych_total) %>%
+  merge(ciq, by="id") %>%
+  relocate(ciq_psych_total, .after = "ciq3")
 
 ```
 
@@ -2840,6 +2847,7 @@ cint_socio <- tpw_raw %>%
 cint_socio$cint1 <- apply(cint_socio[, c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
 
 #Although these were created from the above 9 variables, each participant only selected no more than two choices, so we recoded according to choice 1 and choice 2
+# Maria this create warning, I wasn't sure if this matters
 cint_socio <- cint_socio %>%
   separate(cint1, into = c("cint1_choice1", "cint1_choice2"), sep = ";", remove = FALSE) %>%
   mutate(
@@ -3058,10 +3066,10 @@ cint_relation <- tpw_raw %>%
       TRUE ~ cint34
     ),
     cint35 = case_when(
-      cint35 == "1. None" ~ "1",
-      cint35 == "2. One" ~ "2",
-      cint35 == "3. Two or three" ~ "3",
-      cint35 == "4. Four or more" ~ "4",
+      cint35 == "1. None" ~ "0",
+      cint35 == "2. One" ~ "1",
+      cint35 == "3. Two or three" ~ "2",
+      cint35 == "4. Four or more" ~ "3",
       cint35 == "Decline to Answer" ~ "-77",
       TRUE ~ cint35
     ),
@@ -3135,17 +3143,17 @@ cint_substance <- tpw_raw %>%
       .fns = ~case_when(
         .x == "Yes" ~ "1",
         .x == "No" ~ "0",
-        .x == "3. NA -- not in school and not employed in last 6 months" ~ "NA", # this is for cint63
+        .x == "3. NA -- not in school and not employed in last 6 months" ~ "-55", # this is for cint63
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
     ),
         across(
-      .cols = c( cint63),
+      .cols = c(cint63),
       .fns = ~case_when(
         .x == "1. Yes" ~ "1",
         .x == "2. No" ~ "0",
-        .x == "3. NA -- not in school and not employed in last 6 months" ~ "NA", # this is for cint63
+        .x == "3. NA -- not in school and not employed in last 6 months" ~ "-55", # this is for cint63
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
@@ -3245,6 +3253,8 @@ cint_substance <- cint_substance %>%
   mutate_at(vars(cint77), ~case_when(cint76 == 0 |  cint76 == "-77" ~ "-55", TRUE ~ .)) %>%
    # if cint78 is 0/No or -77, cint79 were not asked
   mutate_at(vars(cint79), ~case_when(cint78 == 0 |  cint78 == "-77" ~ "-55", TRUE ~ .)) %>%
+  # if cint 82 is not Yes, CINT 83, and cint 84 was skiped 
+  mutate_at(vars(cint83:cint84), ~case_when(cint82 != 1 ~ "-55", TRUE ~ .)) %>%
   # if cint80 is 0/No or -77, cint81:cint84_77 were not asked
   mutate_at(vars(cint81:cint84), ~case_when(cint80 == 0 |  cint80 == "-77" ~ "-55", TRUE ~ .)) %>% 
   # cint40 could choose not to answer 
@@ -3257,9 +3267,13 @@ cint_substance <- cint_substance %>%
   mutate(cint83 = ifelse(is.na(cint83), -77, cint83))%>%
   mutate_at(vars(cint47_6_text), ~case_when(cint47 != 7 ~ "-55", TRUE ~ .)) %>% 
   mutate_at(vars(cint62_6_text), ~case_when(cint62 != 7 ~ "-55", TRUE ~ .)) %>%
-  mutate_at(vars(cint84), ~case_when(id == "HR166" ~ "-99", TRUE ~ .)) %>%
  select(-c(cint84_1:cint84_77))
 
+cint_substance_complete <- cint_substance %>%
+  # we don't need cint_pregnancy_screen because it's already included in the sociodems
+  select(-cint_pregnancy_screen)
+
+# Maira/Min: issue below was solved, it becauese we missed a skip rule, Maria, after you checked, you can remove these two line. 
 # HR166 has cint84 missing; checked this and we are using code of -99   
 
 ## we do not apply missing data rules because not a standardized questionnaire
@@ -3303,6 +3317,10 @@ cint_substance <- cint_substance %>%
 ```{r}
 
 ## Note made during cleaning process on 12/2023 -- there are no psychometrics or optimal scoring methods published. Please reach out to Dr. Damion Grasso dgrasso@uchc.edu with questions if you wish to use. 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
  
 cint_covid <- tpw_raw %>%
   select(id, starts_with("cintc")) %>%
@@ -3359,43 +3377,38 @@ process_cintc <- function(data, var_name) {
 # Apply the function to each cintc variable using purrr::reduce
 cint_covid <- purrr::reduce(paste0("cintc", 1:14), process_cintc, .init = cint_covid)
 
+cint_covid_complete <- cint_covid
 ```
 
 ### CINT-COVID Missing 
 ```{r}
 # We are NOT applying missing data rule given guidance from author of scale
-# Replace all empty cells with -55 in the entire data frame
-# cint_covid <- cint_covid %>%
-#   replace(cint_covid, is.na(cint_covid) | cint_covid == "", -55)
-# cint_covid <- cint_covid %>%
-#   mutate_all(~ ifelse(is.na(.x) | .x == "", -55, .x))
-
-cint_covid_miss <- cint_covid %>%
-  mutate(across(-c(id), as.numeric))%>%
-  pct_miss_fun(
-    id = c("id"),
-    n_items = 28
-  )
-
-cint_covid_miss%>% gt::gt() %>% 
-  gt::tab_header(
-    title = 'CINT- COVID Question Missing Data',
-    subtitle = 'By Participant')
-
-
-# Below is the code that treats -77, -55 values as NA
-cint_covid_complete <-
-  cint_covid %>%
-  mutate(across(-c(id), as.numeric)) %>%
-  mutate(
-    across(
-      .cols = -c(id),
-      .fns = ~case_when(
-        .x < 0 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  ) 
+# cint_covid_miss <- cint_covid %>%
+#   mutate(across(-c(id), as.numeric))%>%
+#   pct_miss_fun(
+#     id = c("id"),
+#     n_items = 28
+#   )
+# 
+# cint_covid_miss%>% gt::gt() %>% 
+#   gt::tab_header(
+#     title = 'CINT- COVID Question Missing Data',
+#     subtitle = 'By Participant')
+# 
+# 
+# # Below is the code that treats -77, -55 values as NA
+# cint_covid_complete <-
+#   cint_covid %>%
+#   mutate(across(-c(id), as.numeric)) %>%
+#   mutate(
+#     across(
+#       .cols = -c(id),
+#       .fns = ~case_when(
+#         .x < 0 ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   ) 
 
 ```
 
@@ -3434,7 +3447,6 @@ socinf_sub<- tpw_raw %>%
 ### SOCINF Substances Missing 
 ```{r socinf_sub_missing}
 socinf_sub <- socinf_sub%>%
-
   # if socinf_relationship_screener is NO/0 (no partner), SOC1:SOC2d; soc4a:soc4h; socb1:socb2e; socb4a:socb4k; socc1; socc2a:socc2e; socc4a:socc4k; socd1 were not asked
   mutate_at(vars(soc1:soc2d, soc4a:soc4h, socb1:socb2e, socb4a:socb4k, socc1, socc2a:socc2e, socc4a:socc4k,socd1, socd2a:socd2d, socd4a:socd4k), ~case_when(socinf_relationship_screener == 0 ~ "-55", TRUE ~ .)) %>%
   # if soc1 is Yes/1, soc2a:soc2d were not asked
