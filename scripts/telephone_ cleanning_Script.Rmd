@@ -3876,7 +3876,7 @@ sus <- tpw_raw %>%
       )
     )
   ) 
-    #mutate(across(-c(id,sus6a:sus6c,sus14, sus14b,sus14c, sus14d, sus14e, sus14f,sus14g,sus14h,sus14i,sus14j,sus14k,sus14l,sus14m,sus14n,sus14o), as.numeric))
+
 
 # Combine sus11b answer options to sus11b 
 sus$sus11b <- apply(sus[, c("sus11b_1","sus11b_2","sus11b_3","sus11b_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
@@ -3941,6 +3941,7 @@ sus <- sus %>%
   relocate(sus14a, .after = "sus14") %>%
   relocate(sus14b1, .after = "sus14b") %>%
   relocate(sus14c1, .after = "sus14c") %>%
+  relocate(sus14d1, .after = "sus14d") %>%
   relocate(sus14e1, .after = "sus14e") %>%
   relocate(sus14f1, .after = "sus14f") %>%
   relocate(sus14g1, .after = "sus14g") %>%
@@ -3952,7 +3953,7 @@ sus <- sus %>%
   relocate(sus14m1, .after = "sus14m") %>%
   relocate(sus14n1, .after = "sus14n") %>% 
   relocate(sus14o1, .after = "sus14o") %>%
-  relocate(sus26b, .after = "sus26b") 
+  relocate(sus26b, .after = "sus26a") 
   
   
 ```
@@ -4149,6 +4150,44 @@ sus <- sus %>%
   select(-c("sus14o1_1","sus14o1_2","sus14o1_3","sus14o1_77")) %>%
   select(-c("sus26b_1","sus26b_2","sus26b_3","sus26b_77"))
 
+## Now we will drop columns that have no data (only -55)
+# Check if every value in each column is equal to -55 or -99 or -77 or some combo thereof
+columns_to_drop <- names(sus)[sapply(sus, function(col) 
+  all(col %in% c("-55", "-99", "-77")) || 
+  all(col == "-55") || 
+  all(col == "-99") || 
+  all(col == "-77") || 
+  (all(col %in% c("-55", "-99")) && any(col %in% "-77")) || 
+  (all(col %in% c("-55", "-77")) && any(col %in% "-99")) || 
+  (all(col %in% c("-99", "-77")) && any(col %in% "-55"))
+)]
+
+
+# Drop the columns where every value is -55 or -99 or -77 or combo
+# this should drop 10 empty comlumns
+sus <- sus[, !names(sus) %in% columns_to_drop]
+
+## Min there are still NA values and empty values in the dataset we need to check
+## Note for Maria -- need to remove and recode 6a,6b, and 6c
+## Maria export to csv and double code with Kaylee
+## notes here
+# P865 (add count of 2 to sus1)
+# P856 (add count of 3 to sus 4)
+# P887 (add count of 1 to sus 1)
+# P849 (add count of 3 to sus 1)
+# P854 (add count of 1 to new sus 7 variable should reflect contact for child in my care, not my own child another persons DHS coase)
+# P882 (add count of 2 to sus 1)
+# P867 (Add count of 3 to sus 1)
+# P902 (Add count of 1 to sus 1)
+# P845 (add count of 3 to sus 2)
+# HR 194 (Add count of 1 to new cat 7)
+# HR204 (Add count of 3 to sus 2)
+# HR131 (add count of 3 to sus 4)
+# HR 175 (add count of 3 to sus 4)
+#HR 171 (add count of 1 to sus 3)
+# P805 add count of 3 to sus 7
+#P829 add count of 1 to sus 7
+#P890 add count of 1 to sus 1
 sus_miss <- sus %>%
     mutate(across(-c(id), as.numeric))%>%
   pct_miss_fun(
@@ -4202,8 +4241,12 @@ pcl <- tpw_raw %>%
   mutate(pcl12_hapWit_dev = str_extract(pcl12_hapWit_dev, "^[^;]+")) %>%
   relocate(pcl12_hapWit_dev, .after = "pcl12a_77") %>%
   
+  ## MIN check why does the above code end at 12 instead of going to 19?
+  
   #===========================Developmental Period for "Happened to me" only ============================
   # please note this is developmental period for "Happen to me" is not accurate. Because we asked TC "how old were you when this occurred" ( they don't have a chance to specify weather this was witnessed or actually happened to them. The following code created first development period for happened to me only, i.e.: if someone selected both happen to me and witness, and they indicated it's during 0-5 years old, the only happen to me development period would be 0-5, but we don't know for sure weather that happened to them or they witnessed during this first dev period. 
+
+## Min do you suggest we remove this then given the above? Call me tomorrow if we need to talk
   mutate(
     pcl1_devperiod = factor(
       case_when(
@@ -4480,7 +4523,7 @@ pcl <- pcl %>%
     .fn = ~ gsub("pcl(\\d+)_4", "pcl\\1_no", .),
     .cols = matches("pcl\\d+_4")
   ) %>%
-  # rename column names to reflect when was this ssitution developed 
+  # rename column names to reflect when was this situation developed 
   rename_with(
     .fn = ~ gsub("pcl(\\d+)a_1", "pcl\\1_hapWit_ages_0_5", .),
     .cols = matches("pcl\\d+a_1")
@@ -4806,56 +4849,31 @@ pcl <- pcl %>%
             "pcl19c3_1", "pcl19c3_2", "pcl19c3_3", "pcl19c3_9999", "pcl19c3_77",
             "pcl19c4_1", "pcl19c4_2", "pcl19c4_3", "pcl19c4_9999", "pcl19c4_77",
             "pcl19d_1", "pcl19d_2", "pcl19d_3", "pcl19d_77"))
-  
-# TODO: Maria, I think below are duplicated code, if so, you can go ahead remove them. 
-# pcl <- pcl %>%
-#   mutate(pcl1_devperiod = case_when(
-#      # TODO Maria, please double check I replace _16 to _2, and seems like this code section is doing the same with above
-#     !is.na(pcl1a_1) & pcl1_1 == "Happened to me" ~ "0-5",
-#     is.na(pcl1a_1) & !is.na(pcl1a_2) & pcl1_1 == "Happened to me" ~ "6-11",
-#     is.na(pcl1a_1) & is.na(pcl1a_2) & !is.na(pcl1_3) & pcl1_1 == "Happened to me" ~ "12-19",
-#     is.na(pcl1a_1) & is.na(pcl1a_2) & is.na(pcl1a_3) & !is.na(pcl1a_4) & pcl1_1 == "Happened to me" ~ "adulthood",
-#     TRUE ~ NA_character_),
-#     pcl2_devperiod = case_when(
-#       !is.na(pcl2a_1) & pcl2_1 == "Happened to me" ~ "0-5",
-#       is.na(pcl2a_1) & !is.na(pcl2a_2) & pcl2_1 == "Happened to me" ~ "6-11",
-#       is.na(pcl2a_1) & is.na(pcl2a_2) & !is.na(pcl2_3) & pcl2_1 == "Happened to me" ~ "12-19",
-#       is.na(pcl2a_1) & is.na(pcl2a_2) & is.na(pcl2a_3) & !is.na(pcl2a_4) & pcl2_1 == "Happened to me" ~ "adulthood",
-#       TRUE ~ NA_character_),
-#       pcl3_devperiod = case_when(
-#         !is.na(pcl3a_1) & pcl3_1 == "Happened to me" ~ "0-5",
-#         is.na(pcl3a_1) & !is.na(pcl3a_2) & pcl3_1 == "Happened to me" ~ "6-11",
-#         is.na(pcl3a_1) & is.na(pcl3a_2) & !is.na(pcl3_3) & pcl3_1 == "Happened to me" ~ "12-19",
-#         is.na(pcl3a_1) & is.na(pcl3a_2) & is.na(pcl3a_3) & !is.na(pcl3a_4) & pcl3_1 == "Happened to me" ~ "adulthood",
-#         TRUE ~ NA_character_
-#   ))
 
-# Happen to me 
-# pcl <- pcl %>%
-#   mutate(pcl1_yes = if_else(pcl1_1 == "Happened to me", 1, 0, missing = 0),
-#            # Maria: i replaced pcl16_yes with pcl2_yes
-#          pcl2_yes = if_else(pcl2_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl3_yes = if_else(pcl3_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl4_yes = if_else(pcl4_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl5_yes = if_else(pcl5_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl6_yes = if_else(pcl6_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl7_yes = if_else(pcl7_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl8_yes = if_else(pcl8_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl9_yes = if_else(pcl9_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl10_yes = if_else(pcl10_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl11_yes = if_else(pcl11_1 == "Happened to me", 1, 0, missing = 0),
-#          # Maria: i replaced pcl116_1 with pcl12_1
-#          pcl12_yes = if_else(pcl12_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl13_yes = if_else(pcl13_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl14_yes = if_else(pcl14_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl15_yes = if_else(pcl15_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl16_yes = if_else(pcl16_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl17_yes = if_else(pcl17_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl16_yes = if_else(pcl16_1 == "Happened to me", 1, 0, missing = 0),
-#          pcl19_yes = if_else(pcl19_1 == "Happened to me", 1, 0, missing = 0)
-#          )
-# okay here is a basic by time period
 
+## Removing any columns in which there are only NAs 
+# Assuming 'your_dataset' is the name of your dataframe
+## this drop 105 columns that aren't necessary 
+pcltest <- pcl %>%
+  select(-which(sapply(pcl, function(col) all(is.na(col) | col == "NA"))))
+
+## MIN can you check after column 450 there is data but I can't figure out what the columns are
+## we need to check on inputting appropriate missing values
+
+## would like each b1 thorough c variables to have labels
+## b1 = freq0-5
+## b2 = freq6-11
+## b3 = freq12-19
+## b4 = freqadult
+## all text just add _txt to the above
+
+## then rename cariables
+## c1 == relation0-5
+## c2 == relation6-11
+## c3 == relation12-19
+## c4 == relationadult
+## d == learned_relation_allAge
+## all text just add - txt
 
 
 ```
