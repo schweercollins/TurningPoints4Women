@@ -515,6 +515,7 @@ data_subset <- complete %>%
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
 summary_data <- lapply(data_subset, function(x) {
+  x <- replace(x, x < -40, NA)
   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
   sd_val <- round(sd(x, na.rm = TRUE), 2)
   range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
@@ -1050,6 +1051,7 @@ ciq_data_subset <- complete %>%
 
 # Calculate the summary statistics for each variable
 ciq_summary_data <- lapply(ciq_data_subset, function(x) {
+  x <- replace(x, x < -40, NA)
   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
   sd_val <- round(sd(x, na.rm = TRUE), 2)
   range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
@@ -1316,6 +1318,7 @@ dast_data_subset_binary <- complete %>%
 
 # Calculate the dichotomous summary statistics for each variable
 dast_summary_data_binary <- lapply(dast_data_subset_binary, function(x) {
+  x <- replace(x, x < -40, NA)
   per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
   per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
   num_no <- sum(x == 0, na.rm = TRUE)
@@ -2766,7 +2769,7 @@ dyadc_word_long <- dyadc_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         value = case_when(row_number() <= 15  ~ "0 = Always Disagree 
+         Value = case_when(row_number() <= 15  ~ "0 = Always Disagree 
                                                  \n1 = Almost Always Disagree
                                                  \n2 = Frequently Disagree
                                                  \n3 = Occasionally Disagree
@@ -2848,7 +2851,7 @@ dyadc_gt_table <- dyadc_gt_table %>%
             locations = cells_row_groups(groups = c("set1", "set2", "set3", "set4"))) %>%
   cols_width(#notes ~ px(150),
              var_name ~ px(100),
-             value ~ px(225)) %>%
+             Value ~ px(225)) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
@@ -5388,7 +5391,7 @@ ibq_complete %>%
 
 
 # CINT-SOCIODEMS 
-<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+   <MARIA: you might want to switch this to full name to be consistent with other measure.> 
 
 ## <Maria, I wasn't sure what's the full name is>  (CINT-SOCIODEMS)
 
@@ -5419,6 +5422,10 @@ CINT-SOCIODEMS survey items are presented in the following table:
 # Pull question wording from Qualtrics data
 cint_sociodems_word <- qualtrics %>% 
   select(`CINTPregnancy Screen`: `CINT Income Support`, CINTIdentity, CINTIdentity_8_TEXT) %>%
+  # Maria, we might want to add comment here to explain these two options 
+  mutate(cint1_choice1 = CINT1) %>%
+  rename(cint1_choice2 = CINT1) %>%
+  relocate(cint1_choice1, .after = `CINT-0`) %>%
   slice(1)
 
 #create table with variable name, description, and notes
@@ -5430,7 +5437,7 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
          description = str_replace(description, "READ:", ""),
          description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", ""),
          var_name = str_to_lower(var_name),
-         value = case_when(row_number() %in% c(1,5,6,7,8) ~ "1 = Yes, 
+         value = case_when(row_number() %in% c(1,6,7,8,9) ~ "1 = Yes, 
                                              \n0 = No",
                            row_number() %in% c(2) ~ "1 = 1. 8th grade or less or working towards GED
                                             \n 2 = 2. Completed GED/Alternative H.S. diploma
@@ -5445,7 +5452,7 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
                                             \n 11 = 11. Taking/have taken graduate classes or working toward post-college degree
                                             \n 12 = 12. Completed post-college degree
                                             \n -77 = Decline to Answer",
-                           row_number() %in% c(3) ~ "1 = 1. Currently Working
+                           row_number() %in% c(3,4) ~ "1 = 1. Currently Working
                                             \n 2 = 2. Temporarily laid off
                                             \n 3 = 3. On Leave
                                             \n 4 = 4. Unemployed or looking for work
@@ -5454,20 +5461,20 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
                                             \n 7 = 7. Student
                                             \n 8 = 8. Something else, please briefly describe
                                             \n -77 = Decline to Answer",
-                           row_number() %in% c(9) ~ "1 = 1. Always or almost always
+                           row_number() %in% c(10) ~ "1 = 1. Always or almost always
                                             \n 2 = 2. Often
                                             \n 3 = 3. About half the time
                                             \n 4 = 4. Occasionally
                                             \n 5 = 5. Never or almost never
                                             \n 6 = 8. N/A, no bills to pay
                                             \n -77 = Decline to Answer", 
-                           row_number() %in% c(10) ~ "1 = 1. Always or almost always
+                           row_number() %in% c(11) ~ "1 = 1. Always or almost always
                                             \n 2 = 2. Often
                                             \n 3 = 3. About half the time
                                             \n 4 = 4. Occasionally
                                             \n 5 = 5. Never or almost never
                                             \n -77 = Decline to Answer", 
-                           row_number() %in% c(13) ~ "1 = Cisgender female or woman
+                           row_number() %in% c(14) ~ "1 = Cisgender female or woman
                                             \n 2 = Cisgender male or man
                                             \n 3 = Female/Woman
                                             \n 4 = Male/Man
@@ -5487,7 +5494,8 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
   mutate(value = if_else(var_name == "cint1_8_text", "Open Text Entry", value)) %>%
   mutate(value = if_else(var_name == "cint-income", "Open Text Entry", value)) %>%
   mutate(value = if_else(var_name == "cint income support", "Open Text Entry", value)) %>%
-  mutate(value = if_else(var_name == "cintidentity_8_text", "Open Text Entry", value))
+  mutate(value = if_else(var_name == "cintidentity_8_text", "Open Text Entry", value)) %>%
+  rename(`Value` = value )
 ```
 
 ```{r cint_sociodems-var-table, results ='asis'}
@@ -5508,8 +5516,694 @@ cint_sociodems_gt_table <- cint_sociodems_gt_table %>%
 
 # Print the table
 print(cint_sociodems_gt_table)
+```
+### Summary Statistics
 
-#WHEN RENDERING WITH PDF USE: 
-#my_gt_table
+#### Descriptive Statistics
+
+Only missing percentage are presented 
+  
+```{r cint_socio-missing}
+# Create subset of BSI items
+cint_socio_data_subset <- complete %>%
+  select(cint_pregnancy_screen:cint_income_support, cint_identity)
+
+# Calculate the summary statistics for each variable
+## mean is showing 2 decimals per authors
+cint_socio_summary_data <- lapply(cint_socio_data_subset, function(x) {
+  x <- replace(x, x < -40, NA)
+  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  # sd_val <- round(sd(x, na.rm = TRUE), 2)
+  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+   miss_val <- round(mean(is.na(x)) * 100, 2)
+  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  c(Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cint_socio_summary_data <- as.data.frame(cint_socio_summary_data)
+
+# Set items as first row
+cint_socio_summary_data <- rbind(names(cint_socio_summary_data), cint_socio_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cint_socio_tbl <- cint_socio_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Missing = "% Missing") %>% 
+  # cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Missing"), align = "left") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cint_socio_tbl
+
 ```
 
+# CINT-LADDER
+<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+  
+  
+### CINT-LADDER Description
+  
+  <MARIA> please insert a breif description for this measure 
+
+
+* No items need to be reverse scored. 
+
+* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+
+
+
+Reference:
+  <Maria, please add a reference if needed> 
+  
+### CINT-LADDER Variables
+  
+#### Value Labels and Survey Items 
+  
+  All CINT-LADDER variables use 1-10 as respose from losest of the ladder to highest of the ladder. 
+  <Maria, you might want place a visual here> 
+
+CINT-LADDER survey items are presented in the following table:
+
+  
+```{r CINT-LADDER-var-prep}
+# Pull question wording from Qualtrics data
+cint_ladder_word <- qualtrics %>% 
+  select(`CINT-Ladder1`, `CINT-Ladder2`) %>%
+  slice(1)
+
+#create table with variable name, description, and notes
+cint_ladder_word_long <- cint_ladder_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name)) %>%
+  # Edits Variable description and value
+  mutate(description = if_else(var_name == "cint-ladder1", "L1. Think of this ladder as representing where people stand in the United States. 
+                               At the top of the ladder are the people who are the best off — those who have the most money, the most education, 
+                               and the most respected jobs. At the bottom are the people who are the worst off – who have the least money, least 
+                               education, and the least respected jobs or no job. The higher up you are on this ladder, the closer you are to the 
+                               people at the very top; the lower you are, the closer you are to the people at the very bottom. Where would you 
+                               place yourself on the ladder? Please take a moment to pick a rung where you think you stand at this time in your life, 
+                               relative to other people in the United States. \nNow count starting from the bottom of the ladder to the top. 
+                               Which number of rung did you place yourself on?", description)) %>%
+  mutate(description = if_else(var_name == "cint-ladder2", "L2. Think of this ladder as representing where people stand in their communities. 
+                               People define community in different ways; please define it in whatever way is most meaningful to you. At the top 
+                               of the ladder are the people who have the highest standing in their community. At the bottom are the people who 
+                               have the lowest standing in their community. Where would you place yourself on this ladder. Please take a moment 
+                               to pick a rung where you think you stand at this time in your life, relative to other people in your community. 
+                               \n Now count starting from the bottom of the ladder to the top. Which number of rung did you place yourself on?", description))
+
+ 
+```
+
+```{r cint_ladder-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cint_ladder_gt_table <- gt(cint_ladder_word_long)
+
+# Table-specific formatting (col width, names)
+cint_ladder_gt_table <- cint_ladder_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description"
+             #notes = "Notes"
+  ) %>% 
+  apply_tbl_theme() %>% 
+  cols_width(description ~ px(300),
+             var_name ~ px(100)
+  ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cint_ladder_gt_table)
+```
+
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Only missing percentage are presented 
+
+```{r cint_ladder-missing}
+# Create subset of BSI items
+cint_ladder_data_subset <- complete %>%
+  select(cint_pregnancy_screen:cint_income_support, cint_identity)
+
+# Calculate the summary statistics for each variable
+## mean is showing 2 decimals per authors
+cint_ladder_summary_data <- lapply(cint_ladder_data_subset, function(x) {
+  x <- replace(x, x < -40, NA)
+  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  # sd_val <- round(sd(x, na.rm = TRUE), 2)
+  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+   miss_val <- round(mean(is.na(x)) * 100, 2)
+  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  c(Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cint_ladder_summary_data <- as.data.frame(cint_ladder_summary_data)
+
+# Set items as first row
+cint_ladder_summary_data <- rbind(names(cint_ladder_summary_data), cint_ladder_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cint_ladder_tbl <- cint_ladder_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Missing = "% Missing") %>% 
+  # cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Missing"), align = "left") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cint_ladder_tbl
+
+```
+
+# CINT-Relation
+<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+  
+  
+### CINT-Relation Description
+  
+  <MARIA> please insert a breif description for this measure 
+
+
+* No items need to be reverse scored. 
+
+* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+
+
+
+Reference:
+  <Maria, please add a reference if needed> 
+  
+### CINT-Relation Variables
+  
+#### Value Labels and Survey Items 
+  
+  All CINT-Relation variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+
+CINT-Relation survey items are presented in the following table:
+  
+  
+```{r CINT-relation-var-prep}
+# Pull question wording from Qualtrics data
+cint_relation_word <- qualtrics %>% 
+  select(`CINT20`: `CINT37`) %>%
+  slice(1)
+
+#create table with variable name, description, and notes
+cint_relation_word_long <- cint_relation_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "READ:", ""),
+         #description = str_replace(description, "Assessor Note: Assessor give them a few moments to decide.", "\n"),
+         var_name = str_to_lower(var_name)) %>% 
+  # Edits Variable description and value
+  mutate(description = if_else(var_name == "cint20", " How many people in total have you been involved with romantically or 
+                               sexually in the last 6 months (including current or any others)?", description)) %>%
+  mutate(description = if_else(var_name == "cintq2", "Please think about the longest or most serious relationship 
+                               over the past 6 months. How old was that partner?", description)) %>%
+  mutate(description = if_else(var_name == "cintq3", "What was your relationship with that partner?", description)) %>% 
+  mutate(description = if_else(var_name == "cint27", "On a scale of 1 to 10, with 1 being not at all well and 10 being 
+                               very well, how well did you and your partner get along in the last 6 months 
+                               (when seeing/dating your partner)?", description)) %>% 
+  mutate(description = if_else(var_name == "cint27", "On a scale of 1 to 10, with 1 being not at all well and 10 being 
+                               very well, how well did you and your partner get along in the last 6 months 
+                               (when seeing/dating your partner)?", description)) %>% 
+   mutate(description = if_else(var_name == "cint30", "How would you describe the way your partner drinks alcohol, 
+                                on average, in the past 6 months?", description)) %>%    
+    mutate(description = if_else(var_name == "cint30_7_text", "How would you describe the way your partner drinks 
+                                 alcohol, on average, in the past 6 months? - 7. Other: (Specify) - Text?", description)) %>%     
+    mutate(description = if_else(var_name == "cint31", "How would you describe the way your partner smokes pot, on average, 
+                                 in the past 6 months?", description)) %>%     
+    mutate(description = if_else(var_name == "cint31_7_text", "How would you describe the way your partner smokes pot, 
+                                 on average, in the past 6 months? - 7. Other: (Specify) - Text", description)) %>%
+    mutate(description = if_else(var_name == "cint31_7_text", "How would you describe the way your partner uses hard drugs, 
+                                 on average, in the past 6 months? ", description)) %>%    
+    mutate(description = if_else(var_name == "cint32_7_text", "How would you describe the way your partner uses hard drugs, 
+                                 on average, in the past 6 months? - 7. Other: (Specify) - Text", description)) %>%    
+    mutate(description = if_else(var_name == "cint33", "What is the highest level of school your partner has finished so far?", description)) %>%  
+    mutate(description = if_else(var_name == "cint34", "On a scale of 1-10, with 1 being not at all supportive and 10 being very supportive, 
+                                 how emotionally supportive is/was your partner of you in the last 6 months?", description)) %>%
+    mutate(description = if_else(var_name == "cint35", "Now, I'd like to ask you about friends and other support in your life. 
+                                 About how many close friends do you have?", description)) %>%
+    mutate(description = if_else(var_name == "cint36", "Thinking about your life in the past 6 months, on average, how many days a week do 
+                                 you currently get together socially with your friends outside of school or work?", description)) %>%
+      mutate(description = if_else(var_name == "cint37", "Now, please think about all of your friends (all genders). Have any of your 
+                                   friends been arrested in the last 6 months?", description)) %>%
+    mutate(`Lable Value` = "")%>%
+    mutate(`Lable Value` = if_else(var_name %in% c("cint28", "cint29", "cint37"), "1 = Yes
+                                                                                   \n 0 = No
+                                                                                   \n -66 = Don't Know
+                                                                                   \n -77  = Decline to Answer", `Lable Value`)) %>%
+    mutate(`Lable Value` = if_else(var_name %in% c( "cint20", "cintq2", "cint12", "cint30_7_text", "cint31_7_text", "cint32_7_text"), "Open Text Entry", `Lable Value`)) %>%
+    mutate(`Lable Value` = if_else(var_name %in% c("cintq3"), "1 = 1. Married
+                                                               \n 2 = 2. Living together
+                                                               \n 3 = 3. Dating or seeing each other, but not living together. This includes casual dating.
+                                                               \n 4 = 4. Married, but separated
+                                                               \n -77 = 5. Decline to Answer", `Lable Value`)) %>%
+      mutate(`Lable Value` = if_else(var_name %in% c("cint26"), "1 = 1 - Not at all close
+                                                                 \n 2 = 2
+                                                                 \n 3 = 3
+                                                                 \n 4 = 4
+                                                                 \n 5 = 5
+                                                                 \n 6 = 6
+                                                                 \n 7 = 7
+                                                                 \n 8 = 8
+                                                                 \n 9 = 9
+                                                                 \n 10 = 10 - Extremely Close
+                                                                 \n -77 = Decline to Answer", `Lable Value`)) %>%
+      mutate(`Lable Value` = if_else(var_name %in% c("cint27"), "1 = 1 - Not at all well
+                                                                 \n 2 = 2
+                                                                 \n 3 = 3
+                                                                 \n 4 = 4
+                                                                 \n 5 = 5
+                                                                 \n 6 = 6
+                                                                 \n 7 = 7
+                                                                 \n 8 = 8
+                                                                 \n 9 = 9
+                                                                 \n 10 = 10 - Very Well
+                                                                 \n -77 = Decline to Answer", `Lable Value`)) %>%
+      mutate(`Lable Value` = if_else(var_name %in% c("cint30"), "0 = 1. Never
+                                                                 1 = 2. Drank alcohol only a few times during the year
+                                                                 \n 2 = 3. Drinks regularly for a few weeks or more, then doesn't for a few weeks or more or drinks, then stops drinking (ex: became clean and sober)
+                                                                 \n 3 = 4. Drinks about once a month
+                                                                 \n 4 = 5. Drinks on weekends or mostly on weekends
+                                                                 \n 5 = 6. Drinks daily or almost daily
+                                                                 \n 6 = 7. Other: (Specify)
+                                                                 \n -66 = 8. Don't know
+                                                                 \n -77 = Decline to Answer", `Lable Value`)) %>%
+      mutate(`Lable Value` = if_else(var_name %in% c("cint31"), "0 = 1. Never
+                                                              \n 1 = 2. Smoked only a few times during the year
+                                                              \n 2 = 3. Smokes regularly for a few weeks or more, then doesn't for a few weeks or more or used, then stopped (ex: became clean and sober)
+                                                              \n 3 = 4. Smokes about once a month
+                                                              \n 4 = 5. Smokes on weekends or mostly on weekends or a few times a week
+                                                              \n 5 = 6. Smokes daily or almost daily
+                                                              \n 6 = 7. Other: (Specify)
+                                                              \n -66 = 8. Don't know
+                                                              \n -77 = Decline to Answer" , `Lable Value`)) %>%
+     mutate(`Lable Value` = if_else(var_name %in% c("cint32"), "0 = 1. Never
+                                                              \n 1 = 2. Used hard drugs a limited number of times
+                                                              \n 2 = 3. Uses drugs regularly for a few weeks or more, then don't for a few weeks or more, or used, then stopped (ex: became clean and sober)
+                                                              \n 3 = 4. Uses drugs about once a month
+                                                              \n 4 = 5. Uses hard drugs on weekends or mostly on weekends or a few times a week
+                                                              \n 5 = 6. Uses hard drugs daily or almost daily
+                                                              \n 6 = 7. Other: (Specify)
+                                                              \n -66 = 8. Don't know
+                                                              \n -77 = Decline to Answer", `Lable Value`)) %>%
+     mutate(`Lable Value` = if_else(var_name %in% c("cint33"), "1 = 1. Any grade up to the 12th grade, but not having a High School Diploma/GED
+                                                             \n 2 = 2. GED or Equivalency
+                                                             \n 3 = 3. High School Diploma
+                                                             \n 4 = 4. Attended Community College but no A.A.(Associates) degree
+                                                             \n 5 = 5. Community College degree, (A.A.)
+                                                             \n 6 = 6. Attended 4 year University or College, but no degree
+                                                             \n 7 = 7. B.A., B.S., BSN degree
+                                                             \n 8 = 8. Graduate degree (MA, MS, PhD)
+                                                             \n 9 = 9. Other (Technical, Vocational school)
+                                                             \n -66 = 10. Don't know
+                                                             \n -77 = Decline to Answer" , `Lable Value`)) %>%
+       mutate(`Lable Value` = if_else(var_name %in% c("cint34"), "1 = 1 (Not at all Supportive)
+                                                                 \n 2 = 2
+                                                                 \n 3 = 3
+                                                                 \n 4 = 4
+                                                                 \n 5 = 5
+                                                                 \n 6 = 6
+                                                                 \n 7 = 7
+                                                                 \n 8 = 8
+                                                                 \n 9 = 9
+                                                                 \n 10 = 10 (Very Supportive)
+                                                                 \n -77 = Decline to Answer" , `Lable Value`)) %>%
+         mutate(`Lable Value` = if_else(var_name %in% c("cint35"), "0 = 1. None
+                                                                 \n 1 = 2. One
+                                                                 \n 2 = 3. Two or three
+                                                                 \n 3 = 4. Four or more
+                                                                 \n -77 = Decline to Answer" , `Lable Value`)) %>%
+           mutate(`Lable Value` = if_else(var_name %in% c("cint36"), "0 = 1. Never
+                                                                 \n 1 = 2. Less than once a week
+                                                                 \n 2 = 3. One
+                                                                 \n 3 = 4. Two or three
+                                                                 \n 4 = 5. Four or five
+                                                                 \n 5 = 6. Six or seven
+                                                                 \n 6 = 7. N/A, current living situation/setting provides no opportunity for socialization ( if says she is in a locked setting)
+                                                                 \n -77 = Decline to Answer" , `Lable Value`))
+  
+  
+```
+
+```{r cint_relation-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cint_relation_gt_table <- gt(cint_relation_word_long)
+
+# Table-specific formatting (col width, names)
+cint_relation_gt_table <- cint_relation_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description"
+             #notes = "Notes"
+  ) %>% 
+  apply_tbl_theme() %>% 
+  cols_width(description ~ px(300),
+             var_name ~ px(100)
+  ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cint_relation_gt_table)
+```
+
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Only missing percentage are presented 
+
+```{r cint_relation-missing}
+# Create subset of BSI items
+cint_relation_data_subset <- complete %>%
+  select(cint_pregnancy_screen:cint_income_support, cint_identity)
+
+# Calculate the summary statistics for each variable
+## mean is showing 2 decimals per authors
+cint_relation_summary_data <- lapply(cint_relation_data_subset, function(x) {
+  x <- replace(x, x < -40, NA)
+  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  # sd_val <- round(sd(x, na.rm = TRUE), 2)
+  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+   miss_val <- round(mean(is.na(x)) * 100, 2)
+  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  c(Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cint_relation_summary_data <- as.data.frame(cint_relation_summary_data)
+
+# Set items as first row
+cint_relation_summary_data <- rbind(names(cint_relation_summary_data), cint_relation_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cint_relation_tbl <- cint_relation_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Missing = "% Missing") %>% 
+  # cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Missing"), align = "left") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cint_relation_tbl
+
+```
+
+# CINT-SUBSTANCE
+<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+  
+  
+### CINT-S Description
+  
+  <MARIA> please insert a breif description for this measure 
+
+
+* No items need to be reverse scored. 
+
+* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+
+
+
+Reference:
+  <Maria, please add a reference if needed> 
+  
+### CINT-SUBSTANCE Variables
+  
+#### Value Labels and Survey Items 
+  
+  All CINT-SUBSTANCE variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+
+CINT-SUBSTANCE survey items are presented in the following table:
+  
+  
+```{r CINT-substance-var-prep}
+# Pull question wording from Qualtrics data
+cint_substance_word <- qualtrics %>% 
+  select(`CINTPregnancy Screen`, `CINT39`: `CINT84`) %>%
+  slice(1)
+
+#create table with variable name, description, and notes
+cint_substance_word_long <- cint_substance_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "READ:", ""),
+         description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", "\n"),
+         var_name = str_to_lower(var_name)) %>%
+  # Edits Variable description and value
+  mutate(description = if_else(var_name == "cint40", "How many days have you smoked cigarettes in the past 6 months? _____ Days", description)) %>%
+  mutate(description = if_else(var_name == "cint42", "On average, how many cigarettes did you smoke a day in the past 6 months? _______ Cigarettes", description)) %>%
+  mutate(description = if_else(var_name == "cint44", "How many days did you drink beer, wine or hard liquor in the last six months? _________ Days", description)) %>% 
+  mutate(description = if_else(var_name == "cint46", "When you drank alcohol, did you usually get drunk?", description)) %>% 
+  mutate(description = if_else(var_name == "cint47", "How would you describe the way you drank alcohol over the past 6 months? - Selected Choice", description)) %>% 
+    mutate(description = if_else(var_name == "cint47_6_text", "How would you describe the way you drank alcohol over the past 6 months? - 6. Other: Specify - Text", description)) %>%     
+    mutate(description = if_else(var_name == "cint31", "How would you describe the way your partner smokes pot, on average, 
+                                 in the past 6 months?", description)) %>%     
+    mutate(description = if_else(var_name == "cint48", "Thinking about all types of alcohol, like beer, wine, or hard liquor, how many drinks have you usually 
+                                 had at one time in the past 6 months? _______ Drinks in the past 6 months", description)) %>%
+    mutate(description = if_else(var_name == "cint49", "About how much time would you usually take to drink that? ______ Mins", description)) %>%    
+    mutate(description = if_else(var_name == "cint51", "What is the largest number of drinks you have had (the most drinks you have had), on at least 2 
+                                 different days or occasions in the last 6 months? ______ Drinks", description)) %>%    
+    mutate(description = if_else(var_name == "cint53", "How long does it usually take you to drink that amount? _________ Mins", description)) %>%  
+    mutate(description = if_else(var_name == "cint59", "How many times have you smoked pot in the last 6 months? _______ Times", description)) %>%
+    mutate(description = if_else(var_name == "cint61", "When you have smoked pot in the last 6 months, how high have you gotten?", description)) %>%
+    mutate(description = if_else(var_name == "cint62", "How would you describe the way you smoked pot over the last 6 months? - Selected Choice", description)) %>%
+  mutate(description = if_else(var_name == "cint62_6_text", "How would you describe the way you smoked pot over the last 6 months? - 6. Other - Text", description)) %>%  
+  mutate(description = if_else(var_name == "cint78", "Have you used prescription drugs, such as antidepressants, steroids, mood stabilizers, antibiotics, 
+                               birth control, muscle relaxers, or allergy medications, in the past 6 months?", description)) %>%
+  mutate(description = if_else(var_name == "cint84", "With whom did you share needles? (Indicate all that apply)", description)) %>%
+  mutate(`Value` = "") %>%
+  mutate(`Value` = if_else(var_name %in% c("cintpregnancy screen", "cint39", "cint41", "cint43", "cint45", "cint50", "cint54",
+                                           "cint56", "cint58", "cint60", "cint63", "cint64","cint65", "cint66", 
+                                           "cint68", "cint70", "cint72", "cint74", "cint76", "cint78", "cint80", "cint82"), "1 = Yes
+                                                                                   \n 0 = No
+                                                                                   \n -66 = Don't Know
+                                                                                   \n -77  = Decline to Answer", `Value`)) %>%
+      mutate(`Value` = if_else(var_name %in% c( "cint40", "cint42", "cint44", "cint47_6_text", "cint48", "cint49", "cint51", "cint52", "cint53", 
+                                                "cint55", "cint57", "cint59", "cint62_6_text", "cint67", "cint69", "cint71", "cint73", "cint75" , 
+                                                "cint77", "cint79", "cint81", "cint83"), "Open Text Entry", `Value`)) %>%
+      mutate(`Value` = if_else(var_name %in% c( "cint46"), "0 = 1. Not at all
+        1 = 2. A little drunk
+        2 = 3. Quite drunk
+        3 = 4. Very drunk
+      -77 = Decline to Answer", `Value`)) %>%
+      mutate(`Value` = if_else(var_name %in% c( "cint47"), "1 = 1. Drank alcohol only a few times during the past 6 months (up to 5 times)
+        2 = 2. Drink regularly for a few weeks or more, then don't for a few weeks or more or drank for a period and then stopped altogether
+        3 = 3. Drink about once a month
+        4 = 4. Drink on weekends or mostly weekends or a few times a week
+        5 = 5. Drink daily or almost daily
+        6 = 6. Other: Specify
+        -77 = Decline to Answer", `Value`)) %>%
+       mutate(`Value` = if_else(var_name %in% c( "cint61"), "1 = 1. A little high
+                                                           \n 2 = 2. Quite high
+                                                           \n 3 = 3. Very high
+                                                           \n -77  = Decline to Answer", `Value`)) %>%
+         mutate(`Value` = if_else(var_name %in% c( "cint62"), "1 = 1. Smoked only a few times during the past 6 months
+                                                           \n 2 = 2. Smoked regularly for a few weeks or more, then didn't for a few weeks or more or smoked for some time and then stopped
+                                                           \n 3 = 3. Smoked about once a month
+                                                           \n 4 = 4. Smoked on weekends or mostly weekends or a few times a week
+                                                           \n 5 = 5. Smoked daily or almost daily
+                                                           \n 6 = 6. Other
+                                                           \n -77  = Decline to Answer", `Value`)) %>%
+        mutate(`Value` = if_else(var_name %in% c( "cint63"), "1 = Yes
+                                                           \n 0 = No
+                                                           \n -55 = 3. NA -- not in school and not employed in last 6 months
+                                                           \n -66 = Don't Know
+                                                           \n -77  = Decline to Answer", `Value`)) %>%
+          mutate(`Value` = if_else(var_name %in% c( "cint84"), "1 = 1. Stranger
+                                                          \n 2 = 2. Acquaintance
+                                                          \n 3 = 3. Friend
+                                                          \n 4 = 4. Family member
+                                                          \n 5 = 5. Romantic partner
+                                                          \n 6 = 6. Other
+                                                          \n -77 = Decline to Answer", `Value`))
+
+
+```
+
+```{r cint_substance-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cint_substance_gt_table <- gt(cint_substance_word_long)
+
+# Table-specific formatting (col width, names)
+cint_substance_gt_table <- cint_substance_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description"
+             #notes = "Notes"
+  ) %>% 
+  apply_tbl_theme() %>% 
+  cols_width(description ~ px(300),
+             var_name ~ px(100)
+  ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cint_substance_gt_table)
+```
+
+
+# CINT-COVID
+<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+  
+  
+### CINT-S Description
+  
+  <MARIA> please insert a breif description for this measure 
+
+
+* No items need to be reverse scored. 
+
+* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+
+
+
+Reference:
+  <Maria, please add a reference if needed> 
+  
+### CINT-COVID Variables
+  
+#### Value Labels
+  
+  
+All CINT-COVID variables have the same response options.
+
+```{r cint-covid-label-table, results = 'asis'}
+cint_covid_label_df <- data.frame(
+  value = c("0", "1", "2"),
+  label = c("No",
+    "Yes (Me)",
+            "Yes (Person in home)")) %>% 
+  t() %>% 
+  as.data.frame()
+
+cint_covid_label_df <- setNames(cint_covid_label_df[-1, ], unlist(cint_covid_label_df[1, ]))
+
+
+#create table
+cint_covid_label_table <- cint_covid_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cint_covid_label_table)
+```
+
+#### Survey Items
+
+ALL CINT-COVID variables have the same response options.
+<Maria, please review this> 
+Leading question: Since the coronavirus disease pandemic began, what has changed for you or your family?  
+  
+```{r CINT-covid-var-prep}
+# Pull question wording from Qualtrics data
+cint_covid_word <- qualtrics %>% 
+  select(`CINTPregnancy Screen`, `CINTC1`: `CINTC14`) %>%
+  slice(1)
+
+#create table with variable name, description, and notes
+cint_covid_word_long <- cint_covid_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "READ:", ""),
+         description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", "\n"),
+         var_name = str_to_lower(var_name)) 
+
+```
+
+```{r cint_covid-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+cint_covid_gt_table <- gt(cint_covid_word_long)
+
+# Table-specific formatting (col width, names)
+cint_covid_gt_table <- cint_covid_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description"
+             #notes = "Notes"
+  ) %>% 
+  apply_tbl_theme() %>% 
+  cols_width(#description ~ px(300),
+             var_name ~ px(100)
+  ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(cint_covid_gt_table)
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Only missing percentage are presented 
+
+```{r cint_covid-missing}
+# Create subset of BSI items
+cint_covid_data_subset <- complete %>%
+  select(cint_pregnancy_screen:cint_income_support, cint_identity)
+
+# Calculate the summary statistics for each variable
+## mean is showing 2 decimals per authors
+cint_covid_summary_data <- lapply(cint_covid_data_subset, function(x) {
+  x <- replace(x, x < -40, NA)
+  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  # sd_val <- round(sd(x, na.rm = TRUE), 2)
+  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+   miss_val <- round(mean(is.na(x)) * 100, 2)
+  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  c(Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cint_covid_summary_data <- as.data.frame(cint_covid_summary_data)
+
+# Set items as first row
+cint_covid_summary_data <- rbind(names(cint_covid_summary_data), cint_covid_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cint_covid_tbl <- cint_covid_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Missing = "% Missing") %>% 
+  # cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Missing"), align = "left") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cint_covid_tbl
+
+```
