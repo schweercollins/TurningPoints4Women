@@ -4151,7 +4151,7 @@ sus_miss <- sus %>%
 
 
 ## PCL 
-### PCL Select Variabl and Recode 
+### PCL Select Variable and Recode 
 
 ```{r plc }
 pcl <- tpw_raw %>%
