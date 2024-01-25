@@ -1561,30 +1561,12 @@ elf <-
     across(
       -c(id, elf23),
       ~case_when(
-        # TODO: Maria, in JP's code, he mention all items need revers code, so I just coded them reversely. 
-#         1 - "All"
-# 2 - "Most"
-# 3 - "Some"
-# 4 - "Very Few"
-# 5 - "None"
-# 6 - "Does not apply"
-# -77 - "Decline to Answer"
-# 
-# All 39 items were reverse scored
-# Modified Scale
-# 0 - "Does not apply"
-# 1 - "None"
-# 2 - "Very Few"
-# 3 - "Some"
-# 4 - "Most"
-# 5 - "All"
-# -77 - "Decline to Answer"
         .x == "All" ~ "4",
         .x == "Most" ~ "3",
         .x == "Some" ~ "2",
         .x == "Very Few" ~ "1",
         .x == "None" ~ "0",
-        .x == "Does not apply" ~ "0",   #TODO: Maria, how do we want to code doesn't apply. We have -55 for missing data which are not applicable, but that one is for question not shown. If this is changed, Min please change missing section accordingly.  
+        .x == "Does not apply" ~ "-55",   #TODO: Min, this should be -55 it is the same as NA.I've updated but you need to update missing data section  
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
@@ -1602,7 +1584,7 @@ elf <-
 ### EDS-F Missing Data 
 ```{r eds-f_missing}
 elf <- elf %>%
-  # partial finished TC
+  # partially finished TC who did not complete this questionnaire
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
   mutate_at(vars(elf23), ~case_when(elf20 < 1 & elf21 < 1 & elf22 < 1 ~ "-55", TRUE ~.))
   
@@ -1626,6 +1608,10 @@ elf_remove <- elf_miss %>% filter(miss_pct >= 20) %>% pull(id)
 
 ### EDS-F Calculation & Subscale
 ```{r eds-f_calculation}
+
+## Min can you remove any computation of scales for the EDS-F measure?
+## Please save this in a separate file for our internal work
+## there should be no distributions in the codebook then; no alpha either; you can remove these notes once you clean it up
 elf_calc <-
   elf %>%
   mutate(
@@ -1832,7 +1818,7 @@ ell_calc <-
     )
   )
 
-# TODO: Maria, please double check right items were used for calculation 
+# TODO: Min, you can remove code pertaining the the physical aggression; you can also save the other code in our internal file with a note that the general delinquency needs to be z scored to deal with different reporting waves across the study (12 vs 6 month recall) before using in conjunction with other waves
 ell_complete <-
   ell_calc %>%
   subscale_create(
