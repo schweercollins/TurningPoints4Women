@@ -1039,7 +1039,7 @@ dyadc <-
 ```
 
 ### DAS Missing Data
-There are missing data in DAS and missing rule applied.. 
+There are missing data in DAS and missing rule applied through the unique "COUNT" code below. 
 ```{r dyadc_missing}
 dyadc <- dyadc %>%
   # if answered no for screening question, the entire survey is skipped.
@@ -1109,10 +1109,6 @@ dyadc_calc <- dyadc_calc %>%
   )
 
 
-
-
-
-
 ## creating subscales here 
 
 ## Total = all 32 items
@@ -1128,6 +1124,40 @@ dyadc_calc <- dyadc_calc %>%
 dyadc_complete <- dyadc_calc %>%
   rowwise() %>%
  mutate_at(vars(dyadc_screener :COUNTD5), as.numeric) %>%
+    mutate(
+    das1 = replace(das1, das1 %in% c(-55, -77), NA_real_),
+    das2 = replace(das2, das2 %in% c(-55, -77), NA_real_),
+    das3 = replace(das3, das3 %in% c(-55, -77), NA_real_),
+    das4 = replace(das4, das4 %in% c(-55, -77), NA_real_),
+    das5 = replace(das5, das5 %in% c(-55, -77), NA_real_),
+    das6 = replace(das6, das6 %in% c(-55, -77), NA_real_),
+    das7 = replace(das7, das7 %in% c(-55, -77), NA_real_),
+    das8 = replace(das8, das8 %in% c(-55, -77), NA_real_),
+    das9 = replace(das9, das9 %in% c(-55, -77), NA_real_),
+    das10 = replace(das10, das10 %in% c(-55, -77), NA_real_),
+    das11 = replace(das11, das11 %in% c(-55, -77), NA_real_),
+    das12 = replace(das12, das12 %in% c(-55, -77), NA_real_),
+    das13 = replace(das13, das13 %in% c(-55, -77), NA_real_),
+    das14 = replace(das14, das14 %in% c(-55, -77), NA_real_),
+    das15 = replace(das15, das15 %in% c(-55, -77), NA_real_),
+    das16 = replace(das16, das16 %in% c(-55, -77), NA_real_),
+    das17 = replace(das17, das17 %in% c(-55, -77), NA_real_),
+    das18 = replace(das18, das18 %in% c(-55, -77), NA_real_),
+    das19 = replace(das19, das19 %in% c(-55, -77), NA_real_),
+    das20 = replace(das20, das20 %in% c(-55, -77), NA_real_),
+    das21 = replace(das21, das21 %in% c(-55, -77), NA_real_),
+    das22 = replace(das22, das22 %in% c(-55, -77), NA_real_),
+    das23 = replace(das23, das23 %in% c(-55, -77), NA_real_),
+    das24 = replace(das24, das24 %in% c(-55, -77), NA_real_),
+    das25 = replace(das25, das25 %in% c(-55, -77), NA_real_),
+    das26 = replace(das26, das26 %in% c(-55, -77), NA_real_),
+    das27 = replace(das27, das27 %in% c(-55, -77), NA_real_),
+    das28 = replace(das28, das28 %in% c(-55, -77), NA_real_),
+    das29 = replace(das29, das29 %in% c(-55, -77), NA_real_),
+    das30 = replace(das30, das30 %in% c(-55, -77), NA_real_),
+    das31 = replace(das31, das31 %in% c(-55, -77), NA_real_),
+    das32 = replace(das32, das32 %in% c(-55, -77), NA_real_)
+  ) %>%
   mutate(
     dyadc_con = das1+ das2+ das3+ das5+ das7+ das8+ das10+ das11+ das12+ das13+ das14+ das15,
     dyadc_aff_exp = case_when(
@@ -1172,9 +1202,10 @@ dyadc_complete <- dyadc_calc %>%
         across(where(is.character), ~replace(., is.na(.) | . == "", -77))) %>%
    mutate_at(vars(-id), as.numeric)
 
+
 # DAS compute variable that will include in the archive 
 dyadc_complete <- dyadc_complete %>%
-  select(id, dyadc_con, dyadc_aff_exp, dyadc_satis, dyadc_cohes, dyadc_total) # TODO: Maria, Please check I didn't miss anything 
+  select(id, dyadc_con, dyadc_aff_exp, dyadc_satis, dyadc_cohes, dyadc_total)  
 
 # DAS finalized data 
 dyadc_complete <- dyadc %>%
@@ -1727,6 +1758,7 @@ for (i in 1:39) {
 # most participants will respond to the first part of each item
 # don't respond to anything on the scale
 # TODO: Maria: we are only counting the ellx questions. (ellxa qusetions are not included.)
+## Min, I do want to retain the other questions, but we aren't using them for any ssubscale or total scale computation right now.
 ell_miss <- ell %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
@@ -1746,6 +1778,13 @@ ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ### ELL Calculation & Subscale 
 
 ```{r ell_calculation}
+## Min for this variable I want us to save the censorsed data only for internal uses so you can pull that script. 
+## next I want you to sum for the following items, removing item #23 from these scales
+# total score of all items (38 items in total but not #23)
+# total index offenses (9 items el 4 el 5; ell10 ; ell 16; ell 25; ell 29; ell 32; ell 38; ell 39)
+# total index of minor offenses (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37) 
+
+
 # '{.col}_c' delinquency behavior coded count (if delinquecy reported then coded as 1)
 # "{.col}_r" re-code with cap at 7
 ell <- ell %>%
@@ -4158,6 +4197,8 @@ sus_miss <- sus %>%
     id = c("id", -matches("\\d$")),
     n_items = 24
   )
+
+## MIN we need to remove all 14 and associated variable from the archive file; we can create an internal archive file where we retain them, see notes in spreadsheet
 ```
 
 
