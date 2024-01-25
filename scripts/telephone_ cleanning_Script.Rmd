@@ -164,7 +164,7 @@ bsi_complete <-
   ) %>%
   select(-bsi_avg)
 
-bsi_test <- bsi_complete %>%
+bsi_complete <- bsi_complete %>%
   select(id, bsi_total, bsi_soma, bsi_anx, bsi_dep) %>%
   merge(bsi, by="id") %>%
   relocate(bsi_total:bsi_dep, .after = "bsi19")
@@ -1172,6 +1172,14 @@ dyadc_complete <- dyadc_calc %>%
         across(where(is.character), ~replace(., is.na(.) | . == "", -77))) %>%
    mutate_at(vars(-id), as.numeric)
 
+# DAS compute variable that will include in the archive 
+dyadc_complete <- dyadc_complete %>%
+  select(id, dyadc_con, dyadc_aff_exp, dyadc_satis, dyadc_cohes, dyadc_total) # TODO: Maria, Please check I didn't miss anything 
+
+# DAS finalized data 
+dyadc_complete <- dyadc %>%
+   select(id, starts_with("e")) %>%
+  merge(dyadc_complete, by = "id")
 ```
 
 ## ARQ
@@ -2501,7 +2509,7 @@ sex <- tpw_raw%>%
         # sex_std_happen ~ s24
         .x == "Yes, I had a Sexually Transmitted Disease -STD  (positive diagnosis)" ~ "1",
         .x == "I did not have an STD (negative diagnosis)" ~ "0",
-        .x == "I don't know yet; still waiting for the results" ~ "2",
+        .x == "I don't know yet; still waiting for the results" ~ "2", 
         
         # s25
         .x == "a. Genital herpes" ~ "1",
@@ -2512,6 +2520,7 @@ sex <- tpw_raw%>%
         .x == "f.    Syphilis" ~ "6",
         .x == "g.   Chlamydia" ~ "7",
         .x == "h.   Other: Specify" ~ "8",
+        .x == "i. Don't Remember" ~ "9",
         
         # sex_preg_what_happen ~ s29
         .x == "1 - Went to doctor, Positive diagnosis" ~ "1",
@@ -2543,11 +2552,12 @@ sex <- tpw_raw%>%
         .x == "6  \tMost of the time   \t85 -99%" ~ "5",
         .x == "7  \tEvery single time  \t100%" ~ "6",
         # sex_percent_w_male_use_birthcontrol ~ s43
-        .x == "Don't know" ~ "9",
-        .x == "10       Not using birth control because I am currently pregnant" ~ "10",
+        .x == "Don't know" ~ "-66",
+        .x == "10       Not using birth control because I am currently pregnant" ~ "7",
         # sex_oralsex_dentaldam_female_partner ~ s46
         .x == "Yes, had oral sex without a dental dam" ~ "1",
-        .x == "No, oral sex and always used dental dam" ~ "0",
+        .x == "No, oral sex and always used dental dam (stop here, you are finished)" ~ "0",
+        
         .x == "Decline to Answer" ~ "-77",
         .x == "decline to answer" ~ "-77",
         .x == "Decline to answer" ~ "-77",
@@ -2656,7 +2666,6 @@ sex <- sex %>%
 
 ```
 
-### Sex Missing Data
 There are missing data and missing rule applied 
 ```{r sex_missing}
 sex <- sex %>% 
@@ -2664,16 +2673,24 @@ sex <- sex %>%
    mutate_at(vars(s_pregnancy_screen:s48), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.)  ~ "-55", TRUE ~ .)) %>%
    # Skip rule: if s1 select no/Decline (0/-77), then skip s1a:s8
    mutate_at(vars(s1a:s8), ~case_when(s1 != 1 ~ "-55", TRUE ~ . )) %>%
+  mutate_at(vars(s2a,s2b,s2c), ~case_when(is.na(.x) ~ "0", TRUE ~ . )) %>%
+  # if s1a != 8, s1a_8_text should be -55 
+  # mutate_at(vars(s1a_8_text), ~case_when(s1a != 8 ~ "-55", TRUE ~ . )) %>%
    # Skip rule: if s4 select no/Decline (0/-77), then skip s5:s5c
    mutate_at(vars(s5:s5c), ~case_when(s4 != 1 ~ "-55", TRUE ~ . )) %>%
+    mutate_at(vars(s5a,s5b,s5c), ~case_when(is.na(.x) ~ "0", TRUE ~ . )) %>%
    # skip rule: if s3 is not Yes-1, s6is skipped  
    mutate_at(vars(s6), ~case_when(s3 == 1 ~ "-55", TRUE ~ . )) %>%
   # skip rule: if s3 is Yes-1 | s6 != 1 , s7 is skipped  
    mutate_at(vars(s7), ~case_when(s3 == 1 | s6 != 1 ~ "-55", TRUE ~ . )) %>%
-  # skip rule: if s11 is Never(0) | s11 != -77 , s12 is skipped  
-   mutate_at(vars(s12), ~case_when(s11 == 0 | s11 != -77 ~ "-55", TRUE ~ . )) %>%
+    # if s10 != 4, s10_4_text should be -55 
+  mutate_at(vars(s10_4_text), ~case_when(s10 != 4 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if s11 is Never(0) | s11 == -77 , s12 is skipped  
+   mutate_at(vars(s12), ~case_when(s11 == 0 | s11 == -77 ~ "-55", TRUE ~ . )) %>%
   # skip rule: if s13 is not Yes-1, s14:s17 is skipped  
    mutate_at(vars(s14:s17), ~case_when(s13 != 1 ~ "-55", TRUE ~ . )) %>%
+      # if s14 != 3, s14_8_text should be -55 
+  mutate_at(vars(s14_8_text), ~case_when(s14 != 3 ~ "-55", TRUE ~ . )) %>%
   # skip rule: if s22 is not Yes-1, s23:s25 is skipped  
    mutate_at(vars(s23:s25), ~case_when(s22 != 1 ~ "-55", TRUE ~ . )) %>%
    # skip rule: if s23 is not Yes-1, s24:s25 is skipped 
@@ -2706,32 +2723,20 @@ sex <- sex %>%
   mutate(s25_8_text = ifelse(is.na(s25_8_text) | s25_8_text == "NA", -55, s25_8_text)) %>%
    # skip rule: if s46 is not Yes (1), s47:s48 is skipped  
   mutate_at(vars(s47:s48), ~case_when(s46 != 1 ~ "-55", TRUE ~ . )) %>%
+  # p813 for s12 changed to -99 because truly missing. 
+  mutate_at(vars(s12), ~case_when(id == "P813" ~ "-55", TRUE ~ . )) %>%
   relocate(s25, .before = s25_8_text) %>%
   relocate(s32, .before = s33) %>%
   relocate(62:69, .after = 37) %>%
   relocate(70:78, .after = 53 ) 
 
-# We do not apply the missing data rule due to how items are used
-# Min needs to address as this code no longer works
-# Min can we have all NA or "NA" be -55 now?
-# sex_miss <- sex %>%
-#   mutate_all(as.character()) %>%
-#   pct_miss_fun(
-#     id = c("id"),
-#     n_items = 61 # Min double check # of variables
-#   )
 
-# most missing data is by design (-55) versus declined (-77)
-# sex_miss %>% 
-#   gt::gt() %>% 
-#   gt::tab_header(
-#     title = 'sex Missing Data',
-#     subtitle = 'By Participant')
+
 
 # before next steps, editing dates so only mm/dddd and DD 01 for s2, s5, and s7
 
 ## Function to convert character to date with day to 01
-# MARIA/Min, thoe funtion does not seems to work 
+# MARIA/Min, thie function does not seems to work, if you run the three line below it changes s2, s5,s7 to NA 
 convert_to_date <- function(x) {
   date <- tryCatch({
     parsed_date <- as.Date(as.yearmon(x, "%m/%Y"))
@@ -2747,27 +2752,14 @@ convert_to_date <- function(x) {
 sex$s2 <- convert_to_date(sex$s2)
 sex$s5 <- convert_to_date(sex$s5)
 sex$s7 <- convert_to_date(sex$s7)
-   
+
+
 ```
 
 ### Sex Calculation and Finalize Data (no scales)
 ```{r sex_calc}
-# Below is the code that treats -77, -55 values as NA
-sex_complete <-
-  sex %>%
-  mutate(across(-c(id, s2,s5,s7, matches("_text$")), as.numeric)) %>%
-  #mutate(across(-c(id,matches("_text$")), as.numeric)) %>%
-  mutate(
-    across(
-      .cols = -c(id),
-      .fns = ~case_when(
-        .x < 0 ~ NA,
-        TRUE ~ .x
-      )
-    )
-  )
-
-
+# We do not apply the missing data rule due to how items are used
+sex_complete <-sex 
 ```
 
 ## CINT
@@ -3040,7 +3032,7 @@ cint_relation <- tpw_raw %>%
       cint32 == "4. Uses drugs about once a month" ~ "3",
       cint32 == "5. Uses hard drugs on weekends or mostly on weekends or a few times a week" ~ "4",
       cint32 == "6. Uses hard drugs daily or almost daily" ~ "5",
-      cint32 == "7. Other: (Specify)" ~ "7",
+      cint32 == "7. Other: (Specify)" ~ "6",
       cint32 == "8. Don't know" ~ "-66",
       cint32 == "Decline to Answer" ~ "-77",
       TRUE ~ cint32
@@ -3097,7 +3089,7 @@ cint_relation <- cint_relation %>%
    mutate_at(vars(cint36:cint37), ~case_when(cint35 == 1 |  cint35 == "-77" ~ "-55", TRUE ~ .)) %>% 
    mutate_at(vars(cint30_7_text), ~case_when(cint30 != 7 ~ "-55", TRUE ~ .)) %>% 
    mutate_at(vars(cint31_7_text), ~case_when(cint31 != 7 ~ "-55", TRUE ~ .)) %>% 
-   mutate_at(vars(cint32_7_text), ~case_when(cint32 != 7 ~ "-55", TRUE ~ .))
+   mutate_at(vars(cint32_7_text), ~case_when(cint32 != 6 ~ "-55", TRUE ~ .))
 
 # Correct data type and create _complet df 
 cint_relation_complete <- cint_relation %>%
@@ -3139,11 +3131,10 @@ cint_substance <- tpw_raw %>%
   select(id, cint_pregnancy_screen, cint39:cint84_77) %>%
     mutate(
     across(
-      .cols = c(cint_pregnancy_screen,cint39, cint41, cint43, cint45, cint50, cint54, cint56, cint58, cint60, cint63, cint64, cint65, cint66, cint68, cint70, cint72, cint74, cint76, cint78, cint80, cint82),
+      .cols = c(cint_pregnancy_screen,cint39, cint41, cint43, cint45, cint50, cint54, cint56, cint58, cint60, cint64, cint65, cint66, cint68, cint70, cint72, cint74, cint76, cint78, cint80, cint82),
       .fns = ~case_when(
         .x == "Yes" ~ "1",
         .x == "No" ~ "0",
-        .x == "3. NA -- not in school and not employed in last 6 months" ~ "-55", # this is for cint63
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
@@ -3317,10 +3308,6 @@ cint_substance_complete <- cint_substance %>%
 ```{r}
 
 ## Note made during cleaning process on 12/2023 -- there are no psychometrics or optimal scoring methods published. Please reach out to Dr. Damion Grasso dgrasso@uchc.edu with questions if you wish to use. 
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
  
 cint_covid <- tpw_raw %>%
   select(id, starts_with("cintc")) %>%
@@ -3490,7 +3477,7 @@ socinf_sub_miss %>%
 # Below is the code that treats -77, -55 values as NA
 # No calculations are needed 
 # We do not apply missing data procedures
-socinf_sub_complete <-
+socinf_sub_calc <-
   socinf_sub %>%
   mutate(across(-id, as.numeric)) %>%
   mutate(
@@ -3502,6 +3489,9 @@ socinf_sub_complete <-
       )
     )
   ) 
+
+socinf_sub_complete <- socinf_sub %>%
+  mutate(across(-id, as.numeric)) 
 ```
 
 
@@ -3571,18 +3561,9 @@ socinf_gen_miss %>%
 
 
 ```{r socinf_gen_calc}
-socinf_gen_complete <-
-  socinf_gen %>%
-  mutate(across(-c(id), as.numeric)) %>%
-  mutate(
-    across(
-      .cols = -c(id),
-      .fns = ~case_when(
-        .x < 0 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
+# We do not apply missing data procedures
+socinf_gen_complete <- socinf_gen %>%
+   mutate(across(-c(id), as.numeric))
 ```
 
 
@@ -4900,11 +4881,8 @@ pcl_remove <- pcl_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ## Merge
 Merge together all measures 
 ```{r merge}
-# This file have missing rule applied, this means if the missing rule is triggered for a measure, then the entire measure questions will be NA for this individual. This is the data that I feed to code book. 
-# Min, we need to have missing data actual codes in these files for archival
-# Min, we need to update the codebook so that when we compute missing data for tables
-# it includes -77, -99, -55 etc.,
-# all missing data are NA 
+# This file contain all data including correct missing code for missing values (-77, -99, -55 etc.). 
+# This file also contain all the computed variables. 
 tpw_archive_calc <- tpw_archive_id %>%
   left_join(bsi_complete, by = "id") %>%
   left_join(cesd_complete, by = "id") %>%
@@ -4927,42 +4905,45 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(cint_relation_complete, by="id") %>%
   left_join(cint_substance_complete, by="id") %>%
   left_join(cint_covid_complete, by="id") %>%
+  left_join(socinf_sub_complete, by="id") %>%
+  left_join(socinf_gen_complete, by="id") %>%
   left_join(sex_complete, by="id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
+# This will be removed after we finished merge 
 # Raw data with missing code are actual missing code (-99, -77 etc) instead of NA, this file doesn't include calculated items
-tpw_archive <- tpw_archive_id %>%
-  left_join(bsi, by = "id") %>%
-  left_join(cesd, by = "id") %>%
-  left_join(ciq, by = "id") %>%
-  left_join(dast, by = "id") %>%
-  left_join(cts, by = "id") %>%
-  left_join(bcap, by = "id") %>%
-  left_join(dyadc, by = "id") %>%
-  left_join(arq, by = "id") %>%
-  left_join(prss, by = "id") %>%
-  left_join(ssq, by = "id") %>%
-  left_join(elf, by = "id") %>%
-  left_join(ell, by = "id") %>%
-  left_join(mhc, by = "id") %>%
-  left_join(flo, by = "id") %>%
-  left_join(itq, by = "id") %>%
-  left_join(ibq, by = "id") %>%
-  left_join(cint_socio, by = "id") %>%
-  left_join(cint_ladder, by = "id") %>%
-  left_join(cint_relation, by = "id") %>%
-  left_join(cint_substance, by = "id") %>%
-  left_join(cint_covid, by="id") %>%
-  left_join(socinf_sub, by = "id") %>%
-  left_join(socinf_gen, by = "id") %>%
-  left_join(cts_pc, by = "id") %>%
-  left_join(sex, by="id") %>%
-  mutate_if(is.numeric, round, digits=2) %>%
-  rename(family = id)
+# tpw_archive <- tpw_archive_id %>%
+#   left_join(bsi, by = "id") %>%
+#   left_join(cesd, by = "id") %>%
+#   left_join(ciq, by = "id") %>%
+#   left_join(dast, by = "id") %>%
+#   left_join(cts, by = "id") %>%
+#   left_join(bcap, by = "id") %>%
+#   left_join(dyadc, by = "id") %>%
+#   left_join(arq, by = "id") %>%
+#   left_join(prss, by = "id") %>%
+#   left_join(ssq, by = "id") %>%
+#   left_join(elf, by = "id") %>%
+#   left_join(ell, by = "id") %>%
+#   left_join(mhc, by = "id") %>%
+#   left_join(flo, by = "id") %>%
+#   left_join(itq, by = "id") %>%
+#   left_join(ibq, by = "id") %>%
+#   left_join(cint_socio, by = "id") %>%
+#   left_join(cint_ladder, by = "id") %>%
+#   left_join(cint_relation, by = "id") %>%
+#   left_join(cint_substance, by = "id") %>%
+#   left_join(cint_covid, by="id") %>%
+#   left_join(socinf_sub, by = "id") %>%
+#   left_join(socinf_gen, by = "id") %>%
+#   left_join(cts_pc, by = "id") %>%
+#   left_join(sex, by="id") %>%
+#   mutate_if(is.numeric, round, digits=2) %>%
+#   rename(family = id)
 ```
 
 ```{r output}
-write.csv(tpw_archive, here("do_not_push", "tpw_archive.csv"))
+# write.csv(tpw_archive, here("do_not_push", "tpw_archive.csv"))
 write.csv(tpw_archive_calc, here("do_not_push", "tpw_archive_calc.csv"))
 ```
