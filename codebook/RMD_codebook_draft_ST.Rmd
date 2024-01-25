@@ -344,8 +344,7 @@ the BSI. Please reference this guide to see match with original BSI (original BS
   * **Higher** scores indicate **more** severe
 psychological symptoms.
 
-  * The missing data rule was not applied since there are no missing data
-among BSI variables.
+  * The missing data rule was not applied since there are no missing data among BSI variables.
 
 Reference:
 [@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F);
@@ -4723,25 +4722,22 @@ ggarrange(p_mhc_total, p_mhc_swb + rremove("ylab"),
 ```
 
 
-## Flourishing Index
+## Flourishing Index (FI)
 
-### FLO Description
+### FI Description
 
-The Flourishing Index is a 12-item questionnaire designed to measure
-*insert*.
+The Flourishing Index is a 12-item questionnaire designed to measure five domains of flourishing. The scale contains 2 items for each domain, including happiness and life satisfaction, mental and physical health, meaning and purpose, character and virtue, and close social relationships. There are also two items that represent "secure flourish" indicating financial and material stability, noted by the measure authors to help individuals sustain flourishing across other domains captured through the measure. 
 
-For the present study, 12 items from the Flourishing Index were
-collected in order to #TODO: insert text here
+  * Although not computed in our datafile, subscales based on the five domains can be computed. See the measure reference for more scoring details. 
+  
+  * No items need to be reverse scored. 
+  
+  * **Higher** scores indicate greater flourishing.
 
-No items need to be reverse scored. *TODO: need change text here Higher
-scores indicate more severe mental health symptoms.*
-
-The missing data rule was applied. Calculations were completed for
-participants with 33% or less missing data (this includes -77 responses)
+  * The missing data rule was applied. Calculations were completed for participants with 20% or less missing data (this includes -77 responses)
 
 Reference:
-[@vanderweele2017promotion](https://www.pnas.org/doi/abs/10.1073/pnas.1702996114);
-[DOI](https://doi.org/10.1073/pnas.1702996114)
+[@vanderweele2017promotion](https://www.pnas.org/doi/abs/10.1073/pnas.1702996114)
 
 ### Flourishing Index Variables
 
@@ -4793,6 +4789,7 @@ flo_word <- qualtrics %>%
   slice(1)
 
 #create table with variable name, description, and notes
+# MIN #TODO make sure that these have prefix "flo" instead of i
 flo_word_long <- flo_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
@@ -4825,17 +4822,17 @@ print(flo_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
+Information on the total score is below.
 Variables were constructed by summing included items.
 ```{r  flo, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 flo_complete <- complete %>%
-  select(i1:i12, flo_total)
+  select(flo1:flo12, flo_total)
 ```
 
 ```{r flo alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
 flo_alpha <- flo_complete %>% 
-  select(i1:i12) %>% 
+  select(flo1:flo12) %>% 
   psych::alpha(check.keys = TRUE)
 ```
 
@@ -4844,8 +4841,8 @@ flo_alpha <- flo_complete %>%
 flo_scale_df <- data.frame(
   var_name = c("flo_total"),
   scale = c("FLO Total score (12)"),
-  scale_construction = c(" `i1`, `i2`, `i3`, `i4`, `i5`, `i6`, `i7`, `i8`, `i9`, `i10`, `i11`, `i12`"),
-  scale_range = c(""), #TODO fill in range 
+  scale_construction = c(" `flo1`, `flo2`, `flo3`, `flo4`, `flo5`, `flo6`, `flo7`, `flo8`, `flo9`, `flo10`, `flo11`, `flo12`"),
+  scale_range = c("0-120"), 
   alpha = c(round(flo_alpha$total$raw_alpha, 3))
 )
 
@@ -4873,8 +4870,7 @@ print(flo_scale_df)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and
-subscale score:
+Descriptive statistics are presented below for each item and the total score:
 
 ```{r flo-mean-items}
 # Calculate the summary statistics for each variable
@@ -4913,7 +4909,6 @@ flo_tbl
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale:
 
 ```{r flo-distributions, class.source='fold', echo = FALSE}
 flo_complete %>%

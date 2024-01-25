@@ -2057,7 +2057,7 @@ mhc_complete <- mhc_complete %>%
   relocate(h4:h14, .after = "h3")
 ```
 
-## FI
+## Flourishing Index (FI)
 ### FI Select Variable and Recode 
 ```{r fi}
 flo <- tpw_raw %>%
@@ -2100,7 +2100,7 @@ flo <- tpw_raw %>%
 ```
 
 ### FI Missing Data 
-There are missing data in FI and missing rule applied. 
+There are missing data in FI and missing rule applied for one participant 
 ```{r}
 flo_miss <- flo %>%
     mutate(across(-id, as.numeric)) %>%
@@ -2132,32 +2132,43 @@ flo_calc <-
     )
   )
 
+# MIN we also need a "secure flourish" and averae of items i11 and i12
+# total score should only contain 1-10
+
 flo_complete <-
   flo_calc %>%
   composite_total_avg_fun(
     id = 'id',
     max_value = 10,
-    n_items = 12
+    n_items = 10 # changed from 12 to 10
   ) %>%
   distinct(
     across(
-      .cols = everything()
+      .cols = everything() # it should be across only i1:i10
     )
   ) %>%
   select(
     -mean_values
   ) %>%
-  rename(flo_total = sum_values) %>%
-  mutate(
-    across(
-      -c(id
-      ),
-      ~case_when(
-        id %in% flo_remove ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
+  rename(flo_total = average_values) %>% # Min I changed to average_values as it should be an average not sum
+  # replacing total score with -99 because due to 25% missing data this score isn't valid (follows missing data rule)
+  mutate(flo_total = ifelse(id == "P847" & (flo_total == 78), -99, flo_total)) %>%
+  # changing prefix to align "i" to "flo"
+  rename(flo1 = i1,
+         flo2 = i2,
+         flo3 = i3,
+         flo4 = i4,
+         flo5 = i5,
+         flo6 = i6,
+         flo7 = i7,
+         flo8 = i8,
+         flo9 = i9,
+         flo10 = i10,
+         flo11 = i11,
+         flo12 = i12) %>%
+  # relocate id to front of dataframe
+  select(id, everything())
+
 ```
 
 ##ITQ
