@@ -4828,7 +4828,7 @@ Information on the total score is below.
 Variables were constructed by summing included items.
 ```{r  flo, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 flo_complete <- complete %>%
-  select(flo1:flo12, flo_total)
+  select(flo1:flo12, flo_average)
 ```
 
 ```{r flo alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
@@ -6567,56 +6567,22 @@ socinf_sub_word_long <- socinf_sub_word %>%
   mutate(description = if_else(var_name == "socd2c", "How often did/does your partner try to avoid having the two of you go places, 
                                like parties or friend’s houses, where people will be using drugs?", description)) %>%
   mutate(description = if_else(var_name == "socd4a", "How much does your partner approve of your using drugs?", description)) %>%
-  mutate(`Value` = "") 
+  mutate(Value = "") %>%
+  mutate(Value = if_else(var_name %in% c("socinf_preg_screener", "socinf_relationship_screener"), "1 = Yes\n 0 = No" , `Value`)) %>%
+  mutate(Value = if_else(grepl("\\d$", var_name), "1 = Yes\n0 = No\n -66 = Don't Know\n-77  = Decline to Answer", Value))%>%
+  mutate(Value = if_else(grepl("[a-zA-Z]$", var_name), "0 = Never
+        1 = Hardly ever
+        2 = Sometimes
+        3 = Often
+      -55 = N/A
+      -77 = Decline to Answer", `Value`)) %>%
+  # TODO: Maria, socb4c, socc4c, socd4c doesn't have NA option
+    mutate(Value = if_else(grepl("4c$", var_name), "0 = Never
+        1 = Hardly ever
+        2 = Sometimes
+        3 = Often
+      -77 = Decline to Answer", `Value`)) 
 
-
-
-# inprogress working on value lable 
-  # mutate(`Value` = if_else(var_name %in% c("cintpregnancy screen", "cint39", "cint41", "cint43", "cint45", "cint50", "cint54",
-  #                                          "cint56", "cint58", "cint60", "cint63", "cint64","cint65", "cint66", 
-  #                                          "cint68", "cint70", "cint72", "cint74", "cint76", "cint78", "cint80", "cint82"), "1 = Yes
-  #                                                                                  \n 0 = No
-  #                                                                                  \n -66 = Don't Know
-  #                                                                                  \n -77  = Decline to Answer", `Value`)) %>%
-  # mutate(`Value` = if_else(var_name %in% c( "cint40", "cint42", "cint44", "cint47_6_text", "cint48", "cint49", "cint51", "cint52", "cint53", 
-  #                                           "cint55", "cint57", "cint59", "cint62_6_text", "cint67", "cint69", "cint71", "cint73", "cint75" , 
-  #                                           "cint77", "cint79", "cint81", "cint83"), "Open Text Entry", `Value`)) %>%
-  # mutate(`Value` = if_else(var_name %in% c( "cint46"), "0 = 1. Not at all
-  #       1 = 2. A little drunk
-  #       2 = 3. Quite drunk
-  #       3 = 4. Very drunk
-  #     -77 = Decline to Answer", `Value`)) %>%
-  # mutate(`Value` = if_else(var_name %in% c( "cint47"), "1 = 1. Drank alcohol only a few times during the past 6 months (up to 5 times)
-  #       2 = 2. Drink regularly for a few weeks or more, then don't for a few weeks or more or drank for a period and then stopped altogether
-  #       3 = 3. Drink about once a month
-  #       4 = 4. Drink on weekends or mostly weekends or a few times a week
-  #       5 = 5. Drink daily or almost daily
-  #       6 = 6. Other: Specify
-  #       -77 = Decline to Answer", `Value`)) %>%
-  # mutate(`Value` = if_else(var_name %in% c( "cint61"), "1 = 1. A little high
-  #                                                          \n 2 = 2. Quite high
-  #                                                          \n 3 = 3. Very high
-  #                                                          \n -77  = Decline to Answer", `Value`)) %>%
-  # mutate(`Value` = if_else(var_name %in% c( "cint62"), "1 = 1. Smoked only a few times during the past 6 months
-  #                                                          \n 2 = 2. Smoked regularly for a few weeks or more, then didn't for a few weeks or more or smoked for some time and then stopped
-  #                                                          \n 3 = 3. Smoked about once a month
-  #                                                          \n 4 = 4. Smoked on weekends or mostly weekends or a few times a week
-  #                                                          \n 5 = 5. Smoked daily or almost daily
-  #                                                          \n 6 = 6. Other
-  #                                                          \n -77  = Decline to Answer", `Value`)) %>%
-  # mutate(`Value` = if_else(var_name %in% c( "cint63"), "1 = Yes
-  #                                                          \n 0 = No
-  #                                                          \n -55 = 3. NA -- not in school and not employed in last 6 months
-  #                                                          \n -66 = Don't Know
-  #                                                          \n -77  = Decline to Answer", `Value`)) %>%
-  # mutate(`Value` = if_else(var_name %in% c( "cint84"), "1 = 1. Stranger
-  #                                                         \n 2 = 2. Acquaintance
-  #                                                         \n 3 = 3. Friend
-  #                                                         \n 4 = 4. Family member
-  #                                                         \n 5 = 5. Romantic partner
-  #                                                         \n 6 = 6. Other
-  #                                                         \n -77 = Decline to Answer", `Value`))
-  # 
 
 ```
 

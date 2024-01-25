@@ -1178,7 +1178,8 @@ dyadc_complete <- dyadc_complete %>%
 
 # DAS finalized data 
 dyadc_complete <- dyadc %>%
-   select(id, starts_with("e")) %>%
+  select(id, starts_with("e")) %>%
+  rename_with(~sub("^e", "das", .), starts_with("e"))%>%
   merge(dyadc_complete, by = "id")
 ```
 
@@ -2136,11 +2137,11 @@ flo_complete <-
     )
   ) %>%
   select(
-    -mean_values
+    -sum_values
   ) %>%
-  rename(flo_total = average_values) %>% # Min I changed to average_values as it should be an average not sum
+  rename(flo_average = mean_values) %>% # Min I changed to average_values as it should be an average not sum Min's note mean_value solved. TODO: will need to checkin with Maria about the -99 below 
   # replacing total score with -99 because due to 25% missing data this score isn't valid (follows missing data rule)
-  mutate(flo_total = ifelse(id == "P847" & (flo_total == 78), -99, flo_total)) %>%
+  mutate(flo_average = ifelse(id == "P847" & (flo_average == 78), -99, flo_average)) %>%
   # changing prefix to align "i" to "flo"
   rename(flo1 = i1,
          flo2 = i2,
@@ -2156,6 +2157,16 @@ flo_complete <-
          flo12 = i12) %>%
   # relocate id to front of dataframe
   select(id, everything())
+
+flo_complete <- flo %>%
+  merge(flo_complete, by = "id") %>%
+  # Remove column that contains NA not actual NA code 
+  select(-starts_with("flo")) %>%
+  # changing prefix to align "i" to "flo"
+  
+  
+  
+  
 
 ```
 
