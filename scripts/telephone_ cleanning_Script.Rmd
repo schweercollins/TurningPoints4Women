@@ -3317,11 +3317,7 @@ cint_substance_complete <- cint_substance %>%
 ```{r}
 
 ## Note made during cleaning process on 12/2023 -- there are no psychometrics or optimal scoring methods published. Please reach out to Dr. Damion Grasso dgrasso@uchc.edu with questions if you wish to use. 
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
- 
 cint_covid <- tpw_raw %>%
   select(id, starts_with("cintc")) %>%
     mutate(
@@ -3351,8 +3347,6 @@ cint_covid <- cint_covid %>%
   select(id, cintc1:cintc14)
 
 # Replace all empty cells with -55 in the entire data frame
-# cint_covid <- cint_covid %>%
-#   replace(cint_covid, is.na(cint_covid) | cint_covid == "", -55)
 cint_covid <- cint_covid %>%
   mutate_all(~ ifelse(is.na(.x) | .x == "", -55, .x))
 
@@ -3383,32 +3377,6 @@ cint_covid_complete <- cint_covid
 ### CINT-COVID Missing 
 ```{r}
 # We are NOT applying missing data rule given guidance from author of scale
-# cint_covid_miss <- cint_covid %>%
-#   mutate(across(-c(id), as.numeric))%>%
-#   pct_miss_fun(
-#     id = c("id"),
-#     n_items = 28
-#   )
-# 
-# cint_covid_miss%>% gt::gt() %>% 
-#   gt::tab_header(
-#     title = 'CINT- COVID Question Missing Data',
-#     subtitle = 'By Participant')
-# 
-# 
-# # Below is the code that treats -77, -55 values as NA
-# cint_covid_complete <-
-#   cint_covid %>%
-#   mutate(across(-c(id), as.numeric)) %>%
-#   mutate(
-#     across(
-#       .cols = -c(id),
-#       .fns = ~case_when(
-#         .x < 0 ~ NA_real_,
-#         TRUE ~ .x
-#       )
-#     )
-#   ) 
 
 ```
 
