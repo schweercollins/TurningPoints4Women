@@ -1949,7 +1949,7 @@ mhc_miss %>%
   )
 
 
-mhc_remove <- mhc_miss %>% filter(miss_pct >= 20) %>% pull(id)
+mhc_remove <- mhc_miss %>% filter(miss_pct >= 14) %>% pull(id)
 ```
 
 ### MHC-SF Calculation & Subscale
@@ -2013,7 +2013,8 @@ mhc_complete <-
         mhc_pwb_avg
       ),
       ~case_when(
-        id %in% mhc_remove ~ NA_real_,
+       # MIN apply to only scale 2
+       id %in% mhc_remove ~ NA_real_,
         TRUE ~ .x
       )
     )
@@ -2130,6 +2131,10 @@ flo <- tpw_raw %>%
 ### FI Missing Data 
 There are missing data in FI and missing rule applied for one participant 
 ```{r}
+flo <- flo %>%
+  # We don't know why these variable were missing for this TC
+  mutate_at(vars(i8, i10, i12), ~case_when(id %in% c("P847") & is.na(.) ~ "-99", TRUE ~ .)) 
+  
 flo_miss <- flo %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
@@ -2142,7 +2147,7 @@ flo_miss %>%
   gt::tab_header(title = 'Missing Data',
                  subtitle = 'By Each Participant')
 
-flo_remove <- flo_miss %>% filter(miss_pct >= 20) %>% pull(id)
+flo_remove <- flo_miss %>% filter(miss_pct >= 25) %>% pull(id)
 ```
 
 ### FI Calculation & Subscale 
@@ -2159,6 +2164,20 @@ flo_calc <-
       )
     )
   )
+
+# ibq_complete <-
+#   ibq_calc %>%
+#   mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) %>%
+#    mutate(
+#     across(
+#       -c(id
+#       ),
+#      ~case_when(
+#        id %in% flo_remove ~ NA,
+#          TRUE ~ .x
+#        )
+#     )
+#   )
 
 # MIN we also need a "secure flourish" and averae of items i11 and i12
 # total score should only contain 1-10
@@ -2178,9 +2197,9 @@ flo_complete <-
   select(
     -sum_values
   ) %>%
-  rename(flo_average = mean_values) %>% # Min I changed to average_values as it should be an average not sum Min's note mean_value solved. TODO: will need to checkin with Maria about the -99 below 
+  rename(flo_total = mean_values) %>% # Min I changed to average_values as it should be an average not sum Min's note mean_value solved. TODO: will need to checkin with Maria about the -99 below 
   # replacing total score with -99 because due to 25% missing data this score isn't valid (follows missing data rule)
-  mutate(flo_average = ifelse(id == "P847" & (flo_average == 78), -99, flo_average)) %>%
+  #mutate(flo_average = ifelse(id == "P847" & (flo_average == 78), -99, flo_average)) %>%
   # changing prefix to align "i" to "flo"
   rename(flo1 = i1,
          flo2 = i2,
@@ -2200,9 +2219,9 @@ flo_complete <-
 flo_complete <- flo %>%
   merge(flo_complete, by = "id") %>%
   # Remove column that contains NA not actual NA code 
-  select(-starts_with("flo")) %>%
+  select(-matches("flo\\d")) %>%
   # changing prefix to align "i" to "flo"
-  
+  rename_with(~str_replace(., "^i", "flo"), matches("^i\\d"))
   
   
   
@@ -3496,21 +3515,8 @@ socinf_sub_miss %>%
 
 ### SOCINF Substances Calculations
 ```{r socinf_sub_calc}
-# Below is the code that treats -77, -55 values as NA
 # No calculations are needed 
 # We do not apply missing data procedures
-socinf_sub_calc <-
-  socinf_sub %>%
-  mutate(across(-id, as.numeric)) %>%
-  mutate(
-    across(
-      .cols = -id,
-      .fns = ~case_when(
-        .x < 0 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  ) 
 
 socinf_sub_complete <- socinf_sub %>%
   mutate(across(-id, as.numeric)) 
@@ -3561,8 +3567,8 @@ socinf_gen <- socinf_gen%>%
   # if socinf_general_screener is NO/0, the entire questionnaire was not administered. 
   mutate_at(vars(sg1:sg13d), ~case_when(socinf_general_screener == 0 ~ "-55", TRUE ~ .)) %>%
   # Incarcerated participants weren't administered for this survey
-  mutate_at(vars(sg1:sg13d), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .))
-
+  mutate_at(vars(sg1:sg13d, socinf_general_screener), ~case_when(id %in% c("HR211", "HR181", "P819") ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sg1:sg13d), ~case_when(is.na(.) ~ "-55", TRUE ~ .))
 
 socinf_gen_miss <- socinf_gen %>%
   mutate(across(-c(id), as.numeric))%>%
