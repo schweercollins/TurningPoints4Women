@@ -1888,29 +1888,11 @@ mhc <-
     )
   ) 
 
-
-# # TODO: Maria/Shina I don't think we need code below, please confirm
-# mhc <-
-#   mhc %>%
-#   subtract_scale(
-#     id = 'id',
-#     value = 1
-#   ) %>%
-#   mutate(
-#     across(
-#       -id,
-#       ~case_when(
-#         .x == 6 ~ -77,
-#         .x == 7 ~ NA_real_,
-#         is.na(.x) ~ NA_real_,
-#         TRUE ~ .x
-#       )
-#     )
-#   )
 ```
 
-### MHC-sf Missing Data
-There are missing data, but missing rule doesn't apply. 
+### MHC-SF Missing Data
+There are missing data. The missing data rule applies for two participants for the swb subscale. 
+## MIN #TODO the missing data rule is > 33% for scales of 3-6 (scale 2)
 ```{r mhc-sf_missing}
 mhc_miss <- mhc %>%
     mutate(across(-id, as.numeric)) %>%
@@ -1945,6 +1927,8 @@ mhc_calc <-
     )
   )
 
+## MIN we can drop averages -- we only need sum scores
+# can we just keep the final three columns for diagnosis -- those in character format?
 mhc_complete <-
   mhc_calc %>%
   composite_total_avg_fun(
@@ -1996,6 +1980,10 @@ mhc_complete <-
   )
 
 # TODO: Maria, this changes some value to NA, pleae confirm this is how you want them to be 
+## MIN, is there a way to mutate and create new variables that are converted; I want to retain all originla values
+## MIN # TODO: I also want to have these have a prefix "mhc" instead of "h"
+## let's chat about this tomorrow; I think I want to remove all diagnoses from the codebook but let's retain this code elsewhere for our "internal purposes"
+## MARIA to do -- add note about diagnoses in codebook
 mhc_complete <- mhc_complete %>%
   pivot_longer(
     h4:h14,

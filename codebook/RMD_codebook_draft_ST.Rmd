@@ -1118,8 +1118,8 @@ the variable table below and the reverse scored variables are provided
 (`d4_r` and `d5_r`). Higher scores indicate more problems related to
 substance use.
 
-<TODO: Maria please check if you like this sentences here> 
-TC who are incarcerated while assessment was done weren't asked for this survey. 
+<TODO:  MIN this is done! I've updated language
+Participants who were incarcerated at the time of the interview were not adminstered this survey.
 
 <SHAINA> TODO: CONFIRM THIS IS CORRECT AND IF SHOULD BE APPLIED IN
 TABLES BELOW - specify -77 The missing data rule was applied.
@@ -4482,7 +4482,8 @@ For the present study, 14 items from the MHC were collected in order to
 No items need to be reverse scored. *TODO: need change text here Higher
 scores indicate more severe mental health symptoms.*
 
-The missing data rule was not applied. 
+The missing data rule was applied. 
+## MIN CHECK missing data
 
 Reference: [@keyes2009brief]
 [@lamers2011evaluating](https://onlinelibrary.wiley.com/doi/abs/10.1002/jclp.20741);
@@ -4596,6 +4597,7 @@ mhc_pa_alpha <-
   select(h1:h3) %>%
   psych::alpha(check.keys = TRUE)
 
+# MIN check this alpha is greater than 1?
 mhc_swb_alpha <-
   mhc_complete %>%
   select(h4:h8) %>%
@@ -4631,7 +4633,7 @@ mhc_scale_df <- gt(mhc_scale_df) %>%
              scale_range = "Range*",
              # alpha = "Alpha"
              ) %>% 
-  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   cols_width(scale ~ px(135)) %>% 
   apply_tbl_theme() 
@@ -4666,7 +4668,7 @@ mhc_summary_data <- as.data.frame(mhc_summary_data)
 mhc_summary_data <- rbind(names(mhc_summary_data), mhc_summary_data) %>% 
   t() %>% 
   as.data.frame()
-
+# MIN check the missing % doesn't seem right
 # Create the gt table
 mhc_tbl <- mhc_summary_data %>%
   gt() %>%
