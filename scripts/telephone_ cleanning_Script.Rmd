@@ -597,7 +597,7 @@ cts <-
     matches(
       '^ct'
     ),
-    -cts_parent_screen
+    -cts_parent_screen # removed because part of the CTS parent-child
   ) %>%
   mutate(across(-id, as.factor)) %>%
   mutate(
@@ -636,7 +636,7 @@ There are missing data in CTS and missing rule applied.
 cts <- cts %>%
   # if answered no for screening question, the entire survey is skipped.
   mutate_at(vars(ct1:ct20), ~case_when(cts_screen == 0  ~ "-55", TRUE ~ . )) %>%
-  # Incarcerated TC weren't administered for this survey
+  # participants who were incarcerated at the time of participation were not administered this survey
   mutate_at(vars(cts_screen, ct1:ct20), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .))
 
 cts %>%
@@ -688,7 +688,7 @@ cts_calc <-
         .x == 2 ~ 2,
         .x == 3 ~ 4,
         .x == 4 ~ 8,
-        .x == 5 ~ 16,
+        .x == 5 ~ 15.5, # midpoint between 11-20
         .x == 6 ~ 20,
         .x == 7 ~ 0,
         .x == 8 ~ 0,
@@ -719,6 +719,8 @@ cts_complete <-
         )
     )
 
+# ind = 
+# part = 
 cts_complete <-
   cts_complete %>%
     subscale_create(
@@ -735,6 +737,7 @@ cts_complete <-
       scale10 = c('ct2_midpoint', 'ct8_midpoint')
     ) %>%
     rename(
+      # past year severity only
       cts_psy_agg_ind_sev = total1,
       cts_psy_agg_part_sev = total2,
       cts_injury_ind_sev = total3,
@@ -766,7 +769,7 @@ cts_complete <-
         (cts_psy_agg_ind_prev == 1 &
            cts_psy_agg_part_prev == 0) ~ 2,
         (cts_psy_agg_ind_prev == 0 &
-           cts_psy_agg_part_prev == 0) ~ 0
+           cts_psy_agg_part_prev == 0) ~ -99
       ),
       cts_injury_mutual = case_when(
         (cts_injury_ind_prev == 1 &
@@ -776,7 +779,7 @@ cts_complete <-
         (cts_injury_ind_prev == 1 &
            cts_injury_part_prev == 0) ~ 2,
         (cts_injury_ind_prev == 0 &
-           cts_injury_part_prev == 0) ~ 0
+           cts_injury_part_prev == 0) ~ -99
       ),
       cts_assault_mutual = case_when(
         (cts_assault_ind_prev == 1 &
@@ -786,7 +789,7 @@ cts_complete <-
         (cts_assault_ind_prev == 1 &
            cts_assault_part_prev == 0) ~ 2,
         (cts_assault_ind_prev == 0 &
-           cts_assault_part_prev == 0) ~ 0
+           cts_assault_part_prev == 0) ~ -99
       ),
       cts_sex_mutual = case_when(
         (cts_sex_ind_prev == 1 &
@@ -796,9 +799,26 @@ cts_complete <-
         (cts_sex_ind_prev == 1 &
            cts_sex_part_prev == 0) ~ 2,
         (cts_sex_ind_prev == 0 &
-           cts_sex_part_prev == 0) ~ 0
+           cts_sex_part_prev == 0) ~ -99
       )
     )
+# Dropping dummy-coded variables for archive
+# pulling in original items with missing data code
+cts_complete <- cts_complete %>%
+  select(-ct1_dum:-ct20_dum) %>%
+  select(id, ct1_midpoint:cts_sex_mutual) %>%
+  merge(cts, by="id") %>%
+  # reorder dataset 
+  relocate(ct1_midpoint:cts_sex_mutual, .after = "ct20") %>%
+  # add in -99 for midpoint ranges that cannot be computed due to -55 codes
+   mutate(
+    ct1_midpoint = if_else(is.na(ct1_midpoint), -99, ct1_midpoint),
+    ct2_midpoint = if_else(is.na(ct2_midpoint), -99, ct2_midpoint),
+    ct7_midpoint = if_else(is.na(ct7_midpoint), -99, ct7_midpoint),
+    ct8_midpoint = if_else(is.na(ct8_midpoint), -99, ct8_midpoint)
+  )
+  
+  
 
 ```
 ## BCAP
@@ -2233,7 +2253,7 @@ itq <- tpw_raw %>%
         .x == "Moderately" ~ "2",
         .x == "Quite a bit" ~ "3",
         .x == "Extremely" ~ "4",
-        .x == "Decline to Answer" ~ "-77",
+        .x == "Decline to Answer" ~ "-55",
         TRUE ~ .x
       )
     )
@@ -2279,23 +2299,23 @@ itq_calc <- itq %>%
 itq_calc <- itq_calc %>%
   mutate(
     itq_re_dx = case_when(
-      (itq1 > 1 | itq2 > 1) ~ "diagnosis_met",
-      (itq1 < 2  & itq2 < 2) ~ "diagnosis_not_met",
+      (itq1 >= 1 | itq2 >= 1) ~ "diagnosis_met",
+      (itq1 < 1  & itq2 < 1) ~ "diagnosis_not_met",
       TRUE ~ "conditions_not_met"
     ),
     itq_av_dx = case_when(
-      (itq3 > 1 | itq4 > 1)  ~ "diagnosis_met",
-      (itq3 < 2 & itq4 < 2)  ~ "diagnosis_not_met",
+      (itq3 >= 1 | itq4 >= 1)  ~ "diagnosis_met",
+      (itq3 < 1 & itq4 < 1)  ~ "diagnosis_not_met",
       TRUE ~ "conditions_not_met"
     ),
     itq_th_dx = case_when(
-      (itq5 > 1 | itq6 > 1) ~ "diagnosis_met",
-      (itq5 < 2 & itq6 < 2) ~ "diagnosis_not_met",
+      (itq5 >= 1 | itq6 >= 1) ~ "diagnosis_met",
+      (itq5 < 1 & itq6 < 1) ~ "diagnosis_not_met",
       TRUE ~ "conditions_not_met"
     ),
     itq_fi_dx = case_when(
-      (itq7 > 1 | itq8 > 1 | itq9 > 1) ~ "diagnosis_met",
-      (itq7 < 2 & itq8 < 2 & itq9 < 2) ~ "diagnosis_not_met",
+      (itq7 >= 1 | itq8 >= 1 | itq9 >= 1) ~ "diagnosis_met",
+      (itq7 < 1 & itq8 < 1 & itq9 < 1) ~ "diagnosis_not_met",
       TRUE ~ "conditions_not_met"
     ),
     itq_pstd_dx = case_when(
