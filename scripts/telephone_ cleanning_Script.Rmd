@@ -3838,19 +3838,25 @@ pct_complete <- pct_calc %>%
     pct_preg_total = rowSums(select(., pct2a:pct2d), na.rm = TRUE),
     pct_childbirth_total = rowSums(select(., pct3a:pct3d), na.rm = TRUE)
   ) %>%
-  # making those with missing data have appropriate missing data codes
-  mutate(
-    pct_preg_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_preg_total), "-99", as.character(pct_preg_total))),
-  pct_childbirth_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_childbirth_total), "-99", as.character(pct_childbirth_total)))
-  ) %>%
-  # Adding back in -55 and -77
-  mutate_at(vars(pct1:pct3d), ~ifelse(p00a == 0, "-55", as.character(.))) %>%
-  mutate_at(vars(pct2a:pct3d), ~ifelse(pct1 == 0, "-55", as.character(.))) %>%
-  mutate(
-    pct3a = ifelse(id == "P836" & is.na(pct3a), -77, pct3a),
-    pct3b = ifelse(id == "P836" & is.na(pct3b), -77, pct3b),
-    pct3c = ifelse(id == "P836" & is.na(pct3c), -77, pct3c),
-    pct3d = ifelse(id == "P836" & is.na(pct3d), -77, pct3d))
+  # we can merge with pct so we have correct missing codes 
+  select(id,pct_preg_total, pct_childbirth_total) %>%
+  merge(pct, by = "id") 
+
+  
+# Maria, if merge code above works, we don't need this code in comment 
+  # # making those with missing data have appropriate missing data codes
+  # mutate(
+  #   pct_preg_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_preg_total), "-99", as.character(pct_preg_total))),
+  # pct_childbirth_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_childbirth_total), "-99", as.character(pct_childbirth_total)))
+  # ) %>%
+  # # Adding back in -55 and -77
+  # mutate_at(vars(pct1:pct3d), ~ifelse(p00a == 0, "-55", as.character(.))) %>%
+  # mutate_at(vars(pct2a:pct3d), ~ifelse(pct1 == 0, "-55", as.character(.))) %>%
+  # mutate(
+  #   pct3a = ifelse(id == "P836" & is.na(pct3a), -77, pct3a),
+  #   pct3b = ifelse(id == "P836" & is.na(pct3b), -77, pct3b),
+  #   pct3c = ifelse(id == "P836" & is.na(pct3c), -77, pct3c),
+  #   pct3d = ifelse(id == "P836" & is.na(pct3d), -77, pct3d))
   
 
 ```
@@ -4865,7 +4871,6 @@ pcl <- pcl %>%
 
 
 ## Removing any columns in which there are only NAs 
-# Assuming 'your_dataset' is the name of your dataframe
 ## this drop 105 columns that aren't necessary 
 pcltest <- pcl %>%
   select(-which(sapply(pcl, function(col) all(is.na(col) | col == "NA"))))
@@ -4940,6 +4945,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(socinf_sub_complete, by="id") %>%
   left_join(socinf_gen_complete, by="id") %>%
   left_join(cts_pc_complete, by = "id") %>%
+  left_join(pct_complete, by = "id") %>%
   left_join(sex_complete, by="id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
