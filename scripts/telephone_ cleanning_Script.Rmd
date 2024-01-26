@@ -428,7 +428,7 @@ ciq_complete <- ciq_calc %>%
 ## DAST
 ### DAST Select Variables and Recode 
 ```{r dast}
-# Select bis questions and recede
+# Select DAST questions and recode
 dast <-
   tpw_raw %>%
   select(
@@ -445,6 +445,8 @@ dast <-
         TRUE ~ .x
       )
     ),
+    # reverse score 4 and 5
+    # Min, should we save these as d4_r and d5_r to be consistent with other measures?
         across(
       .cols = c(d4, d5),
       .fns = ~case_when(
@@ -471,9 +473,7 @@ There are missing data in DAST and missing rule applied.
 
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 dast <- dast %>% 
-  #TODO:Maria please double check the skip rule that is correct
-  # for incarcerated TC, entire dast survey wasn't shown
-  # MIN this is correct, the incarcerated TX could not answer this questionnaires
+  # participants who were incarcerated at the time of survey completion were not adminstered this survey
   mutate_at(vars(dast_screen:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) %>%
   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
   mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
@@ -548,7 +548,7 @@ dast_calc <-
   )
 
 ### DAST Composite & Subscale Score Creation 
-# TODO:Maria, Can you please check if the total is calculated right? double check d4, d5 
+# TODO:Min, since d4 and d5 were reverse scored they should be included in the total, it looks like they are not included here but should be
 dast_complete <-
   dast_calc %>%
   select(-missing_n,
@@ -556,19 +556,21 @@ dast_complete <-
   index_total_fun(
     id = c('id',
            'dast_screen',
-           'd4',
+           'd4', # Min possibly remove these here
            'd5')
   ) %>%
   rename(
     dast_total = sum_values 
   )
+
+
 ```
 
 ### DAST recode total 
 ```{r dast recode }
 # re-code total score 
-# RECODE AWH8DAST (0 = 0) (1 THRU 5 = 1) (6 THRU 10 = 2) (11 THRU 15 = 3) (16 THRU 20 = 4) INTO AWHPDASC
-# VALUE LABELS AWHPDASC
+# RECODE  (0 = 0) (1 THRU 5 = 1) (6 THRU 10 = 2) (11 THRU 15 = 3) (16 THRU 20 = 4) 
+# VALUE LABELS
 # 0 'None'
 # 1 'Low'
 # 2 'Intermediate (likely meets DSM criteria)'
@@ -584,6 +586,8 @@ dast_complete <- dast_complete %>%
     dast_total %in% 16:20 ~ 4,
     TRUE ~ NA_integer_
   ))
+
+## need to add back in all participants and missing data
 ```
 
 ## CTS - Partner
@@ -824,7 +828,9 @@ cts_complete <- cts_complete %>%
 ## BCAP
 ### BCAP Select Variables and Recode
 ```{r bcap}
-# Select bcap questions and recede
+# Select bcap questions and recode
+# Maria TO DO check on reverse scoring
+# Maria to check in AM for the original CAP to match items if possible
 bcap <-
   tpw_raw %>%
   select(id, matches('^q\\d'), -q1461) %>%
@@ -869,6 +875,15 @@ bcap %>%
 
 ### BCAP Calculations & Subscale
 ```{r bcap_calculations}
+# Min can you save this in another internal file with the following note. I am going to archive these data without any subscales because we don't have the correct information for scoring. 
+
+## Need to update scoring to include only three subscales according to BCAP reference, these should be:
+
+#  The following items make up the BCAP random responding scale:  31, 53, and 61, with 31 being reverse-scored.  If any one of these items is endorsed, the protocol may be invalid.  
+
+# The following items make up the BCAP lie scale:  12, 44, 57, 66, 106, and 146.  If four or more are endorsed, the protocol may be invalid (although subsequent research with urban parents has suggested that the BCAP may discriminate between known high-risk and control parents better when the lie and random responding scales are not used). 
+
+# Main scale is The remaining items make up the BCAP risk scale, with items 14, 75, and 107—the three items all loading on the “happiness” factor—being reverse-scored (as per CAP instructions).  Thus, the BCAP risk scale score can range from 0 to 24.  In the development study cited above, a BCAP cutoff of 9 best predicted the risk distinction of the full CAP using the cutoff of 166, and a BCAP cutoff of 12 best predicted the CAP cutoff of 215.  
 bcap_calc <-
   bcap %>%
     pct_miss_fun(
@@ -3703,12 +3718,16 @@ cts_pc_complete <-
     mutate(
       cts_pc_PSAP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') * (select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0), na.rm = TRUE),
   # Count of Psychological Aggression Responses
+  # Min need to make P847 -99
       cts_pc_PSAC = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0, na.rm = TRUE),
   # Raw Scoring for Psychological Aggression Past Year - Mean (Chronicity)
+  # Min need to make P847 -99
      cts_pc_PSAM = ifelse(cts_pc_PSAC == 0 & cts_pc_PSAP == 0, 0, round(cts_pc_PSAP / cts_pc_PSAC, 2)),
   #  Raw Scoring for Psychological Aggression - Past Year (Prevalence)
+  # Min need to make P847 -99
       cts_pc_PSAPP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0, na.rm = T),
   # Raw Scoring for Psychological Aggression Discipline - Lifetime (Ever Prevalence greater than past year)
+  # Min need to make P847 -99
       cts_pc_PSAL = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') == -2, na.rm = T),
   # Raw Scoring for Psychological Aggression (Ever Prevalance)
       cts_pc_PSAEP = cts_pc_PSAL + cts_pc_PSAPP
