@@ -2107,7 +2107,8 @@ p_cts_psy_mut <- complete %>%
 
 
 # Physical Injury
-p_cts_ing_mut <- complete %>%
+p_cts_ing_mut <- 
+  complete %>%
   mutate(
     cts_injury_mutual = case_when(
       cts_injury_mutual == 0 ~ 'Neither',
@@ -6809,8 +6810,6 @@ socinf_gen_tbl
 
 * All items need to be reverse scored. 
 
-* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
-
 
 
 Reference:
@@ -6851,7 +6850,8 @@ print(cts_pc_label_table)
 
 ```
 
-Response option for `a1` to  `a23`.
+Response option for `a1` -  `a23`.
+
 
 ```{r cts_pc-label-table-2, results = 'asis'}
 
@@ -6980,5 +6980,154 @@ cts_pc_tbl <- cts_pc_summary_data %>%
 
 # Render the table
 cts_pc_tbl
+
+```
+
+
+
+# Pregnancy and Childbirth Trauma (PCT)
+
+### PCT Description
+  
+  <MARIA> please insert a breif description for this measure 
+
+
+* No items need to be reverse scored. 
+
+
+
+
+Reference:
+  <Maria, please add a reference if needed> 
+  
+### PCT Variables
+  
+#### Value Labels
+
+Response options for `cts parent screen`
+
+```{r pct-label-table, results = 'asis'}
+
+pct_label_df <- data.frame(
+  value = c("1", "2", "-77"),
+  label = c("Yes",
+            "No", 
+            "Decline to Answer")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+pct_label_df <- setNames(pct_label_df[-1, ], unlist(pct_label_df[1, ]))
+
+
+#create table
+pct_label_table <- pct_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ pct(100)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(pct_label_table)
+
+
+```
+
+
+  
+####
+PCT survey items are presented in the following table:
+  
+Leading question: Thinking about your partner, how often is it true that they:
+```{r pct-var-prep}
+# Pull question wording from Qualtrics data
+pct_word <- qualtrics %>% 
+  select(P00a, starts_with("PCT")) %>%
+  slice(1)
+
+#create table with variable name, description, and notes
+pct_word_long <- pct_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "READ:", ""),
+         description = str_replace(description, "\\d+[a-zA-Z]\\. ", ""),
+         var_name = str_to_lower(var_name),
+         notes = as.character("")) 
+  # Edits Variable description and value
+  mutate(description = if_else(var_name == "p00a", "How many times have you been pregnant since we last talked on _____, 
+                               (last interview date mm/yyyy)? Please include if you were pregnant at that interview.", description)) %>%
+    mutate(description = if_else(var_name == "pct0", "Has TC reported any pregnancies?", description)) %>%
+    mutate(description = if_else(var_name == "pct2e", "During which pregnancy or pregnancies did this occur?", description)) %>%
+    mutate(description = if_else(var_name == "pct3e", "During which pregnancy or pregnancies did this occur?", description))
+```
+
+```{r pct-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+pct_gt_table <- gt(pct_word_long)
+
+# Table-specific formatting (col width, names)
+pct_gt_table <- pct_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description"
+             #notes = "Notes"
+  ) %>% 
+  apply_tbl_theme() %>% 
+  cols_width(description ~ px(300),
+             var_name ~ px(100)
+  ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(pct_gt_table)
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Only missing percentage are presented 
+
+```{r pct-missing}
+# Create subset of BSI items
+pct_data_subset <- complete %>%
+  select(p00a, starts_with("pct"))
+
+# Calculate the summary statistics for each variable
+## mean is showing 2 decimals per authors
+pct_summary_data <- lapply(pct_data_subset, function(x) {
+  x <- replace(x, x < -40, NA)
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+pct_summary_data <- as.data.frame(pct_summary_data)
+
+# Set items as first row
+pct_summary_data <- rbind(names(pct_summary_data), pct_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+pct_tbl <- pct_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Missing = "% Missing") %>% 
+   cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Missing"), align = "left") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+pct_tbl
 
 ```
