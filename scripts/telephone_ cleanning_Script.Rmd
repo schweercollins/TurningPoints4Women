@@ -3744,10 +3744,6 @@ cts_pc_complete <- cts_pc_complete %>%
   mutate(across(c(a1:a23, a1_r:a23_r), ~ifelse(cts_parent_screen == 0, -55, ifelse(is.na(.), -77, as.numeric(.))))) %>%
   mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.)))))
 
-
-
-  
-
 ```
 
 ## PCT - Pregnancy and Childbirth Trauma
@@ -4923,6 +4919,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(cint_covid_complete, by="id") %>%
   left_join(socinf_sub_complete, by="id") %>%
   left_join(socinf_gen_complete, by="id") %>%
+  left_join(cts_pc_complete, by = "id") %>%
   left_join(sex_complete, by="id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
