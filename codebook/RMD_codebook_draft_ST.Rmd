@@ -2092,7 +2092,7 @@ p_cts_psy_mut <- complete %>%
       cts_psy_agg_mutual == 3 ~ 'Both'
     ),
     cts_psy_agg_mutual = as.factor(cts_psy_agg_mutual),
-    cts_psy_agg_mutual = relevel(cts_psy_agg_mutual, 'Neither')
+    cts_psy_agg_mutual = relevel(cts_psy_agg_mutual, 'Male')
   ) %>%
   ggplot(
     aes(
@@ -2117,7 +2117,7 @@ p_cts_ing_mut <-
       cts_injury_mutual == 3 ~ 'Both'
     ),
     cts_injury_mutual = as.factor(cts_injury_mutual),
-    cts_injury_mutual = relevel(cts_injury_mutual, 'Neither')
+    cts_injury_mutual = relevel(cts_injury_mutual, 'Female')
   ) %>%
   ggplot(
     aes(
@@ -2140,7 +2140,7 @@ p_cts_ass_mut <- complete %>%
       cts_assault_mutual == 3 ~ 'Both'
     ),
     cts_assault_mutual = as.factor(cts_assault_mutual),
-    cts_assault_mutual = relevel(cts_assault_mutual, 'Neither')
+    cts_assault_mutual = relevel(cts_assault_mutual, 'Male')
   ) %>%
   ggplot(
     aes(
@@ -2162,7 +2162,7 @@ p_cts_sex_mut <- complete %>%
       cts_sex_mutual == 3 ~ 'Both'
     ),
     cts_sex_mutual = as.factor(cts_sex_mutual),
-    cts_sex_mutual = relevel(cts_sex_mutual, 'Neither')
+    cts_sex_mutual = relevel(cts_sex_mutual, 'Male')
   ) %>%
   ggplot(
     aes(
@@ -6856,7 +6856,7 @@ Response option for `a1` -  `a23`.
 ```{r cts_pc-label-table-2, results = 'asis'}
 
 cts_pc_label_df2 <- data.frame(
-  value = c("0", "1", "2", "3", "4", "5", "6", "7", "-77"),
+  value = c("0", "1", "2", "3", "4", "5", "6", "7"),
   label = c("None - has never happened/None",
             "Once",
             "Twice",
@@ -6864,8 +6864,7 @@ cts_pc_label_df2 <- data.frame(
             "6-10 times",
             "11-20 times",
             "More than 20 times",
-            "Not in the past year, but it happened before",
-            "Decline to Answer")
+            "Not in the past year, but it happened before")
 ) %>% 
   t() %>% 
   as.data.frame()
@@ -7009,10 +7008,9 @@ Response options for `cts parent screen`
 ```{r pct-label-table, results = 'asis'}
 
 pct_label_df <- data.frame(
-  value = c("1", "2", "-77"),
+  value = c("1", "2"),
   label = c("Yes",
-            "No", 
-            "Decline to Answer")
+            "No")
 ) %>% 
   t() %>% 
   as.data.frame()
@@ -7038,7 +7036,7 @@ print(pct_label_table)
 
 
   
-####
+#### PCT Survey Items
 PCT survey items are presented in the following table:
   
 Leading question: Thinking about your partner, how often is it true that they:
@@ -7057,7 +7055,7 @@ pct_word_long <- pct_word %>%
          description = str_replace(description, "READ:", ""),
          description = str_replace(description, "\\d+[a-zA-Z]\\. ", ""),
          var_name = str_to_lower(var_name),
-         notes = as.character("")) 
+         notes = as.character("")) %>%
   # Edits Variable description and value
   mutate(description = if_else(var_name == "p00a", "How many times have you been pregnant since we last talked on _____, 
                                (last interview date mm/yyyy)? Please include if you were pregnant at that interview.", description)) %>%
@@ -7077,9 +7075,9 @@ pct_gt_table <- pct_gt_table %>%
              #notes = "Notes"
   ) %>% 
   apply_tbl_theme() %>% 
-  cols_width(description ~ px(300),
-             var_name ~ px(100)
-  ) %>%
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+   tab_options(table.width = pct(100))%>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
