@@ -4037,7 +4037,7 @@ sus <- sus %>%
   mutate_at(vars(sus11a:sus11c), ~case_when(sus11 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus11 is not 3, sus11c was not asked
   mutate_at(vars(sus11c), ~case_when(sus11 != 3 ~ "-55", TRUE ~ .)) %>%
-  # if sus12 is 2,4,5, sus12a:sus12c were not asked
+  # if sus12 is 2,4,-77, sus12a:sus12c were not asked
   mutate_at(vars(sus12a:sus12c), ~case_when(sus12 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus12 is 3..  sus12a:sus12b weren't asked 
   mutate_at(vars(sus12a:sus12b_77), ~case_when(sus12 == 3 ~ "-55", TRUE ~ .)) %>%
@@ -4049,13 +4049,15 @@ sus <- sus %>%
       .cols = sus13a,
       .fns = ~case_when(is.na(.x) ~ "-77", TRUE ~ .x)
   ))%>%
-  # if sus13 is 2,4,5, sus13a:sus14o2 were not asked
+
+  # if sus13 is 2,4,-77, sus13a:sus14o2 were not asked
   mutate_at(vars(sus13a:sus14o2), ~case_when(sus13 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus13 is 3..  sus13a weren't asked 
   mutate_at(vars(sus13a), ~case_when(sus13 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus13 is not 3, sus13b was not asked
   mutate_at(vars(sus13b), ~case_when(sus13 != 3 ~ "-55", TRUE ~ .)) %>%
-
+  # change sus13a to numeric for latter skip rule 
+  mutate(sus13a = as.numeric(sus13a)) %>%
   # if sus13a is <=0 and sus13 != 1, sus14:sus14a1 were not asked 
   mutate_at(vars(sus14:sus14a1), ~case_when(sus13a <=0 | sus13 != 1 ~ "-55", TRUE ~ .)) %>% 
   # if sus13a is <=1 and sus13 != 1, sus14b:sus14b2  were not asked 
@@ -4089,84 +4091,106 @@ sus <- sus %>%
   # if sus13a is <=14 and sus13 != 1, sus14o:sus14o2  were not asked 
   mutate_at(vars(sus14o:sus14o2), ~case_when(sus13a <=14 | sus13 != 1 ~ "-55", TRUE ~ .)) %>%
 
-  # if sus15 is 2,4,5, sus15a:sus15b were not asked
+  # if sus15 is 2,4,-77, sus15a:sus15b were not asked
   mutate_at(vars(sus15a:sus15), ~case_when(sus15 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus15 is 3..  sus15a weren't asked 
   mutate_at(vars(sus15a), ~case_when(sus15 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus15 is not 3, sus15b was not asked
   mutate_at(vars(sus15b), ~case_when(sus15 != 3 ~ "-55", TRUE ~ .)) %>%
   
-  # if sus16 is 2,4,5, sus16a:sus16b were not asked
+  # if sus16 is 2,4,-77, sus16a:sus16b were not asked
   mutate_at(vars(sus16a:sus16b), ~case_when(sus16 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus16 is 3..  sus16a weren't asked 
   mutate_at(vars(sus16a), ~case_when(sus16 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus16 is not 3, sus16b was not asked
   mutate_at(vars(sus16b), ~case_when(sus16 != 3 ~ "-55", TRUE ~ .)) %>%
   
-  # if sus17 is 2,4,5, sus17a:sus17b were not asked
+  # if sus17 is 2,4,-77, sus17a:sus17b were not asked
   mutate_at(vars(sus17a:sus17b), ~case_when(sus17 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus17 is 3..  sus17a weren't asked 
   mutate_at(vars(sus17a), ~case_when(sus17 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus17 is not 3, sus17b was not asked
   mutate_at(vars(sus17b), ~case_when(sus17 != 3 ~ "-55", TRUE ~ .)) %>%
- 
-  # if sus19 is 2,4,5, sus19a:sus19b were not asked
+  
+  # NA in columns below are truly missing 
+  mutate(sus18 = case_when(is.na(sus18) ~ "-99", TRUE ~ sus18)) %>%
+  # if sus18 is 2,4,-77 sus18a:sus18b were not asked
+  mutate_at(vars(sus18a:sus18b), ~case_when(sus18 %in%c(2,4,-77,-55, -99) ~ "-55", TRUE ~ .)) %>%
+  # if sus18 is 3 sus18a was not asked 
+  mutate_at(vars(sus18a), ~case_when(sus18 == 3 ~ "-55", TRUE ~ .)) %>%
+  # if sus18 is 3 sus18b was not asked 
+  mutate_at(vars(sus18b), ~case_when(sus18 != 3 ~ "-55", TRUE ~ .)) %>%
+  
+  # if sus19 is 2,4,-77, sus19a:sus19b were not asked
   mutate_at(vars(sus19a:sus19b), ~case_when(sus19 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus19 is 3..  sus19a weren't asked 
   mutate_at(vars(sus19a), ~case_when(sus19 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus19 is not 3, sus19b was not asked
   mutate_at(vars(sus19b), ~case_when(sus19 != 3 ~ "-55", TRUE ~ .)) %>%
 
-  # if sus20 is 2,4,5, sus20a:sus20b were not asked
+  # if sus20 is 2,4,-77, sus20a:sus20b were not asked
   mutate_at(vars(sus20a:sus20b), ~case_when(sus20 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus20 is 3..  sus20a weren't asked 
   mutate_at(vars(sus20a), ~case_when(sus20 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus20 is not 3, sus20b was not asked
   mutate_at(vars(sus20b), ~case_when(sus20 != 3 ~ "-55", TRUE ~ .)) %>%
 
-  # if sus21 is 2,4,5, sus21a:sus21b were not asked
+  # if sus21 is 2,4,-77, sus21a:sus21b were not asked
   mutate_at(vars(sus21a:sus21b), ~case_when(sus21 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus21 is 3..  sus21a weren't asked 
   mutate_at(vars(sus21a), ~case_when(sus21 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus21 is not 3, sus20b was not asked
   mutate_at(vars(sus21b), ~case_when(sus21 != 3 ~ "-55", TRUE ~ .)) %>%
 
-  # if sus22 is 2,4,5, sus22a:sus22b were not asked
+  # if sus22 is 2,4,-77, sus22a:sus22b were not asked
   mutate_at(vars(sus22a:sus22b), ~case_when(sus22 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus22 is 3..  sus22a weren't asked 
   mutate_at(vars(sus22a), ~case_when(sus22 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus22 is not 3, sus20b was not asked
   mutate_at(vars(sus22b), ~case_when(sus22 != 3 ~ "-55", TRUE ~ .)) %>%
 
-  # if sus23 is 2,4,5, sus23a:sus23b were not asked
-  mutate_at(vars(sus23a:sus23b), ~case_when(sus23 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
+  #NA in columns below are truly missing 
+  mutate(sus23 = case_when(is.na(sus23) ~ "-99", TRUE ~ sus23)) %>%
+  # if sus23 is 2,4,-77, sus23a:sus23b were not asked
+  mutate_at(vars(sus23a:sus23b), ~case_when(sus23 %in%c(2,4,-77,-55) ~ "-55", TRUE ~ .)) %>%
   # if sus23 is 3..  sus23a weren't asked 
   mutate_at(vars(sus23a), ~case_when(sus23 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus23 is not 3, sus23b was not asked
   mutate_at(vars(sus23b), ~case_when(sus23 != 3 ~ "-55", TRUE ~ .)) %>%
   
-  # if sus24 is 2,4,5, sus24a:sus24b were not asked
+  # if sus24 is 2,4,-77, sus24a:sus24b were not asked
   mutate_at(vars(sus24a:sus24b), ~case_when(sus24 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus24 is 3..  sus24a weren't asked 
   mutate_at(vars(sus24a), ~case_when(sus24 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus24 is not 3, sus24b was not asked
   mutate_at(vars(sus24b), ~case_when(sus24 != 3 ~ "-55", TRUE ~ .)) %>%
 
-  # if sus25 is 2,4,5, sus25a:sus25b were not asked
+  # if sus25 is 2,4,-77, sus25a:sus25b were not asked
   mutate_at(vars(sus25a:sus25b), ~case_when(sus25 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus25 is 3..  sus25a weren't asked 
   mutate_at(vars(sus25a), ~case_when(sus25 == 3 ~ "-55", TRUE ~ .)) %>%
   # if sus25 is not 3, sus25b was not asked
   mutate_at(vars(sus25b), ~case_when(sus25 != 3 ~ "-55", TRUE ~ .)) %>%
 
-  # if sus26 is 2,4,5, sus26a:sus26c were not asked
+  # if sus26 is 2,4,-77, sus26a:sus26c were not asked
   mutate_at(vars(sus26a:sus26c), ~case_when(sus26 %in%c(2,4,-77) ~ "-55", TRUE ~ .)) %>%
   # if sus26 is 3..  sus26a:sus26b weren't asked 
   mutate_at(vars(sus26a:sus26b_77), ~case_when(sus26 == 3 ~ "-55", TRUE ~ .)) %>%
-  # if sus26 is not 3, sus26b was not asked
-  mutate_at(vars(sus26b_77), ~case_when(sus26 != 3 ~ "-55", TRUE ~ .)) %>%
+  # if sus26 is not 3, sus26c was not asked
+  mutate_at(vars(sus26c), ~case_when(sus26 != 3 ~ "-55", TRUE ~ .)) %>%
+  
     # we have missing due to partial finish
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
+  # following question are not request to answer, so if NA it means TC refuse to answer -77 
+  mutate(sus2 = case_when(is.na(sus2) ~ "-77", TRUE ~ sus2)) %>%
+  mutate(sus14l = case_when(is.na(sus14l) ~ "-77", TRUE ~ sus14l)) %>%
+  mutate(sus14l2 = case_when(is.na(sus14l2) ~ "-77", TRUE ~ sus14l2)) %>%
+  mutate(sus14m = case_when(is.na(sus14m) ~ "-77", TRUE ~ sus14m)) %>%
+  mutate(sus14m2 = case_when(is.na(sus14m2) ~ "-77", TRUE ~ sus14m2)) %>%
+  mutate(sus18a = case_when(is.na(sus18a) ~ "-77", TRUE ~ sus18a)) %>%
+  mutate(sus23a = case_when(is.na(sus23a) ~ "-77", TRUE ~ sus23a)) %>%
+  
+  
   select(-c("sus11b_1","sus11b_2","sus11b_3","sus11b_77")) %>%
   select(-c("sus12b_1","sus12b_2","sus12b_3","sus12b_77")) %>%
   select(-c("sus14a_1","sus14a_2","sus14a_3","sus14a_77")) %>%
@@ -4203,7 +4227,7 @@ columns_to_drop <- names(sus)[sapply(sus, function(col)
 # this should drop 10 empty comlumns
 sus <- sus[, !names(sus) %in% columns_to_drop]
 
-## Min there are still NA values and empty values in the dataset we need to check
+
 ## Note for Maria -- need to remove and recode 6a,6b, and 6c
 ## Maria export to csv and double code with Kaylee
 ## notes here
@@ -4224,14 +4248,13 @@ sus <- sus[, !names(sus) %in% columns_to_drop]
 # P805 add count of 3 to sus 7
 #P829 add count of 1 to sus 7
 #P890 add count of 1 to sus 1
-sus_miss <- sus %>%
-    mutate(across(-c(id), as.numeric))%>%
-  pct_miss_fun(
-    id = c("id", -matches("\\d$")),
-    n_items = 24
-  )
+
 
 ## MIN we need to remove all 14 and associated variable from the archive file; we can create an internal archive file where we retain them, see notes in spreadsheet
+
+# Remove identifiable information columns 
+sus_complete <- sus %>%
+  select(-starts_with("sus14"))
 ```
 
 
@@ -4965,6 +4988,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(socinf_gen_complete, by="id") %>%
   left_join(cts_pc_complete, by = "id") %>%
   left_join(pct_complete, by = "id") %>%
+  left_join(sus_complete, by = "id") %>%
   left_join(sex_complete, by="id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
