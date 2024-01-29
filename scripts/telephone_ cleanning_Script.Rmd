@@ -1349,12 +1349,12 @@ arq_complete <- arq_calc %>%
     arq_model_other_attach_avoid = (rqa + rqc) - (rqd + rqb)
   ) 
 
-# -99 when there is a tie, because missing due to not being able to determine a top score for arq_group
+# -99 when there is are two items with the same highest value, because missing due to not being able to determine a top score for arq_group
 # more positive scores indicate more positive models, and more negative scores indicate more negative models
 ```
 
 
-## PRSS
+## Posttraumatic Risk-Seeking Scale (PRSS)
 ### PRSS Select Variables and Recode
 ```{r prss}
 prss <- tpw_raw %>%
@@ -1371,7 +1371,8 @@ prss <- tpw_raw %>%
         .x == "Some of the time" ~ 2,
         .x == "Much of the time" ~ 3,
         .x == "Most of the time" ~ 4,
-        .x == "Decline to Answer" ~ -77
+        .x == "Decline to Answer" ~ -77,
+        is.na(.x) ~ -99 # if truly missing
       )
     )
     )
@@ -1380,10 +1381,6 @@ prss <- tpw_raw %>%
 ### PRSS Missing Data 
 There are missing data in PRSS and missing rule applied.
 ```{r prss_missing}
-prss <- prss %>%
-  # we have missing due to partial finish
-  mutate(across(-id, ~ifelse(id == "HR173", -99, .)))
-  
 
 prss_miss <- prss %>%
     mutate(across(-id, as.numeric)) %>%
@@ -1400,19 +1397,10 @@ prss_miss %>%
   )
 ```
 
-### PRSS Calculation & Subscales 
+### PRSS Calculation 
 ```{r prss_calculation}
-# apply missing rule
+# converting missing data to NA for total scale computation
 prss_calc <- prss %>%
-  pct_miss_fun(
-    id = c("id"), 
-    n_items = 5
-  )%>%
-  full_join(prss, by = "id") %>%
-  filter(
-    is.na(miss_pct) |
-      miss_pct < 33
-  )%>%
   mutate(
     across(
     .cols = c(ps9:ps13),
@@ -1424,13 +1412,13 @@ prss_calc <- prss %>%
     )
   )
 
+# the total score is a sum of the five items
+# the average is not needed
 
-
-prss_complete <-
-  prss_calc %>%
+prss_complete <- prss_calc %>%
   composite_total_avg_fun(
     id = 'id',
-    max_value = 5,
+    max_value = 4, # Min, should this be 5 or 4?
     n_items = 5
   ) %>%
   distinct(
@@ -1442,17 +1430,29 @@ prss_complete <-
     prss_total = sum_values,
     prss_avg = mean_values
   ) %>%
+  rowwise() %>%
+  # if missing values in 5 items (< 33%), giving prss_total -99; this applies to two cases
   mutate(
-    across(
-      c(
-        prss_total,
-        prss_avg
-      )
-    )
+    prss_total = if (all(is.na(c_across(starts_with("ps"))))) -99 else prss_total,
+    prss_avg = if (all(is.na(c_across(starts_with("ps"))))) -99 else prss_avg
   ) %>%
-  select(-miss_pct, - missing_n)
+  ungroup()
+
+
+# renaming ps variables to prss and changing numbers to 1-5
+# merging to retain original values including appropriate missing values
+
+
+prss_complete <- prss_complete %>%
+  select(id, prss_total) %>%
+  merge(prss, by = "id") %>%
+  relocate(prss_total, .after = "ps13") %>%
+  rename_with(~ paste0("prss", as.numeric(str_replace(., "^ps", "")) - 8), starts_with("ps"))
+
+
 ```
-##SSQ
+
+## Shame and Stigma Questionnaire (SSQ)
 ### SSQ Select Variables and Recode
 ```{r ssq}
 ssq <- tpw_raw %>%
@@ -1471,6 +1471,7 @@ ssq <- tpw_raw %>%
         .x == "Much of the time" ~ 3,
         .x == "Most of the time" ~ 4,
         .x == "Decline to Answer"~ -77,
+        is.na(.x) ~ -99, # if truly missing
         TRUE ~ NA_real_
       )
     )
@@ -1480,12 +1481,9 @@ ssq <- tpw_raw %>%
 ### SSQ Missing Data
 Missing Rule applied. 
 ```{r ssq_missing}
-ssq <- ssq %>%
-  # missing due to partial finished.
-  mutate(across(-id, ~ifelse(id == "HR173", -99, .)))
+# Missing data threshold for this 8-item score is < 30%
 
-
-
+# this applies to 4 cases 
 ssq_miss <- ssq %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
@@ -1517,34 +1515,49 @@ ssq_calc <-
     )
   )
 
-ssq_complete <-
-  ssq_calc %>%
-  subscale_create(
-    total_only = TRUE,
-    scale1 = c("ps1", "ps2", "ps3", "ps4"),
-    scale1_nitems = 4,
-    scale2 = c("ps1", "ps2", "ps3", "ps4",
-               "ps5", "ps6", "ps7", "ps8"),
-    scale2_nitems = 8
-  ) %>%
-  rename(
-    ssq_abuse_shame = total1,
-    ssq_total = total2
-  ) %>%
+# We compute one total score, a sum of the 8 items
+
+# Original questionnaire included only the first four items, but to expand relevance for adult populations (as is the case in the current study), the additional four items were added 
+
+# Original 8-item questionnaire was measured on a three-point scale (0,1,2) with a cut point of 6
+
+# We administered the 8-item questionnaire on a 5-point scale (0-4) with a corresponding cut point of 12
+
+
+ssq_complete <- ssq_calc %>%
   mutate(
+    ssq_total = ps1 + ps2 + ps3 + ps4 + ps5 + ps6 + ps7 + ps8,
     across(
-      -c(id
-      ),
-      ~case_when(
+      .cols = -c(id),
+      .fns = ~ case_when(
         id %in% ssq_remove ~ NA_real_,
         TRUE ~ .x
       )
     ),
     ssq_total_cutoff = case_when(
-      ssq_total >= 16 ~ "high shame",
-      ssq_total <= 15 ~ "low shame"
+      ssq_total >= 12 ~ "high shame",
+      ssq_total <= 11 ~ "low shame",
+      TRUE ~ NA_character_  # Add default condition to handle other cases
     )
-  )
+  ) %>%
+    rowwise() %>%
+  # if missing values in 5 items (< 33%), giving prss_total -99; this applies to four cases
+  mutate(
+  ssq_total = if_else(all(is.na(c_across(starts_with("ps")))), -99, ssq_total),
+  ssq_total_cutoff = if_else(all(is.na(c_across(starts_with("ps")))), "-99", ssq_total_cutoff)
+) %>%
+  ungroup()
+
+
+## rename from ps to ssq
+## add in missing values
+
+ssq_complete <- ssq_complete %>%
+  select(id, ssq_total:ssq_total_cutoff) %>%
+  merge(ssq, by = "id") %>%
+  relocate(ssq_total:ssq_total_cutoff, .after = "ps8") %>%
+  rename_with(~ paste0("ssq", as.numeric(str_replace(., "^ps", ""))), starts_with("ps"))
+
 ```
 
 ## EDS-F (Friend)
@@ -2269,6 +2282,7 @@ itq <- tpw_raw %>%
         .x == "Quite a bit" ~ "3",
         .x == "Extremely" ~ "4",
         .x == "Decline to Answer" ~ "-55",
+      #  is.na(.x) ~ -99, # if truly missing
         TRUE ~ .x
       )
     )
@@ -2279,7 +2293,7 @@ itq <- tpw_raw %>%
 There are missing data and missing rule applied. 
 ```{r itq_missing}
 itq <- itq %>%
-  # partial finished TC
+  # partially finished TC
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) 
 
 itq_miss <- itq %>%
@@ -2293,7 +2307,7 @@ itq_miss %>%
   gt::gt() %>%
   gt::tab_header(title = 'Missing Data',
                  subtitle = 'By Each Participant')
-#Maria check
+
 itq_remove <- itq_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
@@ -2310,6 +2324,8 @@ itq_calc <- itq %>%
       )
     )
   )
+
+# This code can be used to compute diagnoses based on participant endorsing at least one symptom in each cluster
 
 itq_calc <- itq_calc %>%
   mutate(
@@ -2356,16 +2372,17 @@ itq_complete <-
     itq_th_total = total3
   ) %>%
   mutate(
-    itq_ptsd_total = (itq_re_total + itq_av_total + itq_th_total),
-    across(
-      -c(id
-      ),
-     ~case_when(
-       id %in% itq_remove ~ NA,
-         TRUE ~ .x
-       )
-    )
-  )
+    itq_ptsd_total = (itq_re_total + itq_av_total + itq_th_total)) %>%
+  mutate_at(vars(itq8), ~ifelse(is.na(.), -77, .))#,
+  #   across(
+  #     -c(id
+  #     ),
+  #    ~case_when(
+  #      id %in% itq_remove ~ NA,
+  #        TRUE ~ .x
+  #      )
+  #   )
+  # )
 ```
 
 
@@ -2399,19 +2416,20 @@ ibq <-
     )) %>%
   mutate(ibq10_9 = ifelse(tolower(ibq10_9_text) %in% c("none", "no institutions selected"), "0", ibq10_9)
 ) %>%
-  mutate(ibq9 = ifelse(ibq9 %in% c("N/A"), "-55", ibq9)) %>% #TODO need confirm with Maria
+  mutate(ibq9 = ifelse(ibq9 %in% c("N/A"), "-55", ibq9)) %>% 
   mutate(across(ibq10_1:ibq10_9, as.numeric))%>%
-  mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>% # ibq 10, how many they select
+  mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>% # ibq 10, how many specific systems they selected
+# Min, we may consider ibq = 1 they selected systems; 0 none selected and then create a new variable that shows the total number of systems selected
   mutate(ibq10 = as.character(ibq10))%>% 
   mutate_at(vars(ibq10), ~case_when(ibq10_77 <0  ~ ibq10_77, TRUE ~ . )) %>%
   rename(ibq10_school = ibq10_1) %>%
   rename(ibq10_juvenile_justice = ibq10_2) %>%
-  rename(ibq10_Legal_System = ibq10_3) %>%
-  rename(ibq10_Police = ibq10_4) %>%
-  rename(ibq10_Medical = ibq10_5) %>%
-  rename(ibq10_Church = ibq10_6) %>%
-  rename(ibq10_Foster_Care = ibq10_7) %>%
-  rename(ibq10_Child_Welfare = ibq10_8) %>%
+  rename(ibq10_legal_system = ibq10_3) %>%
+  rename(ibq10_police = ibq10_4) %>%
+  rename(ibq10_medical = ibq10_5) %>%
+  rename(ibq10_church = ibq10_6) %>%
+  rename(ibq10_foster_care = ibq10_7) %>%
+  rename(ibq10_child_welfare = ibq10_8) %>%
   rename(ibq10_other = ibq10_9) %>%
   rename(ibq10_other_text = ibq10_9_text) %>%
   relocate(ibq10, .after = ibq9) %>%
@@ -2420,7 +2438,7 @@ ibq <-
 ```
 
 ### IBQ Missing Data 
-There are missing data, and missing rule applied. 
+There are missing data, hoever missing data rule not applied given this is a total sum of the number of systems endorsed 
 ```{r ibq_missing }
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 ibq <- ibq %>%
@@ -2430,9 +2448,9 @@ ibq <- ibq %>%
 ibq_miss <- ibq %>%
   mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
   pct_miss_fun(
-    id = c("id", "ibq10_school", "ibq10_juvenile_justice", "ibq10_Legal_System", "ibq10_Police", "ibq10_Medical", "ibq10_Church", "ibq10_Foster_Care", "ibq10_Child_Welfare","ibq10_other","ibq10_other_text", "ibq10_77"),
+    id = c("id", "ibq10_school", "ibq10_juvenile_justice", "ibq10_legal_system", "ibq10_police", "ibq10_medical", "ibq10_church", "ibq10_foster_care", "ibq10_child_welfare","ibq10_other","ibq10_other_text", "ibq10_77"),
     n_items = 10
-  )
+  ) 
 
 ibq_miss %>% 
   gt::gt() %>% 
@@ -2440,7 +2458,6 @@ ibq_miss %>%
     title = 'IBQ Missing Data',
     subtitle = 'By Participant')
 
-ibq_remove <- ibq_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ```
 
 ### IBQ Calculations & Subscale
@@ -2459,20 +2476,33 @@ ibq_calc <-
     )
   )
 
-# IBQ Composite & Subscale Score Creation 
+# Here we drop the ibq10_text variables so we can later compute clean merge 
+ibq <- ibq %>%
+  select(id:ibq10)
+
+# IBQ Total Sum Score creation
 ibq_complete <-
   ibq_calc %>%
-  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) %>%
-   mutate(
-    across(
-      -c(id
-      ),
-     ~case_when(
-       id %in% ibq_remove ~ NA,
-         TRUE ~ .x
-       )
-    )
-  )
+  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) 
+
+
+## Pull in missing values
+# drop ibq10_77 as this is an empty value
+
+ibq_complete <- ibq_complete %>%
+  select(id, ibq10_school:ibq10_other_text) %>% # dropped ibq10_77 no values
+  merge(ibq, by="id") %>%
+  relocate(ibq10_school:ibq10_other_text, .after = "ibq10")
+
+## de-identify ibq10 open text
+## update values when person endorsed a system already listed
+## [   ] indicates the one word was removed to de-identify; otherwise, values were re-coded to be de-identified
+
+## pull in internal code when creating external archive file 
+
+# code goes here
+ 
+
 ```
 
 ## Sex History Survey
