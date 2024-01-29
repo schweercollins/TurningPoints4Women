@@ -7129,3 +7129,277 @@ pct_tbl <- pct_summary_data %>%
 pct_tbl
 
 ```
+
+
+
+# Service Utilization Survey (SUS)
+
+  
+  
+### SUS Description
+  
+  <MARIA> please insert a breif description for this measure 
+
+
+* No items need to be reverse scored. 
+
+* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+
+
+
+Reference:
+  <Maria, please add a reference if needed> 
+  
+### SUS Variables
+  
+#### Value Labels
+
+Response options for `sus7`
+
+```{r sus-label-table, results = 'asis'}
+
+sus_label_df <- data.frame(
+  value = c("1", "0", "-66"),
+  label = c("Yes",
+            "No", 
+            "Don't Know")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+sus_label_df <- setNames(sus_label_df[-1, ], unlist(sus_label_df[1, ]))
+
+
+#create table
+sus_label_table <- sus_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ pct(100)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(sus_label_table)
+
+
+```
+
+Response option for `sus8`, `sus11c`, `sus12c`,, `sus13b`, `sus15b`, `sus16b`, `sus17b`, `sus18b`, `sus19b`, `sus20b`, `sus21b`, `sus22b`, `sus23b`, `sus24b`, `sus25b`, `sus26c`.
+
+```{r sus-label-table-2, results = 'asis'}
+
+sus_label_df2 <- data.frame(
+  value = c("1", "0"),
+  label = c("Yes",
+            "No")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+sus_label_df2 <- setNames(sus_label_df2[-1, ], unlist(sus_label_df2[1, ]))
+
+
+#create table
+sus_label_table2 <- sus_label_df2 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(sus_label_table2)
+
+
+```
+Response option for `sus11b`, `sus11c2b`, `sus14a`,, `sus14b2`, `sus14c1`, `sus114d1`,`sus14e1`,`sus14f1`,`sus14g1`,`sus14h1`,`sus14i1`,`sus14j1`,`sus14k1`,`sus14l1`,`sus14m1`,`sus14n1`,`sus14o1`.
+
+```{r sus-label-table-3, results = 'asis'}
+
+sus_label_df3 <- data.frame(
+  value = c("1", "2", "3"),
+  label = c("1. Physical",
+            "2. Mental/Psychological",
+            "3. Substance Use")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+sus_label_df3 <- setNames(sus_label_df3[-1, ], unlist(sus_label_df3[1, ]))
+
+
+#create table
+sus_label_table3 <- sus_label_df3 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(sus_label_table3)
+
+
+```
+
+Response option for `sus11`, `sus12`, `sus13`, `sus15`, `sus16`, `sus17`, `sus18`, `sus19`, `sus20`, `sus21`, `sus22`, `sus23`, `sus24`, `sus25`, `sus26b`.
+
+```{r sus-label-table-4, results = 'asis'}
+
+sus_label_df4 <- data.frame(
+  value = c("1", "2", "3", "4"),
+  label = c("1. Yes, available and accessed",
+            "2. No, available but did not access",
+            "3. No, attempted to access but experienced a barrier",
+            "4. No, was not aware service was available" )
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+sus_label_df4 <- setNames(sus_label_df4[-1, ], unlist(sus_label_df4[1, ]))
+
+
+#create table
+sus_label_table4 <- sus_label_df4 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(sus_label_table4)
+
+
+```
+
+####
+sus  survey items are presented in the following table:
+  
+Leading question: Thinking about your partner, how often is it true that they:
+```{r sus-var-prep}
+# Pull question wording from Qualtrics data
+sus_word <- qualtrics %>% 
+  select(starts_with("SUS")) %>%
+  rename("sus14b1" = "SUS14b2...2226") %>%
+  rename("sus14b2" = "SUS14b2...2227") %>%
+  slice(1)
+
+#create table with variable name, description, and notes
+sus_word_long <- sus_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "\\d+[a-zA-Z]\\.", ""),
+         description = str_replace(description, "\\d+[a-zA-Z]\\d+\\.", ""),
+         description = str_replace(description, "READ: ", ""),
+         description = str_replace(description, "READ: Please use the answer choices below the image of oranges on page 56.", ""),
+         description = str_replace(description, "Assessor Note: If name is unknown, get type/class of drug or condition it was prescribed for.", ""),
+         var_name = str_to_lower(var_name),
+         notes = as.character("")) %>%
+  # Edits Variable description and value
+  mutate(description = if_else(var_name == "sus screen", "Has TC reported any previous or current 
+                               pregnancies or previous or current parenting of any bio, step, or other children?", description)) %>%
+  mutate(description = if_else(var_name == "sus - start", "Thinking about all of your children together, 
+                               how many total contacts with child welfare have you had since your last interview on ______ 
+                               (last interview date)? A contact can be a meeting, call or visit related to any of your 
+                               children or other children whom you may be parenting. ____________ Contacts", description)) %>%
+  mutate(description = if_else(var_name == "sus3", "How many of the contacts were a session 
+                               with a child welfare caseworker? This could be regular/ongoing.", description)) %>%
+  mutate(description = if_else(var_name == "sus10a", "Think of appearance number 1, was it for a hearing, 
+                               continuance or court monitoring?", description)) %>%  
+  mutate(description = if_else(var_name == "sus11", "The next part of the interview is about health and medical services for you.
+                               For example, we are going to talk about how many times you have gone to a hospital, a doctor, a dentist, or a counselor.
+                               Have you been to the emergency room or urgent care at a hospital since our last interview on ______ (last interview date)?", description)) %>%  
+  mutate(description = if_else(var_name %in% c("sus11b","sus12b"), "What were the primary reason(s) for these visits?", description)) %>% 
+  mutate(description = if_else(var_name == "sus12", "Did you go to the hospital for a scheduled procedure, surgery, 
+                               test or other type of appointment since your last interview? (non-pregnancy-related)", description)) %>%
+  mutate(description = if_else(var_name == "sus13", "Have you filled any prescriptions of any type in the past 6 months? 
+                               Please think about anything that has been prescribed by a doctor, 
+                               including medicines, antibiotics, inhalers, birth control pills, etc...", description)) %>%
+  mutate(description = if_else(var_name == "sus14", "What is the name of prescription/drug #1?", description)) %>%
+  mutate(description = if_else(var_name == "sus16a", "How many times?", description)) %>%
+  mutate(description = if_else(var_name == "sus17", "Have you been in short stay or evaluation inpatient treatment. 
+                               This includes stays up to 72 hours (3 days), such as detox? ", description)) %>%
+  mutate(description = if_else(var_name == "sus18", "Have you been in residential treatment for substance abuse?", description)) 
+
+
+
+        
+```
+
+```{r sus-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+sus_gt_table <- gt(sus_word_long)
+
+# Table-specific formatting (col width, names)
+sus_gt_table <- sus_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description"
+             #notes = "Notes"
+  ) %>% 
+  apply_tbl_theme() %>% 
+  cols_width(description ~ px(300),
+             var_name ~ px(100)
+  ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+# Print the table
+print(sus_gt_table)
+```
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Only missing percentage are presented 
+
+```{r sus-missing}
+# Create subset of BSI items
+sus_data_subset <- complete %>%
+  select(starts_with("sus"))
+
+# Calculate the summary statistics for each variable
+## mean is showing 2 decimals per authors
+sus_summary_data <- lapply(sus_data_subset, function(x) {
+  x <- replace(x, x < -40, NA)
+  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  # sd_val <- round(sd(x, na.rm = TRUE), 2)
+  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  c(Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+sus_summary_data <- as.data.frame(sus_summary_data)
+
+# Set items as first row
+sus_summary_data <- rbind(names(sus_summary_data), sus_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+sus_tbl <- sus_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Missing = "% Missing") %>% 
+  # cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Missing"), align = "left") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+sus_tbl
+
+```
