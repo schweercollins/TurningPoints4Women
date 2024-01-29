@@ -51,6 +51,7 @@ There are answer options which are excluded from analysis, it will be NA, is the
 
 question about missing value, I feel like there are item shouldn't be counted when calculate the missing percentage, ie: there are columns for text entry when TC choose other, if TC choose other answer option, this shouldn't be counted when count missing percentage? 
 cint_socio won't have any data after applying missing data 
+## Min, note from MSC here -- I think we should only include -77 or -99 in the missing data; if something was skipped due to skip rule it is not missing; likewise, if TC said "NA" and it is -55 it is not truly missing, but also can't be included in the scoring, so for scoring purposes, -55 shouldn't really affect calculations. Is this correct? In a different time, I might have now (in hindsight) used a skip rule missing value versus when a TC said "NA" but for analysis purposes, these two things are equivalent. 
 
 which( colnames(df)=="b" )
 # Find NA values in the data frame
@@ -94,11 +95,11 @@ bsi <-
 ### BSI Missing Data 
 There are missing data in BSI, but missing rule does not applied. 
 ```{r bsi_missing }
-# correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
+# correct missing value: Not Applicable = -55 = The subject was never asked a question for skip reason (conditional question)
 bsi <- bsi %>% 
   mutate(
     bsi4 = case_when(
-      # for incarcerated TC, bsi4 wasn't shown 
+      # for participants who are incarcerated, bsi4 wasn't shown 
       id %in% c("HR211", "HR181", "P819") & is.na(bsi4) ~ "-55",
       TRUE ~ bsi4
     )
@@ -222,7 +223,7 @@ mutate(
 ### CESD Missing Data
 There are missing data in CESD but the missing rule is not applied due to being below the threshold.
 ```{r CESD_missing }
-# correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
+# correct missing value: Not Applicable = -55 = The subject was never asked a question for skip rule (conditional question)
 # if response is No to item c21, then TC moved on to item c24
 cesd <- cesd %>%
   mutate(c22 = ifelse((c21 == 0 |c21 ==  "-77"), "-55", c22),
@@ -278,8 +279,8 @@ cesd_complete <-
            'c4',
            'c8',
            'c12', 
-           'c16', # c4,c8,c12, c16 was removed because we are using reverse score instead 
-           'c21', # C21 - c24 removed because they are address suicidality 
+           'c16', # c4,c8,c12, c16 were removed because we use reverse scored items instead 
+           'c21', # C21 - c24 removed because they address suicidality 
            'c22',
            'c23',
            'c24'), 
@@ -463,9 +464,9 @@ dast <-
 ```
 
 ### DAST Missing Data 
-There are missing data in DAST and missing rule applied. 
+There are missing data in DAST and missing rule applied.All but one instance of missing data is due to the skip logic; even still, those participants cannot get scored on the DAST 
 ```{r dast_missing }
-# correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
+# correct missing value: Not Applicable = -55 = The subject was never asked a question for skip logic (conditional question)
 # if dast_screen is No-1, rest column should be NA(-55)
 # if D1A is No-0, or Decline to Answer(-77), d2a should be NA(-55)
 # if 2b is No-0 or Decline to Answer (-77), rest column should be NA(-55)
@@ -548,7 +549,7 @@ dast_calc <-
   )
 
 ### DAST Composite & Subscale Score Creation 
-# TODO:Min, since d4 and d5 were reverse scored they should be included in the total, it looks like they are not included here but should be
+
 dast_complete <-
   dast_calc %>%
   select(-missing_n,
@@ -556,7 +557,7 @@ dast_complete <-
   index_total_fun(
     id = c('id',
            'dast_screen',
-           'd4', # Min possibly remove these here
+           'd4', # removed these because we are using the reverse scored
            'd5')
   ) %>%
   rename(
@@ -587,7 +588,7 @@ dast_complete <- dast_complete %>%
     TRUE ~ NA_integer_
   ))
 
-## need to add back in all participants and missing data
+## #TODO MIN or MARIA need to add back in all participants and missing data codes
 ```
 
 ## CTS - Partner
@@ -828,7 +829,7 @@ cts_complete <- cts_complete %>%
 ## BCAP
 ### BCAP Select Variables and Recode
 ```{r bcap}
-# Select bcap questions and recode
+# Select BCAP questions and recode
 # Maria TO DO check on reverse scoring
 # Maria to check in AM for the original CAP to match items if possible
 bcap <-
@@ -1311,7 +1312,7 @@ arq_calc <- arq %>%
   full_join(arq, by = "id") %>%
   filter(
     is.na(miss_pct) |
-      miss_pct < 20
+      miss_pct < 33 # 33% for a 4-item subscale
   )%>%
   mutate(
     across(
@@ -1348,9 +1349,23 @@ arq_complete <- arq_calc %>%
     arq_model_self_attach_anxiety = (rqa + rqd) - (rqc + rqb),
     arq_model_other_attach_avoid = (rqa + rqc) - (rqd + rqb)
   ) 
+## there is a NA that needs resolving for #P885 (all 7s)
+# Pulling in missing data codes from two participants with missing data
+# renaming variables with arq prefix
+arq_completetest <- arq_complete %>%
+  select(id, arq_group, arq_model_self_attach_anxiety, arq_model_other_attach_avoid) %>%
+  full_join(arq, by="id") %>% # pulling in two cases with missing data
+  relocate(arq_group:arq_model_other_attach_avoid, .after = "rqd") %>%
+  # rename with arq prefix
+   rename_with(~ str_replace(., "^rq", "arq"), starts_with("rq")) %>%
+  # update remaining missing values to -99 due to missing data rules and not being able to compute scores either due to a tie in arqa:arqd or due to missing values
+  mutate_all(~ if_else(is.na(.), as.character(-99), as.character(.)))
+
+
 
 # -99 when there is are two items with the same highest value, because missing due to not being able to determine a top score for arq_group
 # more positive scores indicate more positive models, and more negative scores indicate more negative models
+ 
 ```
 
 
@@ -1815,6 +1830,7 @@ ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ## Min for this variable I want us to save the censorsed data only for internal uses so you can pull that script. 
 ## next I want you to sum for the following items, removing item #23 from these scales
 # total score of all items (38 items in total but not #23)
+# Min, need to check if we need to apply missing data rule specifically for index offenses; if someone is missing more than 3 items specifically from index offenses we wouldn't compute 
 # total index offenses (9 items el 4 el 5; ell10 ; ell 16; ell 25; ell 29; ell 32; ell 38; ell 39)
 # total index of minor offenses (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37) 
 
@@ -2181,6 +2197,7 @@ flo_miss %>%
   gt::tab_header(title = 'Missing Data',
                  subtitle = 'By Each Participant')
 
+# set to 25% because this will effectively remove participant who is missing too much data for specific subscale
 flo_remove <- flo_miss %>% filter(miss_pct >= 25) %>% pull(id)
 ```
 
@@ -2438,7 +2455,7 @@ ibq <-
 ```
 
 ### IBQ Missing Data 
-There are missing data, hoever missing data rule not applied given this is a total sum of the number of systems endorsed 
+There are missing data, however missing data rule not applied given this is a total sum of the number of systems endorsed; missing data only applied for individuals who did not complete any questions in this measure (n = 2) 
 ```{r ibq_missing }
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 ibq <- ibq %>%
@@ -2501,6 +2518,8 @@ ibq_complete <- ibq_complete %>%
 ## pull in internal code when creating external archive file 
 
 # code goes here
+# this code also handles missing data
+
  
 
 ```
@@ -2785,7 +2804,7 @@ sex <- sex %>%
 
 ```
 
-There are missing data and missing rule applied 
+There are missing data and missing rule would be applied in future computations
 ```{r sex_missing}
 sex <- sex %>% 
   # for incarcerated TC, this survey wasn't shown 
@@ -2877,7 +2896,7 @@ sex$s7 <- convert_to_date(sex$s7)
 
 ### Sex Calculation and Finalize Data (no scales)
 ```{r sex_calc}
-# We do not apply the missing data rule due to how items are used
+# We do not apply the missing data rule due to how items are used currently: there are no scales
 sex_complete <-sex 
 ```
 
@@ -3332,7 +3351,7 @@ cint_substance$cint84 <- apply(cint_substance[, c("cint84_1", "cint84_2", "cint8
 ### CINT-Substance Missing
 ```{r cint_subs_missing}
 cint_substance <- cint_substance %>%
-       # Incarcerated TC weren't administered this survey
+       # TCs who were incarcerated weren't administered this survey
   mutate_at(vars(cint39:cint84), ~ ifelse(id %in% c("HR211", "HR181", "P819"), -55, .)) %>%
   # if cint_pregnancy_screen is yes/1, cint40:cint43 were not asked 
    mutate_at(vars(cint39:cint84), ~case_when(cint_pregnancy_screen == 1 ~ "-55", TRUE ~ .)) %>%
