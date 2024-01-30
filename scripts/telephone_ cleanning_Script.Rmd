@@ -585,7 +585,7 @@ dast_complete <- dast_complete %>%
   ))
 
 ## Adding in missing values and rename prefix
-dast_completetest <- dast_complete %>%
+dast_complete <- dast_complete %>%
   select(id, dast_total, dast_total_r) %>%
   merge(dast, by = "id") %>%
   relocate(dast_total, dast_total_r, .after = "d5_r") %>%
@@ -2104,12 +2104,12 @@ mhc_complete <- mhc_complete %>%
     values_to = "flourish_feel"
   ) %>%
   mutate(
-    flourish = case_when(
+    mhc_flourish = case_when(
       flourish_feel %in% c(4, 5) ~ 1,
       !flourish_feel %in% c(4, 5) ~ 0,
       TRUE ~ 0
     ),
-    languish = case_when(
+    mhc_languish = case_when(
       flourish_feel %in% c(0, 1) ~ 1,
       !flourish_feel %in% c(0, 1) ~ 0,
       TRUE ~ 0
@@ -2117,22 +2117,22 @@ mhc_complete <- mhc_complete %>%
   ) %>%
   group_by(id) %>%
   mutate(
-    six_or_over = sum(flourish, na.rm = TRUE),
-    neg_six_or_more = sum(languish, na.rm = TRUE)
+    mhc_six_or_over = sum(mhc_flourish, na.rm = TRUE),
+    mhc_neg_six_or_more = sum(mhc_languish, na.rm = TRUE)
   ) %>%
   ungroup() %>%
   mutate(
-    flourish_diagnosis = case_when(
-      (h1 %in% c(4, 5) & six_or_over >= 6) |
-        (h2 %in% c(4, 5) & six_or_over >= 6) |
-        (h3 %in% c(4, 5) & six_or_over >= 6)
+    mhc_flourish_diagnosis = case_when(
+      (h1 %in% c(4, 5) & mhc_six_or_over >= 6) |
+        (h2 %in% c(4, 5) & mhc_six_or_over >= 6) |
+        (h3 %in% c(4, 5) & mhc_six_or_over >= 6)
       ~ "flourish",
       TRUE ~ "not_flourish"
     ),
-    languish_diagnosis = case_when(
-      (h1 %in% c(0, 1) & neg_six_or_more >= 6) |
-        (h2 %in% c(0, 1) & neg_six_or_more >= 6) |
-        (h3 %in% c(0, 1) & neg_six_or_more >= 6)
+    mhc_languish_diagnosis = case_when(
+      (h1 %in% c(0, 1) & mhc_neg_six_or_more >= 6) |
+        (h2 %in% c(0, 1) & mhc_neg_six_or_more >= 6) |
+        (h3 %in% c(0, 1) & mhc_neg_six_or_more >= 6)
       ~ "languish",
       TRUE ~ "not_languish"
     )
@@ -2146,16 +2146,18 @@ mhc_complete <- mhc_complete %>%
     .keep_all = TRUE
   ) %>%
   mutate(
-    final_diagnosis = case_when(
-      (flourish_diagnosis == "flourish" &
-         languish_diagnosis == "not_languish") ~ "flourish",
-      (flourish_diagnosis == "not_flourish" &
-         languish_diagnosis == "languish") ~ "languish",
-      (flourish_diagnosis == "not_flourish" &
-         languish_diagnosis == "not_languish") ~ "moderately mentally healthy"
+    mhc_final_diagnosis = case_when(
+      (mhc_flourish_diagnosis == "flourish" &
+         mhc_languish_diagnosis == "not_languish") ~ "flourish",
+      (mhc_flourish_diagnosis == "not_flourish" &
+         mhc_languish_diagnosis == "languish") ~ "languish",
+      (mhc_flourish_diagnosis == "not_flourish" &
+         mhc_languish_diagnosis == "not_languish") ~ "moderately mentally healthy"
     )
   ) %>%
-  relocate(h4:h14, .after = "h3")
+  relocate(h4:h14, .after = "h3") %>%
+  #update prefix h to mhc
+  rename_with(~ paste0("mhc", as.numeric(substring(., 2))), starts_with("h"))
 ```
 
 ## Flourishing Index (FI)

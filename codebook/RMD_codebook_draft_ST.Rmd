@@ -6910,10 +6910,10 @@ cts_pc_word_long <- cts_pc_word %>%
          notes = as.character("")) %>% 
   # Edits Variable description and value
   mutate(description = if_else(var_name == "cts parent screen", "Have you parented a child (under 18) in the past year?", description)) %>%
-  mutate(notes = if_else(var_name %in% c("a1", "a2", "a3", "a4", "a5", "a6",
-                                         "a7",  "a8",  "a9",  "a10" , "a11",  "a12" , "a13",              
-                                        "a14", "a15", "a16", "a17"  ,"a18" , "a19"  ,"a20",              
-                                        "a21", "a22", "a23"), paste0("This item should be reverse scored. `", var_name, "_r` is reverse scored"), notes)) 
+  mutate(notes = if_else(var_name %in% c("cts_pc1", "cts_pc2", "cts_pc3", "cts_pc4", "cts_pc5", "cts_pc6",
+                                         "cts_pc7",  "cts_pc8",  "cts_pc9",  "cts_pc10" , "cts_pc11",  "cts_pc12" , "cts_pc13",              
+                                        "cts_pc14", "cts_pc15", "cts_pc16", "cts_pc17"  ,"cts_pc18" , "cts_pc19"  ,"cts_pc20",              
+                                        "cts_pc21", "cts_pc22", "cts_pc23"), paste0("This item should be reverse scored. `", var_name, "_r` is reverse scored"), notes)) 
 
 ```
 
@@ -6946,7 +6946,7 @@ Only missing percentage are presented
 ```{r cts_pc-missing}
 # Create subset of BSI items
 cts_pc_data_subset <- complete %>%
-  select(cts_parent_screen:a23)
+  select(cts_parent_screen:cts_pc23)
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
