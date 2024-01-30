@@ -1651,16 +1651,16 @@ CTS_scale_df <- data.frame(
                    "", ""
                    ),
 
-  scale_construction = c("`ct3`, `ct13`", "`ct5`, `ct15`", "`ct9`, `ct11`", "`ct17`, `ct19`", 
-                         "`ct4`, `ct14`", "`ct6`, `ct16`", "`ct10`, `ct12`", "`ct18`, `ct20`", 
+  scale_construction = c("`cts3`, `cts13`", "`cts5`, `cts15`", "`cts9`, `cts11`", "`cts17`, `cts19`", 
+                         "`cts4`, `cts14`", "`cts6`, `cts16`", "`cts10`, `cts12`", "`cts18`, `cts20`", 
                          
-                         "`ct3`, `ct13`", "`ct5`, `ct15`", "`ct9`, `ct11`", "`ct17`, `ct19`", 
-                         "`ct4`, `ct14`", "`ct6`, `ct16`", "`ct10`, `ct12`", "`ct18`, `ct20`",
+                         "`cts3`, `cts13`", "`cts5`, `cts15`", "`cts9`, `cts11`", "`cts17`, `cts19`", 
+                         "`cts4`, `cts14`", "`cts6`, `cts16`", "`cts10`, `cts12`", "`cts18`, `cts20`",
                          
-                         "`ct3`, `ct13`, `ct4`, `ct14`","`ct5`, `ct15`, `ct6`, `ct16`",
-                         "`ct9`, `ct11`, `ct10`, `ct12`", "`ct17`, `ct19`, `ct18`, `ct20`",
+                         "`cts3`, `cts13`, `cts4`, `cts14`","`cts5`, `cts15`, `cts6`, `cts16`",
+                         "`cts9`, `cts11`, `cts10`, `cts12`", "`cts17`, `cts19`, `cts18`, `cts20`",
                          
-                         "`ct1`, `ct7`", "`ct2`, `ct8`"
+                         "`cts1`, `cts7`", "`cts2`, `cts8`"
                          
                          ),
   scale_range = c("", "", "", "", "", "", "", "", "", "",
@@ -1697,7 +1697,7 @@ score:
 ```{r CTS-mean-items}
 # Create subset of CTS items
 cts_data_subset <- complete %>%
-  select(ct1:ct20, starts_with("cts"))
+  select(cts1:cts20, starts_with("cts"))
 
 # Calculate the summary statistics for each variable
 cts_summary_data <- lapply(cts_data_subset, function(x) {
@@ -1742,7 +1742,8 @@ cts_tbl
 #### Distributions
 
 Distributions are presented below for each subscale
-<Maria> I'd like your input on how to abbriviate the x axix and title. 
+<Maria> I'd like your input on how to abbriviate the x axix and title.
+< Min> I only want abbreviations for the continuous scores, not categorial
 
 ##### Severity distributions
 
@@ -4581,7 +4582,7 @@ mhc_complete <-
   select(
   #  id,
 
-    matches("^h"), 
+    matches("^mhc"), 
     mhc_total,mhc_pa,mhc_swb, mhc_pwb
   )
 
@@ -4592,24 +4593,24 @@ mhc_complete <-
 #Calculate internal reliability 
 mhc_alpha <-
   mhc_complete %>%
-  select(h1:h3) %>%
+  select(mhc1:mhc3) %>%
   psych::alpha(check.keys = TRUE)
 
 
 mhc_pa_alpha <-
   mhc_complete %>%
-  select(h1:h3) %>%
+  select(mhc1:mhc3) %>%
   psych::alpha(check.keys = TRUE)
 
 # MIN check this alpha is greater than 1?
 mhc_swb_alpha <-
   mhc_complete %>%
-  select(h4:h8) %>%
+  select(mhc4:mhc8) %>%
   psych::alpha(check.keys = TRUE)
 
 mhc_pwb_alpha <-
   mhc_complete %>%
-  select(h9:h14) %>%
+  select(mhc9:mhc14) %>%
   psych::alpha(check.keys = TRUE)
 ```
 
@@ -4618,8 +4619,8 @@ mhc_pwb_alpha <-
 mhc_scale_df <- data.frame(
   var_name = c("mhc_raw_total", "mhc_pa_total", "mhc_swb_total", "mhc_pwb_total"),
   scale = c("MHC Total score (14)", "Positive Affect (3)", "Social Well-being (4)", "Psychological well-being (6)"),
-  scale_construction = c(" `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `h7`, `h8`, `h9`, `h10`, `h11`, `h12`, `h13`, `h14`",
-                         "`h1`, `h2`,`h3`", "`h4`, `h5`, `h6`, `h7`, `h8`", "`h9`, `h10`, `h11`, `h12`, `h13`, `h14`"
+  scale_construction = c(" `mhc1`, `mhc2`, `mhc3`, `mhc4`, `mhc5`, `mhc6`, `mhc7`, `mhc8`, `mhc9`, `mhc10`, `mhc11`, `mhc12`, `mhc13`, `mhc14`",
+                         "`mhc1`, `mhc2`,`mhc3`", "`mhc4`, `mhc5`, `mhc6`, `mhc7`, `mhc8`", "`mhc9`, `mhc10`, `mhc11`, `mhc12`, `mhc13`, `mhc14`"
                          ),
   scale_range = c(""), #TODO fill in range 
   alpha = c(round(mhc_alpha$total$raw_alpha, 3),

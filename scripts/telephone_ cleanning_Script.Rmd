@@ -478,10 +478,6 @@ dast <- dast %>%
   mutate_at(vars(dast_screen:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) %>%
   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
   mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
-  # Skip rule: if d1a == 0 or -77 , d2a is skipped
-  # mutate(d2a = case_when(d1a == 0 | d1a == "-77" ~ "-55", TRUE ~ d2a)) %>%
-  # Skip rule: if d1a == 1 (d2a is answered (1,0,-77)) d2b should be skipped 
-  # mutate(d2b = case_when(d1a == 1 ~ "-55", TRUE ~ d2b)) %>%
   # Skip rule: if d2b == 0 or -77, rest question were skipped 
   mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == "-77" ~ "-55", TRUE ~ . )) 
 
@@ -533,11 +529,11 @@ dast_calc <-
     n_items = 21
   ) %>%
   full_join(dast, by = 'id') %>% 
-  mutate(across(-id, as.numeric))%>%
-    filter(
-    is.na(miss_pct) |
-      miss_pct < 20
-         ) %>%
+  mutate(across(-id, as.numeric)) %>%
+    # filter(
+    # is.na(miss_pct) |
+    #   miss_pct < 20
+    #      ) %>%
   mutate(
     across(
       .cols = -id,
@@ -588,7 +584,28 @@ dast_complete <- dast_complete %>%
     TRUE ~ NA_integer_
   ))
 
-## #TODO MIN or MARIA need to add back in all participants and missing data codes
+## Adding in missing values and rename prefix
+dast_completetest <- dast_complete %>%
+  select(id, dast_total, dast_total_r) %>%
+  merge(dast, by = "id") %>%
+  relocate(dast_total, dast_total_r, .after = "d5_r") %>%
+  relocate(d4_r, .after = "d4") %>%
+  relocate(d5_r, .after = "d5") %>%
+    # input missing values for the scored variables
+  mutate_at(vars(dast_total, dast_total_r), ~case_when(
+  dast_screen == 1 | dast_screen == -55 ~ "-99",
+  TRUE ~ as.character(.)
+)) %>%
+mutate_at(vars(dast_total, dast_total_r), ~case_when(
+  d1a == 0 & d2 == 0 | d1a == -77 ~ "-99",
+  TRUE ~ as.character(.)
+)) %>%
+  # rename prefix to dast
+  rename_with(~ paste0("dast", str_extract(., "\\d{1,2}")), 
+              matches("^d\\d{1,2}$")) %>%
+  rename_with(~ str_replace(., "d1a", "dast1"), starts_with("d1a")) %>%
+  rename(dast4_r = d4_r, dast5_r = d5_r)
+ 
 ```
 
 ## CTS - Partner
@@ -821,7 +838,8 @@ cts_complete <- cts_complete %>%
     ct2_midpoint = if_else(is.na(ct2_midpoint), -99, ct2_midpoint),
     ct7_midpoint = if_else(is.na(ct7_midpoint), -99, ct7_midpoint),
     ct8_midpoint = if_else(is.na(ct8_midpoint), -99, ct8_midpoint)
-  )
+  ) %>%
+  rename_with(~ ifelse(substr(., 1, 2) == "ct" & substr(., 1, 3) != "cts", paste0("cts", substr(., 3, nchar(.))), .), starts_with("ct"))
   
   
 
@@ -947,7 +965,11 @@ bcap_complete <-
     bcap_poverty = total8,
     bcap_lie = total9,
     bcap_random = total10
-    )
+    ) 
+  # change q prefix to bcap MARIA to do
+  
+
+
 
 ```
 
@@ -1352,7 +1374,7 @@ arq_complete <- arq_calc %>%
 ## there is a NA that needs resolving for #P885 (all 7s)
 # Pulling in missing data codes from two participants with missing data
 # renaming variables with arq prefix
-arq_completetest <- arq_complete %>%
+arq_complete <- arq_complete %>%
   select(id, arq_group, arq_model_self_attach_anxiety, arq_model_other_attach_avoid) %>%
   full_join(arq, by="id") %>% # pulling in two cases with missing data
   relocate(arq_group:arq_model_other_attach_avoid, .after = "rqd") %>%
@@ -3830,7 +3852,9 @@ cts_pc_complete <-
 cts_pc_complete <- cts_pc_complete %>%
   rename_all(tolower) %>%
   mutate(across(c(a1:a23, a1_r:a23_r), ~ifelse(cts_parent_screen == 0, -55, ifelse(is.na(.), -77, as.numeric(.))))) %>%
-  mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.)))))
+  mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.))))) %>%
+  # update a prefix to cts_pc
+  rename_with(~ sub("^a", "cts_pc", .), starts_with("a"))
 
 ```
 
