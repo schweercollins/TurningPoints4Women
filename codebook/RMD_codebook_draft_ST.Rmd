@@ -2222,9 +2222,9 @@ collected and <SHAINA/MARIA> CONFIRM all 9 subscales were computed:
 Happiness, Feelings of Persecution, Loneliness, Family Conflict,
 Rigidity, Distress, Financial Insecurity, Lie, and Random Responding.
 
-Four items (`q1`, `q2`, `q23`, and `q29`) should be reverse scored which
+Four items (`bcap1`, `bcap2`, `bcap23`, and `bcap29`) should be reverse scored which
 is noted in the variable table below and the reverse scored variables
-are provided (`q1_r`, `q2_r`, `q23_r`, and `q29_r`). Higher scores on
+are provided (`bcap1_r`, `bcap2_r`, `bcap23_r`, and `bcap29_r`). Higher scores on
 the BCAP indicates increased risk.
 
 <SHAINA> CONFIRM\> The missing data rule was applied. Calculations were
@@ -2280,16 +2280,17 @@ bcap_word <- qualtrics %>%
   slice(1)
 
 #create table with variable name, description, and notes
+# how can we change this is bcap is the new variable?
 bcap_word_long <- bcap_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         notes = case_when(var_name == "q1" ~ "This item should be reverse scored. `q1_r` is reverse scored",
-                           var_name == "q2" ~ "This item should be reverse scored. `q2_r` is reverse scored",
-                           var_name == "q23" ~ "This item should be reverse scored. `q23_r` is reverse scored",
-                           var_name == "q29" ~ "This item should be reverse scored. `q29_r` is reverse scored",
+         notes = case_when(var_name == "q1" ~ "This item should be reverse scored. `bcap1_r` is reverse scored",
+                           var_name == "q2" ~ "This item should be reverse scored. `bcap2_r` is reverse scored",
+                           var_name == "q23" ~ "This item should be reverse scored. `bcap23_r` is reverse scored",
+                           var_name == "q29" ~ "This item should be reverse scored. `bcap29_r` is reverse scored",
                            
                            var_name %in% c("c22", "c23") ~ "Skipped if `c21` = No",
                            TRUE ~ as.character(""))) %>%
@@ -2333,77 +2334,77 @@ Information on the total score and subscale variables are below.
 bcap_alpha <- 
   complete %>% 
   select(
-    q1_r,
-    q2_r,
-    q3:q22,
-    q23_r,
-    q24:q28,
-    q29_r,
-    q30:q34
+    bcap1_r,
+    bcap2_r,
+    bcap3:bcap22,
+    bcap23_r,
+    bcap24:bcap28,
+    bcap29_r,
+    bcap30:bcap34
   ) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_risk_alpha <-
   complete %>%
   select(
-    q1_r,
-    q3,
-    q5:q8,
-    q10:q14,
-    q16:q17,
-    q19:q20,
-    q22,
-    q23_r,
-    q24:q25,
-    q27,
-    q29_r,
-    q30:q33
+    bcap1_r,
+    bcap3,
+    bcap5:bcap8,
+    bcap10:bcap14,
+    bcap16:bcap17,
+    bcap19:bcap20,
+    bcap22,
+    bcap23_r,
+    bcap24:bcap25,
+    bcap27,
+    bcap29_r,
+    bcap30:bcap33
     ) %>%
   psych::alpha(check.keys = TRUE)
 
 bcap_happy_alpha <- 
   complete %>% 
-  select(q1_r, q23_r, q29_r) %>% 
+  select(bcap1_r, bcap23_r, bcap29_r) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_feel_pers_alpha <- 
   complete %>% 
-  select(q3, q25, q33) %>% 
+  select(bcap3, bcap25, bcap33) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_lonely_alpha <- 
   complete %>% 
-  select(q5, q12, q22, q31) %>% 
+  select(bcap5, bcap12, bcap22, bcap31) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_fam_conf_alpha <- 
   complete %>% 
-  select(q6, q13, q17) %>% 
+  select(bcap6, bcap13, bcap17) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_rigid_alpha <-
   complete %>% 
-  select(q7, q14, q20, q32) %>% 
+  select(bcap7, bcap14, bcap20, bcap32) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_distress_alpha <- 
   complete %>% 
-  select(q8, q11, q16, q19, q27) %>% 
+  select(bcap8, bcap11, bcap16, bcap19, bcap27) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_poverty_alpha <- 
   complete %>% 
-  select(q10, q30) %>% 
+  select(bcap10, bcap30) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_lie_alpha <-
   complete %>% 
-  select(q4, q9, q15, q21, q26, q34) %>% 
+  select(bcap4, bcap9, bcap15, bcap21, bcap26, bcap34) %>% 
   psych::alpha(check.keys = TRUE)
 
 bcap_random_alpha <-
   complete %>% 
-  select(q2_r, q19, q28) %>% 
+  select(bcap2_r, bcap19, bcap28) %>% 
   psych::alpha(check.keys = TRUE)
 ```
 
@@ -2412,17 +2413,17 @@ bcap_random_alpha <-
 bcap_scale_df <- data.frame(
   var_name = c("bcap_total", "bcap_risk", "bcap_happy", "bcap_feel_pers", "bcap_lonely", "bcap_fam_conf", "bcap_rigid","bcap_distress", "bcap_poverty", "bcap_lie", "bcap_random"),
   scale = c("BCAP complete Scale (34)", "BCAP Risk Scale (26)", "Happiness (3)", "Feelings of persecution", "Loneliness (4)", "Family conflict (3)", "Rigidity (4)", "Distress (5)", "Financial Insecurity (2)", "Lie (6)", "Random responding (3)"),
-  scale_construction = c("`q1_r`,`q2_r`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q9`, `q10`, `q11`, `q12`, `q13`, `q14`, `q15`, `q16`, `q17`, `q18`, `q19`, `q20`, `q21`, `q22`, `q23_r`, `q24`, `q25`, `q26`, `q27`, `q28`, `q29_r`, `q30`, `q31`, `q32`, `q33`, `q34`", 
-                         "`q1_r`, `q3`, `q4`, `q5`, `q6`, `q7`, `q8`, `q10`, `q11`, `q12`, `q13`, `q14`, `q16`, `q17`, `q19`, `q20`, `q22`, `q23_r`, `q24`, `q25`, `q27`, `q29_r`, `q30`, `q31`, `q32`, `q33`", 
-                         "`q1_r`, `q23_r`, `q29_r`", 
-                         "`q3`, `q25`, `q33`", 
-                         "`q5`, `q12`, `q22`, `q31`", 
-                         "`q6`, `q13`, `q17`", 
-                         "`q7`, `q14`, `q20`, `q32`", 
-                         "`q8`, `q11`, `q16`, `q19`, `q27`", 
-                         "`q10`, `q30`", 
-                         "`q4`, `q9`, `q15`, `q21`, `q26`, `q34`,", 
-                         "`q2`, `q18`, `q28`"),
+  scale_construction = c("`bcap1_r`,`bcap2_r`, `bcap3`, `bcap4`, `bcap5`, `bcap6`, `bcap7`, `bcap8`, `bcap9`, `bcap10`, `bcap11`, `bcap12`, `bcap13`, `bcap14`, `bcap15`, `bcap16`, `bcap17`, `bcap18`, `bcap19`, `bcap20`, `bcap21`, `bcap22`, `bcap23_r`, `bcap24`, `bcap25`, `bcap26`, `bcap27`, `bcap28`, `bcap29_r`, `bcap30`, `bcap31`, `bcap32`, `bcap33`, `bcap34`", 
+                         "`bcap1_r`, `bcap3`, `bcap4`, `bcap5`, `bcap6`, `bcap7`, `bcap8`, `bcap10`, `bcap11`, `bcap12`, `bcap13`, `bcap14`, `bcap16`, `bcap17`, `bcap19`, `bcap20`, `bcap22`, `bcap23_r`, `bcap24`, `bcap25`, `bcap27`, `bcap29_r`, `bcap30`, `bcap31`, `bcap32`, `bcap33`", 
+                         "`bcap1_r`, `bcap23_r`, `bcap29_r`", 
+                         "`bcap3`, `bcap25`, `bcap33`", 
+                         "`bcap5`, `bcap12`, `bcap22`, `bcap31`", 
+                         "`bcap6`, `bcap13`, `bcap17`", 
+                         "`bcap7`, `bcap14`, `bcap20`, `bcap32`", 
+                         "`bcap8`, `bcap11`, `bcap16`, `bcap19`, `bcap27`", 
+                         "`bcap10`, `bcap30`", 
+                         "`bcap4`, `bcap9`, `bcap15`, `bcap21`, `bcap26`, `bcap34`,", 
+                         "`bcap2`, `bcap18`, `bcap28`"),
   scale_range = c("0-24","","","","","","","","","", ""), #TODO fill in range 
    alpha = c(round(bcap_alpha$total$raw_alpha, 3),
               round(bcap_risk_alpha$total$raw_alpha, 3),
@@ -2469,13 +2470,13 @@ For binary items:
 
 # Create subset of BCAP items
 bcap_data_subset_binary <- complete %>%
-  select(q1_r,
-         q2_r,
-         q3:q22,
-         q23_r,
-         q24:q28,
-         q29_r,
-         q30:q34)
+  select(bcap1_r,
+         bcap2_r,
+         bcap3:bcap22,
+         bcap23_r,
+         bcap24:bcap28,
+         bcap29_r,
+         bcap30:bcap34)
 
 # Calculate the dichotomous summary statistics for each variable
 bcap_summary_data_binary <- lapply(bcap_data_subset_binary, function(x) {
@@ -4542,6 +4543,7 @@ mhc_word <- qualtrics %>%
   slice(1)
 
 #create table with variable name, description, and notes
+# MIN need to make sure updated table with prefix mhc
 mhc_word_long <- mhc_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
@@ -6851,7 +6853,7 @@ print(cts_pc_label_table)
 
 ```
 
-Response option for `a1` -  `a23`.
+Response option for `cts_pc1` -  `cts_pc23`.
 
 
 ```{r cts_pc-label-table-2, results = 'asis'}
@@ -6909,11 +6911,12 @@ cts_pc_word_long <- cts_pc_word %>%
          var_name = str_to_lower(var_name),
          notes = as.character("")) %>% 
   # Edits Variable description and value
-  mutate(description = if_else(var_name == "cts parent screen", "Have you parented a child (under 18) in the past year?", description)) %>%
-  mutate(notes = if_else(var_name %in% c("cts_pc1", "cts_pc2", "cts_pc3", "cts_pc4", "cts_pc5", "cts_pc6",
-                                         "cts_pc7",  "cts_pc8",  "cts_pc9",  "cts_pc10" , "cts_pc11",  "cts_pc12" , "cts_pc13",              
-                                        "cts_pc14", "cts_pc15", "cts_pc16", "cts_pc17"  ,"cts_pc18" , "cts_pc19"  ,"cts_pc20",              
-                                        "cts_pc21", "cts_pc22", "cts_pc23"), paste0("This item should be reverse scored. `", var_name, "_r` is reverse scored"), notes)) 
+  # Min: NAMING UPDATE Maria changed these values so if it won't render check here; also remove note once it renders; need these to be updated to cts_pc from "a"
+  mutate(description = if_else(var_name == "a parent screen", "Have you parented a child (under 18) in the past year?", description)) %>%
+  mutate(notes = if_else(var_name %in% c("a1", "a2", "a3", "a4", "a5", "a6",
+                                         "a7",  "a8",  "a9",  "a10" , "a11",  "a12" , "a13",              
+                                        "a14", "a15", "a16", "a17"  ,"a18" , "a19"  ,"a20",              
+                                        "a21", "a22", "a23"), paste0("This item should be reverse scored. `", var_name, "_r` is reverse scored"), notes)) 
 
 ```
 

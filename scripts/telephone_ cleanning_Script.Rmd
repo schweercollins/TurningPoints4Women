@@ -966,8 +966,58 @@ bcap_complete <-
     bcap_lie = total9,
     bcap_random = total10
     ) 
-  # change q prefix to bcap MARIA to do
-  
+
+
+## merging for original missing data codes
+## changing prefix for measure
+
+bcap_completeTest <- bcap_complete %>%
+  select(id, bcap_risk:bcap_random) %>%
+  full_join(bcap, by="id") %>%
+  relocate(bcap_risk:bcap_random, .after = "q29_r") %>%
+    # change q prefix to bcap 
+  rename(
+    bcap1 = q1,
+    bcap2 = q2,
+    bcap3 = q3,
+    bcap4 = q4,
+    bcap5 = q5,
+    bcap6 = q6,
+    bcap7 = q7,
+    bcap8 = q8,
+    bcap9 = q9,
+    bcap10 = q10,
+    bcap11 = q11,
+    bcap12 = q12,
+    bcap13 = q13,
+    bcap14 = q14,
+    bcap15 = q15,
+    bcap16 = q16,
+    bcap17 = q17,
+    bcap18 = q18,
+    bcap19 = q19,
+    bcap20 = q20,
+    bcap21 = q21,
+    bcap22 = q22,
+    bcap23 = q23,
+    bcap24 = q24,
+    bcap25 = q25,
+    bcap26 = q26,
+    bcap27 = q27,
+    bcap28 = q28,
+    bcap29 = q29,
+    bcap30 = q30,
+    bcap31 = q31,
+    bcap32 = q32,
+    bcap33 = q33,
+    bcap34 = q34,
+    bcap1_r = q1_r,
+    bcap2_r = q2_r,
+    bcap23_r = q23_r,
+    bcap29_r = q29_r
+  ) %>%
+  # add in -99 for case in which subscales and scales not computed
+  mutate_at(vars(everything()), ~ ifelse(is.na(.), -99, .))
 
 
 
