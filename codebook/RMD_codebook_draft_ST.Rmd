@@ -7375,7 +7375,8 @@ sus_data_subset <- complete %>%
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
 sus_summary_data <- lapply(sus_data_subset, function(x) {
-  x <- replace(x, x < -40, NA)
+  x <- replace(x, (x < 40 & x!= -55 & x!= -88), NA)    
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)
   # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
   # sd_val <- round(sd(x, na.rm = TRUE), 2)
   # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")

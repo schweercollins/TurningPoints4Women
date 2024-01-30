@@ -4335,22 +4335,23 @@ sus <- sus %>%
   select(-c("sus14o1_1","sus14o1_2","sus14o1_3","sus14o1_77")) %>%
   select(-c("sus26b_1","sus26b_2","sus26b_3","sus26b_77"))
 
+# We decided to including all variable even they are empty for entire columns
 ## Now we will drop columns that have no data (only -55)
 # Check if every value in each column is equal to -55 or -99 or -77 or some combo thereof
-columns_to_drop <- names(sus)[sapply(sus, function(col) 
-  all(col %in% c("-55", "-99", "-77")) || 
-  all(col == "-55") || 
-  all(col == "-99") || 
-  all(col == "-77") || 
-  (all(col %in% c("-55", "-99")) && any(col %in% "-77")) || 
-  (all(col %in% c("-55", "-77")) && any(col %in% "-99")) || 
-  (all(col %in% c("-99", "-77")) && any(col %in% "-55"))
-)]
-
-
-# Drop the columns where every value is -55 or -99 or -77 or combo
-# this should drop 10 empty comlumns
-sus <- sus[, !names(sus) %in% columns_to_drop]
+# columns_to_drop <- names(sus)[sapply(sus, function(col) 
+#   all(col %in% c("-55", "-99", "-77")) || 
+#   all(col == "-55") || 
+#   all(col == "-99") || 
+#   all(col == "-77") || 
+#   (all(col %in% c("-55", "-99")) && any(col %in% "-77")) || 
+#   (all(col %in% c("-55", "-77")) && any(col %in% "-99")) || 
+#   (all(col %in% c("-99", "-77")) && any(col %in% "-55"))
+# )]
+# 
+# 
+# # Drop the columns where every value is -55 or -99 or -77 or combo
+# # this should drop 10 empty comlumns
+# sus <- sus[, !names(sus) %in% columns_to_drop]
 
 
 ## Note for Maria -- need to remove and recode 6a,6b, and 6c
@@ -5034,36 +5035,87 @@ pcl <- pcl %>%
             "pcl19c2_1", "pcl19c2_2", "pcl19c2_3", "pcl19c2_9999", "pcl19c2_77",
             "pcl19c3_1", "pcl19c3_2", "pcl19c3_3", "pcl19c3_9999", "pcl19c3_77",
             "pcl19c4_1", "pcl19c4_2", "pcl19c4_3", "pcl19c4_9999", "pcl19c4_77",
-            "pcl19d_1", "pcl19d_2", "pcl19d_3", "pcl19d_77"))
+            "pcl19d_1", "pcl19d_2", "pcl19d_3", "pcl19d_77")) %>%
+   #rename column names to reflect frequency of each development period.
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)b1", "pcl\\1_freq0-5", .),
+    .cols = matches("pcl\\d+b1$")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)b2", "pcl\\1_freq6-11", .),
+    .cols = matches("pcl(\\d+)b2")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)b3", "pcl\\1_freq12-19", .),
+    .cols = matches("pcl(\\d+)b3")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)b4", "pcl\\1_freqadult", .),
+    .cols = matches("pcl(\\d+)b4")
+  ) %>%
+   rename_with(
+    .fn = ~ gsub("b1_\\d+", "_freq0-5", .),
+    .cols = matches("pcl\\d+b1_\\d+_text")
+  ) %>%
+ rename_with(
+    .fn = ~ gsub("b2_d+", "_freq6-11", .),
+    .cols = matches("pcl\\d+b2_\\d+_text")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("b3_d+", "_freq12-19", .),
+    .cols = matches("pcl\\d+b3_\\d+_text")
+  ) %>%   
+  rename_with(
+    .fn = ~ gsub("b4_d+", "_freqadult", .),
+    .cols = matches("pcl\\d+b4_\\d+_text")
+  ) %>%
+  
+   rename_with(
+    .fn = ~ gsub("pcl(\\d+)c1", "pcl\\1_relation0-5", .),
+    .cols = matches("pcl\\d+c1$")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)c2", "pcl\\1_relation6-11", .),
+    .cols = matches("pcl(\\d+)c2")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)c3", "pcl\\1_relation12-19", .),
+    .cols = matches("pcl(\\d+)c3")
+  ) %>%
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)c4", "pcl\\1_relationadult", .),
+    .cols = matches("pcl(\\d+)c4")
+  ) %>%
+      
+  rename_with(
+    .fn = ~ gsub("pcl(\\d+)d", "pcl\\1_learned_relation_allAge", .),
+    .cols = matches("pcl(\\d+)d")
+    )
 
 
+# We are not drop columns for archive 
 ## Removing any columns in which there are only NAs 
 ## this drop 105 columns that aren't necessary 
-pcltest <- pcl %>%
-  select(-which(sapply(pcl, function(col) all(is.na(col) | col == "NA"))))
+# pcltest <- pcl %>%
+#   select(-which(sapply(pcl, function(col) all(is.na(col) | col == "NA"))))
 
-## MIN can you check after column 450 there is data but I can't figure out what the columns are
-## we need to check on inputting appropriate missing values
 
-## would like each b1 thorough c variables to have labels
-## b1 = freq0-5
-## b2 = freq6-11
-## b3 = freq12-19
-## b4 = freqadult
-## all text just add _txt to the above
-
-## then rename cariables
-## c1 == relation0-5
-## c2 == relation6-11
-## c3 == relation12-19
-## c4 == relationadult
-## d == learned_relation_allAge
-## all text just add - txt
 
 
 ```
 
+```{r}
+pcl <- pcl %>%
+    mutate_at(vars(pcl1_happen, pcl1_77), as.numeric) %>%
+    mutate(pcl1_happen = ifelse(is.na(pcl1_happen) & is.na(pcl1_77), 0, ifelse(pcl1_77!= NA, -77, pcl1_happen)))
 
+    mutate(pcl1_witness = ifelse((is.na(pcl1_witness) & pcl1_77 == -77), -77, ifelse(is.na(pcl1_witness), 0, pcl1_witness)))
+    
+  mutate_at(
+    vars(matches("^pcl\\d+_happen$|^pcl\\d+_witness$|^pcl\\d+_learn$|^pcl\\d+_no$")),
+    ~ ifelse(is.na(.) & get(paste0("pcl", gsub("[^0-9]", "", .), "_77")) == -77, -77, ifelse(is.na(.), 0, .))
+  )
+```
 ### PCL Missing 
 ```{r pcl_missing }
 pcl_miss <- pcl %>%
@@ -5080,8 +5132,28 @@ pcl_miss %>%
   )
 
 pcl_remove <- pcl_miss %>% filter(miss_pct >= 20) %>% pull(id)
+
+
 ```
 
+### PCL Calculation
+```{r}
+pcl_calc <- pcl %>%
+  mutate(across(ends_with("_happen"), as.numeric)) %>%
+  mutate(across(ends_with("_witness"), as.numeric)) %>%
+  mutate(pcl_total_happen = rowSums(select(., ends_with("_happen")), na.rm = T)) %>%
+  mutate(pcl_total_witness = rowSums(select(., ends_with("_witness")), na.rm = T)) 
+
+pcl_complete <- pcl_calc %>%
+  select(id, pcl_total_happen, pcl_total_witness) %>%
+  merge(pcl, by = "id") %>%
+  # Dropping this variable for archive. 
+  select(-c(pcl1b:pcl19b_3_text)) %>%
+  select(-c(pcl_total_happen, pcl_total_witness), everything(), pcl_total_happen, pcl_total_witness)
+  
+pcl_internal_old_variable <- pcl %>%
+  select(pcl1b:pcl19b_3_text)
+```
 ## Merge
 Merge together all measures 
 ```{r merge}
@@ -5115,6 +5187,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(pct_complete, by = "id") %>%
   left_join(sus_complete, by = "id") %>%
   left_join(sex_complete, by="id") %>%
+  left_join(pcl_complete, by = "id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
