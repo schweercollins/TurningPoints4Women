@@ -4389,7 +4389,7 @@ sus_complete <- sus %>%
 
 ```{r plc }
 pcl <- tpw_raw %>%
-  select(id, starts_with("pcl")) 
+  select(id, starts_with("pcl")) %>%
   # Happened and Witnessed first developed period 
   mutate(pcl1_hapWit_dev = combine_columns(., c("pcl1a_1", "pcl1a_2", "pcl1a_3", "pcl1a_4", "pcl1a_77"), sep = ";") )%>%
   mutate(pcl1_hapWit_dev = str_extract(pcl1_hapWit_dev, "^[^;]+")) %>%
