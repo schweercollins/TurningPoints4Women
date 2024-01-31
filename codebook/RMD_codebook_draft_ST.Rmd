@@ -262,9 +262,9 @@ If you have questions about the data or study, please contact the Principal Inve
 
 ### Study Acronymns
 
--   **TP**: this acrononym is used to refer to the name of this study, the **T**urning **P**oints Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data.
+-   **TP**: this acrononym is used to refer to the name of this study, the **T**urning **P**oints Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data, as we use this study name to refer to the entire longitudinal study.
 
--   **TC**: In our assessment and lab, we refer to original participants, who were at the very start of this longitudinal study, minor children, as **TCs**, which means 'Target Child.' Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants. 
+-   **TC**: In this study, we refer to original participants as **TCs**, which means 'Target Child.' This acronymn has been continued because the original participants were minors at the start of this longitudinal study. Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants, not from partners, caregivers, or offspring. 
 
 -   **NIJ**: NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.
 
@@ -856,34 +856,6 @@ ggarrange(p_cesd_total, p_cesd_dep_symp + rremove("ylab")) %>%
 
 ```
 
-#### Clinical Categories
-
-## Maria TODO edit here
-
-The distribution for CES-D scores alongside clinical cutoffs are
-presented below.
-
-The clinical cutoff score of 16 or above is generally accepted (MARIA add cite); however a cutoff score of 23 or above has been found to be more valid in samples of [insert; MARIA add cite]
-
-Reference:
-[@henry2018determining](https://www.sciencedirect.com/science/article/pii/S0165032717319274?casa_token=Aan1lg2Z8mUAAAAA:aun9j7DwQRQLhRqhbBJQfpPQG4fDv4yjN1WGHvzv-Hh9Pu58f7IhyGyPTDJmeAUZWonwmO7tfi4);
-[DOI](https://doi.org/10.1016/j.jad.2018.02.071)
-
-```{r cesd-clinical}
-complete %>%
-  cutoff_plot2(
-    x = cesd_total,
-    cutoff = 16,
-    cutoff_other = 23
-  ) +
-  labs(
-    title = 'Cutoff Scores for CESD Total Scores',
-    caption = 'Cutoffs are 16 and/or 23\nSee references for literature on cutoff scores.', 
-    y = "Number of Participants"
-  ) +
-  geom_text(aes(x = 16, y = 16.5, label = "cutoff1", vjust = -.25, hjust = 1.2)) + ###MARIA INSERT CUTOFF LABEL
-  geom_text(aes(x = 16, y = 16.5, label = "cutoff2", vjust = -.25, hjust = -1.8))  ##MARIA INSERT CUTOFF LABEL
-```
 
 
 
@@ -1420,73 +1392,12 @@ The distribution for the total score is presented below:
 <#TODO: Maria, should I use reversed total score for this distributions?>
 ```{r}
 complete %>%
+  filter(dast_total >= 0) %>%  # Filter out missing data
   composite_hist(dast_total) +
   labs(
     title = 'DAST Total Score Distribution'
     )
 ```
-
-#### Clinical Categories
-
-The distribution for the total score alongside clinical severity
-categories are presented below.
-
-<MARIA>INSERT MORE INFO ON SEVERITY CUTOFF SCORES - what do they
-categorize?, how should they be used
-
-Reference: <SHAINA/MARIA> INSERT REFERENCE FOR DAST SCORES - MARIA, WHAT
-IS REFERENCE?
-
-```{r dast-distributions, class.source='fold', echo = FALSE}
-complete %>%
-  severity_plot(
-  x = dast_total,
-  bins = 20,
-  low_xmin = 0,
-  low_xmax = 5.5,
-  medium_xmin = 5.5,
-  medium_xmax = 10.5,
-  large_xmin = 10.5,
-  large_xmax = 15.5,
-  critical_xmin = 15.5,
-  critical_xmax = 20) +
-  annotate(
-    geom = 'text',
-    color = 'Black',
-    x = 3,
-    y = -1.5,
-    label = 'Low'
-  ) +
-  annotate(
-    geom = 'text',
-    color = 'Black',
-    x = 8,
-    y = -1.5,
-    label = 'Intermediate'
-  ) +
-  annotate(
-    geom = 'text',
-    color = 'Black',
-    x = 13,
-    y = -1.5,
-    label = 'Substantial'
-  ) +
-  annotate(
-    geom = 'text',
-    color = 'Black',
-    x = 18,
-    y = -1.5,
-    label = 'Severe'
-  ) +
-  labs(
-    title = 'Severity Categories',
-    subtitle = 'Based on DAST',
-    caption = 'Cutoffs are:\nLow = 1-5,\nIntermediate = 6-10,\nSubstantial = 11-15,\nSevere = 16-20',
-    y = 'Number of Participants'
-  )
-```
-
-
 
 
 ## Conflict Tactics Scales (CTS)
@@ -2687,51 +2598,6 @@ ggarrange(p_bcap_risk, p_bcap_happy + rremove("ylab"),
   annotate_figure(top = text_grob( "Distribution for bcap Subscale \n(x-axis and y-axis are in different scales)"))
 ```
 
-####Clinical Cutoff TODO: Maria/Shaina, please confirm weather we need
-this section or not.
-
-```{r}
-p_bcap_risk_clin <- complete %>%
-  cutoff_plot2(
-    x = bcap_risk,
-    cutoff = 9,
-    cutoff_other = 12
-  ) +
-  labs(
-    title = 'Risk',
-    y = "Number of Participant",
-    caption = 'Cutoffs are 9 and 12\nSee references for literature on cutoff scores.'
-  )
-
-p_bcap_lie_clin <- complete %>% 
-  cutoff_plot2(
-    x = bcap_lie,
-    cutoff = 4
-  ) +
-  labs(
-    title = 'Lie',
-    y = "Number of Participant",
-    caption = 'If 4 or more (score of 4) items are endorsed,\ncase may be invalid'
-  )
-
-p_bcap_rand_clin <- complete %>% 
-  cutoff_plot2(
-    x = bcap_random,
-    cutoff = 0
-  ) +
-  labs(
-    title = 'Random Responding',
-    caption = 'If any of these items are endorsed (score > 0),\ncase may be invalid'
-  )
-
-ggarrange(p_bcap_risk_clin, p_bcap_lie_clin+ rremove("ylab"), p_bcap_rand_clin 
-
-          ) %>%
-  annotate_figure(top = text_grob( "Cutoff Values for BCAP Subscale \n(x-axis and y-axis are in different scales)"))
-```
-
-
-
 ## Dyadic Adjustment Scale (DAS)
 
 ### DAS Description
@@ -3112,30 +2978,6 @@ ggarrange(p_dyadc_total, p_dyadc_con + rremove("ylab"),
           ) %>%
   annotate_figure(top = text_grob( "Distribution for DYADC Total and Subscale \n(x-axis and y-axis are in different scales)"))
 ```
-
-#### Clinical Categories
-
-The distribution for the total score alongside clinical cutoffs are
-presented below. Cutoffs for a distressed couple (below 98) or for a satisfied and happy couple (at or above 114.8) are cited in the original Spanier, 1976 article. Other cutoffs may be established so data users should review appropriateness of cutoffs for their specific question of interest.
-
-
-Reference for Cutoffs: [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547)
-
-```{r dyadc-cutoff, class.source='fold', echo = FALSE}
-complete %>%
-  cutoff_plot2(
-    x = dyadc_total,
-    cutoff = 98,
-    cutoff_other = 114.8
-  ) +
-  labs(
-    title = 'Cutoff Values for DAS Scale',
-    caption = 'Cutoffs are 98 and 114.8\nSee references for literature on cutoff scores.'
-  )+
-  geom_text(aes(x = 16, y = 16.5, label = "Distressed\n Couple\n Below Cutoff", vjust = -.25, hjust = -6)) +
-  geom_text(aes(x = 16, y = 16.5, label = "Happy\n or Satisfied\n Couple\n Above Cutoff", vjust = -.25, hjust = -9.25))
-```
-
 
 
 ## Attachment Relationships Questionnaire (ARQ)
