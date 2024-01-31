@@ -348,7 +348,7 @@ the BSI. Please reference this guide to see match with original BSI (original BS
   * **Higher** scores indicate **more** severe
 psychological symptoms.
 
-  * The missing data rule was not applied since there are no missing data among BSI variables.
+  * The missing data rule was not applied. The only missing data in this measure reflects responses not collected due to our protocols for participants who were incarcerated at the time of the assessment.
 
 Reference:
 [@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F);
@@ -452,19 +452,19 @@ bsi_alpha <-
 
 bsi_alpha_som <-
   complete %>%
-  select(bsi2:bsi3,
-         bsi10:bsi13,
+  select(bsi2,bsi3,
+         bsi10, bsi11, bsi12, bsi13,
          bsi15) %>%
   psych::alpha(check.keys = TRUE)
 
 bsi_alpha_anx <-
   complete %>%
-  select(bsi1, bsi5, bsi9, bsi16:bsi18) %>%
+  select(bsi1, bsi5, bsi9, bsi16, bsi17, bsi18) %>%
   psych::alpha(check.keys = TRUE)
 
-bsi_alpha_dep <-
-  complete %>%
-  select(bsi4, bsi6:bsi8, bsi14, bsi19) %>%
+bsi_alpha_dep <- complete %>%
+  select(bsi4, bsi6, bsi7, bsi8, bsi14, bsi19) %>%
+  filter(across(everything(), ~. >= 0)) %>%
   psych::alpha(check.keys = TRUE)
 
 ```
@@ -7223,7 +7223,6 @@ sus_tbl
 ```
 
 
-
 # PCL
 <MARIA: you might want to switch this to full name to be consistent with other measure.> 
   
@@ -7309,6 +7308,7 @@ Only missing percentage are presented
 pcl_data_subset <- complete %>%
   select(starts_with("sg"))
 
+# Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
 pcl_summary_data <- lapply(pcl_data_subset, function(x) {
   x <- replace(x, x < -40, NA)
@@ -7342,8 +7342,7 @@ pcl_tbl <- pcl_summary_data %>%
 pcl_tbl
 
 ```
-
-
+  
 # References 
 
 
