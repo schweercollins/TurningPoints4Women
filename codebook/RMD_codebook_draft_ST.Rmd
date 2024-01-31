@@ -63,6 +63,7 @@ library(ggplot2)
 library(scales)
 library(ggpubr)
 
+
 knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE,
                       echo = FALSE)
@@ -243,21 +244,6 @@ apply_labtab_theme <- function(table) {
 }
   
 ```
-# Credit Author Statement
-
-**Schweer-Collins** conceptualization; software; validation; data curation (specifically checking code for data cleaning and codebook creation, managed data archival) project administration; supervision; funding acquisition; **Trevino** software; validation; data curation (specifically developing codebook, functions, and protocols, data cleaning, codebook creation; data archival); supervision; **Pedroza** software; data curation (specifically making functions used in codebook, data retrieval from Qualtrics; cleaning; codebook creation, visualization); **Zhang** software; validation; data curation (specifically making functions used in codebook, primary responsibility for data retrieval from Qualtrics; data cleaning, codebook creation, visualization)
-
-# Data and Study Author Contact
-
-If you have questions about the data or study, please contact the Principal Investigator, Maria Schweer-Collins through email and please use the subject "NACJD Turning Points Data Query" in the subject line. You can contact Maria at the following emails: 
-
-[insert new email] (through August 1st, 2024 and thereafter)
-mschweer@uoregon.edu (through July 31st, 2024)
-
-# Acronymns
-
-# Maria TODO insert TP and TC
-
 # Overview
 
 <MARIA>INSERT BRIEF INFO ON STUDY, SAMPLE, AND AIMS
@@ -266,6 +252,24 @@ mschweer@uoregon.edu (through July 31st, 2024)
 supplemental materials, any disclaimers/info we think data users need to
 know to use these data accurately*
 
+### Data and Study Author Contact
+
+If you have questions about the data or study, please contact the Principal Investigator, Maria Schweer-Collins through email and please use the subject "NACJD Turning Points Data Query" in the subject line. You can contact Maria through email at mariasc@iastate.edu.
+
+### Credit Author Statement
+
+**Schweer-Collins** conceptualization; software; validation; data curation (specifically checking code for data cleaning and codebook creation, managed data archival) project administration; supervision; funding acquisition; **Trevino** software; validation; data curation (specifically developing codebook, functions, and protocols, data cleaning, codebook creation; data archival); supervision; **Pedroza** software; data curation (specifically making functions used in codebook, data retrieval from Qualtrics; cleaning; codebook creation, visualization); **Zhang** software; validation; data curation (specifically making functions used in codebook, primary responsibility for data retrieval from Qualtrics; data cleaning, codebook creation, visualization)
+
+### Study Acronymns
+
+-   **TP**: this acrononym is used to refer to the name of this study, the **T**urning **P**oints Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data.
+
+-   **TC**: In our assessment and lab, we refer to original participants, who were at the very start of this longitudinal study, minor children, as **TCs**, which means 'Target Child.' Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants. 
+
+-   **NIJ**: NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.
+
+
+### Data Documentation Structure
 <SHAINA>INSERT BRIEF DESCRIPTION OF DATA/CODEBOOK LAYOUT/FILE STRUCTURE
 (can complete once we have more sections and overall structure)
 
@@ -406,7 +410,7 @@ bsi_word_long <- bsi_word %>%
          description = str_replace(description, "During the past week,", ""),
          description = str_replace(description, regex("how much were you bothered by", ignore_case = TRUE), ""),
          var_name = str_to_lower(var_name), 
-          notes = case_when(var_name == "bsi4" ~ "This item was not asked for TC who were incarcerated while assessment were conducted",
+          notes = case_when(var_name == "bsi4" ~ "This was not asked for participants who were incarcerated at the time of the assessment",
                            TRUE ~ as.character(""))) %>% 
   slice(1:19)
 
@@ -689,8 +693,8 @@ cesd_word_long <- cesd_word %>%
                            var_name == "c12" ~ "This item should be reverse scored. `c12_r` is reverse scored",
                            var_name == "c16" ~ "This item should be reverse scored. `c16_r` is reverse scored",
                            
-                           var_name %in% c("c22", "c23") ~ "Skipped if answered No for `c21`. \nThis item was not asked for TC who were incarcerated while assessment were conducted",
-                           var_name %in% c("c21","c24") ~ "This item was not asked for TC who were incarcerated while assessment were conducted",
+                           var_name %in% c("c22", "c23") ~ "Skipped if answered No for `c21`. \nThis was not asked for participants who were incarcerated at the time of the assessment",
+                           var_name %in% c("c21","c24") ~ "This was not asked for participants who were incarcerated at the time of the assessment",
                            TRUE ~ as.character(""))) %>%
   mutate(description = if_else(var_name == "c21", "In the past 6 months, have you ever thought about killing yourself?", description))
   
@@ -1126,6 +1130,8 @@ TABLES BELOW - specify -77 The missing data rule was applied.
 Calculations were completed only with participants that had less than
 20% missing data (this includes `-77` responses)
 
+This survey was not administered for participants who were incarcerated at the time of the assessment. 
+
 Reference:
 [@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1360-0443.1989.tb03463.x);[DOI](https://doi.org/10.1111/j.1360-0443.1989.tb03463.x)
 
@@ -1198,7 +1204,7 @@ print(dast_label_table_total)
 
 All DAST survey items are presented in the following table:
 
-This questionnaire deals with certain drug use and social behavior patterns. Please answer each of the items truthfully by stating Yes or No to me, thinking about the past 6 months.
+*Question Stem* This questionnaire deals with certain drug use and social behavior patterns. Please answer each of the items truthfully by stating Yes or No to me, thinking about the past 6 months.
 
 ```{r DAST-var-prep}
 # Pull question wording from qualtrics data
@@ -1313,7 +1319,7 @@ For binary items:
 ```{r dast-binary-desc}
 # Create subset of DAST items
 dast_data_subset_binary <- complete %>%
-  select(d1a:d20)
+  select(dast1:dast20)
 
 # Calculate the dichotomous summary statistics for each variable
 dast_summary_data_binary <- lapply(dast_data_subset_binary, function(x) {
@@ -1502,7 +1508,9 @@ Severity, Mutuality).
 
 No items need to be reverse scored. <MARIA> TODO: How to word
 directionality with current values/labels. (e.g., Higher scores indicate
-..."
+
+This survey was not administered for participants who were incarcerated at the time of the assessment.
+...
 
 <SHAINA> TODO: CONFIRM & CHECK CALC CODE The missing data rule was
 applied. Calculations were completed only with participants that had
@@ -1556,7 +1564,7 @@ print(CTS_label_table)
 #### Survey Items
 
 All CTS survey items are presented in the following table:
-Incarcerated TC weren't administered for this survey
+This survey was not adminstered for participants who were incarcerated at the time of the assessment. 
 
 ```{r CTS-var-prep}
 # Pull question wording from Qualtrics data
@@ -1583,7 +1591,7 @@ CTS_word_long <- CTS_word %>%
 
 ```
 
-Incarcerated TC weren't administered for this survey
+This survey was not adminstered for participants who were incarcerated at the time of the assessment. 
 
 Please indicate how many times you did each of these things in the past year, and how many times you partner did them in the past year. 
 
@@ -2741,6 +2749,8 @@ Expression, Satisfaction, and Cohesion.
 completed only with participants that had less than 20% missing data
 (this includes `-77` responses)
 
+This survey was not administered for participants who were incarcerated at the time of the assessment. 
+
 References:
 [@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547);
 [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug)
@@ -2823,7 +2833,7 @@ dyadc_word_long <- dyadc_word %>%
 
 ```
 
-Questions in this survey were not asked for participants who were incarcerated at the time of survey administration.
+Some questions in this survey were not asked for participants who were incarcerated at the time of the assessment.
 
 ```{r dyadc-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
@@ -3267,6 +3277,7 @@ print(arq_gt_table)
 ```
 
 #### Scale and Subscales
+## MIN why is this included in the codebook?
 
 Information on constructed attachment groups is presented below. The
 highest rating for attachment style was used to classify participants
@@ -3283,17 +3294,17 @@ CONFIRM THIS IS CORRECT
 ```{r arq-subscales}
 # no internal consistency should be calculated
 # DATA CLEANING CODE - create arq categories
-vars_to_check <- c("rqa", "rqb", "rqc", "rqd")
+vars_to_check <- c("arqa", "arqb", "arqc", "arqd")
 
 arq_subscale <- complete %>% 
   mutate(max_var = apply(.[vars_to_check], 1, function(row) vars_to_check[which.max(row)])) %>% 
-  mutate(arq_group = case_when(max_var == "rqa" ~ "Secure",
-                               max_var == "rqb" ~ "Fearful",
-                               max_var == "rqc" ~ "Preoccupied",
-                               max_var == "rqd" ~ "Dismissive",
+  mutate(arq_group = case_when(max_var == "arqa" ~ "Secure",
+                               max_var == "arqb" ~ "Fearful",
+                               max_var == "arqc" ~ "Preoccupied",
+                               max_var == "arqd" ~ "Dismissive",
                                TRUE ~ NA_character_),
-         arq_model_self = rowSums(data.frame(rqa, rqd), na.rm = TRUE) - rowSums(data.frame(rqc, rqb), na.rm = TRUE),
-    arq_model_other = rowSums(data.frame(rqa, rqc), na.rm = TRUE) - rowSums(data.frame(rqd, rqb), na.rm = TRUE)) %>%
+         arq_model_self = rowSums(data.frame(arqa, arqd), na.rm = TRUE) - rowSums(data.frame(arqc, arqb), na.rm = TRUE),
+    arq_model_other = rowSums(data.frame(arqa, arqc), na.rm = TRUE) - rowSums(data.frame(arqd, arqb), na.rm = TRUE)) %>%
   mutate_at(vars(arq_model_self, arq_model_other), ~ if_else(is.na(arq_group), NA_real_, .)) %>% 
   select(-max_var) 
 
@@ -3333,7 +3344,7 @@ total/subscale score
 # Create subset of ARQ items
 # Maria to do, this should not inlcude rq1 and arq_group, but all other subscales should also be included 
 arq_data_subset <- complete %>%
-  select(rq1,rqa,	rqb, rqc, rqd)
+  select(arq1,arqa,	arqb, arqc, arqd)
 
 # Calculate the summary statistics for each variable
 arq_summary_data <- lapply(arq_data_subset, function(x) {
@@ -3377,11 +3388,11 @@ Distributions are presented for the two subscales only
 JP's graphs are count on x axis*
 
 ```{r ARQ-distributions, class.source='fold', echo = FALSE}
-p_rq1 <- complete %>%
-  select(rq1) %>%
+p_arq1 <- complete %>%
+  select(arq1) %>%
   mutate(
     across(
-      .cols = rq1,
+      .cols = arq1,
       .fns = ~case_when(
         .x == "A" ~ 1,
         .x == "B" ~ 2,
@@ -3391,31 +3402,31 @@ p_rq1 <- complete %>%
       )
     )
     ) %>%
-  composite_hist(x = rq1, bins = 4) +
+  composite_hist(x = arq1, bins = 4) +
   scale_x_continuous(breaks=c(1,2,3,4),
     #breaks=c("1","2","3","4"),
         labels=c("A","B", "C", "D")) +
-  labs(title = 'rq1') 
+  labs(title = 'arq1') 
 
-p_rqa <- complete %>%
-  composite_hist(x = rqa, bins = 10) +
-  labs(title = 'rqa')
+p_arqa <- complete %>%
+  composite_hist(x = arqa, bins = 10) +
+  labs(title = 'arqa')
 
-p_rqb <- complete %>%
-  composite_hist(x = rqb, bins = 10) +
-  labs(title = 'rqb')
+p_arqb <- complete %>%
+  composite_hist(x = arqb, bins = 10) +
+  labs(title = 'arqb')
 
-p_rqc<-complete %>%
-  composite_hist(x = rqc, bins = 10) +
-  labs(title = 'rqc')
+p_arqc<-complete %>%
+  composite_hist(x = arqc, bins = 10) +
+  labs(title = 'arqc')
 
-p_rqd<-complete %>%
-  composite_hist(x = rqd, bins = 10) +
-  labs(title = 'rqd')
+p_arqd<-complete %>%
+  composite_hist(x = arqd, bins = 10) +
+  labs(title = 'arqd')
 
-ggarrange(p_rq1, p_rqa + rremove("ylab"),
-          p_rqb+ rremove("ylab"), p_rqc,
-          p_rqd + rremove("ylab")
+ggarrange(p_arq1, p_arqa + rremove("ylab"),
+          p_arqb+ rremove("ylab"), p_arqc,
+          p_arqd + rremove("ylab")
           ) %>%
   annotate_figure(top = text_grob( "Distribution for ARQ \n(x-axis and y-axis are in different scales)"))
 ```
@@ -3530,21 +3541,21 @@ Variables were constructed by summing included items.
 #Calculate internal reliability 
 prss_alpha <-
   complete %>%
-  select(ps9:ps13) %>%  
+  select(prss1:prss5) %>%  
   psych::alpha(check.keys = TRUE)
 ```
 
 ```{r PRSS-scale-table, results = 'asis'}
 # Create subset of prss items
 prss_data_subset <- complete %>%
-  select(ps9:ps13, prss_total)
+  select(prss1:prss5, prss_total)
 
 
 # Create the table as a data frame
 prss_scale_df <- data.frame(
   var_name = c("prss_total"),
   scale = c("PRSS Total score (5) "),
-  scale_construction = c("`ps9`, `ps10`, `ps11`, `ps12`, `ps13`"),
+  scale_construction = c("`prss1`, `prss2`, `prss3`, `prss4`, `prss5`"),
   scale_range = c("0-16"), #TODO maria double check range 
    alpha = c(round(prss_alpha$total$raw_alpha, 3))
   )
@@ -3620,9 +3631,9 @@ Distributions are presented below for the total score and each subscale:
 ```{r PRSS-distributions, class.source='fold', echo = FALSE}
 complete %>%
   composite_hist(
-    x = prss_avg
+    x = prss_total
   ) +
-  labs(title = "Distribution of Average Scores for the PRSS")
+  labs(title = "Distribution of Total Scores for the PRSS")
 
 
 ```
@@ -3734,15 +3745,10 @@ Variables were constructed by summing included items.
 
 ```{r ssq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-ssq_abuse_shame_alpha <- complete %>% 
-  select(
-    ps1:ps4
-  ) %>% 
-  psych::alpha(check.keys = TRUE)
 
 ssq_alpha <- complete %>% 
   select(
-    ps1:ps8
+    ssq1:ssq8
   ) %>% 
   psych::alpha(check.keys = TRUE)
 ```
@@ -3751,18 +3757,17 @@ ssq_alpha <- complete %>%
 # Create subset of ssq items
 ssq_data_subset <-
   complete %>%
-  select(ps1:ps8, starts_with("ssq"))
+  select(ssq1:ssq_total) # Min does not include cutoff
 
 # Create the table as a data frame
 ssq_scale_df <- data.frame(
-  var_name = c("ssq_total", "ssq_abuse_shame"),
-  scale = c("SSQ Total score (8)", "Abuse-related Shame (4)"),
-  scale_construction = c("`ps1`, `ps2`, `ps3`, `ps4`,`ps5`, `ps6`, `ps7`, `ps8`",
-                         "`ps1`, `ps2`, `ps3`, `ps4`"),
-  scale_range = c("",""), #TODO fill in range 
-  alpha = c(round(ssq_alpha$total$raw_alpha, 3),
-            round(ssq_abuse_shame_alpha$total$raw_alpha, 3))
+  var_name = c("ssq_total"),
+  scale = c("SSQ Total score (8)"),
+  scale_construction = c("`ssq1`, `ssq2`, `ssq3`, `ssq4`,`ssq5`, `ssq6`, `ssq7`, `ssq8`"),
+  scale_range = c("0-32"), # possible range
+  alpha = c(round(ssq_alpha$total$raw_alpha, 3))
 )
+
 
 # Create the gt table object
 ssq_scale_df <- gt(ssq_scale_df) %>%
@@ -3772,7 +3777,7 @@ ssq_scale_df <- gt(ssq_scale_df) %>%
              scale_construction = "Scale Construction",
              scale_range = "Range*",
              alpha = "Alpha") %>% 
-  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   cols_width(scale ~ px(135)) %>% 
   apply_tbl_theme() 
@@ -3787,8 +3792,7 @@ print(ssq_scale_df)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and
-subscale score:
+Descriptive statistics are presented below for each item and the total score:
 
 ```{r ssq-mean-items}
 # Calculate the summary statistics for each variable
@@ -3832,50 +3836,14 @@ ssq_tbl
 Distributions are presented below for the total score and each subscale:
 
 ```{r ssq-distributions, class.source='fold', echo = FALSE}
+
 ssq_data_subset %>%
-  composite_hist(
-    x = ssq_total
-  ) +
+  filter(ssq_total >= 0) %>%
+  composite_hist(x = ssq_total) +
   labs(title = "Distribution of Total Scores for the Stigma & Shame Questionnaire")
 
 ```
 
-#### Clinical Categories
-
-The distribution for the total score alongside clinical cutoffs are
-presented below.
-
-<MARIA>INSERT MORE INFO ON CUTOFF SCORES - what are they (what should
-plot labels be)?, how should they be used
-
-Reference: <SHAINA/MARIA> INSERT REFERENCE FOR DYADC CUTOFF SCORES
-
-```{r ssq-cutoff, class.source='fold', echo = FALSE}
-
-p_ssq_total_clin <- ssq_data_subset %>% 
-  cutoff_plot2(
-    x = ssq_total,
-    cutoff = 16
-  ) +
-  labs(
-    title = "Total",
-    caption = "Cutoff is 16\nSee reference for literature on cutoff score."
-  )
-
-p_ssq_abuse_shame_clin <- ssq_data_subset %>% 
-  cutoff_plot2(
-    x = ssq_abuse_shame,
-    cutoff = 3
-  ) +
-  labs(
-    title = "Abuse-related Shame",
-    caption = "Cutoff is 3\nSee reference for literature on cutoff score."
-  )
-
-ggarrange(p_ssq_total_clin, p_ssq_abuse_shame_clin + rremove("ylab")
-          ) %>%
-  annotate_figure(top = text_grob( "Distribution for SSQ Clinical Cut-off \n(x-axis and y-axis are in different scales)"))
-```
 
 
 ## Elliott Delinquency Scale (EDS) Friends/Peers report
@@ -3892,6 +3860,8 @@ Higher scores indicate more severe mental health symptoms.*
 
 The missing data rule was applied. Calculations were completed for
 participants with 33% or less missing data (this includes -77 responses)
+
+This survey was not administered for participants who were incarcerated at the time of the assessment.
 
 ## edit this this is the number matching with original scale 
 01 = 01, 02 = 03, 03 = 04, 04 = 05, 05 = 06, 06 = 07, 07 = 08, 08 = 09, 09 = 10, 10 = 11, 11 = 12, 12 = 13, 13 = N/A, 14 = 14, 15 = 15, 16 = 16, 17 = 17, 18 = 19, 19 = 20, 20 = 22, 21 = 24, 22 = 25, 23 = N/A, 24 = 26, 25 = 27, 26 = 28, 27 = 29, 28 = 30, 29 = 32, 30 = 34, 31 = 35, 32 = 37, 33 = 38, 34 = 40, 35 = 41, 36 = 42, 37 = 43, 38 = 44, 39 = 45
@@ -5299,10 +5269,8 @@ ibq_complete <- complete %>%
 ```
 
 ```{r ibq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-#Calculate internal reliability 
-ibq_alpha <- ibq_complete %>% 
-  select(ibq1:ibq9) %>% 
-  psych::alpha(check.keys = TRUE)
+#No internal reliability calculated for this measure per type of measure
+
 ```
 
 
@@ -5313,8 +5281,7 @@ ibq_scale_df <- data.frame(
   var_name = c("IBQ Total Score(7)"),
   scale = c("ibq_total"),
   scale_construction = c("`ibq1`, `ibq2`, `ibq3`, `ibq4`, `ibq5`,`ibq6`, `ibp7`"),
-  scale_range = c("0-7"), #TODO fill in range 
-  alpha = c("")
+  scale_range = c("0-7") #TODO fill in range 
 )
 
 # Create the gt table object
@@ -5323,10 +5290,9 @@ ibq_scale_df <- gt(ibq_scale_df) %>%
   cols_label(var_name = "Variable Name",
              scale = "Scale (# of items)", 
              scale_construction = "Scale Construction",
-             scale_range = "Range*",
-             # alpha = "Alpha"
+             scale_range = "Range*"
              ) %>% 
-  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   cols_width(scale ~ px(135)) %>% 
   apply_tbl_theme() 
@@ -5385,11 +5351,12 @@ Distributions are presented below for the total score and each subscale:
 
 ```{r ibq-distributions, class.source='fold', echo = FALSE}
 ibq_complete %>%
+  filter(ibq10 >= 0) %>%
   composite_hist(
-    x = ibq_total,
+    x = ibq10, 
     bins = 15
   ) +
-  labs(title = "Distribution for IBQ Total Score ")
+  labs(title = "Distribution for IBQ Total Score")
 
 ```
 
@@ -5950,6 +5917,8 @@ cint_relation_tbl
 * No items need to be reverse scored. 
 
 * This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+
+This survey was not administered for participants who were incarcerated at the time of the assessment.
 
 
 
@@ -6523,7 +6492,7 @@ sex_tbl
 
 * This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
 
-
+This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
 Reference:
   <Maria, please add a reference if needed> 
@@ -6676,7 +6645,7 @@ socinf_sub_tbl
 
 * This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
 
-
+This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
 Reference:
   <Maria, please add a reference if needed> 
@@ -7408,3 +7377,7 @@ sus_tbl <- sus_summary_data %>%
 sus_tbl
 
 ```
+
+# References 
+
+
