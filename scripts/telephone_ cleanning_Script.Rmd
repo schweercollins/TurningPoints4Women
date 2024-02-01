@@ -5383,6 +5383,22 @@ for (column in columns_relation) {
       ))
 }
 
+# ##################################################################################
+# Maria please double check this one
+# when pcl1_happen is 0 then pcl1_devperiod is -55? 
+columns_devperiod <- paste0("pcl", 1:19, "_devperiod")
+for (column in columns_devperiod) {
+    pcl <- pcl %>%
+      mutate({{column}} := case_when(                         
+        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_happen")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_witness")) %in% c("-77","-55", "-99") & get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_learn")) %in% c("-77","-55", "-99") ~ "-55",
+        # if _relation are still NA then _relation should be truly missing 
+        is.na(get(column)) ~ "-99",
+        TRUE ~ get(column)
+      ))
+}
+
+
 
 
 pcl <- pcl %>%
