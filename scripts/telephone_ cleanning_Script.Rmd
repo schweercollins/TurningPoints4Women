@@ -5455,8 +5455,8 @@ pcl_calc <- pcl %>%
   mutate(pcl_total_happen = rowSums(select(., ends_with("_happen")), na.rm = T)) %>%
   mutate(pcl_total_witness = rowSums(select(., ends_with("_witness")), na.rm = T))%>%
   # apply missing rule 
-  mutate_at(vars(pcl_total_happen), ~ ifelse(id %in% c(pcl_happen_remove$id), -55, .))%>%
-  mutate_at(vars(pcl_total_happen), ~ ifelse(id %in% c(pcl_witness_remove$id), -55, .))
+  mutate_at(vars(pcl_total_happen), ~ ifelse(id %in% c(pcl_happen_remove$id), -99, .))%>%
+  mutate_at(vars(pcl_total_happen), ~ ifelse(id %in% c(pcl_witness_remove$id), -99, .))
 
 
 
