@@ -70,7 +70,7 @@ bsi <-
     matches(
       '^bsi'
     ),
-    -bsi20, 
+    -bsi20, # these are part of scale CIQ
     -bsi21,
     -bsi22
   ) %>%
@@ -93,9 +93,9 @@ bsi <-
 ```
 
 ### BSI Missing Data 
-There are missing data in BSI, but missing rule does not applied. 
+There are missing data in BSI, but missing rule does not apply. 
 ```{r bsi_missing }
-# correct missing value: Not Applicable = -55 = The subject was never asked a question for skip reason (conditional question)
+# correct missing value: Not Applicable = -55 = The subject was never asked a question due to a skip rule (conditional question)
 bsi <- bsi %>% 
   mutate(
     bsi4 = case_when(
@@ -134,41 +134,29 @@ bsi_calc <-
     )
   )
 
-# BSI Composite & Subscale Score Creation 
+# BSI Subscale Score Creation 
+
+  # Define the subscale items
+scale1 <- c('bsi2', 'bsi3', 'bsi10', 'bsi11', 'bsi12', 'bsi13', 'bsi15')
+scale2 <- c('bsi1', 'bsi5', 'bsi9', 'bsi16', 'bsi17', 'bsi18')
+scale3 <- c('bsi4', 'bsi6', 'bsi7', 'bsi8', 'bsi14', 'bsi19')
+
+
 bsi_complete <-
   bsi_calc %>%
-  composite_total_avg_fun(
-    id = 'id',
-    max_value = 4,
-    n_items = 19
-  ) %>%
-  distinct(
-    across(
-      .cols = everything()
-    )
-  ) %>%
-  subscale_create(
-    total_only = TRUE,
-    scale1 = c('bsi2', 'bsi3', 'bsi10',
-               'bsi11', 'bsi12', 'bsi13', 'bsi15'),
-    scale2 = c('bsi1', 'bsi5', 'bsi9',
-               'bsi16', 'bsi17', 'bsi18'),
-    scale3 = c('bsi4', 'bsi6', 'bsi7',
-               'bsi8', 'bsi14', 'bsi19')
-  ) %>%
+  mutate(scale1_avg = round(rowMeans(select(., all_of(scale1)), na.rm = TRUE), 2),
+         scale2_avg = round(rowMeans(select(., all_of(scale2)), na.rm = TRUE), 2),
+         scale3_avg = round(rowMeans(select(., all_of(scale3)), na.rm = TRUE), 2)) %>%
   rename(
-    bsi_total = sum_values,
-    bsi_avg = mean_values,
-    bsi_soma = total1,
-    bsi_anx = total2,
-    bsi_dep = total3
-  ) %>%
-  select(-bsi_avg)
+    bsi_soma = scale1_avg,
+    bsi_anx = scale2_avg,
+    bsi_dep = scale3_avg
+  ) 
 
 bsi_complete <- bsi_complete %>%
-  select(id, bsi_total, bsi_soma, bsi_anx, bsi_dep) %>%
+  select(id, bsi_soma, bsi_anx, bsi_dep) %>%
   merge(bsi, by="id") %>%
-  relocate(bsi_total:bsi_dep, .after = "bsi19")
+  relocate(bsi_soma:bsi_dep, .after = "bsi19")
 ```
 
 
@@ -255,7 +243,7 @@ cesd_missing  %>%
 
 
 ### CESD Calculations & Subscale
-```{r cesd_calculatio}
+```{r cesd_calculation}
 
 # Below is the code that treats negative values (-77, -55) as NA
 cesd_calc <-
@@ -272,56 +260,26 @@ cesd_calc <-
     )
 
 # CESD Composite & Subscale Score Creation 
+cesd_items <- c('c1', 'c2', 'c3', 'c4_r', 'c5',  
+                'c6', 'c7', 'c8_r', 'c9', 'c10', 'c11',
+                'c12_r', 'c13', 'c14', 'c15', 'c16_r', 'c17',
+                'c18', 'c19', 'c20')
 cesd_complete <-
   cesd_calc %>%
-  composite_total_avg_fun(
-    id = c('id',
-           'c4',
-           'c8',
-           'c12', 
-           'c16', # c4,c8,c12, c16 were removed because we use reverse scored items instead 
-           'c21', # C21 - c24 removed because they address suicidality 
-           'c22',
-           'c23',
-           'c24'), 
-    n_items = 20
-  ) %>%
-  subscale_create(
-    total_only = FALSE,
-    scale1 = c('c1', 'c2', 'c3', 'c4_r', 'c5',  
-               'c6', 'c7', 'c8_r', 'c9', 'c10', 'c11',
-               'c12_r', 'c13', 'c14', 'c15', 'c16_r', 'c17',
-               'c18', 'c19', 'c20'),
-    scale1_nitems = 20,
-    scale2 = c('c1'),  # These are irrelevent, and removed below 
-    scale2_nitems = 1
-  ) %>%
-  rename(
-    cesd_total = sum_values,
-    cesd_avg = mean_values,
-    
-    cesd_dep_symp = total1,  
-    cesd_dep_symp_avg = avg1
-  ) %>%
-  distinct(
-    across(
-      .cols = everything()
-    )
-  )%>%
-  select(-cesd_avg, -total2, -avg2) %>%
+  mutate(cesd_dep_symp = rowSums(select(., cesd_items), na.rm = TRUE)) %>%
   relocate(id, .before = c1) %>%
   relocate(c4, .after = c3) %>%
   relocate(c8, .after = c7) %>%
   relocate(c12, .after = c11) %>%
   relocate(c16, .after = c15) %>%
-  relocate(c21:c24, .after = c20) 
-  
+  relocate(c21:c24, .after = c20)
+
 
 # Merge _calc and _complete 
 cesd_complete <- cesd_complete %>%
-  select(id, cesd_total:cesd_dep_symp_avg) %>%
+  select(id, cesd_dep_symp) %>%
   merge(cesd, by = "id") %>% 
-  relocate(cesd_total:cesd_dep_symp_avg, .after = c16_r)
+  relocate(cesd_dep_symp, .after = c16_r)
 ```
 
 
