@@ -269,9 +269,11 @@ If you have questions about the data or study, please contact the Principal Inve
 -   **NIJ**: NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.
 
 
-### Data Documentation Structure
-<SHAINA>INSERT BRIEF DESCRIPTION OF DATA/CODEBOOK LAYOUT/FILE STRUCTURE
-(can complete once we have more sections and overall structure)
+### Introduction to Codebook Structure
+
+This document provides a summary of each measure assessed in the Turning Points for Women Study. Most of the measures described here have actual or potential computed scale scores. Some measures, however, are simply collections of individual items (e.g., demographic variables). We have tried to use the official name of each measure as the heading for each section; many measures, however, do not have official names and therefore the chosen name is arbitrary. If you cannot find a study measure in the table of contents, you may want to search for a keyword in this document.
+
+
 
 ### Missing Data
 
@@ -337,10 +339,9 @@ The Brief Symptom Inventory (BSI) is designed to reflect psychological symptom p
 
     + **Somatization** reflects distress arising from perceptions of bodily dysfunction.
     + **Anxiety** reflects general signs such as nervousness and tension are included in the Anxiety dimension, as are panic attacks and feelings of terror.
-    + **Depression** reflects symptoms of dysphoric mood and affect are represented as are lack of motivation and loss of interest in life.
-    
-  * Item numbers in this data set may not match original item numbers from
-the BSI. Please reference this guide to see match with original BSI (original BSI item number in *italics*): 01 = *01*, 02 = *02*, 03 = *07*, 04 = *09*, 05 = *12*, 06 = *16*, 07 = *17*, 08 = *18*, 09 = *19*, 10 = *23*, 11 = *29*, 12 = *30*, 13 = *33*, 14 = *35*, 15 = *37*, 16 = *38*, 17 = *45*, 18 = *49*, 19 = *50* 
+    + **Depression** reflects symptoms of dysphoric mood and affect are represented as are lack of motivation and loss of interest in life.  
+&nbsp; 
+*   Item numbers in this data set may not match original item numbers from the BSI. Please reference this guide to see match with original BSI (original BSI item number in *italics*): 01 = *01*, 02 = *02*, 03 = *07*, 04 = *09*, 05 = *12*, 06 = *16*, 07 = *17*, 08 = *18*, 09 = *19*, 10 = *23*, 11 = *29*, 12 = *30*, 13 = *33*, 14 = *35*, 15 = *37*, 16 = *38*, 17 = *45*, 18 = *49*, 19 = *50* 
 
   * No items need to be reverse scored. 
 
@@ -350,7 +351,7 @@ psychological symptoms.
   * The missing data rule was not applied. The only missing data in this measure reflects responses not collected on `bsi4` due to our protocols for participants who were incarcerated at the time of the assessment. According to the BSI manual, up to one item can be missing from each subscale to obtain valid subscale scores.
 
 Reference:
-[@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F);
+[@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F)
 
 ### BSI Variables
 
@@ -836,17 +837,15 @@ ggarrange(p_cesd_dep_symp) %>%
 
 ### CIQ Description
 
-The CIQ is self-report survey used to assess the financial, resource,
-and psychological impacts of the COVID-19 pandemic.
+The CIQ is self-report survey used to assess the financial, resource, and psychological impacts of the COVID-19 pandemic.
 
-  * For the present study, only 3 items from the CIQ were collected in order to construct the psychological impacts scale. We made this decision because data collection launched in the COVID-19 pandemic, whereas prior waves occurred before the onset of the COVID-19 pandemic.
+*   For the present study, 3 items from the CIQ were collected in order to construct the psychological impacts subscale. We made this decision because data collection launched in the COVID-19 pandemic, whereas prior waves occurred before the onset of the COVID-19 pandemic.
 
-  * `ciq1` need to be reverse scored. 
+*   `ciq1` should be reverse scored. 
 
-  * **Higher**scores indicate **greater** psychological impacts of COVID-19.
+*   **Higher** scores indicate **greater** psychological impacts of COVID-19.
 
-  * The missing data rule was not applied since there is no missing data
-among CIQ variables.
+*   The missing data rule was not applied since there is no missing data among CIQ variables.
 
 Reference: [@conway2020social](https://psyarxiv.com/z2x9a/)
 
@@ -894,7 +893,6 @@ All CIQ survey items are presented in the following table:
 ```{r ciq-var-prep}
 # Pull question wording from qualtrics data
 # ciq is from BSI question 20-22
-# TODO: Check range of possible values 
 ciq_word <- qualtrics %>% 
   select(starts_with("BSI")) %>% 
   slice(1)
@@ -942,8 +940,7 @@ print(ciq_gt_table)
 
 #### Scale and Subscales
 
-Information on the psychological impacts subscale and associated variables are below.
-The subscale was constructed by averaging the included items.
+Information on the psychological impacts subscale and associated variables are below. The subscale was constructed by averaging the included items.
 
 ```{r ciq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -1034,7 +1031,7 @@ ciq_tbl
 
 #### Distributions
 
-The distribution for the total score is presented below:
+The distribution for the subscale is presented below:
 
 ```{r csi-distributions, class.source='fold', echo = FALSE}
 complete %>%

@@ -335,7 +335,7 @@ ciq <-
 
 
 ### CIQ Missing Data 
-No missing data found in the CIQ measure. 
+No missing data exist in the CIQ measure. 
 ```{r, warning = FALSE, message = FALSE}
 ciq %>%
     mutate(across(-id, as.numeric)) %>%
@@ -699,8 +699,8 @@ cts_complete <-
         )
     )
 
-# ind = 
-# part = 
+# ind = the participant's behaviors
+# part = the participant's partner's behaviors
 cts_complete <-
   cts_complete %>%
     subscale_create(
@@ -3747,7 +3747,7 @@ cts_pc <- cts_pc%>%
 
 cts_pc_miss <- cts_pc %>%
   mutate(across(-c(id), as.numeric))%>%
-  select(id, a1:a23) %>% # Maria, I think missing percentage should calculate using a1:a23
+  select(id, a1:a23) %>% # Missing percentage should calculate using a1:a23
   pct_miss_fun(
     id = c("id"),
     n_items = 23 # updated to reflect the coding
@@ -3777,6 +3777,7 @@ cts_pc_calc <-
       )
     )
   )
+# missing data rule is not applied
 
 cts_pc_complete <-
   cts_pc_calc %>%
@@ -3800,16 +3801,12 @@ cts_pc_complete <-
     mutate(
       cts_pc_PSAP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') * (select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0), na.rm = TRUE),
   # Count of Psychological Aggression Responses
-  # Min need to make P847 -99
       cts_pc_PSAC = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0, na.rm = TRUE),
   # Raw Scoring for Psychological Aggression Past Year - Mean (Chronicity)
-  # Min need to make P847 -99
      cts_pc_PSAM = ifelse(cts_pc_PSAC == 0 & cts_pc_PSAP == 0, 0, round(cts_pc_PSAP / cts_pc_PSAC, 2)),
   #  Raw Scoring for Psychological Aggression - Past Year (Prevalence)
-  # Min need to make P847 -99
       cts_pc_PSAPP = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') > 0, na.rm = T),
   # Raw Scoring for Psychological Aggression Discipline - Lifetime (Ever Prevalence greater than past year)
-  # Min need to make P847 -99
       cts_pc_PSAL = rowSums(select(., 'a6_r', 'a8_r', 'a9_r', 'a10_r', 'a14_r') == -2, na.rm = T),
   # Raw Scoring for Psychological Aggression (Ever Prevalance)
       cts_pc_PSAEP = cts_pc_PSAL + cts_pc_PSAPP
