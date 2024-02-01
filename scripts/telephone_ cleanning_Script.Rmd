@@ -3907,7 +3907,7 @@ cts_pc_complete <- cts_pc_complete %>%
   rename_all(tolower) %>%
   merge(cts_pc, by="id") %>%
  # mutate(across(c(a1:a23, a1_r:a23_r), ~ifelse(cts_parent_screen == 0, -55, ifelse(is.na(.), -77, as.numeric(.))))) %>%
- # mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.))))) %>%
+  mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.))))) %>%
   # update a prefix to cts_pc
   rename_with(~ sub("^a", "cts_pc", .), starts_with("a"))
 
