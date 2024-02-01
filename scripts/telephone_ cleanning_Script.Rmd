@@ -3789,9 +3789,10 @@ cts_pc <- cts_pc%>%
 
 cts_pc_miss <- cts_pc %>%
   mutate(across(-c(id), as.numeric))%>%
+  select(id, a1:a23) %>% # Maria, I think missing percentage should calculate using a1:a23
   pct_miss_fun(
-    id = c("id", -matches("\\d$")),
-    n_items = 46 # updated to reflect the coding
+    id = c("id"),
+    n_items = 23 # updated to reflect the coding
   )
 
 cts_pc_miss %>% 
@@ -3902,9 +3903,11 @@ cts_pc_complete <-
 
 # finalize to add back in appropriate missing values
 cts_pc_complete <- cts_pc_complete %>%
+  select(id, cts_pc_NVDP:cts_pc_NEGEP) %>%
   rename_all(tolower) %>%
-  mutate(across(c(a1:a23, a1_r:a23_r), ~ifelse(cts_parent_screen == 0, -55, ifelse(is.na(.), -77, as.numeric(.))))) %>%
-  mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.))))) %>%
+  merge(cts_pc, by="id") %>%
+ # mutate(across(c(a1:a23, a1_r:a23_r), ~ifelse(cts_parent_screen == 0, -55, ifelse(is.na(.), -77, as.numeric(.))))) %>%
+ # mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.))))) %>%
   # update a prefix to cts_pc
   rename_with(~ sub("^a", "cts_pc", .), starts_with("a"))
 
