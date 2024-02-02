@@ -2848,7 +2848,7 @@ cint_ladder_complete <- cint_ladder %>%
   mutate(across(-c(id), as.numeric))
 ```
 
-### CINT-Ladder Missing 
+### CINT-SSES Missing 
 ```{r cint-ladder-missing}
 ## we do not apply missing data rules because not a standardized questionnaire
 # cint_ladder_missing <- cint_ladder %>%

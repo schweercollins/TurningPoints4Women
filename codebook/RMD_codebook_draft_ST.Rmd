@@ -5304,7 +5304,7 @@ print(cint_ladder_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented. 
 
 ```{r cint_ladder-missing}
 # Create subset of items
@@ -5546,7 +5546,7 @@ print(cint_relation_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented.
 
 ```{r cint_relation-missing}
 # Create subset of BSI items
@@ -5843,7 +5843,7 @@ print(cint_covid_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented. 
 
 ```{r cint_covid-missing}
 # Create subset of BSI items
@@ -6119,7 +6119,7 @@ print(sex_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented. 
 
 ```{r sex-missing}
 # Create subset of BSI items
@@ -6272,7 +6272,7 @@ print(socinf_sub_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented. 
 
 ```{r socinf_sub-missing}
 # Create subset of BSI items
@@ -6410,7 +6410,7 @@ print(socinf_gen_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented.
 
 ```{r socinf_gen-missing}
 # Create subset of BSI items
@@ -6597,7 +6597,7 @@ print(cts_pc_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented. 
 
 ```{r cts_pc-missing}
 # Create subset of BSI items
@@ -6745,7 +6745,7 @@ print(pct_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented. 
 
 ```{r pct-missing}
 # Create subset of BSI items
@@ -7018,7 +7018,7 @@ print(sus_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented. 
 
 ```{r sus-missing}
 # Create subset of BSI items
@@ -7142,7 +7142,7 @@ print(pcl_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages of variables are presented. 
 
 ```{r pcl-missing}
 # Create subset of BSI items
