@@ -1647,7 +1647,8 @@ for (i in 1:39) {
     ell[[ella_col]][set_to_77] <- -77
 }
 
-
+ell <- ell %>%
+  select(-ell23a)
 
 # ELL Count Missing Data
 # most participants will respond to the first part of each item
@@ -1728,6 +1729,10 @@ ell_calc <-
     )
   )
 
+ell_complete <- ell_calc %>%
+  # total score should only contain 1-10
+  mutate(ell_total = rowSums(select(., i1:i10), na.rm = T)) %>%
+  
 # TODO: Min, you can remove code pertaining the the physical aggression; you can also save the other code in our internal file with a note that the general delinquency needs to be z scored to deal with different reporting waves across the study (12 vs 6 month recall) before using in conjunction with other waves
 ell_complete <-
   ell_calc %>%
@@ -3176,53 +3181,16 @@ cint_substance <- cint_substance %>%
   mutate_at(vars(cint62_6_text), ~case_when(cint62 != 7 ~ "-55", TRUE ~ .)) %>%
  select(-c(cint84_1:cint84_77))
 
-cint_substance_complete <- cint_substance %>%
-  # we don't need cint_pregnancy_screen because it's already included in the sociodems
-  select(-cint_pregnancy_screen)
+cint_substance_complete <- cint_substance 
 
 # Maira/Min: issue below was solved, it becauese we missed a skip rule, Maria, after you checked, you can remove these two line. 
 # HR166 has cint84 missing; checked this and we are using code of -99   
 
 ## we do not apply missing data rules because not a standardized questionnaire
-# cint_substance_miss <- cint_substance %>%
-#   mutate(across(-c(id, matches("_6_text$")), as.numeric))%>%
-#   pct_miss_fun(
-#     id = c("id", matches("_6_text$")),
-#     n_items = 47
-#   )
-# 
-# cint_substance_miss%>% gt::gt() %>% 
-#   gt::tab_header(
-#     title = 'CINT- Subtance use Missing Data',
-#     subtitle = 'By Participant')
-# 
-# 
-# 
-# # Below is the code that treats -77, -55 values as NA
-# cint_substance_complete <-
-#   cint_substance %>%
-# mutate(across(-c(id, matches("_6_text$"), cint84), as.numeric)) %>% # cint84 is multiple choice
-#   mutate(
-#     across(
-#       .cols = -c(id, matches("_6_text$")),
-#       .fns = ~case_when(
-#         .x < 0 ~ NA,
-#         TRUE ~ .x
-#       )
-#     ),
-#     across(
-#       .cols = matches("_6_text$"),
-#       .fns = ~case_when(
-#         .x == -55 ~ NA,
-#         TRUE ~ .x
-#       )
-#     )
-#   ) 
 ```
 
 ### CINT-COVID Select Variables and Recode 
 ```{r}
-
 ## Note made during cleaning process on 12/2023 -- there are no psychometrics or optimal scoring methods published. Please reach out to Dr. Damion Grasso dgrasso@uchc.edu with questions if you wish to use. 
  
 cint_covid <- tpw_raw %>%
