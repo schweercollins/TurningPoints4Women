@@ -412,3 +412,180 @@ pcl <- pcl %>%
 #   select(-which(sapply(pcl, function(col) all(is.na(col) | col == "NA"))))
 
 
+
+
+
+# PCT OPTION 2 #########################################################################
+pct_complete <- pct_calc %>%
+  mutate(
+    pct_preg_total = rowSums(select(., pct2a:pct2d), na.rm = TRUE),
+    pct_childbirth_total = rowSums(select(., pct3a:pct3d), na.rm = TRUE)
+  ) %>%
+  # making those with missing data have appropriate missing data codes
+  mutate(
+    pct_preg_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_preg_total), "-99", as.character(pct_preg_total))),
+    pct_childbirth_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_childbirth_total), "-99", as.character(pct_childbirth_total)))
+  ) %>%
+  mutate_at(vars(pct_childbirth_total), ~case_when(id =="P836" ~ -99, TRUE ~.))
+# Adding back in -55 and -77
+mutate_at(vars(pct1:pct3d), ~ifelse(p00a == 0, "-55", as.character(.))) %>%
+  mutate_at(vars(pct2a:pct3d), ~ifelse(pct1 == 0, "-55", as.character(.))) %>%
+  mutate(
+    pct3a = ifelse(id == "P836" & is.na(pct3a), -77, pct3a),
+    pct3b = ifelse(id == "P836" & is.na(pct3b), -77, pct3b),
+    pct3c = ifelse(id == "P836" & is.na(pct3c), -77, pct3c),
+    pct3d = ifelse(id == "P836" & is.na(pct3d), -77, pct3d))
+
+
+# MHC diagnoses #########################################################################
+mhc_complete <- mhc_complete %>%
+  pivot_longer(
+    h4:h14,
+    names_to = "pre_flourish",
+    values_to = "flourish_feel"
+  ) %>%
+  mutate(
+    mhc_flourish = case_when(
+      flourish_feel %in% c(4, 5) ~ 1,
+      !flourish_feel %in% c(4, 5) ~ 0,
+      TRUE ~ 0
+    ),
+    mhc_languish = case_when(
+      flourish_feel %in% c(0, 1) ~ 1,
+      !flourish_feel %in% c(0, 1) ~ 0,
+      TRUE ~ 0
+    )
+  ) %>%
+  group_by(id) %>%
+  mutate(
+    mhc_six_or_over = sum(mhc_flourish, na.rm = TRUE),
+    mhc_neg_six_or_more = sum(mhc_languish, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    mhc_flourish_diagnosis = case_when(
+      (h1 %in% c(4, 5) & mhc_six_or_over >= 6) |
+        (h2 %in% c(4, 5) & mhc_six_or_over >= 6) |
+        (h3 %in% c(4, 5) & mhc_six_or_over >= 6)
+      ~ "flourish",
+      TRUE ~ "not_flourish"
+    ),
+    mhc_languish_diagnosis = case_when(
+      (h1 %in% c(0, 1) & mhc_neg_six_or_more >= 6) |
+        (h2 %in% c(0, 1) & mhc_neg_six_or_more >= 6) |
+        (h3 %in% c(0, 1) & mhc_neg_six_or_more >= 6)
+      ~ "languish",
+      TRUE ~ "not_languish"
+    )
+  ) %>%
+  pivot_wider(
+    names_from = pre_flourish,
+    values_from = flourish_feel
+  ) %>%
+  distinct(
+    id,
+    .keep_all = TRUE
+  ) %>%
+  mutate(
+    mhc_final_diagnosis = case_when(
+      (mhc_flourish_diagnosis == "flourish" &
+         mhc_languish_diagnosis == "not_languish") ~ "flourish",
+      (mhc_flourish_diagnosis == "not_flourish" &
+         mhc_languish_diagnosis == "languish") ~ "languish",
+      (mhc_flourish_diagnosis == "not_flourish" &
+         mhc_languish_diagnosis == "not_languish") ~ "moderately mentally healthy"
+    )
+  ) %>%
+  relocate(h4:h14, .after = "h3")
+
+
+# BCAP SCORING #########################################################################
+### BCAP Missing Data
+# There are missing data in BCAP and missing rule not applied.
+
+bcap %>%
+  select(-c(q1,q2,q23,q29)) %>%
+  mutate(across(-id, as.numeric)) %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 34
+  ) %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'BCAP Missing Data',
+    subtitle = 'By Participant'
+  )
+
+
+# Min can you save this in another internal file with the following note. I am going to archive these data without any subscales because we don't have the correct information for scoring.
+
+## Need to update scoring to include only three subscales according to BCAP reference, these should be:
+
+#  The following items make up the BCAP random responding scale:  31, 53, and 61, with 31 being reverse-scored.  If any one of these items is endorsed, the protocol may be invalid.
+
+# The following items make up the BCAP lie scale:  12, 44, 57, 66, 106, and 146.  If four or more are endorsed, the protocol may be invalid (although subsequent research with urban parents has suggested that the BCAP may discriminate between known high-risk and control parents better when the lie and random responding scales are not used).
+
+# Main scale is The remaining items make up the BCAP risk scale, with items 14, 75, and 107—the three items all loading on the “happiness” factor—being reverse-scored (as per CAP instructions).  Thus, the BCAP risk scale score can range from 0 to 24.  In the development study cited above, a BCAP cutoff of 9 best predicted the risk distinction of the full CAP using the cutoff of 166, and a BCAP cutoff of 12 best predicted the CAP cutoff of 215.
+bcap_calc <-
+  bcap %>%
+  pct_miss_fun(
+    id = 'id',
+    n_items = 34
+  ) %>%
+  full_join(bcap,
+            by = 'id') %>%
+  filter(
+    is.na(miss_pct) |
+      miss_pct < 20
+  ) %>%
+  mutate(
+    across(
+      .cols = c(-id, -miss_pct, -missing_n),
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        .x == -55 ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+bcap_complete <-
+  bcap_calc %>%
+  select(
+    -missing_n,
+    -miss_pct
+  ) %>%
+  # index_total_fun(
+  #   id = 'id'
+  # ) %>%
+  subscale_create(
+    total_only = TRUE,
+    scale1 = c('q1_r', 'q23_r', 'q29_r',
+               'q3', 'q25', 'q33',
+               'q5', 'q12', 'q22', 'q31',
+               'q6', 'q13', 'q17',
+               'q7', 'q14', 'q20', 'q32',
+               'q8', 'q11', 'q16', 'q19', 'q27',
+               'q10', 'q30'),
+    scale2 = c('q1_r', 'q23_r', 'q29_r'),
+    scale3 = c('q3', 'q25', 'q33'),
+    scale4 = c('q5', 'q12', 'q22', 'q31'),
+    scale5 = c('q6', 'q13', 'q17'),
+    scale6 = c('q7', 'q14', 'q20', 'q32'),
+    scale7 = c('q8', 'q11', 'q16', 'q19', 'q27'),
+    scale8 = c('q10', 'q30'),
+    scale9 = c('q4', 'q9', 'q15', 'q21', 'q26', 'q34'),
+    scale10 = c('q2_r', 'q18', 'q28')
+  ) %>%
+  rename(
+    bcap_risk = total1,
+    bcap_happy = total2,
+    bcap_feel_pers = total3,
+    bcap_lonely = total4,
+    bcap_fam_conf = total5,
+    bcap_rigid = total6,
+    bcap_distress = total7,
+    bcap_poverty = total8,
+    bcap_lie = total9,
+    bcap_random = total10
+  )
