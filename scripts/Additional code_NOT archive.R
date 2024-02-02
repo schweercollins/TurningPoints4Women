@@ -714,6 +714,165 @@ bcap_scale_table <- gt(bcap_scale_df) %>%
 # Print the table
 print(bcap_scale_table)
 
+
+# For continuous total and subscale scores:
+
+
+# Create subset of bcap items
+bcap_data_subset <- complete %>%
+  select(
+    bcap_risk, bcap_happy, bcap_feel_pers, bcap_lonely, bcap_fam_conf, bcap_rigid, bcap_distress, bcap_poverty, bcap_lie, bcap_random)
+
+# Calculate the summary statistics for each variable
+bcap_summary_data <- lapply(bcap_data_subset, function(x) {
+  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+  sd_val <- round(sd(x, na.rm = TRUE), 2)
+  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+bcap_summary_data <- as.data.frame(bcap_summary_data)
+
+# Set items as first row
+bcap_summary_data <- rbind(names(bcap_summary_data), bcap_summary_data) %>%
+  t() %>%
+  as.data.frame()
+
+# Create the gt table
+bcap_tbl <- bcap_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>%
+  cols_width(1 ~ px(165),2:5 ~ px(115)) %>%
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>%
+  tab_footnote("*Range of data values") %>%
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+bcap_tbl
+
+
+
+#### Distributions
+
+# Distributions are presented below for the total score and each subscale:
+
+ # ```{r bcap-distributions, class.source='fold', echo = FALSE}
+#Risk
+p_bcap_risk <- complete %>%
+  composite_hist(
+    x = bcap_risk
+  ) +
+  labs(
+    title = 'Risk'
+  )
+
+# Happiness
+p_bcap_happy <- complete %>%
+  composite_hist(
+    x = bcap_happy,
+    bins = 5
+  ) +
+  labs(
+    title = 'Happiness'
+  )
+
+# Feelings
+p_bcap_pers <- complete %>%
+  composite_hist(
+    x = bcap_feel_pers,
+    bins = 5
+  ) +
+  labs(
+    title = 'Feelings of Persecution'
+  )
+
+# Loneliness
+p_bacp_lonely <- complete %>%
+  composite_hist(
+    x = bcap_lonely,
+    bins = 5
+  ) +
+  labs(
+    title = 'Loneliness'
+  )
+
+# Family Conflict
+p_bcap_fam_c<-complete %>%
+  composite_hist(
+    x = bcap_fam_conf,
+    bins = 5
+  ) +
+  labs(
+    title = 'Family Conflict'
+  )
+
+# Rigidity
+p_bcap_rig <- complete %>%
+  composite_hist(
+    x = bcap_rigid,
+    bins = 5
+  ) +
+  labs(
+    title = 'Rigidity'
+  )
+
+# Distress
+p_bcap_dis <- complete %>%
+  composite_hist(
+    x = bcap_distress,
+    bins = 5
+  ) +
+  labs(
+    title = 'Distress'
+  )
+
+# Poverty
+p_bcap_prov <- complete %>%
+  composite_hist(
+    x = bcap_poverty,
+    bins = 5
+  ) +
+  labs(
+    title = 'Poverty'
+  )
+
+# Lying
+p_bcap_lie <- complete %>%
+  composite_hist(
+    x = bcap_lie,
+    bins = 5
+  ) +
+  labs(
+    title = 'Lying'
+  )
+
+# Random Responding
+p_bcap_rand <- complete %>%
+  composite_hist(
+    x = bcap_random,
+    bins = 5
+  ) +
+  labs(
+    title = 'Random Responding'
+  )
+
+ggarrange(p_bcap_risk, p_bcap_happy + rremove("ylab"),
+          p_bcap_pers+ rremove("ylab"), p_bacp_lonely+ rremove("ylab"),
+          p_bcap_fam_c, p_bcap_rig+ rremove("ylab"),
+          p_bcap_dis+ rremove("ylab"), p_bcap_dis+ rremove("ylab"),
+          p_bcap_prov, p_bcap_lie+ rremove("ylab"),
+          p_bcap_rand+ rremove("ylab")
+) %>%
+  annotate_figure(top = text_grob( "Distribution for bcap Subscale \n(x-axis and y-axis are in different scales)"))
+
+
+
 ### EDS-F Calculation & Subscale #########################################################################
 elf_miss <- elf %>%
   mutate(across(-id, as.numeric)) %>%
@@ -815,29 +974,22 @@ elf_complete <-
 #Information on the total score and subscale variables are below.
 #Variables were c onstructed by summing included items.
 
-
+# EDS #########################################################################################
 #Calculate internal reliability
 
 
-eds <-
-  complete %>%
-  select(
-    matches(
-      "^elf"
-    )
-  )
 #Calculate internal reliability
 eds_alpha <- complete %>%
   select(elf1:elf39) %>%
   drop_na() %>%  # TODO: Shaina: I don't know why does including NA doesn't work for the alpha function.
   psych::alpha(check.keys = TRUE)
 
-```
+#```
 
-TODO: all revers coded column is 0, need to double check, I used
-non-revers coded score for now
+#TODO: all revers coded column is 0, need to double check, I used
+#non-revers coded score for now
 
-```{r EDS-scale-table, results = 'asis'}
+#```{r EDS-scale-table, results = 'asis'}
 
 
 # Create the table as a data frame
@@ -869,6 +1021,21 @@ eds_scale_df <- gt(eds_scale_df) %>%
 # Print the table
 print(eds_scale_df)
 
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+#  ```{r eds-distributions, class.source='fold', echo = FALSE}
+
+eds %>%
+  composite_hist(
+    x = elf_total
+  ) +
+  labs(title = "Distribution of Total Scores for the Stigma & Shame Questionnaire")
+
+#```
+
+
 #socinf_sub  ####################################
 socinf_sub_miss <- socinf_sub %>%
   pct_miss_fun(
@@ -896,4 +1063,38 @@ socinf_gen_miss %>%
     title = 'SOCINF General Missing Data',
     subtitle = 'By Participant')
 
-
+# CINT _SUBSTANCE
+# cint_substance_miss <- cint_substance %>%
+#   mutate(across(-c(id, matches("_6_text$")), as.numeric))%>%
+#   pct_miss_fun(
+#     id = c("id", matches("_6_text$")),
+#     n_items = 47
+#   )
+#
+# cint_substance_miss%>% gt::gt() %>%
+#   gt::tab_header(
+#     title = 'CINT- Subtance use Missing Data',
+#     subtitle = 'By Participant')
+#
+#
+#
+# # Below is the code that treats -77, -55 values as NA
+# cint_substance_complete <-
+#   cint_substance %>%
+# mutate(across(-c(id, matches("_6_text$"), cint84), as.numeric)) %>% # cint84 is multiple choice
+#   mutate(
+#     across(
+#       .cols = -c(id, matches("_6_text$")),
+#       .fns = ~case_when(
+#         .x < 0 ~ NA,
+#         TRUE ~ .x
+#       )
+#     ),
+#     across(
+#       .cols = matches("_6_text$"),
+#       .fns = ~case_when(
+#         .x == -55 ~ NA,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
