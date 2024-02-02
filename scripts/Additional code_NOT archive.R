@@ -589,3 +589,311 @@ bcap_complete <-
     bcap_lie = total9,
     bcap_random = total10
   )
+### BCAP Reliability from codebook  #########################################################################
+#Calculate internal reliability
+# Total
+bcap_alpha <-
+  complete %>%
+  select(
+    bcap1_r,
+    bcap2_r,
+    bcap3:bcap22,
+    bcap23_r,
+    bcap24:bcap28,
+    bcap29_r,
+    bcap30:bcap34
+  ) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_risk_alpha <-
+  complete %>%
+  select(
+    bcap1_r,
+    bcap3,
+    bcap5:bcap8,
+    bcap10:bcap14,
+    bcap16:bcap17,
+    bcap19:bcap20,
+    bcap22,
+    bcap23_r,
+    bcap24:bcap25,
+    bcap27,
+    bcap29_r,
+    bcap30:bcap33
+  ) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_happy_alpha <-
+  complete %>%
+  select(bcap1_r, bcap23_r, bcap29_r) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_feel_pers_alpha <-
+  complete %>%
+  select(bcap3, bcap25, bcap33) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_lonely_alpha <-
+  complete %>%
+  select(bcap5, bcap12, bcap22, bcap31) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_fam_conf_alpha <-
+  complete %>%
+  select(bcap6, bcap13, bcap17) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_rigid_alpha <-
+  complete %>%
+  select(bcap7, bcap14, bcap20, bcap32) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_distress_alpha <-
+  complete %>%
+  select(bcap8, bcap11, bcap16, bcap19, bcap27) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_poverty_alpha <-
+  complete %>%
+  select(bcap10, bcap30) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_lie_alpha <-
+  complete %>%
+  select(bcap4, bcap9, bcap15, bcap21, bcap26, bcap34) %>%
+  psych::alpha(check.keys = TRUE)
+
+bcap_random_alpha <-
+  complete %>%
+  select(bcap2_r, bcap19, bcap28) %>%
+  psych::alpha(check.keys = TRUE)
+# BCAP Scale table
+# Create the table as a data frame
+bcap_scale_df <- data.frame(
+  var_name = c("bcap_total", "bcap_risk", "bcap_happy", "bcap_feel_pers", "bcap_lonely", "bcap_fam_conf", "bcap_rigid","bcap_distress", "bcap_poverty", "bcap_lie", "bcap_random"),
+  scale = c("BCAP complete Scale (34)", "BCAP Risk Scale (26)", "Happiness (3)", "Feelings of persecution", "Loneliness (4)", "Family conflict (3)", "Rigidity (4)", "Distress (5)", "Financial Insecurity (2)", "Lie (6)", "Random responding (3)"),
+  scale_construction = c("`bcap1_r`,`bcap2_r`, `bcap3`, `bcap4`, `bcap5`, `bcap6`, `bcap7`, `bcap8`, `bcap9`, `bcap10`, `bcap11`, `bcap12`, `bcap13`, `bcap14`, `bcap15`, `bcap16`, `bcap17`, `bcap18`, `bcap19`, `bcap20`, `bcap21`, `bcap22`, `bcap23_r`, `bcap24`, `bcap25`, `bcap26`, `bcap27`, `bcap28`, `bcap29_r`, `bcap30`, `bcap31`, `bcap32`, `bcap33`, `bcap34`",
+                         "`bcap1_r`, `bcap3`, `bcap4`, `bcap5`, `bcap6`, `bcap7`, `bcap8`, `bcap10`, `bcap11`, `bcap12`, `bcap13`, `bcap14`, `bcap16`, `bcap17`, `bcap19`, `bcap20`, `bcap22`, `bcap23_r`, `bcap24`, `bcap25`, `bcap27`, `bcap29_r`, `bcap30`, `bcap31`, `bcap32`, `bcap33`",
+                         "`bcap1_r`, `bcap23_r`, `bcap29_r`",
+                         "`bcap3`, `bcap25`, `bcap33`",
+                         "`bcap5`, `bcap12`, `bcap22`, `bcap31`",
+                         "`bcap6`, `bcap13`, `bcap17`",
+                         "`bcap7`, `bcap14`, `bcap20`, `bcap32`",
+                         "`bcap8`, `bcap11`, `bcap16`, `bcap19`, `bcap27`",
+                         "`bcap10`, `bcap30`",
+                         "`bcap4`, `bcap9`, `bcap15`, `bcap21`, `bcap26`, `bcap34`,",
+                         "`bcap2`, `bcap18`, `bcap28`"),
+  scale_range = c("0-24","","","","","","","","","", ""), #TODO fill in range
+  alpha = c(round(bcap_alpha$total$raw_alpha, 3),
+            round(bcap_risk_alpha$total$raw_alpha, 3),
+            round(bcap_happy_alpha$total$raw_alpha, 3),
+            round(bcap_feel_pers_alpha$total$raw_alpha, 3),
+            round(bcap_lonely_alpha$total$raw_alpha, 3),
+            round(bcap_fam_conf_alpha$total$raw_alpha, 3),
+            round(bcap_rigid_alpha$total$raw_alpha, 3),
+            round(bcap_distress_alpha$total$raw_alpha, 3),
+            round(bcap_poverty_alpha$total$raw_alpha, 3),
+            round(bcap_lie_alpha$total$raw_alpha, 3),
+            round(bcap_random_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+bcap_scale_table <- gt(bcap_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>%
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)",
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>%
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>%
+  #cols_width(scale_construction ~ px(135)) %>%
+  tab_options(table.width = pct(100))%>%
+  apply_tbl_theme()
+
+# Print the table
+print(bcap_scale_table)
+
+### EDS-F Calculation & Subscale #########################################################################
+elf_miss <- elf %>%
+  mutate(across(-id, as.numeric)) %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 39
+  )
+
+elf_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = "EDS Missing Data",
+    subtitle = "By Participant"
+  )
+
+elf_remove <- elf_miss %>% filter(miss_pct >= 20) %>% pull(id)
+## Min can you remove any computation of scales for the EDS-F measure?
+## Please save this in a separate file for our internal work
+## there should be no distributions in the codebook then; no alpha either; you can remove these notes once you clean it up
+elf_calc <-
+  elf %>%
+  mutate(
+    across(
+      .cols = -c(
+        id
+      ),
+      .fns = ~case_when(
+        .x < 0 ~ NA,
+        TRUE ~ .x
+      )
+    )
+  ) %>%
+  mutate(across(-id, as.numeric))
+
+elf_complete <-
+  elf_calc %>%
+  composite_total_avg_fun(
+    id = c('id', "elf1", "elf2", "elf3", "elf7",
+           "elf12", "elf13", "elf15", "elf17", "elf18",
+           "elf19", "elf23", "elf26", "elf28", "elf30",
+           "elf34", "elf35", "elf36", "elf37"),
+    max_value = 4,
+    n_items = 21
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  rename(
+    elf_total = sum_values,
+    elf_avg = mean_values #TODO: Maria do we need average for this measure
+  ) %>%
+  mutate(
+    mutate(
+      across(
+        -c(id
+        ),
+        ~case_when(
+          id %in% elf_remove ~ NA_real_,
+          TRUE ~ .x
+        )
+      )
+    )
+  ) %>%
+  relocate(elf1:elf3, .before = "elf4") %>%
+  relocate(elf7, .before = "elf8") %>%
+  relocate(elf12:elf13, .before = "elf14") %>%
+  relocate(elf15, .before = "elf16") %>%
+  relocate(elf17:elf19, .before = "elf20") %>%
+  relocate(elf23, .before = "elf24") %>%
+  relocate(elf26, .before = "elf27") %>%
+  relocate(elf28, .before = "elf29") %>%
+  relocate(elf30, .before = "elf31") %>%
+  relocate(elf34:elf37, .before = "elf38")
+
+# composite_total_avg_fun(
+#   id = c(
+#     'id', "elf1_c", "elf2_c", "elf3_c", "elf7_c",
+#     "elf12_c", "elf13_c", "elf15_c", "elf17_c", "elf18_c",
+#     "elf19_c", "elf23_c", "elf26_c", "elf28_c", "elf30_c",
+#     "elf34_c", "elf35_c", "elf36_c", "elf37_c"
+#   ),
+#   max_value = 4,
+#   n_items = 21
+# ) %>%
+# distinct(
+#   across(
+#     .cols = everything()
+#   )
+# ) %>%
+# rename(
+#   elf_total = sum_values,
+#   elf_avg = mean_values)
+
+
+#### Scale and Subscales
+# From Code book
+#Information on the total score and subscale variables are below.
+#Variables were c onstructed by summing included items.
+
+
+#Calculate internal reliability
+
+
+eds <-
+  complete %>%
+  select(
+    matches(
+      "^elf"
+    )
+  )
+#Calculate internal reliability
+eds_alpha <- complete %>%
+  select(elf1:elf39) %>%
+  drop_na() %>%  # TODO: Shaina: I don't know why does including NA doesn't work for the alpha function.
+  psych::alpha(check.keys = TRUE)
+
+```
+
+TODO: all revers coded column is 0, need to double check, I used
+non-revers coded score for now
+
+```{r EDS-scale-table, results = 'asis'}
+
+
+# Create the table as a data frame
+eds_scale_df <- data.frame(
+  var_name = c("eds_total"),
+  scale = c("EDS Total score (39)"),
+  scale_construction = c("`elf1`, `elf2`, `elf3`, `elf4`, `elf5`, `elf6`, `elf7`,
+  `elf8`, `elf9`, `elf10`, `elf11`, `elf12`, `elf13`, `elf14`, `elf15`, `elf16`,
+  `elf17`, `elf18`, `elf19`, `elf20`, `elf21`, `elf22`, `elf23`, `elf24`, `elf25`,
+  `elf26`, `elf27`, `elf28`, `elf29`, `elf30`, `elf31`, `elf32`, `elf33`, `elf34`,
+                         `elf35`, `elf36`, `elf37`, `elf38`, `elf39`"),
+  scale_range = c("39-159"), #TODO fill in range
+  alpha = c(round(eds_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+eds_scale_df <- gt(eds_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>%
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)",
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>%
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>%
+  cols_width(scale ~ px(135)) %>%
+  apply_tbl_theme()
+
+# Print the table
+print(eds_scale_df)
+
+#socinf_sub  ####################################
+socinf_sub_miss <- socinf_sub %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 49
+  )
+
+socinf_sub_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'socinf_sub Missing Data',
+    subtitle = 'By Participant')
+#socinf_gen
+socinf_gen_miss <- socinf_gen %>%
+  mutate(across(-c(id), as.numeric))%>%
+  pct_miss_fun(
+    id = c("id"),
+    n_items = 17
+  )
+
+
+socinf_gen_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'SOCINF General Missing Data',
+    subtitle = 'By Participant')
+
+
