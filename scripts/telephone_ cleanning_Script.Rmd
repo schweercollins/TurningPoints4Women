@@ -1592,7 +1592,7 @@ elf <-
 elf <- elf %>%
   # partially finished TC who did not complete this questionnaire
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
-  mutate_at(vars(elf23), ~case_when(elf20 < 1 & elf21 < 1 & elf22 < 1 ~ "-55", TRUE ~.))
+  mutate_at(vars(elf23), ~case_when(elf20 < 1 | elf21 < 1 | elf22 < 1 ~ "-55", TRUE ~.))
   
 elf_miss <- elf %>%
     mutate(across(-id, as.numeric)) %>%
