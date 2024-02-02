@@ -2167,6 +2167,8 @@ Reference:
 [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug);
 [DOI](https://doi.org/10.1207/s15374424jccp3402_9)
 
+<Maria> please add note for scoring reference and note that we are only presenting the items and cite the scoring info (not calculated items). 
+
 ### BCAP Variables
 
 #### Value Labels
@@ -4187,7 +4189,7 @@ ell_count_calc <-
 
 ```{r ell alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-#TODO: Shaina: JP doesn't include alpha in his script. Please review and delet if not needed
+#TODO: Shaina: JP doesn't include alpha in his script. Please review and delete if not needed
 
 
 ```
@@ -7268,7 +7270,8 @@ Leading question: Thinking about your partner, how often is it true that they:
 # Pull question wording from Qualtrics data
 pcl_word <- qualtrics %>% 
   select(starts_with("pcl")) %>%
-  slice(1)
+  slice(1) 
+
 
 #create table with variable name, description, and notes
 pcl_word_long <- pcl_word %>% 
