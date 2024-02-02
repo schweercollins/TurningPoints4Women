@@ -422,39 +422,43 @@ dast <-
 ```
 
 ### DAST Missing Data 
-There are missing data in DAST and missing rule applied.All but one instance of missing data is due to the skip logic; even still, those participants cannot get scored on the DAST 
+There are missing data in DAST and missing rule applied. All but one instance of missing data is due to the skip logic; even still, those participants cannot get scored on the DAST 
 ```{r dast_missing }
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for skip logic (conditional question)
-# if dast_screen is No-1, rest column should be NA(-55)
+# if dast_screen is Yes-1, rest column should be NA(-55)
 # if D1A is No-0, or Decline to Answer(-77), d2a should be NA(-55)
 # if 2b is No-0 or Decline to Answer (-77), rest column should be NA(-55)
 
 
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 dast <- dast %>% 
-  # participants who were incarcerated at the time of survey completion were not adminstered this survey
+  # participants who were incarcerated at the time of survey completion were not administered this survey
   mutate_at(vars(dast_screen:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) %>%
   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
   mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if d1a != 1, d2a should be NA(-55)
+  mutate_at(vars(d2a), ~case_when(d1a != 1 ~ "-55", TRUE ~ . )) %>%
   # Skip rule: if d2b == 0 or -77, rest question were skipped 
-  mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == "-77" ~ "-55", TRUE ~ . )) 
+  mutate_at(vars(d3:d20,d4_r, d5_r), ~case_when(d2b == 0 | d2b == "-77" ~ "-55", TRUE ~ . )) %>%
+  # skip rule: if d2a is 1,0,-77, D2b should be spiked 
+  mutate_at(vars(d2b), ~case_when(d2a == 0 | d2a == 1 |d2a == "-77" ~ "-55", TRUE ~ . )) 
 
 # Combine d2a and d2b answer options to d2
-dast$d2 <- apply(dast[, c("d2a", "d2b")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
+dast$d2 <- apply(dast[, c("d2a", "d2b")], 1, function(x) {
+  if(all(x == -55)) {
+    result <- -55
+  } else {
+    filtered_values <- x[x != -55 & !is.na(x)]
+    result <- paste(filtered_values, collapse = ";")
+  }
+  result
+})
 
 # Organize column order 
 dast <- dast %>%
   relocate(d2, .after = d1a) %>%
-  select(-c(d2a, d2b)) %>%
-  mutate(
-    across(
-      .cols = d2,
-      .fns = ~case_when(
-        .x == "-55;-55" ~ "-55",
-        TRUE ~ .x
-      )
-    )
-  ) 
+  select(-c(d2a, d2b)) 
+
 
 dast %>%
     mutate(across(-id, as.numeric)) %>%
@@ -463,7 +467,7 @@ dast %>%
          -d5) %>%
   pct_miss_fun(
     id = 'id',
-    n_items = 20
+    n_items = 22
   ) %>% 
   gt::gt() %>% 
   gt::tab_header(
@@ -484,14 +488,14 @@ dast_calc <-
          -d5) %>%
   pct_miss_fun(
     id = 'id',
-    n_items = 21
+    n_items = 22
   ) %>%
   full_join(dast, by = 'id') %>% 
   mutate(across(-id, as.numeric)) %>%
-    # filter(
-    # is.na(miss_pct) |
-    #   miss_pct < 20
-    #      ) %>%
+    filter(
+    is.na(miss_pct) |
+      miss_pct < 20
+         ) %>%
   mutate(
     across(
       .cols = -id,
@@ -503,7 +507,6 @@ dast_calc <-
   )
 
 ### DAST Composite & Subscale Score Creation 
-
 dast_complete <-
   dast_calc %>%
   select(-missing_n,
@@ -545,11 +548,12 @@ dast_complete <- dast_complete %>%
 ## Adding in missing values and rename prefix
 dast_complete <- dast_complete %>%
   select(id, dast_total, dast_total_r) %>%
-  merge(dast, by = "id") %>%
+  merge(dast, by = "id", all.y = TRUE) %>%
   relocate(dast_total, dast_total_r, .after = "d5_r") %>%
   relocate(d4_r, .after = "d4") %>%
   relocate(d5_r, .after = "d5") %>%
     # input missing values for the scored variables
+  #mutate_at(vars(dast_total), ~case_when(is.na(dast_total) ~ -99, TRUE ~.x)) %>%
   mutate_at(vars(dast_total, dast_total_r), ~case_when(
   dast_screen == 1 | dast_screen == -55 ~ "-99",
   TRUE ~ as.character(.)
@@ -833,106 +837,19 @@ bcap <-
   )
 ```
 
-### BCAP Missing Data 
-There are missing data in BCAP and missing rule not applied. 
-```{r bcap_missing}
-bcap %>%
-  select(-c(q1,q2,q23,q29)) %>%
-    mutate(across(-id, as.numeric)) %>%
-    pct_miss_fun(
-      id = 'id', 
-      n_items = 34 
-    ) %>%
-  gt::gt() %>% 
-  gt::tab_header(
-    title = 'BCAP Missing Data',
-    subtitle = 'By Participant'
-  )
-```
 
 ### BCAP Calculations & Subscale
 ```{r bcap_calculations}
-# Min can you save this in another internal file with the following note. I am going to archive these data without any subscales because we don't have the correct information for scoring. 
 
-## Need to update scoring to include only three subscales according to BCAP reference, these should be:
-
-#  The following items make up the BCAP random responding scale:  31, 53, and 61, with 31 being reverse-scored.  If any one of these items is endorsed, the protocol may be invalid.  
-
-# The following items make up the BCAP lie scale:  12, 44, 57, 66, 106, and 146.  If four or more are endorsed, the protocol may be invalid (although subsequent research with urban parents has suggested that the BCAP may discriminate between known high-risk and control parents better when the lie and random responding scales are not used). 
-
-# Main scale is The remaining items make up the BCAP risk scale, with items 14, 75, and 107—the three items all loading on the “happiness” factor—being reverse-scored (as per CAP instructions).  Thus, the BCAP risk scale score can range from 0 to 24.  In the development study cited above, a BCAP cutoff of 9 best predicted the risk distinction of the full CAP using the cutoff of 166, and a BCAP cutoff of 12 best predicted the CAP cutoff of 215.  
-bcap_calc <-
-  bcap %>%
-    pct_miss_fun(
-      id = 'id',
-      n_items = 34
-    ) %>%
-    full_join(bcap,
-              by = 'id') %>%
-    filter(
-      is.na(miss_pct) |
-        miss_pct < 20
-      ) %>%
-  mutate(
-    across(
-      .cols = c(-id, -miss_pct, -missing_n),
-      .fns = ~case_when(
-        .x == -77 ~ NA_real_,
-        .x == -55 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
-
-bcap_complete <-
-  bcap_calc %>%
-  select(
-    -missing_n,
-    -miss_pct
-         ) %>% 
-    # index_total_fun(
-    #   id = 'id'
-    # ) %>%
-  subscale_create(
-  total_only = TRUE,
-  scale1 = c('q1_r', 'q23_r', 'q29_r',
-             'q3', 'q25', 'q33',
-             'q5', 'q12', 'q22', 'q31',
-             'q6', 'q13', 'q17',
-             'q7', 'q14', 'q20', 'q32',
-             'q8', 'q11', 'q16', 'q19', 'q27',
-             'q10', 'q30'),
-  scale2 = c('q1_r', 'q23_r', 'q29_r'),
-  scale3 = c('q3', 'q25', 'q33'),
-  scale4 = c('q5', 'q12', 'q22', 'q31'),
-  scale5 = c('q6', 'q13', 'q17'),
-  scale6 = c('q7', 'q14', 'q20', 'q32'),
-  scale7 = c('q8', 'q11', 'q16', 'q19', 'q27'),
-  scale8 = c('q10', 'q30'),
-  scale9 = c('q4', 'q9', 'q15', 'q21', 'q26', 'q34'),
-  scale10 = c('q2_r', 'q18', 'q28')
-  ) %>% 
-    rename(
-    bcap_risk = total1,
-    bcap_happy = total2,
-    bcap_feel_pers = total3,
-    bcap_lonely = total4,
-    bcap_fam_conf = total5,
-    bcap_rigid = total6,
-    bcap_distress = total7,
-    bcap_poverty = total8,
-    bcap_lie = total9,
-    bcap_random = total10
-    ) 
-
+# Please refer to code book for cite the scoring info 
 
 ## merging for original missing data codes
 ## changing prefix for measure
 
-bcap_complete <- bcap_complete %>%
-  select(id, bcap_risk:bcap_random) %>%
-  full_join(bcap, by="id") %>%
-  relocate(bcap_risk:bcap_random, .after = "q29_r") %>%
+bcap_complete <- bcap %>%
+  # select(id, bcap_risk:bcap_random) %>%
+  # full_join(bcap, by="id") %>%
+  # relocate(bcap_risk:bcap_random, .after = "q29_r") %>%
     # change q prefix to bcap 
   rename(
     bcap1 = q1,
@@ -973,12 +890,7 @@ bcap_complete <- bcap_complete %>%
     bcap2_r = q2_r,
     bcap23_r = q23_r,
     bcap29_r = q29_r
-  ) %>%
-  # add in -99 for case in which subscales and scales not computed
-  mutate_at(vars(everything()), ~ ifelse(is.na(.), -99, .))
-
-
-
+  ) 
 ```
 
 ## DAS 
@@ -1379,6 +1291,7 @@ arq_complete <- arq_calc %>%
     arq_model_self_attach_anxiety = (rqa + rqd) - (rqc + rqb),
     arq_model_other_attach_avoid = (rqa + rqc) - (rqd + rqb)
   ) 
+
 ## there is a NA that needs resolving for #P885 (all 7s)
 # Pulling in missing data codes from two participants with missing data
 # renaming variables with arq prefix
@@ -1836,7 +1749,7 @@ for (i in 1:39) {
 # ELL Count Missing Data
 # most participants will respond to the first part of each item
 # don't respond to anything on the scale
-# TODO: Maria: we are only counting the ellx questions. (ellxa qusetions are not included.)
+# TODO: Maria: we are only counting the ellx questions for missing percentage. (ellxa qusetions are not included.)
 ## Min, I do want to retain the other questions, but we aren't using them for any ssubscale or total scale computation right now.
 ell_miss <- ell %>%
     mutate(across(-id, as.numeric)) %>%
@@ -2012,8 +1925,8 @@ mhc <-
 
 ### MHC-SF Missing Data
 There are missing data. The missing data rule applies for two participants for the swb subscale. 
-## MIN #TODO the missing data rule is > 33% for scales of 3-6 (scale 2)
 ```{r mhc-sf_missing}
+###### Missing percentage for total 
 mhc_miss <- mhc %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
@@ -2029,7 +1942,62 @@ mhc_miss %>%
   )
 
 
-mhc_remove <- mhc_miss %>% filter(miss_pct >= 14) %>% pull(id)
+mhc_remove <- mhc_miss %>% filter(miss_pct >= 20) %>% pull(id) # No one need to be removed 
+
+###### Missing percentage for mhc_pa
+mhc_pa_miss <- mhc %>%
+  select(id, "h1", "h2", "h3") %>%
+  mutate(across(-id, as.numeric)) %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 3
+  )
+
+mhc_pa_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'mhc_pa Missing Data',
+    subtitle = 'By Each Participant'
+  )
+ 
+mhc_pa_remove <- mhc_pa_miss %>% filter(miss_pct >= 33) %>% pull(id) # No one need to be removed 
+
+###### Missing percentage for mhc_swb
+mhc_swb_miss <- mhc %>%
+  select(id, "h4", "h5", "h6", "h7", "h8") %>%
+  mutate(across(-id, as.numeric)) %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 5
+  )
+
+mhc_swb_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'mhc_swb Missing Data',
+    subtitle = 'By Each Participant'
+  )
+ 
+mhc_swb_remove <- mhc_swb_miss %>% filter(miss_pct >= 33) %>% pull(id) # P845; P854
+
+###### Missing percentage for mhc_pwb
+mhc_pwb_miss <- mhc %>%
+  select(id, "h9", "h10", "h11", "h12", "h13", "h14") %>%
+  mutate(across(-id, as.numeric)) %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 5
+  )
+
+mhc_pwb_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'mhc_swb Missing Data',
+    subtitle = 'By Each Participant'
+  )
+ 
+mhc_pwb_remove <- mhc_pwb_miss %>% filter(miss_pct >= 33) %>% pull(id)  # No one need to be removed 
+
 ```
 
 ### MHC-SF Calculation & Subscale
@@ -2047,7 +2015,7 @@ mhc_calc <-
     )
   )
 
-## MIN we can drop averages -- we only need sum scores
+
 # can we just keep the final three columns for diagnosis -- those in character format?
 mhc_complete <-
   mhc_calc %>%
@@ -2062,7 +2030,7 @@ mhc_complete <-
     )
   ) %>%
   subscale_create(
-    total_only = FALSE,
+    total_only = TRUE,
     scale1 = c("h1", "h2", "h3"),
     scale1_nitems = 3,
     scale2 = c("h4", "h5", "h6", "h7", "h8"),
@@ -2072,100 +2040,39 @@ mhc_complete <-
   ) %>%
   rename(
     mhc_total = sum_values,
-    mhc_avg = mean_values,
+    #mhc_avg = mean_values,
     mhc_pa = total1,
-    mhc_pa_avg = avg1,
+    #mhc_pa_avg = avg1,
     mhc_swb = total2,
-    mhc_swb_avg = avg2,
+    #mhc_swb_avg = avg2,
     mhc_pwb = total3,
-    mhc_pwb_avg = avg3
+    #mhc_pwb_avg = avg3
   ) %>%
-  mutate(
-    across(
-      c(
-        mhc_total,
-        mhc_avg,
-        mhc_pa,
-        mhc_pa_avg,
-        mhc_swb,
-        mhc_swb_avg,
-        mhc_pwb,
-        mhc_pwb_avg
-      ),
-      ~case_when(
-       # MIN apply to only scale 2
-       id %in% mhc_remove ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
+  # apply missing rule for mhc_total 
+  mutate(across(c(mhc_total), ~case_when(id %in% mhc_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rule for mhc_pa 
+  mutate(across(c(mhc_pa), ~case_when(id %in% mhc_pa_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rule for mhc_swb
+  mutate(across(c(mhc_swb), ~case_when(id %in% mhc_swb_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rule for mhc_pwb
+  mutate(across(c(mhc_pwb), ~case_when(id %in% mhc_pwb_remove ~ -99, TRUE ~ .x))) %>%
+  select(-mean_values) %>%
+  select(id, mhc_total, mhc_pa, mhc_swb, mhc_pwb)
 
-# TODO: Maria, this changes some value to NA, pleae confirm this is how you want them to be 
-## MIN, is there a way to mutate and create new variables that are converted; I want to retain all originla values
-## MIN # TODO: I also want to have these have a prefix "mhc" instead of "h"
-## let's chat about this tomorrow; I think I want to remove all diagnoses from the codebook but let's retain this code elsewhere for our "internal purposes"
-## MARIA to do -- add note about diagnoses in codebook
-mhc_complete <- mhc_complete %>%
-  pivot_longer(
-    h4:h14,
-    names_to = "pre_flourish",
-    values_to = "flourish_feel"
-  ) %>%
-  mutate(
-    mhc_flourish = case_when(
-      flourish_feel %in% c(4, 5) ~ 1,
-      !flourish_feel %in% c(4, 5) ~ 0,
-      TRUE ~ 0
-    ),
-    mhc_languish = case_when(
-      flourish_feel %in% c(0, 1) ~ 1,
-      !flourish_feel %in% c(0, 1) ~ 0,
-      TRUE ~ 0
-    )
-  ) %>%
-  group_by(id) %>%
-  mutate(
-    mhc_six_or_over = sum(mhc_flourish, na.rm = TRUE),
-    mhc_neg_six_or_more = sum(mhc_languish, na.rm = TRUE)
-  ) %>%
-  ungroup() %>%
-  mutate(
-    mhc_flourish_diagnosis = case_when(
-      (h1 %in% c(4, 5) & mhc_six_or_over >= 6) |
-        (h2 %in% c(4, 5) & mhc_six_or_over >= 6) |
-        (h3 %in% c(4, 5) & mhc_six_or_over >= 6)
-      ~ "flourish",
-      TRUE ~ "not_flourish"
-    ),
-    mhc_languish_diagnosis = case_when(
-      (h1 %in% c(0, 1) & mhc_neg_six_or_more >= 6) |
-        (h2 %in% c(0, 1) & mhc_neg_six_or_more >= 6) |
-        (h3 %in% c(0, 1) & mhc_neg_six_or_more >= 6)
-      ~ "languish",
-      TRUE ~ "not_languish"
-    )
-  ) %>%
-  pivot_wider(
-    names_from = pre_flourish,
-    values_from = flourish_feel
-  ) %>%
-  distinct(
-    id,
-    .keep_all = TRUE
-  ) %>%
-  mutate(
-    mhc_final_diagnosis = case_when(
-      (mhc_flourish_diagnosis == "flourish" &
-         mhc_languish_diagnosis == "not_languish") ~ "flourish",
-      (mhc_flourish_diagnosis == "not_flourish" &
-         mhc_languish_diagnosis == "languish") ~ "languish",
-      (mhc_flourish_diagnosis == "not_flourish" &
-         mhc_languish_diagnosis == "not_languish") ~ "moderately mentally healthy"
-    )
-  ) %>%
-  relocate(h4:h14, .after = "h3") %>%
-  #update prefix h to mhc
+mhc_complete <- mhc %>%
+  merge(mhc_complete, by = "id") %>%
+    #update prefix h to mhc
   rename_with(~ paste0("mhc", as.numeric(substring(., 2))), starts_with("h"))
+
+
+
+
+## MIN, is there a way to mutate and create new variables that are converted; I want to retain all originla values
+### Maira I don't know what do you mean for comment above, but I think the mhc_complete is what you want for final achrive data 
+## MARIA to do -- add note about diagnoses in codebook
+
+
+  
 ```
 
 ## Flourishing Index (FI)
@@ -2217,11 +2124,14 @@ flo <- flo %>%
   # We don't know why these variable were missing for this TC
   mutate_at(vars(i8, i10, i12), ~case_when(id %in% c("P847") & is.na(.) ~ "-99", TRUE ~ .)) 
   
+
+# missing percentage for total score (total score should only contain 1-10)
 flo_miss <- flo %>%
-    mutate(across(-id, as.numeric)) %>%
+  select(id, i1:i10) %>%
+  mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = "id",
-    n_items = 12
+    n_items = 10
   )
 
 flo_miss %>%
@@ -2229,8 +2139,27 @@ flo_miss %>%
   gt::tab_header(title = 'Missing Data',
                  subtitle = 'By Each Participant')
 
-# set to 25% because this will effectively remove participant who is missing too much data for specific subscale
-flo_remove <- flo_miss %>% filter(miss_pct >= 25) %>% pull(id)
+
+flo_remove <- flo_miss %>% filter(miss_pct >= 20) %>% pull(id) # p847
+
+
+ 
+# missing percentage for "secure flourish": average of items i11 and i12
+secure_flourish_miss <- flo %>%
+  select(id, i11:i12) %>%
+  mutate(across(-id, as.numeric)) %>%
+  pct_miss_fun(
+    id = "id",
+    n_items = 2
+  )
+
+secure_flourish_miss %>%
+  gt::gt() %>%
+  gt::tab_header(title = 'Missing Data',
+                 subtitle = 'By Each Participant')
+
+# If they are missing one items then we are not calculate this subscale 
+secure_flourish_remove <- secure_flourish_miss %>% filter(miss_pct >= 50) %>% pull(id) # p847
 ```
 
 ### FI Calculation & Subscale 
@@ -2248,67 +2177,27 @@ flo_calc <-
     )
   )
 
-# ibq_complete <-
-#   ibq_calc %>%
-#   mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) %>%
-#    mutate(
-#     across(
-#       -c(id
-#       ),
-#      ~case_when(
-#        id %in% flo_remove ~ NA,
-#          TRUE ~ .x
-#        )
-#     )
-#   )
+
 
 # MIN we also need a "secure flourish" and averae of items i11 and i12
-# total score should only contain 1-10
 
-flo_complete <-
-  flo_calc %>%
-  composite_total_avg_fun(
-    id = 'id',
-    max_value = 10,
-    n_items = 10 # changed from 12 to 10
-  ) %>%
-  distinct(
-    across(
-      .cols = everything() # it should be across only i1:i10
-    )
-  ) %>%
-  select(
-    -sum_values
-  ) %>%
-  rename(flo_total = mean_values) %>% # Min I changed to average_values as it should be an average not sum Min's note mean_value solved. TODO: will need to checkin with Maria about the -99 below 
-  # replacing total score with -99 because due to 25% missing data this score isn't valid (follows missing data rule)
-  #mutate(flo_average = ifelse(id == "P847" & (flo_average == 78), -99, flo_average)) %>%
-  # changing prefix to align "i" to "flo"
-  rename(flo1 = i1,
-         flo2 = i2,
-         flo3 = i3,
-         flo4 = i4,
-         flo5 = i5,
-         flo6 = i6,
-         flo7 = i7,
-         flo8 = i8,
-         flo9 = i9,
-         flo10 = i10,
-         flo11 = i11,
-         flo12 = i12) %>%
-  # relocate id to front of dataframe
-  select(id, everything())
-
-flo_complete <- flo %>%
-  merge(flo_complete, by = "id") %>%
-  # Remove column that contains NA not actual NA code 
-  select(-matches("flo\\d")) %>%
+flo_complete <- flo_calc %>%
+  # total score should only contain 1-10
+  mutate(flo_total = rowSums(select(., i1:i10), na.rm = T)) %>%
+  # apply missing rule: replacing total score with -99 because due to 25% missing data this score isn't valid  
+  mutate_at(vars(flo_total), ~case_when(id %in% flo_remove ~ -99, TRUE ~ .x )) %>%
+  # "secure flourish": average of items i11 and i12
+  mutate(Secure_flourish = rowMeans(select(., i11:i12), na.rm = T)) %>%
+  mutate_at(vars(Secure_flourish), ~case_when(id %in% secure_flourish_remove ~ -99, TRUE ~ .x )) 
+  
+  
+flo_complete <- flo_complete %>%
+  select(id, flo_total, Secure_flourish) %>%
+  merge(flo, by = "id") %>%
+  relocate(flo_total, .after = "i12") %>%
+  relocate(Secure_flourish, .after = "flo_total") %>%
   # changing prefix to align "i" to "flo"
   rename_with(~str_replace(., "^i", "flo"), matches("^i\\d"))
-  
-  
-  
-
 ```
 
 ##ITQ
@@ -2469,8 +2358,9 @@ ibq <-
   mutate(across(ibq10_1:ibq10_9, as.numeric))%>%
   mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>% # ibq 10, how many specific systems they selected
 # Min, we may consider ibq = 1 they selected systems; 0 none selected and then create a new variable that shows the total number of systems selected
-  mutate(ibq10 = as.character(ibq10))%>% 
-  mutate_at(vars(ibq10), ~case_when(ibq10_77 <0  ~ ibq10_77, TRUE ~ . )) %>%
+  # mutate(ibq10 = as.character(ibq10))%>% 
+  mutate(ibq10_77 = as.numeric(ibq10_77))%>%
+  mutate_at(vars(ibq10), ~case_when(ibq10_77 < 0  ~ ibq10_77, TRUE ~ . )) %>%
   rename(ibq10_school = ibq10_1) %>%
   rename(ibq10_juvenile_justice = ibq10_2) %>%
   rename(ibq10_legal_system = ibq10_3) %>%
@@ -3898,23 +3788,61 @@ pct <- pct %>%
   select(-pct2e, -pct3e, -pct0) 
 
 
+#################################### Maria I think code in this section should be removed ###################################
+# pct_miss <- pct %>%
+#   #mutate(across(-c(id), as.numeric)) %>%
+#   pct_miss_fun(
+#     id = c("id"),
+#     n_items = 13
+#   )
+# 
+# pct_miss %>%
+#   gt::gt() %>%
+#   gt::tab_header(
+#     title = 'PCT Missing Data',
+#     subtitle = 'by Participant'
+#   )
+# # primarily missing due to not having prior pregnancy (p00a) or due to not having a traumatic childbirth (pct1)
+# pct_remove <- pct_miss %>% filter(miss_pct >= 20) %>% filter(id != "P836") %>% pull(id)
+# # above we retain P836 because they are only missing items from one subscale
 
-pct_miss <- pct %>%
+####################################  ending here ####################################################################
+
+# missing rule for pct_preg_total 
+pct_preg_total_miss <- pct %>%
+  select(id, pct2a:pct2d) %>%
   mutate(across(-c(id), as.numeric)) %>%
   pct_miss_fun(
     id = c("id"),
-    n_items = 10
+    n_items = 4
   )
 
-pct_miss %>%
+pct_preg_total_miss %>%
   gt::gt() %>%
   gt::tab_header(
-    title = 'PCT Missing Data',
+    title = 'pct_preg_total Missing Data',
     subtitle = 'by Participant'
   )
-# primarily missing due to not having prior pregnancy (p00a) or due to not having a traumatic childbirth (pct1)
-pct_remove <- pct_miss %>% filter(miss_pct >= 20) %>% filter(id != "P836") %>% pull(id)
-# above we retain P836 because they are only missing items from one subscale
+
+pct_preg_total_remove <- pct_preg_total_miss %>% filter(miss_pct >= 33) %>% pull(id)
+
+# missing rule for pct_childbirth_total
+pct_childbirth_total_miss <- pct %>%
+  select(id, pct3a:pct3d) %>%
+  mutate(across(-c(id), as.numeric)) %>%
+  pct_miss_fun(
+    id = c("id"),
+    n_items = 4
+  )
+
+pct_childbirth_total_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'pct_childbirth_total Missing Data',
+    subtitle = 'by Participant'
+  )
+
+pct_childbirth_total_remove <- pct_childbirth_total_miss %>% filter(miss_pct >= 33) %>% pull(id)
 ```
 
 PCT Calculation & Subscale 
@@ -3934,32 +3862,18 @@ pct_calc <-
   )
 
 # pct Composite & Subscale Score Creation 
-
 pct_complete <- pct_calc %>%
   mutate(
     pct_preg_total = rowSums(select(., pct2a:pct2d), na.rm = TRUE),
     pct_childbirth_total = rowSums(select(., pct3a:pct3d), na.rm = TRUE)
   ) %>%
+  # Apply missing rule for pct_preg_total 
+  mutate_at(vars(pct_preg_total), ~case_when(id %in% pct_preg_total_remove ~ -99, TRUE ~ .)) %>%
+  # Apply missing rule for pct_childbirth_total 
+  mutate_at(vars(pct_childbirth_total), ~case_when(id %in% pct_childbirth_total_remove ~ -99, TRUE ~ .)) %>%
   # we can merge with pct so we have correct missing codes 
   select(id,pct_preg_total, pct_childbirth_total) %>%
-  merge(pct, by = "id") 
-
-  
-# Maria, if merge code above works, we don't need this code in comment 
-  # # making those with missing data have appropriate missing data codes
-  # mutate(
-  #   pct_preg_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_preg_total), "-99", as.character(pct_preg_total))),
-  # pct_childbirth_total = ifelse(p00a == 0, "-99", ifelse(is.na(pct_childbirth_total), "-99", as.character(pct_childbirth_total)))
-  # ) %>%
-  # # Adding back in -55 and -77
-  # mutate_at(vars(pct1:pct3d), ~ifelse(p00a == 0, "-55", as.character(.))) %>%
-  # mutate_at(vars(pct2a:pct3d), ~ifelse(pct1 == 0, "-55", as.character(.))) %>%
-  # mutate(
-  #   pct3a = ifelse(id == "P836" & is.na(pct3a), -77, pct3a),
-  #   pct3b = ifelse(id == "P836" & is.na(pct3b), -77, pct3b),
-  #   pct3c = ifelse(id == "P836" & is.na(pct3c), -77, pct3c),
-  #   pct3d = ifelse(id == "P836" & is.na(pct3d), -77, pct3d))
-  
+  merge(pct, by = "id")
 
 ```
 
