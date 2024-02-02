@@ -1522,7 +1522,7 @@ ssq_complete <- ssq_complete %>%
 ### EDS-F Select Variables and Recode
 
 ```{r eds df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-# TODO: Min remove after maria confirm how to score
+
 # reverse scoring
 eds <-
   tpw_raw %>%
@@ -1532,29 +1532,11 @@ eds <-
       "^elf"
     )
   )
-# composite_total_avg_fun(
-#   id = c(
-#     'id', "elf1_c", "elf2_c", "elf3_c", "elf7_c",
-#     "elf12_c", "elf13_c", "elf15_c", "elf17_c", "elf18_c",
-#     "elf19_c", "elf23_c", "elf26_c", "elf28_c", "elf30_c",
-#     "elf34_c", "elf35_c", "elf36_c", "elf37_c"
-#   ),
-#   max_value = 4,
-#   n_items = 21
-# ) %>%
-# distinct(
-#   across(
-#     .cols = everything()
-#   )
-# ) %>%
-# rename(
-#   elf_total = sum_values,
-#   elf_avg = mean_values)
+
 
 ```
 
 ```{r}
-# TODO: Maria, the scoring doc on dropbox have different scoring system
 elf <-
   tpw_raw %>%
   select(
@@ -1593,89 +1575,11 @@ elf <- elf %>%
   # partially finished TC who did not complete this questionnaire
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
   mutate_at(vars(elf23), ~case_when(elf20 < 1 | elf21 < 1 | elf22 < 1 ~ "-55", TRUE ~.))
-  
-elf_miss <- elf %>%
-    mutate(across(-id, as.numeric)) %>%
-  pct_miss_fun(
-    id = "id",
-    n_items = 39
-  )
 
-elf_miss %>%
-  gt::gt() %>%
-  gt::tab_header(
-    title = "EDS Missing Data",
-    subtitle = "By Participant"
-  )
-
-elf_remove <- elf_miss %>% filter(miss_pct >= 20) %>% pull(id)
+elf_complete <- elf
 ```
 
 
-### EDS-F Calculation & Subscale
-```{r eds-f_calculation}
-
-## Min can you remove any computation of scales for the EDS-F measure?
-## Please save this in a separate file for our internal work
-## there should be no distributions in the codebook then; no alpha either; you can remove these notes once you clean it up
-elf_calc <-
-  elf %>%
-  mutate(
-    across(
-      .cols = -c(
-        id
-      ),
-      .fns = ~case_when(
-        .x < 0 ~ NA,
-        TRUE ~ .x
-      )
-    )
-  ) %>%
-  mutate(across(-id, as.numeric))
-  
-elf_complete <-
-  elf_calc %>%
-  composite_total_avg_fun(
-    id = c('id', "elf1", "elf2", "elf3", "elf7",
-      "elf12", "elf13", "elf15", "elf17", "elf18",
-      "elf19", "elf23", "elf26", "elf28", "elf30",
-      "elf34", "elf35", "elf36", "elf37"), 
-    max_value = 4,
-    n_items = 21
-  ) %>%
-  distinct(
-    across(
-      .cols = everything()
-    )
-  ) %>%
-  rename(
-    elf_total = sum_values,
-    elf_avg = mean_values #TODO: Maria do we need average for this measure 
-  ) %>%
-  mutate(
-    mutate(
-      across(
-        -c(id
-        ),
-        ~case_when(
-          id %in% elf_remove ~ NA_real_,
-          TRUE ~ .x
-        )
-      )
-    )
-  ) %>%
-  relocate(elf1:elf3, .before = "elf4") %>%
-  relocate(elf7, .before = "elf8") %>%
-  relocate(elf12:elf13, .before = "elf14") %>%
-  relocate(elf15, .before = "elf16") %>%
-  relocate(elf17:elf19, .before = "elf20") %>%
-  relocate(elf23, .before = "elf24") %>%
-  relocate(elf26, .before = "elf27") %>%
-  relocate(elf28, .before = "elf29") %>%
-  relocate(elf30, .before = "elf31") %>%
-  relocate(elf34:elf37, .before = "elf38")
-
-```
 
 ## ELL (Self-Report)
 ### ELL Select Variables and Recode
@@ -3489,18 +3393,6 @@ socinf_sub <- socinf_sub%>%
   # Incarcerated participants weren't administered for this survey
   mutate_at(vars(socinf_preg_screener:socd4k), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) # they will therefore not have screener questions asked
 
-socinf_sub_miss <- socinf_sub %>%
-  pct_miss_fun(
-    id = "id",
-    n_items = 49
-  )
-
-socinf_sub_miss %>% 
-  gt::gt() %>% 
-  gt::tab_header(
-    title = 'socinf_sub Missing Data',
-    subtitle = 'By Participant')
-
 
 ```
 
@@ -3508,7 +3400,6 @@ socinf_sub_miss %>%
 ```{r socinf_sub_calc}
 # No calculations are needed 
 # We do not apply missing data procedures
-
 socinf_sub_complete <- socinf_sub %>%
   mutate(across(-id, as.numeric)) 
 ```
@@ -3560,20 +3451,6 @@ socinf_gen <- socinf_gen%>%
   # Incarcerated participants weren't administered for this survey
   mutate_at(vars(sg1:sg13d, socinf_general_screener), ~case_when(id %in% c("HR211", "HR181", "P819") ~ "-55", TRUE ~ .)) %>%
   mutate_at(vars(sg1:sg13d), ~case_when(is.na(.) ~ "-55", TRUE ~ .))
-
-socinf_gen_miss <- socinf_gen %>%
-  mutate(across(-c(id), as.numeric))%>%
-  pct_miss_fun(
-    id = c("id"),
-    n_items = 17
-  )
-
-
-socinf_gen_miss %>% 
-  gt::gt() %>% 
-  gt::tab_header(
-    title = 'SOCINF General Missing Data',
-    subtitle = 'By Participant')
 
 
 ```
