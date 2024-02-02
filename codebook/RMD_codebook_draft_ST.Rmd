@@ -5407,7 +5407,7 @@ cint_socio_tbl
 
 
 
-# CINT-LADDER
+# CINT-Subjective Socioeconomic Status
 <MARIA: you might want to switch this to full name to be consistent with other measure.> 
   
   
