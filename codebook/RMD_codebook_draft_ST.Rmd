@@ -4586,8 +4586,7 @@ The missing data rule was applied. Calculations were completed for
 participants with 33% or less missing data (this includes -77 responses)
 
 Reference:
-[@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/10.1111/acps.12956?casa_token=K4GIoIIYOkwAAAAA%3ABuaGU3cOQZwsFiM78FxHp_PHTQXDc72xABnVp8nlMCYRCHzf4c0oOMropyrzVjdClA3pFA-m01heootZ);
-[DOI](https://doi.org/10.1111/acps.12956)
+[@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/10.1111/acps.12956?casa_token=K4GIoIIYOkwAAAAA%3ABuaGU3cOQZwsFiM78FxHp_PHTQXDc72xABnVp8nlMCYRCHzf4c0oOMropyrzVjdClA3pFA-m01heootZ)
 
 ### ITQ Variables
 
@@ -5219,32 +5218,33 @@ cint_socio_tbl
 
 
 
-# CINT-Subjective Socioeconomic Status
+# CINT-Subjective Socioeconomic Status (CINT-SSES)
 <MARIA: you might want to switch this to full name to be consistent with other measure.> 
   
   
-### CINT-LADDER Description
+### CINT-SSES Description
   
-  <MARIA> please insert a breif description for this measure 
+To assess subjective socioeconomic status (SES), the MacArthur Scale of Subjective Social Status – Adult Version was administered in the CINT.
 
+-   There are two items. 
 
-* No items need to be reverse scored. 
+-   No items need to be reverse scored. 
 
-* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+-   This measure has two single items, thus the missing data rule was not applicable. One participant is missing data. No total scores or subscales were computed. 
 
+-   Participants rated themselves 1-10 using the image of a ladder shown below, with higher numbers indicating greater subjective socioeconomic status.
+
+<Min, can you insert the ladder image here> 
 
 
 Reference:
-  <Maria, please add a reference if needed> 
+[adler1994socioeconomic](https://psycnet.apa.org/fulltext/1994-29613-001.pdf)
   
-### CINT-LADDER Variables
+### CINT-SSES Variables
   
 #### Value Labels and Survey Items 
-  
-  All CINT-LADDER variables use 1-10 as respose from losest of the ladder to highest of the ladder. 
-  <Maria, you might want place a visual here> 
 
-CINT-LADDER survey items are presented in the following table:
+CINT-SSES survey items are presented in the following table:
 
   
 ```{r CINT-LADDER-var-prep}
@@ -5255,13 +5255,15 @@ cint_ladder_word <- qualtrics %>%
 
 #create table with variable name, description, and notes
 cint_ladder_word_long <- cint_ladder_word %>% 
+  rename(cint_sses1 = `CINT-Ladder1`) %>%
+  rename(cint_sses2 = `CINT-Ladder2`) %>%
   pivot_longer(cols = everything(), 
                names_to = "var_name",
-               values_to = "description") %>% 
+               values_to = "description") %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name)) %>%
   # Edits Variable description and value
-  mutate(description = if_else(var_name == "cint-ladder1", "L1. Think of this ladder as representing where people stand in the United States. 
+  mutate(description = if_else(var_name == "cint_sses1", "L1. Think of this ladder as representing where people stand in the United States. 
                                At the top of the ladder are the people who are the best off — those who have the most money, the most education, 
                                and the most respected jobs. At the bottom are the people who are the worst off – who have the least money, least 
                                education, and the least respected jobs or no job. The higher up you are on this ladder, the closer you are to the 
@@ -5269,7 +5271,7 @@ cint_ladder_word_long <- cint_ladder_word %>%
                                place yourself on the ladder? Please take a moment to pick a rung where you think you stand at this time in your life, 
                                relative to other people in the United States. \nNow count starting from the bottom of the ladder to the top. 
                                Which number of rung did you place yourself on?", description)) %>%
-  mutate(description = if_else(var_name == "cint-ladder2", "L2. Think of this ladder as representing where people stand in their communities. 
+  mutate(description = if_else(var_name == "cint_sses2", "L2. Think of this ladder as representing where people stand in their communities. 
                                People define community in different ways; please define it in whatever way is most meaningful to you. At the top 
                                of the ladder are the people who have the highest standing in their community. At the bottom are the people who 
                                have the lowest standing in their community. Where would you place yourself on this ladder. Please take a moment 
@@ -5290,7 +5292,7 @@ cint_ladder_gt_table <- cint_ladder_gt_table %>%
              #notes = "Notes"
   ) %>% 
   apply_tbl_theme() %>% 
-  cols_width(description ~ px(300),
+  cols_width(description ~ px(600),
              var_name ~ px(100)
   ) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
@@ -5303,8 +5305,6 @@ print(cint_ladder_gt_table)
 ### Summary Statistics
 
 #### Descriptive Statistics
-
-Only missing percentages of variables are presented. 
 
 ```{r cint_ladder-missing}
 # Create subset of items
@@ -5337,8 +5337,7 @@ cint_ladder_tbl <- cint_ladder_summary_data %>%
   cols_label(`1` = "Variable",
              Missing = "% Missing") %>% 
   # cols_width(everything() ~ pct(100)) %>%
-  cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
+  cols_align(columns = c("Missing"), align = "left")  
   tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 

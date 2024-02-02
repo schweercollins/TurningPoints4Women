@@ -1617,7 +1617,6 @@ ell <-
   mutate(across(-id, as.numeric))
 
 
-
 ```
 
 ### ELL Missing Data 
