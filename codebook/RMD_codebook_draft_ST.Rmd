@@ -5223,9 +5223,9 @@ ibq_complete %>%
 
 CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. 
 
-# CINT-SOCIODEM (CINT-SOCIO)
+# CINT-Sociodemographics (CINT-SOCIO)
 
-### CINT-SOCIODEMS Description
+### CINT-SOCIO Description
 
 
 -   Numbering retains the original numbers as the data were collected. Although the numbers are slightly out of order and appear to be missing items, this is by design as other CINT items are documented in other CINT sections or are variables that were for skip rules or screening only. 
@@ -5236,25 +5236,28 @@ CINT is our study name for 'Child Interview' and refers to an assessor administe
 
 
 Reference:
-Unpublished Oregon Social Learning Center (OSLC) Instrument
+Oregon Social Learning Center (OSLC) Instrument [Unpublished]
 
-### CINT-SOCIODEMS Variables
+### CINT-SOCIO Variables
 
 #### Value Labels and Survey Items 
 
-All CINT-SOCIODEMS variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+All CINT-SOCIO variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
 
-CINT-SOCIODEMS survey items are presented in the following table:
+CINT-SOCIO survey items are presented in the following table:
 
 
 ```{r CINT-SOCIODEMS-var-prep}
 # Pull question wording from Qualtrics data
 cint_sociodems_word <- qualtrics %>% 
-  select(`CINTPregnancy Screen`: `CINT Income Support`, CINTIdentity, CINTIdentity_8_TEXT) %>%
-  # Maria, we might want to add comment here to explain these two options 
+  select(`CINT-0`: `CINT Income Support`, CINTIdentity, CINTIdentity_8_TEXT) %>%
+  # When participants seleced option 1 in CINT1, they were permitted to select a second option. We divided these into two variables below 
   mutate(cint1_choice1 = CINT1) %>%
   rename(cint1_choice2 = CINT1) %>%
+  rename(cint_income_support = `CINT Income Support`) %>%
+  rename(cint_income = `CINT-Income`)  %>%
   relocate(cint1_choice1, .after = `CINT-0`) %>%
+  rename(cint_0 = `CINT-0`)  %>%
   slice(1)
 
 #create table with variable name, description, and notes
@@ -5314,16 +5317,22 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
                                             \n -77 = Decline to Answer")
          ) %>% 
 # Edits Variable description and value
-  mutate(description = if_else(var_name == "cint-0", "I have some questions about your school and work experiences. What is the highest level of education you have completed?", description)) %>%
+  mutate(description = if_else(var_name == "cint_0", "I have some questions about your school and work experiences. What is the highest level of education you have completed?", description)) %>%
   mutate(description = if_else(var_name == "cint1_choice1", "What is your current employment status? (Indicate all that apply)", description)) %>%
   mutate(description = if_else(var_name == "cint1_choice2", "What is your current employment status? (if option 1 was selected in cint1_choice1 than the participant can select another option)", description)) %>%
+  mutate(description = if_else(var_name == "cint3", "Is this due to COVID-19 (if participant select 'temporarily laid off' in CINT1)", description)) %>%
+  mutate(description = if_else(var_name == "cint4", "Is this due to COVID-19 (if participant select 'on leave' in CINT1)", description)) %>%
+  mutate(description = if_else(var_name == "cint5", "Is this due to COVID-19 (if participant select 'unemployed or looking for work' in CINT1)", description)) %>%
+  mutate(description = if_else(var_name == "cint1_8_text", "If 'something else, please briefly describe' was selected in cint1", description)) %>%
+  mutate(description = if_else(var_name == "cintidentity", "What is your gender identity?", description)) %>%
+  mutate(description = if_else(var_name == "cintidentity_8_text", "What is your gender identity? - Prefer to self-identify selected", description)) %>%
   mutate(description = if_else(var_name == "cint18", "During the past 6 months, how often have you had enough money to pay your bills/make your payments?", description)) %>%
-  mutate(description = if_else(var_name == "cint-income", "What is your annual (gross) household income?", description)) %>%
-  mutate(description = if_else(var_name == "cint income support", "How many people does that income support?", description)) %>%
+  mutate(description = if_else(var_name == "cint_income", "What is your annual (gross) household income?", description)) %>%
+  mutate(description = if_else(var_name == "cint_income_support", "How many people does that income support?", description)) %>%
   mutate(description = if_else(var_name == "cintpregnancy screen", "Has TC reported that she is currently pregnant?", description)) %>%
   mutate(value = if_else(var_name == "cint1_8_text", "Open Text Entry", value)) %>%
-  mutate(value = if_else(var_name == "cint-income", "Open Text Entry", value)) %>%
-  mutate(value = if_else(var_name == "cint income support", "Open Text Entry", value)) %>%
+  mutate(value = if_else(var_name == "cint_income", "Open Text Entry", value)) %>%
+  mutate(value = if_else(var_name == "cint_income_support", "Open Text Entry", value)) %>%
   mutate(value = if_else(var_name == "cintidentity_8_text", "Open Text Entry", value)) %>%
   rename(`Value` = value )
 ```
@@ -5351,7 +5360,7 @@ print(cint_sociodems_gt_table)
 
 #### Descriptive Statistics
 
-Only missing percentage are presented 
+Only missing percentages for each variable are presented. 
   
 ```{r cint_socio-missing}
 # Create subset of BSI items
@@ -5361,14 +5370,17 @@ cint_socio_data_subset <- complete %>%
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
 cint_socio_summary_data <- lapply(cint_socio_data_subset, function(x) {
-  x <- replace(x, x < -40, NA)
-  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  # sd_val <- round(sd(x, na.rm = TRUE), 2)
-  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-   miss_val <- round(mean(is.na(x)) * 100, 2)
-  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+#  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+#  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+#  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Missing = paste(miss_val, "%", sep = ""))
 })
+
 
 # Convert summary_data to a data frame
 cint_socio_summary_data <- as.data.frame(cint_socio_summary_data)
@@ -5384,8 +5396,7 @@ cint_socio_tbl <- cint_socio_summary_data %>%
   cols_label(`1` = "Variable",
              Missing = "% Missing") %>% 
   # cols_width(everything() ~ pct(100)) %>%
-  cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
+  cols_align(columns = c("Missing"), align = "left")  %>%
   tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 
@@ -5393,6 +5404,8 @@ cint_socio_tbl <- cint_socio_summary_data %>%
 cint_socio_tbl
 
 ```
+
+
 
 # CINT-LADDER
 <MARIA: you might want to switch this to full name to be consistent with other measure.> 
@@ -5482,7 +5495,7 @@ print(cint_ladder_gt_table)
 Only missing percentage are presented 
 
 ```{r cint_ladder-missing}
-# Create subset of BSI items
+# Create subset of items
 cint_ladder_data_subset <- complete %>%
   select(cint_pregnancy_screen:cint_income_support, cint_identity)
 
