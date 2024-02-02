@@ -2978,7 +2978,7 @@ cint_socio <- tpw_raw %>%
       cint18 == "3. About half the time" ~ "3",
       cint18 == "4. Occasionally" ~ "4",
       cint18 == "5. Never or almost never" ~ "5",
-      cint18 == "8. N/A, no bills to pay" ~ "6",
+      cint18 == "8. N/A, no bills to pay" ~ "-55",
       cint18 == "Decline to Answer" ~ "-77",
       TRUE ~ cint18
     ),
@@ -3048,8 +3048,7 @@ cint_socio <- cint_socio %>%
 
 
 cint_socio_complete <-
-  cint_socio %>%
-  select(-cint_identity_8_text) # no participant selected other not listed gender identity
+  cint_socio 
 
 
 ## we do not apply missing data rules because not a standardized questionnaire

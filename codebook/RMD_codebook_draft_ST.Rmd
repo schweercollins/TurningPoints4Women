@@ -248,7 +248,7 @@ apply_labtab_theme <- function(table) {
 
 <MARIA>INSERT BRIEF INFO ON STUDY, SAMPLE, AND AIMS
 
-*Additional info to possibly include: global missing data info, links to
+*Additional info to possibly include: links to
 supplemental materials, any disclaimers/info we think data users need to
 know to use these data accurately*
 
@@ -262,17 +262,60 @@ If you have questions about the data or study, please contact the Principal Inve
 
 ### Study Acronymns
 
--   **TP**: this acrononym is used to refer to the name of this study, the **T**urning **P**oints Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data, as we use this study name to refer to the entire longitudinal study.
+```{r abbreviation_table, results = 'asis'}
 
--   **TC**: In this study, we refer to original participants as **TCs**, which means 'Target Child.' This acronymn has been continued because the original participants were minors at the start of this longitudinal study. Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants, not from partners, caregivers, or offspring. 
+abbrev_table_df <- data.frame(
+  abbrev = c("TP", "TC", "NIJ", "CINT"),
+  descrip = c(
+    "This acronym is used to refer to the name of this study, the Turning Points Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data, as we use this study name to refer to the entire longitudinal study.",
+    "In this study, we refer to original participants as TCs, which means 'Target Child.' This acronym has been continued because the original participants were minors at the start of this longitudinal study. Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants, not from partners, caregivers, or offspring.",
+    "NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.",
+    "CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. "
+  ),
+  stringsAsFactors = FALSE
+)
 
--   **NIJ**: NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.
+#create table
+# Min, figure out how to make the abbreviation column less wide
+abbrev_table <- abbrev_table_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(
+    everything() ~ pct(100)
+  ) %>%
+  tab_style(style = cell_text(align = "left"),locations = cells_body(columns = vars("descrip"))) %>%
+ # cols_align(align = "left") %>%
+  cols_label(abbrev = "Abbreviation",
+            descrip = "Full Name and Explanation") %>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(abbrev_table)
+
+```
 
 
 ### Introduction to Codebook Structure
 
 This document provides a summary of each measure assessed in the Turning Points for Women Study. Most of the measures described here have actual or potential computed scale scores. Some measures, however, are simply collections of individual items (e.g., demographic variables). We have tried to use the official name of each measure as the heading for each section; many measures, however, do not have official names and therefore the chosen name is arbitrary. If you cannot find a study measure in the table of contents, you may want to search for a keyword in this document.
 
+For each measure, this document typically contains the following descriptive information:
+
+-   A brief description of what the instrument measures  
+
+-   Pertinent references  
+
+-   All measures were collected from the original study participant unless otherwise indicated  
+
+-   Variable name, variable description, and notes about the variable, for example, if a variable should be reverse scored or if a variable was not adminstered to participants who were incarcerated at the time of the assessment   
+
+-   Description of how missing data is coded and handled in scale scores. Generally, this information is covered in the introductory materials as missing codes are consistent across *all* study variables, but if exceptions apply, they will be noted in the cleaning script and this codebook.  
+
+-   Formulas for creating scale scores and the resulting variables  
+
+-   Coefficient alphas of scales or subscale scores and notes about their distribution and valid ranges of the data  
 
 
 ### Missing Data
@@ -5174,25 +5217,24 @@ ibq_complete %>%
 
 ```
 
+# CINT Overview
 
-# CINT-SOCIODEMS 
-   <MARIA: you might want to switch this to full name to be consistent with other measure.> 
+CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. 
 
-## <Maria, I wasn't sure what's the full name is>  (CINT-SOCIODEMS)
+# CINT-SOCIODEM (CINT-SOCIO)
 
 ### CINT-SOCIODEMS Description
 
-<MARIA> please insert a breif description for this measure 
 
+-   Numbering retains the original numbers as the data were collected. Although the numbers are slightly out of order and appear to be missing items, this is by design as other CINT items are documented in other CINT sections or are variables that were for skip rules or screening only. 
 
-  * No items need to be reverse scored. 
+-   No items need to be reverse scored. 
 
-  * This is not a a standardized questionnaire, so missing data rule was not applied. And no sub scale was computed. 
-
+-   This is not a standardized questionnaire, so the missing data rule was not applied. No total or subscale scores were computed. 
 
 
 Reference:
- <Maria, please add a reference if needed> 
+Unpublished Oregon Social Learning Center (OSLC) Instrument
 
 ### CINT-SOCIODEMS Variables
 
@@ -5222,42 +5264,42 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
          description = str_replace(description, "READ:", ""),
          description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", ""),
          var_name = str_to_lower(var_name),
-         value = case_when(row_number() %in% c(1,6,7,8,9) ~ "1 = Yes, 
+         value = case_when(row_number() %in% c(1,6,7,8,9) ~ "1 = Yes 
                                              \n0 = No",
-                           row_number() %in% c(2) ~ "1 = 1. 8th grade or less or working towards GED
-                                            \n 2 = 2. Completed GED/Alternative H.S. diploma
-                                            \n 3 = 3. Completed some high school, but did not graduate
-                                            \n 4 = 4. Graduated high school
-                                            \n 5 = 5. Taking/have taken community college classes or working toward Associates Degree
-                                            \n 6 = 6. Completed/obtained an Associate's Degree
-                                            \n 7 = 7. Taking/have taken vocational classes or working toward Vocational Training
-                                            \n 8 = 8. Completed Vocational Training
-                                            \n 9 = 9. Taking/have taken 4 yr college classes or working toward 4 year college degree
-                                            \n 10 = 10. Completed 4 year college degree
-                                            \n 11 = 11. Taking/have taken graduate classes or working toward post-college degree
-                                            \n 12 = 12. Completed post-college degree
+                           row_number() %in% c(2) ~ "1 = 8th grade or less or working towards GED
+                                            \n 2 = Completed GED/Alternative H.S. diploma
+                                            \n 3 = Completed some high school, but did not graduate
+                                            \n 4 = Graduated high school
+                                            \n 5 = Taking/have taken community college classes or working toward Associates Degree
+                                            \n 6 = Completed/obtained an Associate's Degree
+                                            \n 7 = Taking/have taken vocational classes or working toward Vocational Training
+                                            \n 8 = Completed Vocational Training
+                                            \n 9 = Taking/have taken 4 yr college classes or working toward 4 year college degree
+                                            \n 10 = Completed 4 year college degree
+                                            \n 11 = Taking/have taken graduate classes or working toward post-college degree
+                                            \n 12 = Completed post-college degree
                                             \n -77 = Decline to Answer",
-                           row_number() %in% c(3,4) ~ "1 = 1. Currently Working
-                                            \n 2 = 2. Temporarily laid off
-                                            \n 3 = 3. On Leave
-                                            \n 4 = 4. Unemployed or looking for work
-                                            \n 5 = 5. Retired
-                                            \n 6 = 6. Disabled, permanently or temporarily
-                                            \n 7 = 7. Student
-                                            \n 8 = 8. Something else, please briefly describe
+                           row_number() %in% c(3,4) ~ "1 = Currently Working
+                                            \n 2 = Temporarily laid off
+                                            \n 3 = On Leave
+                                            \n 4 = Unemployed or looking for work
+                                            \n 5 = Retired
+                                            \n 6 = Disabled, permanently or temporarily
+                                            \n 7 = Student
+                                            \n 8 = Something else, please briefly describe
                                             \n -77 = Decline to Answer",
-                           row_number() %in% c(10) ~ "1 = 1. Always or almost always
-                                            \n 2 = 2. Often
-                                            \n 3 = 3. About half the time
-                                            \n 4 = 4. Occasionally
-                                            \n 5 = 5. Never or almost never
-                                            \n 6 = 8. N/A, no bills to pay
+                           row_number() %in% c(10) ~ "1 = Always or almost always
+                                            \n 2 = Often
+                                            \n 3 = About half the time
+                                            \n 4 = Occasionally
+                                            \n 5 = Never or almost never
+                                            \n -55 = N/A, no bills to pay
                                             \n -77 = Decline to Answer", 
-                           row_number() %in% c(11) ~ "1 = 1. Always or almost always
-                                            \n 2 = 2. Often
-                                            \n 3 = 3. About half the time
-                                            \n 4 = 4. Occasionally
-                                            \n 5 = 5. Never or almost never
+                           row_number() %in% c(11) ~ "1 = Always or almost always
+                                            \n 2 = Often
+                                            \n 3 = About half the time
+                                            \n 4 = Occasionally
+                                            \n 5 = Never or almost never
                                             \n -77 = Decline to Answer", 
                            row_number() %in% c(14) ~ "1 = Cisgender female or woman
                                             \n 2 = Cisgender male or man
@@ -5271,7 +5313,8 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
          ) %>% 
 # Edits Variable description and value
   mutate(description = if_else(var_name == "cint-0", "I have some questions about your school and work experiences. What is the highest level of education you have completed?", description)) %>%
-  mutate(description = if_else(var_name == "cint1", "What is your current employment status? (Indicate all that apply)", description)) %>%
+  mutate(description = if_else(var_name == "cint1_choice1", "What is your current employment status? (Indicate all that apply)", description)) %>%
+  mutate(description = if_else(var_name == "cint1_choice2", "What is your current employment status? (if option 1 was selected in cint1_choice1 than the participant can select another option)", description)) %>%
   mutate(description = if_else(var_name == "cint18", "During the past 6 months, how often have you had enough money to pay your bills/make your payments?", description)) %>%
   mutate(description = if_else(var_name == "cint-income", "What is your annual (gross) household income?", description)) %>%
   mutate(description = if_else(var_name == "cint income support", "How many people does that income support?", description)) %>%
