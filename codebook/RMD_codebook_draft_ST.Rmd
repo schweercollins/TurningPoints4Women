@@ -276,14 +276,12 @@ abbrev_table_df <- data.frame(
 )
 
 #create table
-# Min, figure out how to make the abbreviation column less wide
 abbrev_table <- abbrev_table_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(
-    everything() ~ pct(100)
-  ) %>%
+  cols_width(abbrev ~ px(100),
+             descrip ~ px(600)) %>%
   tab_style(style = cell_text(align = "left"),locations = cells_body(columns = vars("descrip"))) %>%
  # cols_align(align = "left") %>%
   cols_label(abbrev = "Abbreviation",
@@ -3492,6 +3490,7 @@ eds_word <- qualtrics %>%
   select(starts_with("elf")) %>% 
   slice(1)
 
+
 #create table with variable name, description, and notes
 eds_word_long <- eds_word %>% 
   pivot_longer(cols = everything(), 
@@ -3539,7 +3538,7 @@ Descriptive statistics are presented below for each item, total, and
 subscale score:
 
 ```{r eds-mean-items}
-eds <-
+eds_descrip <-
   complete %>%
   select(
     matches(
@@ -3548,11 +3547,15 @@ eds <-
   )
 
 # Calculate the summary statistics for each variable
-eds_summary_data <- lapply(eds, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+eds_summary_data <- lapply(eds_descrip, function(x) {
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -5015,7 +5018,7 @@ Only missing percentages for each variable are presented.
 ```{r cint_socio-missing}
 # Create subset of BSI items
 cint_socio_data_subset <- complete %>%
-  select(cint_pregnancy_screen:cint_income_support, cint_identity)
+  select(cint_0:cint_income_support, cint_identity)
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
@@ -5058,12 +5061,11 @@ cint_socio_tbl
 
 
 # CINT-Subjective Socioeconomic Status (CINT-SSES)
-<MARIA: you might want to switch this to full name to be consistent with other measure.> 
   
   
 ### CINT-SSES Description
   
-To assess subjective socioeconomic status (SES), the MacArthur Scale of Subjective Social Status – Adult Version was administered in the CINT.
+To assess subjective socioeconomic status (SES), the MacArthur Scale of Subjective Social Status – Adult Version was administered as part of the CINT.
 
 -   There are two items. 
 
@@ -5073,12 +5075,12 @@ To assess subjective socioeconomic status (SES), the MacArthur Scale of Subjecti
 
 -   Participants rated themselves 1-10 using the image of a ladder shown below, with higher numbers indicating greater subjective socioeconomic status.
 
-```{r ladder image, echo=FALSE, out.width = "10%", fig.align = "center"}
+```{r ladder image, echo=FALSE, out.width = "30%", fig.align = "center"}
 knitr::include_graphics("ladder_image.jpg")
 ```
 
 Reference:
-[adler1994socioeconomic](https://psycnet.apa.org/fulltext/1994-29613-001.pdf)
+[@adler1994socioeconomic](https://psycnet.apa.org/fulltext/1994-29613-001.pdf)
   
 ### CINT-SSES Variables
   
@@ -5149,18 +5151,22 @@ print(cint_ladder_gt_table)
 ```{r cint_ladder-missing}
 # Create subset of items
 cint_ladder_data_subset <- complete %>%
-  select(cint_pregnancy_screen:cint_income_support, cint_identity)
+  select(cint_ladder1, cint_ladder2) %>%
+  rename(cint_sses1 = cint_ladder1,
+         cint_sses2 = cint_ladder2)
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
 cint_ladder_summary_data <- lapply(cint_ladder_data_subset, function(x) {
-  x <- replace(x, x < -40, NA)
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-   miss_val <- round(mean(is.na(x)) * 100, 2)
-  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
-  c(Mean = mean_val, SD = sd_val, Missing = paste(miss_val, "%", sep = ""))
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
+  c(mean_val, sd_val, range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
 # Convert summary_data to a data frame
@@ -5174,10 +5180,14 @@ cint_ladder_summary_data <- rbind(names(cint_ladder_summary_data), cint_ladder_s
 # Create the gt table
 cint_ladder_tbl <- cint_ladder_summary_data %>%
   gt() %>%
-  cols_label(`1` = "Variable",
-             Missing = "% Missing") %>% 
+  cols_label(V1 = "Variable",
+             V2 = "Mean",
+             V3 = "SD",
+             V4 = "Range",
+             V5 = "% Missing") %>% 
   # cols_width(everything() ~ pct(100)) %>%
-  cols_align(columns = c("Missing"), align = "left") %>% 
+  cols_align(columns = c(V1:V5), align = "left") %>% 
+  tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 

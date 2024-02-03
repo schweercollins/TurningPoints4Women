@@ -1684,121 +1684,121 @@ ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 
 # '{.col}_c' delinquency behavior coded count (if delinquecy reported then coded as 1)
 # "{.col}_r" re-code with cap at 7
-ell <- ell %>%
-  # TODO: Maria, this section need special attention
-#  select(-ell23a) %>%
-  mutate(
-    # Create ell count columns 
-    across(
-      .cols = matches("\\d$"),
-      .fns = ~case_when(
-        .x == 0 ~ 0,
-        .x > 0 ~ 1, # everyone reported delinquency behavior coded as 1
-        TRUE ~ .x
-      ),
-      .names = '{.col}_c'
-      ),
-# TODO :Maria:JP also covert number larger than 4 to 4 in this code, but the SPSS Syntax cap at 7 which is what I used below. If this is correct, please delete this comment. 
-    across(
-      .cols = matches("\\d$"),   # TODO: Maria, JP used column end with a to create this recoded column, but based on spss I think it should be column without a, this is what I used for this code. Please confirm this is correct. 
-      .names = "{.col}_r"
-    ),
-    across(
-      c(
-        matches("_r$")
-      ),
-      ~case_when(
-        .x >= 7 ~ 7, # cap at 7
-        TRUE ~ .x
-      )
-    )
-  )
-
-
-ell_calc <-
-  ell %>%
-  mutate(
-    across(
-      .cols = -c(
-        id
-      ),
-      .fns = ~case_when(
-        .x < 0 ~ NA,
-        TRUE ~ .x
-      )
-    )
-  )
-
-ell_complete <- ell_calc %>%
-  # total score should only contain 1-10
-  mutate(ell_total = rowSums(select(., i1:i10), na.rm = T)) %>%
-  
-# TODO: Min, you can remove code pertaining the the physical aggression; you can also save the other code in our internal file with a note that the general delinquency needs to be z scored to deal with different reporting waves across the study (12 vs 6 month recall) before using in conjunction with other waves
-ell_complete <-
-  ell_calc %>%
-  subscale_create(
-    total_only = TRUE,
-    scale1 = c(
-      "ell4a", "ell5a", "ell6a", "ell8a", "ell9a",
-      "ell10a", "ell11a", "ell14a", "ell16a", "ell20a",
-      "ell21a", "ell22a", "ell24a", "ell25a", "ell27a", "ell29a",
-      "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
-    ),
-    scale2 = c(
-      "ell4_r", "ell5_r",
-       "ell6_r", "ell8_r", "ell9_r",
-       "ell10_r", "ell11_r", "ell14_r", "ell16_r", "ell20_r",
-       "ell21_r", "ell22_r", "ell24_r", "ell25_r", "ell27_r", "ell29_r",
-       "ell31_r", "ell32_r", "ell33_r", "ell38_r", "ell39_r"
-    )
-  ) %>%
-  rename(
-    ell_raw_total = total1,
-    ell_censor_total = total2
-  )
-
-
-ell_count_complete <-
-  ell_complete %>%
-  composite_total_avg_fun(
-    id = c(
-      'id', "ell1", "ell2", "ell3", "ell7",
-      "ell12", "ell13", "ell15", "ell17", "ell18",
-      "ell19", "ell23", "ell26", "ell28", "ell30",
-      "ell34", "ell35", "ell36", "ell37"
-    ),
-    max_value = 1,
-    n_items = 21
-  ) %>%
-  distinct(
-    across(
-      .cols = everything()
-    )
-  ) %>%
-  rename(
-    ell_count_total = sum_values,
-    ell_count_avg = mean_values
-  ) %>%
-  mutate(
-    across(
-      -c(id
-      ),
-      ~case_when(
-        id %in% ell_count_remove ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
-
-ell_count_complete <- ell_count_complete%>%
-  select(
-    order(names(.))
-  ) %>%
-  relocate(ell1a:ell2_r, .after = "ell1_r") %>%
-  relocate(ell3a:ell7_r, .after = "ell3_r") %>%
-  relocate(ell7a:ell9a, .after = "ell7_r") %>%
-  relocate(id, .before = "ell1") %>% 
-  relocate(ell_censor_total:ell_raw_total, .after = "ell39a")
+# ell <- ell %>%
+#   # TODO: Maria, this section need special attention
+# #  select(-ell23a) %>%
+#   mutate(
+#     # Create ell count columns 
+#     across(
+#       .cols = matches("\\d$"),
+#       .fns = ~case_when(
+#         .x == 0 ~ 0,
+#         .x > 0 ~ 1, # everyone reported delinquency behavior coded as 1
+#         TRUE ~ .x
+#       ),
+#       .names = '{.col}_c'
+#       ),
+# # TODO :Maria:JP also covert number larger than 4 to 4 in this code, but the SPSS Syntax cap at 7 which is what I used below. If this is correct, please delete this comment. 
+#     across(
+#       .cols = matches("\\d$"),   # TODO: Maria, JP used column end with a to create this recoded column, but based on spss I think it should be column without a, this is what I used for this code. Please confirm this is correct. 
+#       .names = "{.col}_r"
+#     ),
+#     across(
+#       c(
+#         matches("_r$")
+#       ),
+#       ~case_when(
+#         .x >= 7 ~ 7, # cap at 7
+#         TRUE ~ .x
+#       )
+#     )
+#   )
+# 
+# 
+# ell_calc <-
+#   ell %>%
+#   mutate(
+#     across(
+#       .cols = -c(
+#         id
+#       ),
+#       .fns = ~case_when(
+#         .x < 0 ~ NA,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
+# 
+# ell_complete <- ell_calc %>%
+#   # total score should only contain 1-10
+#   mutate(ell_total = rowSums(select(., i1:i10), na.rm = T)) %>%
+#   
+# # TODO: Min, you can remove code pertaining the the physical aggression; you can also save the other code in our internal file with a note that the general delinquency needs to be z scored to deal with different reporting waves across the study (12 vs 6 month recall) before using in conjunction with other waves
+# ell_complete <-
+#   ell_calc %>%
+#   subscale_create(
+#     total_only = TRUE,
+#     scale1 = c(
+#       "ell4a", "ell5a", "ell6a", "ell8a", "ell9a",
+#       "ell10a", "ell11a", "ell14a", "ell16a", "ell20a",
+#       "ell21a", "ell22a", "ell24a", "ell25a", "ell27a", "ell29a",
+#       "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
+#     ),
+#     scale2 = c(
+#       "ell4_r", "ell5_r",
+#        "ell6_r", "ell8_r", "ell9_r",
+#        "ell10_r", "ell11_r", "ell14_r", "ell16_r", "ell20_r",
+#        "ell21_r", "ell22_r", "ell24_r", "ell25_r", "ell27_r", "ell29_r",
+#        "ell31_r", "ell32_r", "ell33_r", "ell38_r", "ell39_r"
+#     )
+#   ) %>%
+#   rename(
+#     ell_raw_total = total1,
+#     ell_censor_total = total2
+#   )
+# 
+# 
+# ell_count_complete <-
+#   ell_complete %>%
+#   composite_total_avg_fun(
+#     id = c(
+#       'id', "ell1", "ell2", "ell3", "ell7",
+#       "ell12", "ell13", "ell15", "ell17", "ell18",
+#       "ell19", "ell23", "ell26", "ell28", "ell30",
+#       "ell34", "ell35", "ell36", "ell37"
+#     ),
+#     max_value = 1,
+#     n_items = 21
+#   ) %>%
+#   distinct(
+#     across(
+#       .cols = everything()
+#     )
+#   ) %>%
+#   rename(
+#     ell_count_total = sum_values,
+#     ell_count_avg = mean_values
+#   ) %>%
+#   mutate(
+#     across(
+#       -c(id
+#       ),
+#       ~case_when(
+#         id %in% ell_count_remove ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
+# 
+# ell_count_complete <- ell_count_complete%>%
+#   select(
+#     order(names(.))
+#   ) %>%
+#   relocate(ell1a:ell2_r, .after = "ell1_r") %>%
+#   relocate(ell3a:ell7_r, .after = "ell3_r") %>%
+#   relocate(ell7a:ell9a, .after = "ell7_r") %>%
+#   relocate(id, .before = "ell1") %>% 
+#   relocate(ell_censor_total:ell_raw_total, .after = "ell39a")
 ```
 
 ## MHC-SF
