@@ -1630,7 +1630,7 @@ ell <- ell %>%
   mutate(ell23 = case_when(ell20 <= 0 & ell21 <=0 & ell22 <=0 ~ -55, TRUE ~ ell23)) 
   
 
-  # if ellX is below 10, then ellXa should be -55 (will need remove ell23a, because we don't have that question)
+# if ellX is below 10, then ellXa should be -55 (will need remove ell23a, because we don't have that question)
 for (i in 1:39) {
     ell_col <- paste0("ell", i)
     ella_col <- paste0("ell", i, "a")
@@ -1658,8 +1658,8 @@ ell <- ell %>%
 ell_miss <- ell %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
-    id = c("id", matches("a$")),
-    n_items = 39
+    id = c("id", matches("a$"), ell23), # we are not counting ell23 when we are calculating total score 
+    n_items = 38
   )
 
 
@@ -1668,7 +1668,46 @@ ell_miss %>%
   gt::tab_header(title = 'Missing Data',
                  subtitle = 'By Each Participant')
 
-ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
+ell_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
+
+
+# missing for total index offenses
+# (9 items el 4 el 5; ell10 ; ell 16; ell 25; ell 29; ell 32; ell 38; ell 39)
+ell_total_index_offenses_miss <- ell %>%
+    mutate(across(-id, as.numeric)) %>%
+  select(id, ell4, ell5, ell10 , ell16, ell25, ell29, ell32, ell38, ell39) %>%
+  pct_miss_fun(
+    id = c("id"), 
+    n_items = 9
+  )
+
+
+ell_total_index_offenses_miss %>%
+  gt::gt() %>%
+  gt::tab_header(title = 'Missing Data',
+                 subtitle = 'By Each Participant')
+
+ell_total_index_offenses_remove <- ell_total_index_offenses_miss %>% filter(miss_pct >= 30) %>% pull(id)
+
+
+# missing for total index of minor offenses 
+# (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37) 
+ell_total_index_minor_offenses_miss <- ell %>%
+    mutate(across(-id, as.numeric)) %>%
+  select(id, ell1, ell2, ell3, ell6, ell7, ell8, ell9, ell11, ell12, ell13, ell14, ell15, ell17, ell18, ell19, ell20, ell21, ell22, ell24, ell26, ell27, ell28, ell30, ell31, ell33, ell34, ell35, ell36, ell37) %>%
+  pct_miss_fun(
+    id = c("id"), 
+    n_items = 29
+  )
+
+
+ell_total_index_minor_offenses_miss %>%
+  gt::gt() %>%
+  gt::tab_header(title = 'Missing Data',
+                 subtitle = 'By Each Participant')
+
+ell_total_index_minor_offenses_remove <- ell_total_index_minor_offenses_miss %>% filter(miss_pct >= 30) %>% pull(id)
+
 ```
 
 ### ELL Calculation & Subscale 
@@ -1682,41 +1721,10 @@ ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 # total index of minor offenses (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37)
 
 
-# '{.col}_c' delinquency behavior coded count (if delinquecy reported then coded as 1)
-# "{.col}_r" re-code with cap at 7
-ell <- ell %>%
-  # TODO: Maria, this section need special attention
-#  select(-ell23a) %>%
-  mutate(
-    # Create ell count columns
-    across(
-      .cols = matches("\\d$"),
-      .fns = ~case_when(
-        .x == 0 ~ 0,
-        .x > 0 ~ 1, # everyone reported delinquency behavior coded as 1
-        TRUE ~ .x
-      ),
-      .names = '{.col}_c'
-      ),
-# # TODO :Maria:JP also covert number larger than 4 to 4 in this code, but the SPSS Syntax cap at 7 which is what I used below. If this is correct, please delete this comment.
-#     across(
-#       .cols = matches("\\d$"),   # TODO: Maria, JP used column end with a to create this recoded column, but based on spss I think it should be column without a, this is what I used for this code. Please confirm this is correct.
-      .names = "{.col}_r"
-    ),
-    across(
-      c(
-        matches("_r$")
-      ),
-      ~case_when(
-        .x >= 7 ~ 7, # cap at 7
-        TRUE ~ .x
-      )
-    )
-  )
-
-
 ell_calc <-
   ell %>%
+  select(id, matches("\\d+$")) %>%
+  mutate(across(-id, as.numeric)) %>%
   mutate(
     across(
       .cols = -c(
@@ -1729,76 +1737,30 @@ ell_calc <-
     )
   )
 
+
+
+
 ell_complete <- ell_calc %>%
-  # total score should only contain 1-10
-  mutate(ell_total = rowSums(select(., i1:i10), na.rm = T)) #%>%
-#
-# # TODO: Min, you can remove code pertaining the the physical aggression; you can also save the other code in our internal file with a note that the general delinquency needs to be z scored to deal with different reporting waves across the study (12 vs 6 month recall) before using in conjunction with other waves
-# ell_complete <-
-#   ell_calc %>%
-#   subscale_create(
-#     total_only = TRUE,
-#     scale1 = c(
-#       "ell4a", "ell5a", "ell6a", "ell8a", "ell9a",
-#       "ell10a", "ell11a", "ell14a", "ell16a", "ell20a",
-#       "ell21a", "ell22a", "ell24a", "ell25a", "ell27a", "ell29a",
-#       "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
-#     ),
-#     scale2 = c(
-#       "ell4_r", "ell5_r",
-#        "ell6_r", "ell8_r", "ell9_r",
-#        "ell10_r", "ell11_r", "ell14_r", "ell16_r", "ell20_r",
-#        "ell21_r", "ell22_r", "ell24_r", "ell25_r", "ell27_r", "ell29_r",
-#        "ell31_r", "ell32_r", "ell33_r", "ell38_r", "ell39_r"
-#     )
-#   ) %>%
-#   rename(
-#     ell_raw_total = total1,
-#     ell_censor_total = total2
-#   )
-#
-#
-# ell_count_complete <-
-#   ell_complete %>%
-#   composite_total_avg_fun(
-#     id = c(
-#       'id', "ell1", "ell2", "ell3", "ell7",
-#       "ell12", "ell13", "ell15", "ell17", "ell18",
-#       "ell19", "ell23", "ell26", "ell28", "ell30",
-#       "ell34", "ell35", "ell36", "ell37"
-#     ),
-#     max_value = 1,
-#     n_items = 21
-#   ) %>%
-#   distinct(
-#     across(
-#       .cols = everything()
-#     )
-#   ) %>%
-#   rename(
-#     ell_count_total = sum_values,
-#     ell_count_avg = mean_values
-#   ) %>%
-#   mutate(
-#     across(
-#       -c(id
-#       ),
-#       ~case_when(
-#         id %in% ell_count_remove ~ NA_real_,
-#         TRUE ~ .x
-#       )
-#     )
-#   )
-#
-# ell_count_complete <- ell_count_complete%>%
-#   select(
-#     order(names(.))
-#   ) %>%
-#   relocate(ell1a:ell2_r, .after = "ell1_r") %>%
-#   relocate(ell3a:ell7_r, .after = "ell3_r") %>%
-#   relocate(ell7a:ell9a, .after = "ell7_r") %>%
-#   relocate(id, .before = "ell1") %>%
-#   relocate(ell_censor_total:ell_raw_total, .after = "ell39a")
+  # total score of all items (38 items in total but not #23)
+  mutate(ell_total = rowSums(select(., c(matches("\\d+$"), -ell23)), na.rm = T)) %>%
+  # apply missing rule to total score 
+  mutate_at(vars(ell_total), ~case_when(id %in% ell_remove ~ -99, TRUE ~ .x )) %>%
+  # total index offenses (9 items ell4 ell5; ell10 ; ell16; ell25; ell29; ell32; ell38; ell39)
+  mutate(ell_total_index_offenses = rowSums(select(., c(ell4, ell5, ell10 , ell16, ell25, ell29, ell32, ell38, ell39)), na.rm = T)) %>%
+  # apply missing rule to ell_total_index_offenses
+  mutate_at(vars(ell_total_index_offenses), ~case_when(id %in% ell_total_index_offenses_remove ~ -99, TRUE ~ .x )) %>%
+  # total index of minor offenses (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37) 
+  mutate(ell_total_index_minor_offenses = rowSums(select(., c(ell1, ell2, ell3, ell6, ell7, ell8, ell9, ell11, ell12, ell13, ell14, ell15, ell17, ell18, ell19, ell20, ell21, ell22, ell24, ell26, ell27, ell28, ell30, ell31, ell33, ell34, ell35, ell36, ell37)), na.rm = T)) %>%
+  # apply missing rule to ell_total_index_minor_offenses
+  mutate_at(vars(ell_total_index_minor_offenses), ~case_when(id %in% ell_total_index_minor_offenses_remove ~ -99, TRUE ~ .x )) 
+
+  
+ell_complete <- ell_complete%>%
+  select(id, ell_total, ell_total_index_offenses, ell_total_index_minor_offenses) %>%
+  merge (ell, by = "id", all.y = TRUE) %>%
+  relocate(id, .before = "ell1") %>% 
+  relocate(ell_total, ell_total_index_offenses,ell_total_index_minor_offenses, .after = "ell39a")
+
 ```
 
 ## MHC-SF
@@ -1978,8 +1940,6 @@ mhc_complete <- mhc %>%
 ## MIN, is there a way to mutate and create new variables that are converted; I want to retain all originla values
 ### Maira I don't know what do you mean for comment above, but I think the mhc_complete is what you want for final achrive data 
 ## MARIA to do -- add note about diagnoses in codebook
-
-
   
 ```
 
@@ -2172,7 +2132,6 @@ itq_calc <- itq %>%
   )
 
 # This code can be used to compute diagnoses based on participant endorsing at least one symptom in each cluster
-
 itq_calc <- itq_calc %>%
   mutate(
     itq_re_dx = case_when(
@@ -2229,6 +2188,11 @@ itq_complete <-
   #      )
   #   )
   # )
+
+itq_complete <- itq_complete %>%
+  select(id, itq_re_total, itq_av_total, itq_th_total) %>%
+  merge(itq, by="id", all.y = TRUE) %>%
+  relocate(itq_re_total, itq_av_total, itq_th_total, .after = "itq9")
 ```
 
 
@@ -3977,23 +3941,7 @@ sus <- sus %>%
   select(-c("sus14o1_1","sus14o1_2","sus14o1_3","sus14o1_77")) %>%
   select(-c("sus26b_1","sus26b_2","sus26b_3","sus26b_77"))
 
-# We decided to including all variable even they are empty for entire columns
-## Now we will drop columns that have no data (only -55)
-# Check if every value in each column is equal to -55 or -99 or -77 or some combo thereof
-# columns_to_drop <- names(sus)[sapply(sus, function(col) 
-#   all(col %in% c("-55", "-99", "-77")) || 
-#   all(col == "-55") || 
-#   all(col == "-99") || 
-#   all(col == "-77") || 
-#   (all(col %in% c("-55", "-99")) && any(col %in% "-77")) || 
-#   (all(col %in% c("-55", "-77")) && any(col %in% "-99")) || 
-#   (all(col %in% c("-99", "-77")) && any(col %in% "-55"))
-# )]
-# 
-# 
-# # Drop the columns where every value is -55 or -99 or -77 or combo
-# # this should drop 10 empty comlumns
-# sus <- sus[, !names(sus) %in% columns_to_drop]
+
 
 
 ## Note for Maria -- need to remove and recode 6a,6b, and 6c
@@ -4018,11 +3966,15 @@ sus <- sus %>%
 #P890 add count of 1 to sus 1
 
 
-## MIN we need to remove all 14 and associated variable from the archive file; we can create an internal archive file where we retain them, see notes in spreadsheet
 
-# Remove identifiable information columns 
+
+# Remove identifiable information columns: all 14 and associated variable
 sus_complete <- sus %>%
   select(-starts_with("sus14"))
+
+# Internal data 
+sus_internal <- sus %>% 
+  select(id, starts_with("sus14"))
 ```
 
 
@@ -5143,7 +5095,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(prss_complete, by = "id") %>%
   left_join(ssq_complete, by = "id") %>%
   left_join(elf_complete, by = "id") %>%
-  #left_join(ell_count_complete, by = "id") %>%
+  left_join(ell_complete, by = "id") %>%
   left_join(mhc_complete, by = "id") %>%
   left_join(flo_complete, by = "id") %>%
   left_join(itq_complete, by = "id") %>%
@@ -5159,43 +5111,19 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(pct_complete, by = "id") %>%
   left_join(sus_complete, by = "id") %>%
   left_join(sex_complete, by="id") %>%
- # left_join(pcl_complete, by = "id") %>%
+  left_join(pcl_complete, by = "id") %>%
   mutate_if(is.numeric, round, digits=2) %>%
   rename(family = id)
 
-# This will be removed after we finished merge 
-# Raw data with missing code are actual missing code (-99, -77 etc) instead of NA, this file doesn't include calculated items
-# tpw_archive <- tpw_archive_id %>%
-#   left_join(bsi, by = "id") %>%
-#   left_join(cesd, by = "id") %>%
-#   left_join(ciq, by = "id") %>%
-#   left_join(dast, by = "id") %>%
-#   left_join(cts, by = "id") %>%
-#   left_join(bcap, by = "id") %>%
-#   left_join(dyadc, by = "id") %>%
-#   left_join(arq, by = "id") %>%
-#   left_join(prss, by = "id") %>%
-#   left_join(ssq, by = "id") %>%
-#   left_join(elf, by = "id") %>%
-#   left_join(ell, by = "id") %>%
-#   left_join(mhc, by = "id") %>%
-#   left_join(flo, by = "id") %>%
-#   left_join(itq, by = "id") %>%
-#   left_join(ibq, by = "id") %>%
-#   left_join(cint_socio, by = "id") %>%
-#   left_join(cint_ladder, by = "id") %>%
-#   left_join(cint_relation, by = "id") %>%
-#   left_join(cint_substance, by = "id") %>%
-#   left_join(cint_covid, by="id") %>%
-#   left_join(socinf_sub, by = "id") %>%
-#   left_join(socinf_gen, by = "id") %>%
-#   left_join(cts_pc, by = "id") %>%
-#   left_join(sex, by="id") %>%
-#   mutate_if(is.numeric, round, digits=2) %>%
-#   rename(family = id)
+
+# internal data 
+tpw_internal <- tpw_archive_id %>% 
+  left_join(sus_internal, by = "id") %>%
+  left_join(pcl_internal_old_variable, by = "id") 
 ```
 
 ```{r output}
 # write.csv(tpw_archive, here("do_not_push", "tpw_archive.csv"))
 write.csv(tpw_archive_calc, here("do_not_push", "tpw_archive_calc.csv"))
+write.csv(tpw_internal, here("do_not_push", "tpw_internal.csv"))
 ```
