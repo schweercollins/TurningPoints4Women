@@ -1674,65 +1674,65 @@ ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 ### ELL Calculation & Subscale 
 
 ```{r ell_calculation}
-## Min for this variable I want us to save the censorsed data only for internal uses so you can pull that script. 
+## Min for this variable I want us to save the censorsed data only for internal uses so you can pull that script.
 ## next I want you to sum for the following items, removing item #23 from these scales
 # total score of all items (38 items in total but not #23)
-# Min, need to check if we need to apply missing data rule specifically for index offenses; if someone is missing more than 3 items specifically from index offenses we wouldn't compute 
+# Min, need to check if we need to apply missing data rule specifically for index offenses; if someone is missing more than 3 items specifically from index offenses we wouldn't compute
 # total index offenses (9 items el 4 el 5; ell10 ; ell 16; ell 25; ell 29; ell 32; ell 38; ell 39)
-# total index of minor offenses (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37) 
+# total index of minor offenses (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37)
 
 
 # '{.col}_c' delinquency behavior coded count (if delinquecy reported then coded as 1)
 # "{.col}_r" re-code with cap at 7
-# ell <- ell %>%
-#   # TODO: Maria, this section need special attention
-# #  select(-ell23a) %>%
-#   mutate(
-#     # Create ell count columns 
+ell <- ell %>%
+  # TODO: Maria, this section need special attention
+#  select(-ell23a) %>%
+  mutate(
+    # Create ell count columns
+    across(
+      .cols = matches("\\d$"),
+      .fns = ~case_when(
+        .x == 0 ~ 0,
+        .x > 0 ~ 1, # everyone reported delinquency behavior coded as 1
+        TRUE ~ .x
+      ),
+      .names = '{.col}_c'
+      ),
+# # TODO :Maria:JP also covert number larger than 4 to 4 in this code, but the SPSS Syntax cap at 7 which is what I used below. If this is correct, please delete this comment.
 #     across(
-#       .cols = matches("\\d$"),
-#       .fns = ~case_when(
-#         .x == 0 ~ 0,
-#         .x > 0 ~ 1, # everyone reported delinquency behavior coded as 1
-#         TRUE ~ .x
-#       ),
-#       .names = '{.col}_c'
-#       ),
-# # TODO :Maria:JP also covert number larger than 4 to 4 in this code, but the SPSS Syntax cap at 7 which is what I used below. If this is correct, please delete this comment. 
-#     across(
-#       .cols = matches("\\d$"),   # TODO: Maria, JP used column end with a to create this recoded column, but based on spss I think it should be column without a, this is what I used for this code. Please confirm this is correct. 
-#       .names = "{.col}_r"
-#     ),
-#     across(
-#       c(
-#         matches("_r$")
-#       ),
-#       ~case_when(
-#         .x >= 7 ~ 7, # cap at 7
-#         TRUE ~ .x
-#       )
-#     )
-#   )
-# 
-# 
-# ell_calc <-
-#   ell %>%
-#   mutate(
-#     across(
-#       .cols = -c(
-#         id
-#       ),
-#       .fns = ~case_when(
-#         .x < 0 ~ NA,
-#         TRUE ~ .x
-#       )
-#     )
-#   )
-# 
-# ell_complete <- ell_calc %>%
-#   # total score should only contain 1-10
-#   mutate(ell_total = rowSums(select(., i1:i10), na.rm = T)) %>%
-#   
+#       .cols = matches("\\d$"),   # TODO: Maria, JP used column end with a to create this recoded column, but based on spss I think it should be column without a, this is what I used for this code. Please confirm this is correct.
+      .names = "{.col}_r"
+    ),
+    across(
+      c(
+        matches("_r$")
+      ),
+      ~case_when(
+        .x >= 7 ~ 7, # cap at 7
+        TRUE ~ .x
+      )
+    )
+  )
+
+
+ell_calc <-
+  ell %>%
+  mutate(
+    across(
+      .cols = -c(
+        id
+      ),
+      .fns = ~case_when(
+        .x < 0 ~ NA,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ell_complete <- ell_calc %>%
+  # total score should only contain 1-10
+  mutate(ell_total = rowSums(select(., i1:i10), na.rm = T)) #%>%
+#
 # # TODO: Min, you can remove code pertaining the the physical aggression; you can also save the other code in our internal file with a note that the general delinquency needs to be z scored to deal with different reporting waves across the study (12 vs 6 month recall) before using in conjunction with other waves
 # ell_complete <-
 #   ell_calc %>%
@@ -1756,8 +1756,8 @@ ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 #     ell_raw_total = total1,
 #     ell_censor_total = total2
 #   )
-# 
-# 
+#
+#
 # ell_count_complete <-
 #   ell_complete %>%
 #   composite_total_avg_fun(
@@ -1789,7 +1789,7 @@ ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 #       )
 #     )
 #   )
-# 
+#
 # ell_count_complete <- ell_count_complete%>%
 #   select(
 #     order(names(.))
@@ -1797,7 +1797,7 @@ ell_count_remove <- ell_miss %>% filter(miss_pct >= 20) %>% pull(id)
 #   relocate(ell1a:ell2_r, .after = "ell1_r") %>%
 #   relocate(ell3a:ell7_r, .after = "ell3_r") %>%
 #   relocate(ell7a:ell9a, .after = "ell7_r") %>%
-#   relocate(id, .before = "ell1") %>% 
+#   relocate(id, .before = "ell1") %>%
 #   relocate(ell_censor_total:ell_raw_total, .after = "ell39a")
 ```
 
@@ -3006,8 +3006,8 @@ cint_relation <- tpw_raw %>%
 cint_relation <- cint_relation %>%
   # if cint20 <1 cintq2:cint35 was be asked 
    mutate_at(vars(cintq2:cint34), ~case_when(cint20 < 1 ~ "-55", TRUE ~ .)) %>%
-  # if cint35 is none/1 or -77 cint36:cint37 was be asked 
-   mutate_at(vars(cint36:cint37), ~case_when(cint35 == 1 |  cint35 == "-77" ~ "-55", TRUE ~ .)) %>% 
+  # if cint35 is none/0 or -77 cint36:cint37 was be asked 
+   mutate_at(vars(cint36:cint37), ~case_when(cint35 == 0 |  cint35 == "-77" ~ "-55", TRUE ~ .)) %>% 
    mutate_at(vars(cint30_7_text), ~case_when(cint30 != 7 ~ "-55", TRUE ~ .)) %>% 
    mutate_at(vars(cint31_7_text), ~case_when(cint31 != 7 ~ "-55", TRUE ~ .)) %>% 
    mutate_at(vars(cint32_7_text), ~case_when(cint32 != 6 ~ "-55", TRUE ~ .))
@@ -3016,34 +3016,7 @@ cint_relation <- cint_relation %>%
 cint_relation_complete <- cint_relation %>%
   mutate(across(-c(id, matches("text$")), as.numeric))
 
-## we do not apply missing data rules because not a standardized questionnaire
-# cint_relation_miss <- cint_relation %>%
-#   mutate(across(-c(id, matches("_7_text$")), as.numeric))%>%
-#   pct_miss_fun(
-#     id = c("id", matches("_7_text$")),
-#     n_items = 15
-#   )
-# 
-# cint_relation_miss%>% gt::gt() %>% 
-#   gt::tab_header(
-#     title = 'CINT- Ramantic and Friend Relationship Missing Data',
-#     subtitle = 'By Participant')
-# 
-# 
-# 
-# # Below is the code that treats -77, -55 values as NA
-# cint_relation_complete <-
-#   cint_relation %>%
-#   mutate(across(-c(id, matches("_7_text$")), as.numeric)) %>%
-#   mutate(
-#     across(
-#       .cols = -c(id, matches("_7_text$")),
-#       .fns = ~case_when(
-#         .x < 0 ~ NA_real_,
-#         TRUE ~ .x
-#       )
-#     )
-#   ) 
+
 ```
 
 ### CINT-Substance Use Select Variable & Recode
