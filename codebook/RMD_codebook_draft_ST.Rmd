@@ -4876,7 +4876,7 @@ ibq_complete %>%
 
 CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. 
 
-# CINT-Sociodemographics (CINT-SOCIO)
+## CINT-Sociodemographics (CINT-SOCIO)
 
 ### CINT-SOCIO Description
 
@@ -5060,7 +5060,7 @@ cint_socio_tbl
 
 
 
-# CINT-Subjective Socioeconomic Status (CINT-SSES)
+## CINT-Subjective Socioeconomic Status (CINT-SSES)
   
   
 ### CINT-SSES Description
@@ -5151,9 +5151,7 @@ print(cint_ladder_gt_table)
 ```{r cint_ladder-missing}
 # Create subset of items
 cint_ladder_data_subset <- complete %>%
-  select(cint_ladder1, cint_ladder2) %>%
-  rename(cint_sses1 = cint_ladder1,
-         cint_sses2 = cint_ladder2)
+  select(cint_sses1, cint_sses2) 
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
@@ -5196,7 +5194,7 @@ cint_ladder_tbl
 
 ```
 
-# CINT-Relationship (CINT-R)
+## CINT-Relationship (CINT-R)
 
   
 ### CINT-R Description
@@ -5392,8 +5390,8 @@ print(cint_relation_gt_table)
 
 Only missing percentages of variables are presented.
 
-```{r cint_relation-missing, fig.height = 5}
-# Create subset of BSI items
+```{r cint_relation-missing}
+# Create subset of items
 cint_relation_data_subset <- complete %>%
   select(cint20, cintq2, cintq3, cint26:cint37)
 
@@ -5427,31 +5425,38 @@ cint_relation_tbl <- cint_relation_summary_data %>%
   # cols_width(everything() ~ pct(100)) %>%
   cols_align(columns = c("Missing"), align = "left") %>%
   tab_options(table.border.bottom.style = "hidden") %>%
+  tab_footnote("") %>%
   apply_tbl_theme()
 
 # Render the table
 cint_relation_tbl
 
-
 ```
-<p>This is a line.</p>
-<p style="margin-bottom: 20px;">This is another line.</p>
 
-# CINT-Substances (CINT-Sub)
+
+## CINT-Substances (CINT-Sub)
 
 ### CINT-Sub Description
 
-This set of questions administered as part of the CINT focus on the participant's substance use.
+This set of questions administered as part of the CINT focus on the participant's substance use. All questions for substance use were drawn from an unpublished measure  but are aligned with typical retrospective reports of substance use similar to the widely used Timeline Follow-Back procedure (Sobell and Sobell, 1992).
 
--   There are XX items. 
+-   There are 49 items. 
 
 -   No items need to be reverse scored. 
 
 -   This measure is not a standardized questionnaire with scoring, thus the missing data rule was not applicable. No total scores or subscales were computed. 
+
+-   This survey was not administered for participants who were incarcerated at the time of the assessment. 
+
  
 
-Reference:
-Oregon Social Learning Center (OSLC) Instrument [Unpublished]
+References:  
+
+-   Oregon Social Learning Center (OSLC) Instrument [Unpublished]
+
+-   [@rhoades2014drug]( https://doi.org/10.1111/jora.12077)
+
+-   [@sobell1992timeline](https://link.springer.com/chapter/10.1007/978-1-4612-0357-5_3)
   
   
 ### CINT-Sub Variables
@@ -5464,10 +5469,10 @@ All CINT-Sub variables have multiple responses options, value labels for each va
 ```{r CINT-substance-var-prep}
 # Pull question wording from Qualtrics data
 cint_substance_word <- qualtrics %>% 
-  select(`CINTPregnancy Screen`, `CINT39`: `CINT84`) %>%
+  select(`CINTPregnancy Screen`,`CINT39`: `CINT84`) %>%
   slice(1)
 
-#create table with variable name, description, and notes
+# create table with variable name, description, and notes
 cint_substance_word_long <- cint_substance_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
@@ -5477,12 +5482,13 @@ cint_substance_word_long <- cint_substance_word %>%
          description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", "\n"),
          var_name = str_to_lower(var_name)) %>%
   # Edits Variable description and value
+   mutate(description = if_else(var_name == "cintpregnancy screen", "Has TC reported that they are currently pregnanct?", description)) %>%
   mutate(description = if_else(var_name == "cint40", "How many days have you smoked cigarettes in the past 6 months? _____ Days", description)) %>%
   mutate(description = if_else(var_name == "cint42", "On average, how many cigarettes did you smoke a day in the past 6 months? _______ Cigarettes", description)) %>%
   mutate(description = if_else(var_name == "cint44", "How many days did you drink beer, wine or hard liquor in the last six months? _________ Days", description)) %>% 
   mutate(description = if_else(var_name == "cint46", "When you drank alcohol, did you usually get drunk?", description)) %>% 
   mutate(description = if_else(var_name == "cint47", "How would you describe the way you drank alcohol over the past 6 months?", description)) %>% 
-    mutate(description = if_else(var_name == "cint47_6_text", "How would you describe the way you drank alcohol over the past 6 months? - 6. Other: Specify - Text", description)) %>%     
+    mutate(description = if_else(var_name == "cint47_6_text", "How would you describe the way you drank alcohol over the past 6 months? - Other: Specify", description)) %>%     
     mutate(description = if_else(var_name == "cint31", "How would you describe the way your partner smokes pot, on average, 
                                  in the past 6 months?", description)) %>%     
     mutate(description = if_else(var_name == "cint48", "Thinking about all types of alcohol, like beer, wine, or hard liquor, how many drinks have you usually 
@@ -5494,9 +5500,11 @@ cint_substance_word_long <- cint_substance_word %>%
     mutate(description = if_else(var_name == "cint59", "How many times have you smoked pot in the last 6 months? _______ Times", description)) %>%
     mutate(description = if_else(var_name == "cint61", "When you have smoked pot in the last 6 months, how high have you gotten?", description)) %>%
     mutate(description = if_else(var_name == "cint62", "How would you describe the way you smoked pot over the last 6 months?", description)) %>%
-  mutate(description = if_else(var_name == "cint62_6_text", "How would you describe the way you smoked pot over the last 6 months? - 6. Other - Text", description)) %>%  
+  mutate(description = if_else(var_name == "cint62_6_text", "How would you describe the way you smoked pot over the last 6 months? - Other - Specify", description)) %>%  
   mutate(description = if_else(var_name == "cint78", "Have you used prescription drugs, such as antidepressants, steroids, mood stabilizers, antibiotics, 
                                birth control, muscle relaxers, or allergy medications, in the past 6 months?", description)) %>%
+  mutate(description = if_else(var_name == "cint80", "Have you injected any drugs in the past 6 months?", description)) %>%
+  mutate(`Value` = "") %>%
   mutate(description = if_else(var_name == "cint84", "With whom did you share needles? (Indicate all that apply)", description)) %>%
   mutate(`Value` = "") %>%
   mutate(`Value` = if_else(var_name %in% c("cintpregnancy screen", "cint39", "cint41", "cint43", "cint45", "cint50", "cint54",
@@ -5542,7 +5550,8 @@ cint_substance_word_long <- cint_substance_word %>%
                                                           \n 4 = Family member
                                                           \n 5 = Romantic partner
                                                           \n 6 = Other
-                                                          \n -77 = Decline to Answer", `Value`))
+                                                          \n -77 = Decline to Answer", `Value`)) %>%
+  mutate(var_name = ifelse(var_name == "cintpregnancy screen", "cint_pregnancy_screen", var_name))
 
 
 ```
@@ -5568,30 +5577,186 @@ print(cint_substance_gt_table)
 ```
 
 
-# CINT-COVID
-<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+#### Descriptive Statistics
+
+For binary items:
+
+```{r cintsub-binary-desc}
+# Create subset of  items
+cint_sub_data_subset_binary <- complete %>%
+  select(cint_pregnancy_screen, cint39, cint41,cint43, cint45, cint50, cint54, cint56, cint58, cint60, cint63, cint64, cint65, cint66, cint68, cint70,cint72,cint74,cint76,cint78,cint80,cint82)
+
+
+# Calculate the dichotomous summary statistics for each variable
+cint_sub_summary_data_binary <- lapply(cint_sub_data_subset_binary, function(x) {
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA) 
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cint_sub_summary_data_binary <- as.data.frame(cint_sub_summary_data_binary)
+
+# Set items as first row
+cint_sub_summary_data_binary <- rbind(names(cint_sub_summary_data_binary), cint_sub_summary_data_binary) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cint_sub_tbl_binary <- cint_sub_summary_data_binary %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+
+# Render the table
+cint_sub_tbl_binary
+
+
+```
+For continuous items:
+# Maria double check range once Kaylee queries data
+
+```{r cintsub-cont-desc}
+
+# start here
+# Create subset of  items
+cint_sub_data_subset <- complete %>%
+  select(cint40, cint42, cint44,  cint48, cint49, cint51, cint52, cint53, cint55, cint57, cint59, cint67, cint69, cint71, cint73, cint75, cint77, cint81, cint83)
+
+# Calculate the continuous summary statistics for each variable
+cint_sub_summary_data <- lapply(cint_sub_data_subset, function(x) {
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2))
+  sd_val <- round(sd(x_no_negatives, na.rm = TRUE), 2)
+  range_val <- paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-")
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cint_sub_summary_data <- as.data.frame(cint_sub_summary_data) 
+
+# Set items as first row
+cint_sub_summary_data <- rbind(names(cint_sub_summary_data), cint_sub_summary_data) %>% 
+  t() %>% 
+  as.data.frame() %>%
+  mutate(Mean = if_else(Mean == "NaN", "NA", Mean)) %>%
+  mutate(Range = if_else(Range == "Inf--Inf", "NA", Range))
+
+ 
+
+
+
+# Create the gt table
+cint_sub_tbl <- cint_sub_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ px(115)) %>%
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cint_sub_tbl
+
+```
+
+Missing percentages of other non-continuous and non-dichotomous variables are presented.
+
+
+```{r cint_sub-missing}
+# Create subset of items
+cint_sub_data_subset_2 <- complete %>%
+  select(cint46, cint47, cint47_6_text, cint49, cint61, cint62,  cint62_6_text, cint79, cint84)
+
+# Calculate the summary statistics for each variable
+## mean is showing 2 decimals per authors
+cint_sub_summary_data_2 <- lapply(cint_sub_data_subset_2, function(x) {
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+#  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+#  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+#  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
+  c(Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cint_sub_summary_data_2 <- as.data.frame(cint_sub_summary_data_2)
+
+# Set items as first row
+cint_sub_summary_data_2 <- rbind(names(cint_sub_summary_data_2), cint_sub_summary_data_2) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cint_sub_tbl_2 <- cint_sub_summary_data_2 %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Missing = "% Missing") %>% 
+  # cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Missing"), align = "left") %>%
+  tab_options(table.border.bottom.style = "hidden") %>%
+  tab_footnote("") %>%
+  apply_tbl_theme()
+
+# Render the table
+cint_sub_tbl_2
+
+```
+## CINT-COVID (EPII)
+
   
-  
-### CINT-S Description
+### Epidemic-Pandemic Impacts Inventory (EPII)
   
   <MARIA> please insert a breif description for this measure 
 
 
-* No items need to be reverse scored. 
+-   No items need to be reverse scored. 
 
 * This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
 
 
 
 Reference:
-  <Maria, please add a reference if needed> 
+  <Maria, please add a reference if needed>
+  https://www.phenxtoolkit.org/toolkit_content/PDF/Grasso_EPII.pdf
   
-### CINT-COVID Variables
+### EPII Variables
   
 #### Value Labels
   
   
-All CINT-COVID variables have the same response options.
+All EPII variables have the same response options.
 
 ```{r cint-covid-label-table, results = 'asis'}
 cint_covid_label_df <- data.frame(
@@ -5619,7 +5784,7 @@ print(cint_covid_label_table)
 
 #### Survey Items
 
-ALL CINT-COVID variables have the same response options.
+ALL EPII variables have the same response options.
 Leading question: Since the coronavirus disease pandemic began, what has changed for you or your family?  
 Note: Variables ending with _self indicate changes for TC themselves and ending with _other indicate changes for other family member
   
@@ -5685,6 +5850,8 @@ print(cint_covid_gt_table)
 ### Summary Statistics
 
 #### Descriptive Statistics
+
+# Maria insert the binary table
 
 Only missing percentages of variables are presented. 
 

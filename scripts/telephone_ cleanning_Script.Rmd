@@ -2813,7 +2813,10 @@ cint_ladder <- tpw_raw %>%
 
 # correct data type 
 cint_ladder_complete <- cint_ladder %>%
-  mutate(across(-c(id), as.numeric))
+  mutate(across(-c(id), as.numeric)) %>%
+  # rename to match codebook
+  rename(cint_sses1 = cint_ladder1,
+         cint_sses2 = cint_ladder2)
 ```
 
 ### CINT-SSES Missing 
@@ -3119,8 +3122,7 @@ cint_substance <- cint_substance %>%
  select(-c(cint84_1:cint84_77))
 
 cint_substance_complete <- cint_substance 
-
-# Maira/Min: issue below was solved, it becauese we missed a skip rule, Maria, after you checked, you can remove these two line. 
+ 
 # HR166 has cint84 missing; checked this and we are using code of -99   
 
 ## we do not apply missing data rules because not a standardized questionnaire
