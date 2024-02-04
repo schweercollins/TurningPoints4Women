@@ -5738,32 +5738,29 @@ cint_sub_tbl_2
   
 ### Epidemic-Pandemic Impacts Inventory (EPII)
   
-  <MARIA> please insert a breif description for this measure 
-
+This survey was administered as part of the CINT. As shared in the original publication, the EPII is a newly developed measure designed to learn about the impact of the coronavirus disease pandemic and future epidemics and pandemics on various domains of personal and family life. Because the EPII is a newly developed measure, there are no psychometric properties yet available and optimal scoring procedures are not yet determined. 
 
 -   No items need to be reverse scored. 
 
-* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+-   This is not a a standardized questionnaire, so the missing data rules were not applied. No total or subscale scores were computed 
 
+-   The original measure contains 14 items. We have cleaned the data to create dichotomous variables for the impact on self and others. In the administration of the survey, participants were read each item once and asked if changes impacted the participant (_self), another person in their home (_other), or did not affect them. 
 
 
 Reference:
-  <Maria, please add a reference if needed>
-  https://www.phenxtoolkit.org/toolkit_content/PDF/Grasso_EPII.pdf
+[@grasso2020epidemic](https://www.phenxtoolkit.org/toolkit_content/PDF/Grasso_EPII.pdf)
   
 ### EPII Variables
   
 #### Value Labels
   
-  
 All EPII variables have the same response options.
 
 ```{r cint-covid-label-table, results = 'asis'}
 cint_covid_label_df <- data.frame(
-  value = c("0", "1", "-77"),
+  value = c("0", "1"),
   label = c("No",
-            "Yes",
-    "Decline to Answer")) %>% 
+            "Yes")) %>% 
   t() %>% 
   as.data.frame()
 
@@ -5784,9 +5781,9 @@ print(cint_covid_label_table)
 
 #### Survey Items
 
-ALL EPII variables have the same response options.
-Leading question: Since the coronavirus disease pandemic began, what has changed for you or your family?  
-Note: Variables ending with _self indicate changes for TC themselves and ending with _other indicate changes for other family member
+
+**Question stem: Since the coronavirus disease pandemic began, what has changed for you or your family?**  
+
   
 ```{r CINT-covid-var-prep}
 # Pull question wording from Qualtrics data
@@ -5851,25 +5848,25 @@ print(cint_covid_gt_table)
 
 #### Descriptive Statistics
 
-# Maria insert the binary table
-
-Only missing percentages of variables are presented. 
 
 ```{r cint_covid-missing}
-# Create subset of BSI items
+# Create subset of items
 cint_covid_data_subset <- complete %>%
-  select(cint_pregnancy_screen:cint_income_support, cint_identity)
+  select(cintc1_other:cintc14_self)
 
-# Calculate the summary statistics for each variable
-## mean is showing 2 decimals per authors
+
+# Calculate the dichotomous summary statistics for each variable
 cint_covid_summary_data <- lapply(cint_covid_data_subset, function(x) {
-  x <- replace(x, x < -40, NA)
-  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  # sd_val <- round(sd(x, na.rm = TRUE), 2)
-  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-   miss_val <- round(mean(is.na(x)) * 100, 2)
-  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
-  c(Missing = paste(miss_val, "%", sep = ""))
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA) 
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
 
 # Convert summary_data to a data frame
@@ -5881,18 +5878,27 @@ cint_covid_summary_data <- rbind(names(cint_covid_summary_data), cint_covid_summ
   as.data.frame()
 
 # Create the gt table
-cint_covid_tbl <- cint_covid_summary_data %>%
+cint_covid_tbl_ <- cint_covid_summary_data %>%
   gt() %>%
   cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
              Missing = "% Missing") %>% 
-  # cols_width(everything() ~ pct(100)) %>%
-  cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>%
-  apply_tbl_theme()
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
 
 # Render the table
-cint_covid_tbl
+cint_covid_tbl_
+
 
 ```
 
