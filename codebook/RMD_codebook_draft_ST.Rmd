@@ -2332,31 +2332,33 @@ bcap_tbl_binary
 
 ### DAS Description
 
-The DAS is a self-report measure used to assess dyadic adjustment
-(e.g., interpersonal tensions, dyadic satisfaction, dyadic functioning).
+The DAS is a self-report measure used to assess dyadic adjustment (e.g., interpersonal tensions, dyadic satisfaction, dyadic functioning).
 
-  * For the present study, all 32 items from the DAS were collected, and
-the total score and all subscales are included: Consensus, Affective
-Expression, Satisfaction, and Cohesion.
+-   For the present study, all 32 items from the DAS were collected, and the **total score** and all subscales are included: **Consensus**, **Affective Expression**, **Satisfaction**, and **Cohesion**, thus there are 37 total items.
 
-  * **Higher** scores indicate **more** positive dyadic (couple) adjustment.
+-   **Higher** scores indicate **more** positive dyadic (couple) adjustment, and **greater** consensus, affective expression, satisfaction, and cohesion in the couple relationship.
 
-  * The missing data rule was Applied. Calculations were
-completed only with participants that had less than 20% missing data
-(this includes `-77` responses)
+-   The missing data rule was applied. Calculations were
+completed only with participants that had less than 20% missing data (this includes `-77` responses) # MARIA TO DO CHECK
 
-This survey was not administered for participants who were incarcerated at the time of the assessment. 
+-   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
-References:
-[@spanier1976measuring](https://www.jstor.org/stable/350547);[DOI](https://doi.org/10.2307/350547);
-[@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug)
+-   There are no reverse scored variables.
+
+-   Participants who reported they were not currently in a (romantic) relationship, or in a relationship in the past 6 months, were not administered this survey. 
+
+-   Guidance on clinical cutoffs are presented in the Spanier 1976 article and may be obtained through other empirical papers that use the DAS.
+
+References:  
+-   [@spanier1976measuring](https://www.jstor.org/stable/350547)
+
+-   [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug)
 
 ### DAS Variables
 
 #### Value Labels
 
-The DAS has multiple response options, value labels for each variable
-can be found in the survey items table below.
+The DAS has multiple response options, value labels for each variable can be found in the survey items table below.
 
 #### Survey Items
 
@@ -2365,57 +2367,81 @@ All DAS survey items are presented in the following table:
 ```{r dyadc-var-prep}
 # Pull question wording from qualtrics data
 dyadc_word <- qualtrics %>% 
-  select(starts_with("E")) %>%
+  select(`DYADC Screener`, starts_with("E")) %>%
   slice(1) %>%
-  select(-(1:2)) %>%
+  select(-(2:3)) %>%
   rename_with(~sub("^E", "das", .), starts_with("E"))
 
 #create table with variable name, description, and notes
+
+## this is a new try for adding in the screener which needs to be added to raw data, too
+dyadc_word_long <- dyadc_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name)) %>%
+  mutate(Value = case_when(
+    between(row_number(), 2, 16) ~ "0 = Always Disagree \n1 = Almost Always Disagree \n2 = Frequently Disagree \n3 = Occasionally Disagree \n4 = Almost Always Agree \n5 = Always Agree",
+    row_number() %in% c(17, 18, 21:23) ~ "0 = All the time \n1 = Most of the time \n2 = More often than not \n3 = Occasionally \n4 = Rarely \n5 = Never",
+    row_number() %in% c(19,20) ~ "0 = Never \n1 = Rarely \n2 = Occasionally \n3 = More often than not \n4 = Most of the time \n5 = All the time ",
+    between(row_number(), 24, 25 ) ~ "0 = Never \n1 = Rarely \n2 = Occasionally \n3 = Almost every day \n4 = Every day",
+    between(row_number(), 26,29) ~ "0 = Never \n1 = Less than once a month \n2 = Once or twice a month \n3 = Once or twice a week \n4 = Once a day \n5 = More often",
+    row_number() %in% c(30,31) ~ "0 = Yes \n1 = No",
+    row_number() == 32 ~ "0 = Extremely Unhappy \n1 = Fairly Unhappy \n2 = A Little Unhappy \n3 = Happy \n4 = Very Happy \n5 = Extremely Happy \n6 = Perfect",
+    row_number() >= 33 ~ "0 = My relationship can never succeed, and there is no more that I can do to keep the relationship going. \n1 = It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going. \n2 = It would be nice if my relationship succeeded, but I can’t do much more than I’m doing now to help it succeed. \n3 = I want very much for my relationship to succeed, and will do my fair share to see that it does. \n4 = I want very much for my relationship to succeed, and will do all I can to see that it does. \n5 = I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
+  )) %>%
+  mutate(description = if_else(var_name == "das31", " Please indicate the number that best describes the degree of happiness in your relationship.",
+                               if_else(var_name == "das32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
+  slice(1:33)
+
 dyadc_word_long <- dyadc_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         Value = case_when(row_number() <= 15  ~ "0 = Always Disagree 
+         Value = between(row_number(), 2, 16)  ~ "0 = Always Disagree 
                                                  \n1 = Almost Always Disagree
                                                  \n2 = Frequently Disagree
                                                  \n3 = Occasionally Disagree
                                                  \n4 = Almost Always Agree
-                                                 \n5 = Always Agree",
-                           row_number() %in% c(16, 17, 20:22) ~ "0 = All the time 
+                                                 \n5 = Always Agree") %>%
+  ## adding this in for the screener notes
+  mutate(Value = case_when(row_number() %in% c(1) ~ "0 = no, \n1 = yes",
+    mutate(Value = case_when(row_number() %in% c(17, 18, 21:23) ~ "0 = All the time 
                                                  \n1 = Most of the time
                                                  \n2 = More often than not
                                                  \n3 = Occasionally
                                                  \n4 = Rarely
                                                  \n5 = Never",
-                           row_number() %in% c(18,19) ~ "0 = Never
+                           row_number() %in% c(19,20) ~ "0 = Never
                                                  \n1 = Rarely
                                                 \n2 = Occasionally
                                                  \n3 = More often than not
                                                  \n4 = Most of the time
                                                  \n5 = All the time ",
-                           between(row_number(), 23, 24 ) ~ "0 = Never
+                           between(row_number(), 24, 25 ) ~ "0 = Never
                                                  \n1 = Rarely
                                                  \n2 = Occasionally
                                                  \n3 = Almost every day
                                                  \n4 = Every day",
-                           between(row_number(), 25,28) ~ "0 = Never
+                           between(row_number(), 26,29) ~ "0 = Never
                                                  \n1 = Less than once a month
                                                  \n2 = Once or twice a month
                                                  \n3 = Once or twice a week
                                                  \n4 = Once a day
                                                  \n5 = More often",
-                           row_number() %in% c(29,30) ~ "0 = Yes
+                           row_number() %in% c(30,31) ~ "0 = Yes
                                                  \n1 = No",
-                           row_number() %in% c(31) ~ "0 = Extremely Unhappy
+                           row_number() %in% c(32) ~ "0 = Extremely Unhappy
                                                  \n1 = Fairly Unhappy
                                                  \n2 = A Little Unhappy
                                                  \n3 = Happy
                                                  \n4 = Very Happy
                                                  \n5 = Extremely Happy
                                                  \n6 = Perfect",
-                           row_number() >= 32 ~ "0 =	My relationship can never succeed, and there is no more that I can do to keep the relationship going.
+                           row_number() >= 33 ~ "0 =	My relationship can never succeed, and there is no more that I can do to keep the relationship going.
                                                  \n1 =	It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going.
                                                  \n2 =	It would be nice if my relationship succeeded, but I can’t do much more than I’m doing now to help it succeed.
                                                  \n3 =	I want very much for my relationship to succeed, and will do my fair share to see that it does.
@@ -2424,12 +2450,12 @@ dyadc_word_long <- dyadc_word %>%
                            ))%>% 
    mutate(description = if_else(var_name == "das31", " Please indicate the number that best describes the degree of happiness in your relationship.",
                                if_else(var_name == "das32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
-  slice(1:32)
+  slice(1:33)
 
 
 ```
 
-Some questions in this survey were not asked for participants who were incarcerated at the time of the assessment.
+
 
 ```{r dyadc-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
@@ -2473,8 +2499,8 @@ print(dyadc_gt_table)
 
 #### Scale and Subscales
 
-Information on total score and subscale variables are below.
-See cleaning syntax and annotations for guidance on how variables were constructed. 
+Information on total score and subscale variables are below. The total score and subscales were constructed by summing items.
+
 
 ```{r dyadc alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -2556,8 +2582,7 @@ print(dyadc_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and
-subscale score.
+Descriptive statistics are presented below for each item, total, and subscale score.
 
 For continuous items:
 
@@ -5016,7 +5041,7 @@ print(cint_sociodems_gt_table)
 Only missing percentages for each variable are presented. 
   
 ```{r cint_socio-missing}
-# Create subset of BSI items
+# Create subset of items
 cint_socio_data_subset <- complete %>%
   select(cint_0:cint_income_support, cint_identity)
 
@@ -5199,7 +5224,7 @@ cint_ladder_tbl
   
 ### CINT-R Description
   
-This set of questions administered as part of the CINT focus on the participant's relationships.
+This set of questions was administered as part of the CINT focus on the participant's relationships.
 
 -   There are 18 items. 
 
@@ -5438,7 +5463,7 @@ cint_relation_tbl
 
 ### CINT-Sub Description
 
-This set of questions administered as part of the CINT focus on the participant's substance use. All questions for substance use were drawn from an unpublished measure  but are aligned with typical retrospective reports of substance use similar to the widely used Timeline Follow-Back procedure (Sobell and Sobell, 1992).
+This set of questions was administered as part of the CINT focus on the participant's substance use. All questions for substance use were drawn from an unpublished measure  but are aligned with typical retrospective reports of substance use similar to the widely used Timeline Follow-Back procedure (Sobell and Sobell, 1992).
 
 -   There are 49 items. 
 
@@ -5903,31 +5928,34 @@ cint_covid_tbl_
 ```
 
 
-# SEX
-<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+# Sex History Survey (SEXEXP)
+ 
+### SEXEXP Description
   
+The Sex History Survey was administered as part of the CINT and focuses on the participant's sexual experiences. All questions for SEXEXP were drawn from Capaldi et al., 2002.
+
+-   There are 77 items, which includes items that were created during data cleaning. 
+
+-   No items need to be reverse scored. 
+
+-   No total scores or subscales were computed, thus the missing data rules were not applied. 
+
+-   For a 5-item health-risking sexual behavior scale suggestion suggestion, please see the Smith et al., 2006 reference below.
+
+-   This survey was not administered for participants who were incarcerated at the time of the assessment. 
+
+References:  
+
+-   [@capaldi2002heterosexual](https://psycnet.apa.org/fulltext/2002-12745-005.pdf)
+
+-   [@smith2006adolescent](https://journals.sagepub.com/doi/epdf/10.1177/1077559506291950)
+
   
-### CINT-S Description
-  
-  <MARIA> please insert a breif description for this measure 
-
-
-* No items need to be reverse scored. 
-
-* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
-
-
-
-Reference:
-  <Maria, please add a reference if needed> 
-  
-### SEX Variables
+### SEXEXP Variables
   
 #### Value Labels and Survey Items 
   
-  All SEX variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
-
-SEX survey items are presented in the following table:
+All SEXEXP variables have multiple responses options, value labels for each variable can be found in the following table:
   
   
 ```{r sex-var-prep}
@@ -5937,6 +5965,7 @@ sex_word <- qualtrics %>%
   slice(1)
 
 #create table with variable name, description, and notes
+# MIN TODO, we need to add in the 25 and 32 variables that were newly created
 sex_word_long <- sex_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
@@ -5945,9 +5974,11 @@ sex_word_long <- sex_word %>%
   description = str_replace(description, "READ:", ""),
   description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", ""),
        var_name = str_to_lower(var_name)) %>%
+  mutate(var_name = if_else(var_name == "s-pregnancy screen", "s_pregnancy_screen",var_name)) %>%
   # Edits Variable description and value
+  mutate(description = if_else(var_name == "s_pregnancy_screen", "Is TC currently pregnant?", description)) %>%
   mutate(description = if_else(var_name == "s1a", "What is your partner's current gender identity?", description)) %>%
-  mutate(description = if_else(var_name == "s1a_8_text", "What is your partner's current gender identity? - Prefer to self-identify - Text", description)) %>%
+  mutate(description = if_else(var_name == "s1a_8_text", "What is your partner's current gender identity? - Prefer to self-identify", description)) %>%
   mutate(description = if_else(var_name == "s2", "When did you start seeing your current partner? __ __ / __ __ __ __ month/years", description)) %>%
   mutate(description = if_else(var_name == "s2a", "How long, not counting time when you were broken up, have you and your partner been together? __ __ years", description)) %>%
   mutate(description = if_else(var_name == "s2b", " __ __ months", description)) %>%
@@ -5956,16 +5987,18 @@ sex_word_long <- sex_word %>%
   mutate(description = if_else(var_name == "s5b", " __ __ months", description)) %>%
   mutate(description = if_else(var_name == "s5c", "__ __ days", description)) %>%
   mutate(description = if_else(var_name == "s10", "Do you feel that you are:", description)) %>%
-  mutate(description = if_else(var_name == "s10_4_text", "Do you feel that you are: - 4 - Other: Please describe - Text", description)) %>%   mutate(description = if_else(var_name == "s13", "Do you have anyone else, not including your closest friends, that you talk to when you have a question or concern regarding birth control or safe sex practices?", description)) %>%
-  mutate(description = if_else(var_name == "s14_8_text", "Do you have anyone else, not including your closest friends, that you talk to when you have a question or concern regarding birth control or safe sex practices? s", description)) %>%
-  mutate(description = if_else(var_name == "s14", "Is that person a friend, relative, partner, or someone else? - Selected Choice", description)) %>%
-  mutate(description = if_else(var_name == "s14_8_text", "Is that person a friend, relative, partner, or someone else? - 7 - other (please describe:) - Text", description)) %>%
-
+  mutate(description = if_else(var_name == "s10_4_text", "Do you feel that you are: (Other Selected: please describe)", description)) %>%   mutate(description = if_else(var_name == "s13", "Do you have anyone else, not including your closest friends, that you talk to when you have a question or concern regarding birth control or safe sex practices?", description)) %>%
+  mutate(description = if_else(var_name == "s14_8_text", "Do you have anyone else, not including your closest friends, that you talk to when you have a question or concern regarding birth control or safe sex practices?", description)) %>%
+  mutate(description = if_else(var_name == "s14", "Is that person a friend, relative, partner, or someone else?", description)) %>%
+  mutate(description = if_else(var_name == "s14_8_text", "Is that person a friend, relative, partner, or someone else? (Other selected - please describe)", description)) %>%
   mutate(description = if_else(var_name == "s18", "How comfortable do you feel discussing the use of birth control or contraceptives to prevent pregnancy with someone you might have sex with?", description)) %>%
+  mutate(description = if_else(var_name == "s25", "	Which infections did you have? (Select all that apply)?", description)) %>%
+  mutate(description = if_else(var_name == "s25_8_text", "		Which infections did you have (Other selected - please describe)?", description)) %>%
   mutate(description = if_else(var_name == "s28", "Were there any times during the last 6 months that you thought you might be pregnant?", description)) %>%
   mutate(description = if_else(var_name == "s29", "What happened?", description)) %>%
   mutate(description = if_else(var_name == "s30", "How many times, in the last six months, have you had sexual relations? __ __ __ times", description)) %>%
   mutate(description = if_else(var_name == "s31", "With how many different people (in the last 6 months)? __ __ __ partners", description)) %>%
+   mutate(description = if_else(var_name == "s32", "Who were your partners (in the last 6 months)? (Select all that apply)", description)) %>%
   mutate(description = if_else(var_name == "s38", "In the last 6 months, have you had sexual relations with someone who injects drugs?", description)) %>%
   mutate(description = if_else(var_name == "s41", "How many times in the last 6 months? __ __ __ times", description)) %>%
   mutate(description = if_else(var_name == "s43", "In the last 6 months, when you've had intercourse with a male partner, what percentage of the time did you or your partner USE a birth control method specifically to prevent pregnancy?", description)) %>%
@@ -5973,7 +6006,7 @@ sex_word_long <- sex_word %>%
    mutate(description = if_else(var_name == "s46", "In the last 6 months, have you had oral sex without using a dental dam with your female partner(s)?", description)) %>%
 
   mutate(`Value` = "") %>%
-  mutate(`Value` = if_else(var_name %in% c("s-pregnancy-screen",
+  mutate(`Value` = if_else(var_name %in% c("s_pregnancy_screen",
                                            "s1",
                                            "s3",
                                            "s4",
@@ -5995,29 +6028,29 @@ sex_word_long <- sex_word %>%
                                             "s8", "s10_4_text", "s14_8_text", "s15", "s25_8_text","s27", "s30", "s31", "s41", "s42", "s47" , "s48"), "Open Text Entry", `Value`)) %>%
     mutate(`Value` = if_else(var_name %in% c( "s-pregnancy screen"), "0 = No
         1 = Yes", `Value`)) %>%
-  mutate(`Value` = if_else(var_name %in% c( "s28"), "0 = 2. No
-        1 = 1. Yes
-        2 = 4. I became pregnant prior to this last 6 months and knew that I was pregnant prior to this 6 month period
-      -77 = Decline to Answer", `Value`)) %>%
+  mutate(`Value` = if_else(var_name %in% c( "s28"), "0 = No
+                                                  \n 1 = Yes
+                                                  \n 2 = I became pregnant prior to this last 6 months and knew that I was pregnant prior to this 6 month period
+                                                  \n -77 = Decline to Answer", `Value`)) %>%
   mutate(`Value` = if_else(var_name %in% c( "s1a"), "1 = Cisgender female or woman
-        2 = Cisgender male or man
-        3 = Female/Woman
-        4 = Male/Man
-        5 = Non-binary
-        6 = Prefer to self-identify
-        7 = Trans female/woman
-        8 = Trans male/man
-        -77 = Decline to Answer", `Value`)) %>%
+                                                  \n 2 = Cisgender male or man
+                                                  \n 3 = Female/Woman
+                                                  \n 4 = Male/Man
+                                                  \n 5 = Non-binary
+                                                  \n 6 = Prefer to self-identify
+                                                  \n 7 = Trans female/woman
+                                                  \n 8 = Trans male/man
+                                                  \n -77 = Decline to Answer", `Value`)) %>%
   mutate(`Value` = if_else(var_name %in% c( "s9"), "1 = very little
                                                            \n 2 = not much
                                                            \n 3 = some
                                                            \n 4 = quite a lot
                                                            \n 5 = a great deal
                                                            \n -77  = Decline to Answer", `Value`)) %>%
-  mutate(`Value` = if_else(var_name %in% c( "s10"), "1 = 1 - heterosexual (attracted to the opposite sex)
-                                                           \n 2 = 2 - gay or lesbian (attracted to the same sex)
-                                                           \n 3 = 3 - bi-sexual (attracted to both males and females)
-                                                           \n 4 = 4 - Other: Please describe
+  mutate(`Value` = if_else(var_name %in% c( "s10"), "1 = heterosexual (attracted to the opposite sex)
+                                                           \n 2 = gay or lesbian (attracted to the same sex)
+                                                           \n 3 = bi-sexual (attracted to both males and females)
+                                                           \n 4 = Other: Please describe
                                                            \n -77  = Decline to Answer", `Value`)) %>%  # Maria: We might want to remove the number before variable lable
   mutate(`Value` = if_else(var_name %in% c( "s11", "s16"), " 0 = Never
                                                            \n 1 = Rarely
@@ -6031,78 +6064,78 @@ sex_word_long <- sex_word %>%
                                                           \n 4 = Somewhat Comfortable
                                                           \n 5 = Very Comfortable
                                                           \n -77 = Decline to Answer", `Value`)) %>%
-    mutate(`Value` = if_else(var_name %in% c( "s14"), "1 = 5 - counselor, teacher, doctor
-                                                          \n 2 = 1 - friend
-                                                          \n 3 = 7 - other (please describe:)
-                                                          \n 4 = 4 - other relative
-                                                          \n 5 = 6 - parent/parent figure
-                                                          \n 6 = 2 - romantic partner
-                                                          \n 7 = 3 - sister or brother
+    mutate(`Value` = if_else(var_name %in% c( "s14"), "1 = counselor, teacher, doctor
+                                                          \n 2 = friend
+                                                          \n 3 = other (please describe:)
+                                                          \n 4 = other relative
+                                                          \n 5 = parent/parent figure
+                                                          \n 6 = romantic partner
+                                                          \n 7 = sister or brother
                                                           \n -77 = Decline to Answer", `Value`)) %>%
-    mutate(`Value` = if_else(var_name %in% c( "s20"), "0 = 4 - Not at all Confident
-                                                          \n 1 = 3 - A little Confident
-                                                          \n 2 = 2 - Somewhat Confident
-                                                          \n 3 = 1 - Very Confident
+    mutate(`Value` = if_else(var_name %in% c( "s20"), "0 = Not at all Confident
+                                                          \n 1 = A little Confident
+                                                          \n 2 = Somewhat Confident
+                                                          \n 3 = Very Confident
                                                           \n -77 = Decline to Answer", `Value`)) %>%
-    mutate(`Value` = if_else(var_name %in% c( "s21", "s33", "s36", "s37"), "0 = 5 - Never or almost never
-                                                          \n 1 = 4 - Occasionally
-                                                          \n 2 = 3 - About half the time
-                                                          \n 3 = 2 - Often
-                                                          \n 4 = 1 - Always or almost always
+    mutate(`Value` = if_else(var_name %in% c( "s21", "s33", "s36", "s37"), "0 = Never or almost never
+                                                          \n 1 = Occasionally
+                                                          \n 2 = About half the time
+                                                          \n 3 = Often
+                                                          \n 4 = Always or almost always
                                                           \n -77 = Decline to Answer", `Value`)) %>%
       mutate(`Value` = if_else(var_name %in% c( "s24"), "0 = I did not have an STD (negative diagnosis)
                                                           \n 1 = Yes, I had a Sexually Transmitted Disease -STD  (positive diagnosis)
                                                           \n 2 = I don't know yet; still waiting for the results
                                                           \n -77 = Decline to Answer", `Value`)) %>%
-    mutate(`Value` = if_else(var_name %in% c( "s25"), "1 = a. Genital herpes
-                                                          \n 2 = b. Genital warts
-                                                          \n 3 = c. AIDS/HIV
-                                                          \n 4 = d. Hepatitis B
-                                                          \n 5 = e. Gonorrhea (clap)
-                                                          \n 6 = f. Syphilis
-                                                          \n 7 = g. Chlamydia
-                                                          \n 8 = h. Other: Specify
-                                                          \n 9 = i. Don't Remember
+    mutate(`Value` = if_else(var_name %in% c( "s25"), "1 = Genital herpes
+                                                          \n 2 = Genital warts
+                                                          \n 3 = AIDS/HIV
+                                                          \n 4 = Hepatitis B
+                                                          \n 5 = Gonorrhea (clap)
+                                                          \n 6 = Syphilis
+                                                          \n 7 = Chlamydia
+                                                          \n 8 = Other: Specify
+                                                          \n 9 = Don't Remember
                                                           \n -77 = Decline to Answer", `Value`)) %>%
-        mutate(`Value` = if_else(var_name %in% c( "s28"), "0 = 2. No
-                                                          \n 1 = 1. Yes
-                                                          \n 2 = 4. I became pregnant prior to this last 6 months and knew that I was pregnant prior to this 6 month period
-                                                          \n -77 = 3. Decline to Answer", `Value`)) %>%
-    mutate(`Value` = if_else(var_name %in% c( "s29"), "1 = 1 - Went to doctor, Positive diagnosis
-                                                          \n 2 = 2 - Went to doctor, Negative diagnosis
-                                                          \n 3 = 3 - Went to doctor, Don't know
-                                                          \n 4 = 4 - Took a home test, positive
-                                                          \n 5 = 5 - Took a home test, negative
-                                                          \n 6 = 6 - Took a home test, don't know
-                                                          \n 7 = 7 - Did nothing, negative (period started)
-                                                          \n 8 = 8 - Did nothing, don't know
+        mutate(`Value` = if_else(var_name %in% c( "s28"), "0 = No
+                                                          \n 1 = Yes
+                                                          \n 2 = I became pregnant prior to this last 6 months and knew that I was pregnant prior to this 6 month period
                                                           \n -77 = Decline to Answer", `Value`)) %>%
-  mutate(`Value` = if_else(var_name %in% c( "s32"), "1 = 1.Male, same age or younger
-                                                          \n 2 = 2.Male, 1-2 years older
-                                                          \n 3 = 3.Male, more than 2 years older
-                                                          \n 4 = 4.Female, same age or younger
-                                                          \n 5 = 5.Female, 1-2 years older
-                                                          \n 6 = 6. Female, more than 2 years older
-                                                          \n 7 = 7. Non-binary and/or Other Gender, same age or younger
-                                                          \n 8 = 8. 7. Non-binary and/or Other Gender, 1-2 years older
-                                                          \n 9 = 9. 7. Non-binary and/or Other Gender, more than 2 years older
+    mutate(`Value` = if_else(var_name %in% c( "s29"), "1 = Went to doctor, Positive diagnosis
+                                                          \n 2 = Went to doctor, Negative diagnosis
+                                                          \n 3 = Went to doctor, Don't know
+                                                          \n 4 = Took a home test, positive
+                                                          \n 5 = Took a home test, negative
+                                                          \n 6 = Took a home test, don't know
+                                                          \n 7 = Did nothing, negative (period started)
+                                                          \n 8 = Did nothing, don't know
                                                           \n -77 = Decline to Answer", `Value`)) %>%
-  mutate(`Value` = if_else(var_name %in% c( "s34"), "0 = 1 Never 0%
-                                                          \n 1 = 2 Rarely 1 - 15%
-                                                          \n 2 = 3 Occasionally 15 - 40%
-                                                          \n 3 = 4 About half the time 40 - 60%
-                                                          \n 4 = 5 Usually 60 - 85%
-                                                          \n 5 = 6 Most of the time 85 -99%
-                                                          \n 6 = 7 Every single time 100%
+  mutate(`Value` = if_else(var_name %in% c( "s32"), "1 = Male, same age or younger
+                                                          \n 2 = Male, 1-2 years older
+                                                          \n 3 = Male, more than 2 years older
+                                                          \n 4 = Female, same age or younger
+                                                          \n 5 = Female, 1-2 years older
+                                                          \n 6 = Female, more than 2 years older
+                                                          \n 7 = Non-binary and/or Other Gender, same age or younger
+                                                          \n 8 = Non-binary and/or Other Gender, 1-2 years older
+                                                          \n 9 = Non-binary and/or Other Gender, more than 2 years older
                                                           \n -77 = Decline to Answer", `Value`)) %>%
-  mutate(`Value` = if_else(var_name %in% c( "s43"), "0 = 1 Never 0%
-                                                          \n 1 = 2 Rarely 1 - 15%
-                                                          \n 2 = 3 Occasionally 15 - 40%
-                                                          \n 3 = 4 About half the time 40 - 60%
-                                                          \n 4 = 5 Usually 60 - 85%
-                                                          \n 5 = 6 Most of the time 85 -99%
-                                                          \n 6 = 7 Every single time 100%
-                                                          \n 7 = 10 Not using birth control because I am currently pregnant
+  mutate(`Value` = if_else(var_name %in% c( "s34"), "0 = Never 0%
+                                                          \n 1 = Rarely 1 - 15%
+                                                          \n 2 = Occasionally 15 - 40%
+                                                          \n 3 = About half the time 40 - 60%
+                                                          \n 4 = Usually 60 - 85%
+                                                          \n 5 = Most of the time 85 -99%
+                                                          \n 6 = Every single time 100%
+                                                          \n -77 = Decline to Answer", `Value`)) %>%
+  mutate(`Value` = if_else(var_name %in% c( "s43"), "0 = Never 0%
+                                                          \n 1 = Rarely 1 - 15%
+                                                          \n 2 = Occasionally 15 - 40%
+                                                          \n 3 = About half the time 40 - 60%
+                                                          \n 4 = Usually 60 - 85%
+                                                          \n 5 = Most of the time 85 -99%
+                                                          \n 6 = Every single time 100%
+                                                          \n 7 = Not using birth control because I am currently pregnant
                                                           \n -66 = Don't Know
                                                           \n -77 = Decline to Answer", `Value`)) %>%
   mutate(`Value` = if_else(var_name %in% c( "s46"), "1 = Yes, had oral sex without a dental dam
@@ -6138,19 +6171,21 @@ print(sex_gt_table)
 Only missing percentages of variables are presented. 
 
 ```{r sex-missing}
-# Create subset of BSI items
+# Create subset of items
 sex_data_subset <- complete %>%
   select(s_pregnancy_screen:s48)
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
 sex_summary_data <- lapply(sex_data_subset, function(x) {
-  x <- replace(x, x < -40, NA)
-  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  # sd_val <- round(sd(x, na.rm = TRUE), 2)
-  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
-  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+#  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+#  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+#  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -6168,9 +6203,9 @@ sex_tbl <- sex_summary_data %>%
   cols_label(`1` = "Variable",
              Missing = "% Missing") %>% 
   # cols_width(everything() ~ pct(100)) %>%
-  cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
+  cols_align(columns = c("Missing"), align = "left") %>%
   tab_options(table.border.bottom.style = "hidden") %>%
+  tab_footnote("") %>%
   apply_tbl_theme()
 
 # Render the table
@@ -6179,7 +6214,8 @@ sex_tbl
 ```
 
 
-# SOCINF_SUBSTANCES
+# Social Influences - Substances (SOCINF-S)
+# start here
 <MARIA: you might want to switch this to full name to be consistent with other measure.> 
   
   
@@ -6291,7 +6327,7 @@ print(socinf_sub_gt_table)
 Only missing percentages of variables are presented. 
 
 ```{r socinf_sub-missing}
-# Create subset of BSI items
+# Create subset of items
 socinf_sub_data_subset <- complete %>%
   select(starts_with("soc"), -socinf_general_screener)
 
@@ -6429,7 +6465,7 @@ print(socinf_gen_gt_table)
 Only missing percentages of variables are presented.
 
 ```{r socinf_gen-missing}
-# Create subset of BSI items
+# Create subset of items
 socinf_gen_data_subset <- complete %>%
   select(starts_with("sg"))
 
@@ -6616,7 +6652,7 @@ print(cts_pc_gt_table)
 Only missing percentages of variables are presented. 
 
 ```{r cts_pc-missing}
-# Create subset of BSI items
+# Create subset of items
 cts_pc_data_subset <- complete %>%
   select(cts_parent_screen:cts_pc23)
 
@@ -6764,7 +6800,7 @@ print(pct_gt_table)
 Only missing percentages of variables are presented. 
 
 ```{r pct-missing}
-# Create subset of BSI items
+# Create subset of items
 pct_data_subset <- complete %>%
   select(p00a, starts_with("pct"))
 
@@ -7037,7 +7073,7 @@ print(sus_gt_table)
 Only missing percentages of variables are presented. 
 
 ```{r sus-missing}
-# Create subset of BSI items
+# Create subset of items
 sus_data_subset <- complete %>%
   select(starts_with("sus"))
 
@@ -7161,7 +7197,7 @@ print(pcl_gt_table)
 Only missing percentages of variables are presented. 
 
 ```{r pcl-missing}
-# Create subset of BSI items
+# Create subset of items
 pcl_data_subset <- complete %>%
   select(starts_with("sg"))
 

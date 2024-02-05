@@ -1022,7 +1022,7 @@ There are missing data in DAS and missing rule applied through the unique "COUNT
 dyadc <- dyadc %>%
   # if answered no for screening question, the entire survey is skipped.
   mutate_at(vars(e1:e32), ~case_when(dyadc_screener == 0  ~ "-55", TRUE ~ . )) %>%
-    # Incarcerated TC weren't administered for this survey
+    # Participants who were incarcerated at the time of assessment where not administered this survey
   mutate_at(vars(dyadc_screener, e1:e32), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .)) 
 
 dyadc %>%
@@ -2651,6 +2651,8 @@ sex <- sex %>%
    mutate_at(vars(s46:s48), ~case_when(s45 != 1 ~ "-55", TRUE ~ . )) %>%
   # skip rule: if s45 is not Yes (1) | s30 <=0, s45, s47 is skipped  
    mutate_at(vars(s46:s48), ~case_when(s45 != 1 | s30 <= 0 ~ "-55", TRUE ~ . )) %>%
+  # s1_8_text NAs to -55 
+  mutate(s1a_8_text = ifelse(is.na(s1a_8_text) | s1a_8_text == "NA", -55, s1a_8_text)) %>%
   # catching NAs that weren't caught because s25 was endorsed
   mutate(s25_8_text = ifelse(is.na(s25_8_text) | s25_8_text == "NA", -55, s25_8_text)) %>%
    # skip rule: if s46 is not Yes (1), s47:s48 is skipped  
@@ -2663,22 +2665,31 @@ sex <- sex %>%
   relocate(70:78, .after = 53 ) 
 
 
-
-
 # before next steps, editing dates so only mm/dddd and DD 01 for s2, s5, and s7
 
 ## Function to convert character to date with day to 01
-# MARIA/Min, thie function does not seems to work, if you run the three line below it changes s2, s5,s7 to NA 
+
 convert_to_date <- function(x) {
-  date <- tryCatch({
-    parsed_date <- as.Date(as.yearmon(x, "%m/%Y"))
-    if (all(is.na(parsed_date))) {
-      stop("All formats failed to parse. No formats found.")
-    }
-    parsed_date  # Remove the floor_date function
+  parsed_date <- tryCatch({
+    # Try parsing as "MM/YYYY" format
+    parsed_date <- ifelse(grepl("^\\d{2}/\\d{4}$", x),
+                          as.character(as.Date(paste0("01/", x), format = "%d/%m/%Y")),
+                          NA)
+    # Try parsing as "DD/MM/YYYY" format if previous parsing failed
+    parsed_date[is.na(parsed_date)] <- ifelse(grepl("^\\d{2}/\\d{2}/\\d{4}$", x),
+                                             as.character(as.Date(x, format = "%d/%m/%Y")),
+                                             NA)
+    # Set day values to the start of the month (01)
+    parsed_date <- ifelse(!is.na(parsed_date),
+                          format(as.Date(parsed_date), "%Y-%m-01"),
+                          NA)
+    parsed_date
   }, error = function(e) NA)
-  return(date)
+  return(parsed_date)
 }
+
+
+
 
 # Apply the function to the 's2' and 's5' and 's7' columns
 sex$s2 <- convert_to_date(sex$s2)
@@ -2691,7 +2702,13 @@ sex$s7 <- convert_to_date(sex$s7)
 ### Sex Calculation and Finalize Data (no scales)
 ```{r sex_calc}
 # We do not apply the missing data rule due to how items are used currently: there are no scales
-sex_complete <-sex 
+# updating dates to NA = -55
+sex_complete <- sex %>%
+  mutate(
+    s2 = ifelse(is.na(s2), -55, as.character(s2)),
+    s5 = ifelse(is.na(s5), -55, as.character(s5)),
+    s7 = ifelse(is.na(s7), -55, as.character(s7))
+  )
 ```
 
 ## CINT
