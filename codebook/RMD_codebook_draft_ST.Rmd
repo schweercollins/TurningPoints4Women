@@ -563,7 +563,6 @@ summary_data <- lapply(data_subset, function(x) {
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
-
 # Convert summary_data to a data frame
 summary_data <- as.data.frame(summary_data)
 
@@ -2851,6 +2850,7 @@ print(arq_gt_table)
 
 #### Scale and Subscales
 ## MIN why is this included in the codebook?
+Min' note: this is for how we construct those scales, same with other measure, but this one doesn't including range and alpha. 
 
 Information on constructed attachment groups is presented below. The
 highest rating for attachment style was used to classify participants
@@ -3032,7 +3032,6 @@ Reference:
 All PRSS variables have the same response options.
 
 ```{r PRSS-label-table, results = 'asis'}
-
 prss_label_df <- data.frame(
   value = c("0", "1", "2", "3", "4"),
   label = c("None of the time",
@@ -3165,12 +3164,17 @@ subscale score:
 
 # Calculate the summary statistics for each variable
 prss_summary_data <- lapply(prss_data_subset, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
+
 
 # Convert summary_data to a data frame
 prss_summary_data <- as.data.frame(prss_summary_data)
@@ -3204,12 +3208,11 @@ Distributions are presented below for the total score and each subscale:
 
 ```{r PRSS-distributions, class.source='fold', echo = FALSE}
 complete %>%
+   filter(dast_total >= 0) %>%  # Filter out missing data
   composite_hist(
     x = prss_total
   ) +
   labs(title = "Distribution of Total Scores for the PRSS")
-
-
 ```
 
 
@@ -3217,7 +3220,7 @@ complete %>%
 
 ### SSQ Description
 
-The SSQ is a 8-item questionnaire designed to measure *insert*.
+The SSQ is a 8-item questionnaire designed to measure *Maria insert*.
 
 For the present study, 8 items from the SSQ were collected in order to
 #TODO: insert text here
@@ -3276,6 +3279,7 @@ SSQ survey items are presented in the following table:
 # Pull question wording from qualtrics data
 ssq_word <- qualtrics %>% 
   select(starts_with("ps")) %>% 
+  rename_with(~ paste0("ssq", as.numeric(str_replace(., "^PS", ""))), starts_with("ps")) %>%
   slice(1)
 
 #create table with variable name, description, and notes
@@ -3307,8 +3311,6 @@ ssq_gt_table <- ssq_gt_table %>%
 
 # Print the table
 print(ssq_gt_table)
-
-
 ```
 
 
@@ -3353,7 +3355,8 @@ ssq_scale_df <- gt(ssq_scale_df) %>%
              alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  # cols_width(scale ~ px(135)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
 # Print the table
@@ -3371,10 +3374,14 @@ Descriptive statistics are presented below for each item and the total score:
 ```{r ssq-mean-items}
 # Calculate the summary statistics for each variable
 ssq_summary_data <- lapply(ssq_data_subset, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -3410,7 +3417,6 @@ ssq_tbl
 Distributions are presented below for the total score and each subscale:
 
 ```{r ssq-distributions, class.source='fold', echo = FALSE}
-
 ssq_data_subset %>%
   filter(ssq_total >= 0) %>%
   composite_hist(x = ssq_total) +
@@ -4652,6 +4658,7 @@ Distributions are presented below for the total score and each subscale:
 The IBQis a 10-item questionnaire designed to measure *insert*.
 
 For the present study, 10 items from the IBQ were collected in order to
+
 #TODO: insert text here
 
 No items need to be reverse scored. *TODO: need change text here Higher
@@ -6711,8 +6718,8 @@ print(pct_label_table)
   
 #### PCT Survey Items
 PCT survey items are presented in the following table:
-  
-Leading question: Thinking about your partner, how often is it true that they:
+
+**Question stem: Thinking about your partner, how often is it true that they:**
 ```{r pct-var-prep}
 # Pull question wording from Qualtrics data
 pct_word <- qualtrics %>% 
@@ -6765,18 +6772,19 @@ Only missing percentages of variables are presented.
 
 ```{r pct-missing}
 # Create subset of BSI items
-pct_data_subset <- complete %>%
+pct_data_subset_binary <- complete %>%
   select(p00a, starts_with("pct"))
 
-# Calculate the summary statistics for each variable
-## mean is showing 2 decimals per authors
-pct_summary_data <- lapply(pct_data_subset, function(x) {
+
+# Calculate the dichotomous summary statistics for each variable
+pct_summary_data <- lapply(pct_data_subset_binary, function(x) {
   x <- replace(x, x < -40, NA)
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
   miss_val <- round(mean(is.na(x)) * 100, 2)
-  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
 
 # Convert summary_data to a data frame
@@ -6788,18 +6796,26 @@ pct_summary_data <- rbind(names(pct_summary_data), pct_summary_data) %>%
   as.data.frame()
 
 # Create the gt table
-pct_tbl <- pct_summary_data %>%
+pct_tbl_binary <- pct_summary_data %>%
   gt() %>%
   cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
              Missing = "% Missing") %>% 
-   cols_width(everything() ~ pct(100)) %>%
-  cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>%
-  apply_tbl_theme()
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
 
 # Render the table
-pct_tbl
+pct_tbl_binary
 
 ```
 
@@ -6817,7 +6833,7 @@ pct_tbl
 * No items need to be reverse scored. 
 
 * This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
-
+* We are not presenting sus14 items because those contain identifiable information. 
 
 
 Reference:
@@ -6889,15 +6905,16 @@ print(sus_label_table2)
 
 
 ```
+
 Response option for `sus11b`, `sus11c2b`, `sus14a`,, `sus14b2`, `sus14c1`, `sus114d1`,`sus14e1`,`sus14f1`,`sus14g1`,`sus14h1`,`sus14i1`,`sus14j1`,`sus14k1`,`sus14l1`,`sus14m1`,`sus14n1`,`sus14o1`.
 
 ```{r sus-label-table-3, results = 'asis'}
 
 sus_label_df3 <- data.frame(
   value = c("1", "2", "3"),
-  label = c("1. Physical",
-            "2. Mental/Psychological",
-            "3. Substance Use")
+  label = c("1.Physical",
+            "2.Mental/Psychological",
+            "3.Substance Use")
 ) %>% 
   t() %>% 
   as.data.frame()
@@ -6927,10 +6944,10 @@ Response option for `sus11`, `sus12`, `sus13`, `sus15`, `sus16`, `sus17`, `sus18
 
 sus_label_df4 <- data.frame(
   value = c("1", "2", "3", "4"),
-  label = c("1. Yes, available and accessed",
-            "2. No, available but did not access",
-            "3. No, attempted to access but experienced a barrier",
-            "4. No, was not aware service was available" )
+  label = c("1.Yes, available and accessed",
+            "2.No, available but did not access",
+            "3.No, attempted to access but experienced a barrier",
+            "4.No, was not aware service was available" )
 ) %>% 
   t() %>% 
   as.data.frame()
@@ -6954,16 +6971,14 @@ print(sus_label_table4)
 
 ```
 
-####
+#### SUS Survey Items
 sus  survey items are presented in the following table:
   
 Leading question: Thinking about your partner, how often is it true that they:
 ```{r sus-var-prep}
 # Pull question wording from Qualtrics data
 sus_word <- qualtrics %>% 
-  select(starts_with("SUS")) %>%
-  rename("sus14b1" = "SUS14b2...2226") %>%
-  rename("sus14b2" = "SUS14b2...2227") %>%
+  select(starts_with("SUS"), -matches("^sus14")) %>% # We are not presenting sus14 items because those contain identifiable information 
   slice(1)
 
 #create table with variable name, description, and notes
@@ -7004,10 +7019,6 @@ sus_word_long <- sus_word %>%
   mutate(description = if_else(var_name == "sus17", "Have you been in short stay or evaluation inpatient treatment. 
                                This includes stays up to 72 hours (3 days), such as detox? ", description)) %>%
   mutate(description = if_else(var_name == "sus18", "Have you been in residential treatment for substance abuse?", description)) 
-
-
-
-        
 ```
 
 ```{r sus-var-table, results ='asis'}
@@ -7021,10 +7032,10 @@ sus_gt_table <- sus_gt_table %>%
              #notes = "Notes"
   ) %>% 
   apply_tbl_theme() %>% 
-  cols_width(description ~ px(300),
+  cols_width(notes ~ px(150),
              var_name ~ px(100)
   ) %>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) 
 
 # Print the table
 print(sus_gt_table)
@@ -7046,11 +7057,7 @@ sus_data_subset <- complete %>%
 sus_summary_data <- lapply(sus_data_subset, function(x) {
   x <- replace(x, (x < 40 & x!= -55 & x!= -88), NA)    
   x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)
-  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  # sd_val <- round(sd(x, na.rm = TRUE), 2)
-  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
   miss_val <- round(mean(is.na(x)) * 100, 2)
-  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
   c(Missing = paste(miss_val, "%", sep = ""))
 })
 
