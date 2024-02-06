@@ -13,7 +13,7 @@ subtract_scale <-
   }
 
 # reverse scoring is messed up. It converts back to original qualtrics scale 1 - ...
-# Using reversd column as data could solve this problem
+# Using reversd column as data solve this problem
 composite_total_avg_fun <- function(
     data,
     id,
@@ -777,3 +777,14 @@ severity_plot <- function(
       ymax = max(plot_data$data[[1]]$ymax)
     )
 }
+
+
+combine_columns <- function(data, columns_to_combine, separator) {
+  combined_values <- apply(data[, columns_to_combine], 1, function(x) paste(x[!is.na(x)], collapse = separator))
+  return(combined_values)
+}
+
+# Example usage with combine_columns
+# result <- combine_columns(sus, c("sus11b_1", "sus11b_2", "sus11b_3", "sus11b_77"), separator = ";")
+
+
