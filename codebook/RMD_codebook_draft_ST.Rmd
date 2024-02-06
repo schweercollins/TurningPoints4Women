@@ -2417,14 +2417,14 @@ dyadc_word_long <- dyadc_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         Value = between(row_number(), 2, 16)  ~ "0 = Always Disagree 
+         Value = case_when(between(row_number(), 2, 16)  ~ "0 = Always Disagree 
                                                  \n1 = Almost Always Disagree
                                                  \n2 = Frequently Disagree
                                                  \n3 = Occasionally Disagree
                                                  \n4 = Almost Always Agree
-                                                 \n5 = Always Agree") %>%
+                                                 \n5 = Always Agree")) %>%
   ## adding this in for the screener notes
-  mutate(Value = case_when(row_number() %in% c(1) ~ "0 = no, \n1 = yes",
+  mutate(Value = case_when(row_number() %in% c(1) ~ "0 = no, \n1 = yes")) %>%
     mutate(Value = case_when(row_number() %in% c(17, 18, 21:23) ~ "0 = All the time 
                                                  \n1 = Most of the time
                                                  \n2 = More often than not
@@ -4971,9 +4971,9 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
          description = str_replace(description, "READ:", ""),
          description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", ""),
          var_name = str_to_lower(var_name),
-         value = case_when(row_number() %in% c(1,6,7,8,9) ~ "1 = Yes 
+         value = case_when(row_number() %in% c(4,5,6,7,8) ~ "1 = Yes 
                                              \n0 = No",
-                           row_number() %in% c(2) ~ "1 = 8th grade or less or working towards GED
+                           row_number() %in% c(1) ~ "1 = 8th grade or less or working towards GED
                                             \n 2 = Completed GED/Alternative H.S. diploma
                                             \n 3 = Completed some high school, but did not graduate
                                             \n 4 = Graduated high school
@@ -4986,7 +4986,7 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
                                             \n 11 = Taking/have taken graduate classes or working toward post-college degree
                                             \n 12 = Completed post-college degree
                                             \n -77 = Decline to Answer",
-                           row_number() %in% c(3,4) ~ "1 = Currently Working
+                           row_number() %in% c(2,3) ~ "1 = Currently Working
                                             \n 2 = Temporarily laid off
                                             \n 3 = On Leave
                                             \n 4 = Unemployed or looking for work
@@ -4995,7 +4995,7 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
                                             \n 7 = Student
                                             \n 8 = Something else, please briefly describe
                                             \n -77 = Decline to Answer",
-                           row_number() %in% c(10) ~ "1 = Always or almost always
+                           row_number() %in% c(8,9) ~ "1 = Always or almost always
                                             \n 2 = Often
                                             \n 3 = About half the time
                                             \n 4 = Occasionally
@@ -5008,7 +5008,7 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
                                             \n 4 = Occasionally
                                             \n 5 = Never or almost never
                                             \n -77 = Decline to Answer", 
-                           row_number() %in% c(14) ~ "1 = Cisgender female or woman
+                           row_number() %in% c(13) ~ "1 = Cisgender female or woman
                                             \n 2 = Cisgender male or man
                                             \n 3 = Female/Woman
                                             \n 4 = Male/Man
