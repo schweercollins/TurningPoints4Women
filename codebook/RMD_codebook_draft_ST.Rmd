@@ -246,11 +246,27 @@ apply_labtab_theme <- function(table) {
 ```
 # Overview
 
-<MARIA>INSERT BRIEF INFO ON STUDY, SAMPLE, AND AIMS
+## Longitudinal Study Background  
 
+This study is a longitudinal extension which aims to further our understanding of trajectories of adult offending in a sample of 158 (n = 8 participants are now deceased) women who participated in a randomized intervention trial aimed at reducing conduct problems and delinquency during adolescence. The study was originally supported and funded through the Oregon Youth Authority and by Grant R01 DA015208 (P.I., Patricia Chamberlain, Ph.D.) from the National Institute on Drug Abuse, and by Grant R01 MH054257 (P.I., Patricia Chamberlain, Ph.D.) from the National Institute of Mental Health. In the original study, juvenile justice involved girls ages 13 – 17 who had been referred for out-of-home placement due to chronic delinquency were randomly assigned to participate in services as usual (group care; GC) or in Treatment Foster Care Oregon (TFCO, Chamberlain, 2003). The first extension of this longitudinal study was funded by Grant R01 DA024672 (P.I., Leslie Leve, Ph.D.). That study examined the developmental pathways of risk for juvenile justice involved girls into young adulthood with the original participants who were at the time, ages 16-29 years.
+
+## Data Collection Activities in this Wave  
+
+There were several data collection activities. First, one telephone interview was conducted with original participants (*M* = 18 years after each participants’ baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. The second part of the assessment was a 1 hour biological and physical health assessment. While prior waves collected limited information on self-reported health, this longitudinal extension also included a more robust battery of health conditions and a robust battery of 12 biomarkers, used to assess allostatic load, including cardiovascular, metabolic, and immune system function. This biological assessment was conducted either in person or virtually due to COVID-19 restrictions. Last, arrest records from the adult corrections system were collected. The age at last known arrest, number of arrests, whether each resulted in incarceration, and the length of incarceration was coded from the records and archived in aggregate to ensure that records are not identifiable.
+
+## Study Goals
+
+-   **Goal 1** Explore the constellation of risk factors and risk processes in the lives of adult women with histories in the juvenile justice system   
+
+-   **Goal 2** Understand how justice involvement is related to women's health outcomes, including biological indicators of health and stress.
+
+-   **Goal 3** Examine the potential long-term impact of Treatment Foster Care Oregon, a gender-specific intervention. 
+
+# Maria add references if needed
 *Additional info to possibly include: links to
 supplemental materials, any disclaimers/info we think data users need to
-know to use these data accurately*
+know to use these data accurately* Shaina/Min anything here? I think we have disclaimers and can use them in each measure, but anything overall?
+One I am thinking of is that some publications contain data from other waves. 
 
 ### Data and Study Author Contact
 
@@ -2374,6 +2390,7 @@ dyadc_word <- qualtrics %>%
 #create table with variable name, description, and notes
 
 ## this is a new try for adding in the screener which needs to be added to raw data, too
+## Maria edit here
 dyadc_word_long <- dyadc_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
@@ -5884,7 +5901,7 @@ print(cint_covid_gt_table)
 ```{r cint_covid-missing}
 # Create subset of items
 cint_covid_data_subset <- complete %>%
-  select(cintc1_other:cintc14_self)
+  select(cintc1_self:cintc14_self)
 
 
 # Calculate the dichotomous summary statistics for each variable
