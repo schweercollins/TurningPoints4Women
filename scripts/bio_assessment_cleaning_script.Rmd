@@ -203,7 +203,7 @@ bio_td <- bio_df %>%
          bp_dia_pal = ifelse(bp_dia_avg != -55, ifelse(bp_dia_avg >= quantile(bp_dia_avg, 0.75, na.rm = TRUE), 1, 0), -55),
          pef_avg = round(rowMeans(select(., starts_with("pef")), na.rm = TRUE), 2),
          pef_cal    = ifelse(pef_avg != -55, ifelse(pef_avg <= 319, 1, 0), -55),
-         pef_pal    = ifelse(pef_avg != -55, ifelse(pef_avg >= quantile(pef_avg, 0.75, na.rm = TRUE), 1, 0), -55),
+         pef_pal    = ifelse(pef_avg != -55, ifelse(pef_avg <= quantile(pef_avg, 0.25, na.rm = TRUE), 1, 0), -55),
          wth_ratio  = ifelse(iliac_crest_measure != -55 & hip_measure != -55, round(iliac_crest_measure / hip_measure, 3), -55),
          wth_cal = ifelse(wth_ratio != -55, ifelse(wth_ratio >= 0.85, 1, 0), -55),
          wth_pal = ifelse(wth_ratio != -55, ifelse(wth_ratio >= quantile(wth_ratio, 0.75, na.rm = TRUE), 1, 0), -55),
@@ -710,10 +710,10 @@ bio_td_archive <- rhs_subscales %>%
 
 ```{r export}
 # #export internal file
-# export(internal_df, "bio_internal.xlsx")
+ #export(internal_df, "bio_internal.xlsx")
 # 
 # #export archived file
-# export(bio_td_archive, "bio_archive.xlsx")
+ #export(bio_td_archive, "bio_archive.xlsx")
 
 
 ```
