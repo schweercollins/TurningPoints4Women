@@ -1330,16 +1330,15 @@ prss <- tpw_raw %>%
         .x == "Much of the time" ~ 3,
         .x == "Most of the time" ~ 4,
         .x == "Decline to Answer" ~ -77,
-        is.na(.x) ~ -99 # if truly missing
+        is.na(.x) ~ -99 # if truly missing: This is for HR173
       )
     )
-    )
+  )
 ```
 
 ### PRSS Missing Data 
 There are missing data in PRSS and missing rule applied.
 ```{r prss_missing}
-
 prss_miss <- prss %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
@@ -1366,7 +1365,6 @@ prss_calc <- prss %>%
       .x < 0 ~ NA_real_,
       TRUE ~ .x
     )
-    
     )
   )
 
@@ -1376,7 +1374,7 @@ prss_calc <- prss %>%
 prss_complete <- prss_calc %>%
   composite_total_avg_fun(
     id = 'id',
-    max_value = 4, # Min, should this be 5 or 4?
+    max_value = NULL,
     n_items = 5
   ) %>%
   distinct(
@@ -1397,23 +1395,22 @@ prss_complete <- prss_calc %>%
   ungroup()
 
 
-# renaming ps variables to prss and changing numbers to 1-5
+
+
 # merging to retain original values including appropriate missing values
-
-
 prss_complete <- prss_complete %>%
   select(id, prss_total) %>%
   merge(prss, by = "id") %>%
   relocate(prss_total, .after = "ps13") %>%
+  # renaming ps variables to prss and changing numbers to 1-5
   rename_with(~ paste0("prss", as.numeric(str_replace(., "^ps", "")) - 8), starts_with("ps"))
-
-
 ```
 
 ## Shame and Stigma Questionnaire (SSQ)
 ### SSQ Select Variables and Recode
 ```{r ssq}
 ssq <- tpw_raw %>%
+  # renaming ps variables to prss and changing numbers to 1-5
   select(
   id,
   ps1:ps8
@@ -1507,13 +1504,13 @@ ssq_complete <- ssq_calc %>%
   ungroup()
 
 
-## rename from ps to ssq
-## add in missing values
 
+## add in missing values
 ssq_complete <- ssq_complete %>%
   select(id, ssq_total:ssq_total_cutoff) %>%
   merge(ssq, by = "id") %>%
   relocate(ssq_total:ssq_total_cutoff, .after = "ps8") %>%
+  ## rename from ps to ssq
   rename_with(~ paste0("ssq", as.numeric(str_replace(., "^ps", ""))), starts_with("ps"))
 
 ```
@@ -2217,22 +2214,22 @@ ibq <-
          TRUE ~ .x
         )
       ),
+      ibq10_77 = case_when(ibq10_77 == "Decline to Answer" ~ "-77", TRUE ~ "0"),
+      
     across(
       .cols = c(ibq10_1:ibq10_9),
-      .fns = ~if_else(!is.na(.x), "1", "0")), 
-    ibq10_77 = case_when(
-        ibq10_77 == "Decline to Answer" ~ "-77",
-        TRUE ~ "0"
-    )) %>%
+      .fns = ~if_else(!is.na(.x), "1", "0"))
+    ) %>%
   mutate(ibq10_9 = ifelse(tolower(ibq10_9_text) %in% c("none", "no institutions selected"), "0", ibq10_9)
 ) %>%
   mutate(ibq9 = ifelse(ibq9 %in% c("N/A"), "-55", ibq9)) %>% 
   mutate(across(ibq10_1:ibq10_9, as.numeric))%>%
   mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>% # ibq 10, how many specific systems they selected
-# Min, we may consider ibq = 1 they selected systems; 0 none selected and then create a new variable that shows the total number of systems selected
+# Min, we may consider ibq = 1 they selected systems; 0 none selected and then create a new variable that shows the total number of systems selected -> ibq10 is total number 
   # mutate(ibq10 = as.character(ibq10))%>% 
   mutate(ibq10_77 = as.numeric(ibq10_77))%>%
-  mutate_at(vars(ibq10), ~case_when(ibq10_77 < 0  ~ ibq10_77, TRUE ~ . )) %>%
+  mutate_at(vars(ibq10_1:ibq10_9, ibq10), ~case_when(ibq10_77 < 0  ~ -77, TRUE ~ . )) %>%
+  mutate_at(vars(ibq10_9_text), ~case_when(is.na(ibq10_9_text) ~ "-55", TRUE ~ . )) %>%
   rename(ibq10_school = ibq10_1) %>%
   rename(ibq10_juvenile_justice = ibq10_2) %>%
   rename(ibq10_legal_system = ibq10_3) %>%
@@ -2245,6 +2242,9 @@ ibq <-
   rename(ibq10_other_text = ibq10_9_text) %>%
   relocate(ibq10, .after = ibq9) %>%
   relocate(ibq10_other_text, .after = ibq10_other)
+
+
+  mutate_at(vars(i8, i10, i12), ~case_when(id %in% c("P847") & is.na(.) ~ "-99", TRUE ~ .)) 
 
 ```
 
@@ -3524,26 +3524,7 @@ pct <- pct %>%
   select(-pct2e, -pct3e, -pct0) 
 
 
-#################################### Maria I think code in this section should be removed ###################################
-# pct_miss <- pct %>%
-#   #mutate(across(-c(id), as.numeric)) %>%
-#   pct_miss_fun(
-#     id = c("id"),
-#     n_items = 13
-#   )
-# 
-# pct_miss %>%
-#   gt::gt() %>%
-#   gt::tab_header(
-#     title = 'PCT Missing Data',
-#     subtitle = 'by Participant'
-#   )
-# # primarily missing due to not having prior pregnancy (p00a) or due to not having a traumatic childbirth (pct1)
-# pct_remove <- pct_miss %>% filter(miss_pct >= 20) %>% filter(id != "P836") %>% pull(id)
-# # above we retain P836 because they are only missing items from one subscale
-
-####################################  ending here ####################################################################
-
+# primarily missing due to not having prior pregnancy (p00a) or due to not having a traumatic childbirth (pct1)
 # missing rule for pct_preg_total 
 pct_preg_total_miss <- pct %>%
   select(id, pct2a:pct2d) %>%
@@ -3609,7 +3590,8 @@ pct_complete <- pct_calc %>%
   mutate_at(vars(pct_childbirth_total), ~case_when(id %in% pct_childbirth_total_remove ~ -99, TRUE ~ .)) %>%
   # we can merge with pct so we have correct missing codes 
   select(id,pct_preg_total, pct_childbirth_total) %>%
-  merge(pct, by = "id")
+  merge(pct, by = "id") %>%
+  relocate(pct_preg_total, pct_childbirth_total, .after = pct3d)
 
 ```
 
@@ -3980,10 +3962,10 @@ sus_internal <- sus %>%
 ```
 
 
-## PCL 
-### PCL Select Variable and Recode 
+## LEC 
+### LEC Select Variable and Recode 
 
-```{r plc }
+```{r lec }
 pcl <- tpw_raw %>%
   select(id, starts_with("pcl"), starts_with("p_cl")) %>%
   # Happened and Witnessed first developed period 
@@ -4752,8 +4734,8 @@ pcl <- pcl %>%
 
 ```
 
-### PCL Missing 
-```{r pcl_missing }
+### LEC Missing 
+```{r LEC_missing }
 # Fixed some NAs 
 columns_happen <- paste0("pcl", 1:19, "_happen")
 for (column in columns_happen) {
@@ -5074,10 +5056,11 @@ pcl_complete <- pcl_calc %>%
   merge(pcl, by = "id") %>%
   # Dropping this variable for archive. 
   select(-c(pcl1b:pcl19b_text, pcl18c2:pcl18d, matches("pcl\\d+_77"), matches("pcl\\d+_hapWit_ages_77"))) %>%
-  select(-c(pcl_total_happen, pcl_total_witness), everything(), pcl_total_happen, pcl_total_witness)
+  select(-c(pcl_total_happen, pcl_total_witness), everything(), pcl_total_happen, pcl_total_witness) %>%
+  rename_with(~ paste0("lec", str_replace(., "^pcl", "")), starts_with("pcl")) 
   
 pcl_internal_old_variable <- pcl %>%
-  select(pcl1b:pcl19b_text)
+  select(id, pcl1b:pcl19b_text)
 
 ```
 ## Merge
