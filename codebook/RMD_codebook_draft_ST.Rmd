@@ -1355,7 +1355,8 @@ dast_tbl_binary <- dast_summary_data_binary %>%
             locations = cells_column_spanners()) %>% 
   apply_tbl_theme() %>% 
   tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
-            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable")
 
 # Render the table
 dast_tbl_binary
@@ -2336,7 +2337,8 @@ bcap_tbl_binary <- bcap_summary_data_binary %>%
             locations = cells_column_spanners()) %>% 
   apply_tbl_theme() %>% 
   tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
-            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable")
 
 # Render the table
 bcap_tbl_binary
@@ -3043,8 +3045,7 @@ The missing data rule was applied. Calculations were completed for
 participants with 33% or less missing data (this includes -77 responses)
 
 Reference:
-[@kerig2019linking](https://onlinelibrary.wiley.com/doi/abs/10.1111/cpsp.12280);
-[DOI](https://doi.org/10.1111/cpsp.12280)
+[@kerig2019linking](https://onlinelibrary.wiley.com/doi/abs/10.1111/cpsp.12280)
 
 ### PRSS Variables
 
@@ -5456,6 +5457,8 @@ cint_relation_tbl <- cint_relation_summary_data %>%
   tab_footnote("") %>%
   apply_tbl_theme()
 
+# start here
+
 # Render the table
 cint_relation_tbl
 
@@ -5653,6 +5656,7 @@ cint_sub_tbl_binary <- cint_sub_summary_data_binary %>%
   tab_style(style = list(cell_fill(color = "#9BB6D1")),
             locations = cells_column_spanners()) %>% 
   apply_tbl_theme() %>% 
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable") %>%
   tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
             locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
 
@@ -5666,7 +5670,7 @@ For continuous items:
 
 ```{r cintsub-cont-desc}
 
-# start here
+
 # Create subset of  items
 cint_sub_data_subset <- complete %>%
   select(cint40, cint42, cint44,  cint48, cint49, cint51, cint52, cint53, cint55, cint57, cint59, cint67, cint69, cint71, cint73, cint75, cint77, cint81, cint83)
@@ -5988,7 +5992,7 @@ sex_word <- qualtrics %>%
   slice(1)
 
 #create table with variable name, description, and notes
-# MIN TODO, we need to add in the 25 and 32 variables that were newly created
+
 sex_word_long <- sex_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
@@ -6257,6 +6261,7 @@ sex_tbl_binary <- sex_summary_data_binary %>%
   apply_tbl_theme() %>% 
   tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
             locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable") %>%
   tab_options(table.width = pct(100))
 
 # Render the table
@@ -6936,7 +6941,8 @@ pct_tbl_binary <- pct_summary_data %>%
             locations = cells_column_spanners()) %>% 
   apply_tbl_theme() %>% 
   tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
-            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) 
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable")
 
 # Render the table
 pct_tbl_binary
