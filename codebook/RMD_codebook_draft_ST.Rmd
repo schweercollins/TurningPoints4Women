@@ -3033,19 +3033,19 @@ ggarrange(p_arq_model_s, p_arq_model_o
 
 ### PRSS Description
 
-The PRSS is a 5-item questionnaire designed to measure *insert text*
+The PRSS is a brief 5-item questionnaire designed to assess the construct of posttraumatic risk-seeking (Kerig, 2019) which proposes that, following trauma exposure, some individuals, particularly youth, engage in behaviors that that involve fear-defiance, rushing toward danger, and the cultivation of risky situations that might result in harm to themselves or others. This description was taken from the measure documentation. 
 
-For the present study, 5 items from the PRSS were collected in order to
-*TODO: insert text here*
+-   Please note that because PRSS is hypothesized to follow from trauma, individuals who do not endorse a trauma exposure will not have valid scores on the measure. Although our study appended the PRSS to other trauma indices, no decision rules were built in, thus individuals who analyze these data should be sure to check variable `pcl_total_happen` and `pcl_total_witness` to ensure that trauma exposure has occurred and that PRSS data are valid for analysis. 
 
-No items need to be reverse scored. *TODO: need change text here Higher
-scores indicate more severe mental health symptoms.*
+-   No items need to be reverse scored. 
 
-The missing data rule was applied. Calculations were completed for
-participants with 33% or less missing data (this includes -77 responses)
+-   **Higher** scores indicate **greater** posttraumatic risk-seeking behaviors.
 
-Reference:
-[@kerig2019linking](https://onlinelibrary.wiley.com/doi/abs/10.1111/cpsp.12280)
+-   There are 6 total items presented below, included the computed total score.
+
+-   The missing data rule was applied. Calculations were completed for participants with 33% or less missing data (this includes `-77` responses)
+
+Reference: [@kerig2019linking](https://onlinelibrary.wiley.com/doi/abs/10.1111/cpsp.12280)
 
 ### PRSS Variables
 
@@ -3129,8 +3129,8 @@ print(prss_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
-Variables were constructed by summing included items.
+Information on the total score is below.
+The total score was constructed by summing included items.
 
 ```{r prss alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -3151,7 +3151,7 @@ prss_scale_df <- data.frame(
   var_name = c("prss_total"),
   scale = c("PRSS Total score (5) "),
   scale_construction = c("`prss1`, `prss2`, `prss3`, `prss4`, `prss5`"),
-  scale_range = c("0-16"), #TODO maria double check range 
+  scale_range = c("0-20"), 
    alpha = c(round(prss_alpha$total$raw_alpha, 3))
   )
 
@@ -3163,7 +3163,7 @@ prss_scale_df <- gt(prss_scale_df) %>%
             scale_construction = "Scale Construction",
             scale_range = "Range*",
             alpha = "Alpha") %>% 
-  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   #cols_width(scale ~ px(135)) %>% 
   tab_options(table.width = pct(100))%>%
@@ -3179,10 +3179,12 @@ print(prss_scale_df)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and
-subscale score:
+Descriptive statistics are presented below for each item and the total score.
 
 ```{r prss-mean-items}
+
+prss_data_subset <- complete %>%
+  select(prss1, prss2, prss3, prss4, prss5, prss_total)
 
 # Calculate the summary statistics for each variable
 prss_summary_data <- lapply(prss_data_subset, function(x) {
@@ -3226,11 +3228,11 @@ prss_tbl
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale:
+The distribution for the total score is presented below:
 
 ```{r PRSS-distributions, class.source='fold', echo = FALSE}
 complete %>%
-   filter(dast_total >= 0) %>%  # Filter out missing data
+   filter(prss_total >= 0) %>%  # Filter out missing data
   composite_hist(
     x = prss_total
   ) +
