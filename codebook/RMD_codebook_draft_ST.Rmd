@@ -4741,6 +4741,7 @@ ibq_word <- qualtrics %>%
   mutate(ibq10_foster_care = "Part of question ibq10: Does TC select Foster Care") %>%
   mutate(ibq10_child_welfare = "Part of question ibq10: Does TC select Child Welfare") %>%
   mutate(ibq10_other = "Part of question ibq10: Does TC select Other") %>%
+  relocate(IBQ10_9_TEXT, .after = "ibq10_other") %>%
   slice(1)
 
 #create table with variable name, description, and notes
@@ -4751,7 +4752,8 @@ ibq_word_long <- ibq_word %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>%
-  mutate(description = if_else(var_name == "ibq10", "Total nnumber of institutions involved.", description)) 
+  mutate(description = if_else(var_name == "ibq10", "Total nnumber of institutions involved.", description)) %>%
+  mutate(description = if_else(var_name == "ibq10_9_text", "Part of question ibq10: Does TC select Other - Text", description)) 
 ```
 
 ```{r ibq-var-table, results ='asis'}
@@ -4791,8 +4793,6 @@ ibq_complete <- complete %>%
 #No internal reliability calculated for this measure per type of measure
 ```
 
-
-
 ```{r ibq-scale-table, results = 'asis'}
 # Create the table as a data frame
 ibq_scale_df <- data.frame(
@@ -4812,22 +4812,22 @@ ibq_scale_df <- gt(ibq_scale_df) %>%
              ) %>% 
   tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  cols_width(var_name ~ px (170),
+             scale ~ px(150),
+             scale_construction ~ px(360)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
 # Print the table
 print(ibq_scale_df)
-
-
 ```
 
 ### Summary Statistics
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and
-subscale score:
-<TODO: Maria: please review this table and see if there are anything you want me remove from this table>
+Descriptive statistics are presented below for each item, total, and subscale score:
+
 ```{r ibq-mean-items}
 # Calculate the summary statistics for each variable
 ibq_summary_data <- lapply(ibq_complete, function(x) {
@@ -4856,7 +4856,10 @@ ibq_tbl <- ibq_summary_data %>%
   cols_label(`1` = "Variable",
              Range = "Range*",
              Missing = "% Missing") %>% 
-  cols_width(everything() ~ pct(100)) %>%
+  #cols_width(everything() ~ pct(100)) %>%
+  tab_options(table.width = pct(100))%>%
+  cols_width(`1` ~ px(170)) %>%
+  
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -4867,6 +4870,62 @@ ibq_tbl
 
 ```
 
+For binary items:
+```{r ibq-binary}
+# Create subset of IBQ items
+ibq_data_subset_binary <- complete %>%
+  select(ibq10_school:ibq10_other)
+
+# Calculate the dichotomous summary statistics for each variable
+ibq_summary_data_binary <- lapply(ibq_data_subset_binary, function(x) {
+  x <- replace(x, x < -40, NA)
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+ibq_summary_data_binary <- as.data.frame(ibq_summary_data_binary)
+
+# Set items as first row
+ibq_summary_data_binary <- rbind(names(ibq_summary_data_binary), ibq_summary_data_binary) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+ibq_tbl_binary <- ibq_summary_data_binary %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  tab_options(table.width = pct(100))%>%
+    cols_width(#everything() ~ px(115),
+             `1` ~ px(170),
+             num_no ~ px(120),
+             num_yes ~ px(120),
+             per_no ~ px(120),
+             per_yes ~ px(120)) %>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable")
+
+# Render the table
+ibq_tbl_binary
+
+
+```
 #### Distributions
 
 Distributions are presented below for the total score and each subscale:
@@ -4876,10 +4935,17 @@ ibq_complete %>%
   filter(ibq10 >= 0) %>%
   composite_hist(
     x = ibq10, 
-    bins = 15
+    bins = 8
+  ) +
+  labs(title = "Distribution for IBQ10 Score")
+
+ibq_complete %>%
+  filter(ibq_total >= 0) %>%
+  composite_hist(
+    x = ibq_total, 
+    bins = 7
   ) +
   labs(title = "Distribution for IBQ Total Score")
-
 ```
 
 # CINT Overview
