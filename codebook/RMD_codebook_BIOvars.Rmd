@@ -15,6 +15,7 @@ pacman::p_load(readxl, here, tidyverse, openxlsx, gt, tidyverse, scales, ggpubr)
 ```
 
 ```{r import, include = FALSE}
+#Import DBS file
 #file path
 dbs_fp <- here("do_not_push", "dbs_archive.xlsx")
 
@@ -32,6 +33,13 @@ dbs_ebv_df <- read_excel(dbs_fp, sheet = "EBV")
 dbs_a1c_df <- read_excel(dbs_fp, sheet = "A1c")
 
 dbs_il6_df <- read_excel(dbs_fp, sheet = "IL6")
+
+#Import BIO assessment file
+bio_df <- read_excel(here("do_not_push", "bio_archive.xlsx"))
+#import meta data for variable tables
+bio_md <- read_excel(here("do_not_push", "bio_metadata_archive.xlsx")) %>% 
+  rename(Variable = DATA,
+         Description = `Variable description`)
 
 ```
 
@@ -198,7 +206,7 @@ apply_labtab_theme <- function(table) {
 
 # Allostatic Load Assessment
 
-*<MARIA> INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN (includes DBS and bio survey data)*
+*<MARIA> INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN (includes DBS and bio assessment data)*
 
 ## Dried Blood Spot Data Collection
 
@@ -366,7 +374,8 @@ calc_cont_sum_stats <- function(df) {
     x <- df[[name]]
     mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
     sd_val <- round(sd(x, na.rm = TRUE), 2)
-    range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+    range_val <- paste(round(min(x, na.rm = TRUE), 2),
+                       round(max(x, na.rm = TRUE), 2), sep = "-")
     miss_val <- round(mean(is.na(x)) * 100, 2)
     data.frame(Variable = name, Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
   })
@@ -2217,8 +2226,1059 @@ dbs_il6_df %>%
 
 
 
-## Other Health Measures (bio measures from bio file and AL indicators, and total AL)
+## Other Health Measures 
 
-**explain data file**
+These data are in the `bio_archive.xlsx` file. Participant ID corresponds to the `family` variable, which can be used to merge additional data files from this study. 
 
-**explain total AL as own table/section OR as total score from other health measures?**
+*<MARIA> INSERT brief description about how bio assessment (bio variables and survey variables) was measured and any special considerations for the full file/sample (e.g., incarcerated participants were not asked some questions)*
+
+
+### Blood Pressure (BP) Description
+
+These data include variables on systolic and diastolic blood pressure collected from participants. Higher scores indicate higher blood pressure. 
+
+Using these values, average blood pressure and allostatic load indicators for high blood pressure were computed. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
+
+### BP Variables
+
+#### Value Labels 
+
+Allostatic load indicators, variables ending in `cal` or `pal`, are dichotomous:
+
+```{r bp-al-labels, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+#### Variables
+
+All BP variables are presented in the following table: 
+
+```{r bp-var-tbl, results = 'asis'}
+#create function for all bio vars in bio data
+create_bio_var_tbl <- function(data, prefix) {
+  filtered_data <- data %>%
+    filter(str_starts(Variable, prefix))
+  
+  # Generate and format the table
+  var_table <- filtered_data %>%
+    gt() %>%
+    cols_width(
+      Variable ~ pct(25),
+      Description ~ pct(75)) %>%
+    apply_tbl_theme() %>%
+    tab_style(
+      style = cell_text(align = "left"), 
+      locations = cells_column_labels())
+  
+  # Return the formatted table
+  return(var_table)
+}
+
+#create table for bp vars
+print(create_bio_var_tbl(bio_md, "bp"))
+```
+
+#### Composite Variables
+
+For both systolic and diastolic blood pressure, an average value and two allostatic load indicators were calculated. One based on the clinical cut off for high blood pressure (ending in `_cal`) and the other is a percentile-based cut-off for high blood pressure (ending in `pal`) defined as the top 25% of values.
+
+Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
+
+
+```{r bp-comp-tbl, results = 'asis'}
+#extract variables from metadata
+bp_scale_vars <- bio_md %>% 
+  filter(str_starts(Variable, "bp") & str_ends(Variable, "avg|al")) %>% 
+  pull(Variable)
+
+#create table of info for AL indicators
+bp_scale_df <- data.frame(
+  var_name = bp_scale_vars,
+  scale = c("Average systolic blood pressure (2)",
+            "Average diastolic blood pressure (2)",
+            "Allostatic load indicator based on clinical cut-off for high systolic BP (1)",
+            "Allostatic load indicator based on clinical cut-off for high diastolic BP (1)",
+            "Allostatic load indicator based on top 25% of systolic BP values (1)",
+            "Allostatic load indicator based on top 25% of diastolic BP values (1)"),
+  scale_construction = c("mean(`bp1`, `bp3`)",
+                         "mean(`bp2`, `bp4`)",
+                         "`bp_sys_avg` > 139",
+                         "`bp_dia_avg` > 89",
+                         "Top 25% of observed `bp_sys_avg` values",
+                         "Top 25% of observed `bp_dia_avg` values"),
+  scale_range = c(" ", " ", "0-1", "0-1", "0-1", "0-1")) #MARIA ENTER POSSIBLE VALUES FOR BP AVERAGE or leave blank/NA
+
+#create gt table
+bp_scale_table <- bp_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(bp_scale_table)
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for BP variables.
+
+**Continuous values:** 
+
+```{r bp-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+bp_sum_tbl <- bio_df %>% 
+  select(bp1, bp2, bp3, bp4, bp_sys_avg, bp_dia_avg) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+bp_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r bp-dichot-summary-table, results = 'asis'}
+#create function to make dichotomous table
+create_dichot_gt_table <- function(data) {
+  table <- data %>%
+    gt() %>%
+    cols_label(num_no = "N",
+               per_no = "%",
+               num_yes = "N",
+               per_yes = "%",
+               Missing = "% Missing") %>%
+    tab_options(table.width = pct(100)) %>%
+    cols_align(columns = c(per_no, per_yes, num_no, num_yes, Missing), align = "center") %>%
+    tab_spanner(label = "No", columns = c(num_no, per_no)) %>%
+    tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>%
+    tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no)))
+  
+  return(table)
+}
+
+#create df - apply function to calculate summary stats and create
+bp_dichot_df <- bio_df %>% 
+  select(starts_with("bp")) %>%
+  select(ends_with("al")) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+
+#create table
+bp_tbl_dichot <- create_dichot_gt_table(bp_dichot_df)
+
+#print table
+bp_tbl_dichot
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the average scores and allostatic load indicators.
+
+**Average blood pressure:** 
+
+```{r bp-avg-plot}
+p_sbp_avg <- bio_df %>%
+  mutate(across(ends_with("avg"), ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = bp_sys_avg) + 
+  labs(title = "Distribution of Average \nSystolic BP Values") + 
+  theme(plot.title = element_text(hjust = 0.5))
+  
+
+p_dbp_avg <- bio_df %>%
+  mutate(across(ends_with("avg"), ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = bp_dia_avg) +
+  labs(title = "Distribution of Average \nDiastolic BP Values") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_sbp_avg, p_dbp_avg)
+
+```
+
+**Allostatic load indicators:**  
+
+```{r bp-cal-plots}
+
+#bp_sys_cal
+p_sbp_cal <- create_AL_plot(bio_df, "bp_sys_cal", "Systolic BP \nClinical AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#bp_dia_cal
+p_dbp_cal <- create_AL_plot(bio_df, "bp_dia_cal", "Diastolic BP \nClinical AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#a1c_pal
+# p_a1c_pal <- create_AL_plot(dbs_a1c_df, "a1c_pal", "A1C Percentile- \nDetermined AL Indicator") +
+#   theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_sbp_cal, p_dbp_cal)
+
+```
+
+```{r bp-pal-plots}
+
+#bp_sys_pal
+p_sbp_pal <- create_AL_plot(bio_df, "bp_sys_pal", "Systolic BP \nPercentile-Based AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#bp_dia_pal
+p_dbp_pal <- create_AL_plot(bio_df, "bp_dia_pal", "Diastolic BP \nPercentile-Based AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_sbp_pal, p_dbp_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for average systolic and diastolic blood pressure (`bp_sys_avg` and `bp_dia_avg`) alongside the clinical and percentile-determined allostatic load cutoffs are presented below: 
+
+```{r sys-bp-clinical-plot}
+bio_df %>%
+  filter(bp_sys_avg != "-99" & bp_sys_avg != "-55") %>% 
+  mutate(bp_sys_avg = as.numeric(bp_sys_avg)) %>% 
+  cutoff_plot2(
+    x = bp_sys_avg,
+    cutoff = 140,
+    cutoff_other = 126.875
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for Systolic BP',
+    caption = 'Clinical cutoff is 140 and \n percentile-determined cutoff is 127.'
+  )+
+  annotate("text", x = 121, y = 20, label = "Percentile") +
+  annotate("text", x = 145, y = 20, label = "Clinical")
+
+
+```
+
+```{r dia-bp-clinical-plot}
+bio_df %>%
+  filter(bp_dia_avg != "-99" & bp_dia_avg != "-55") %>% 
+  mutate(bp_dia_avg = as.numeric(bp_dia_avg)) %>% 
+  cutoff_plot2(
+    x = bp_dia_avg,
+    cutoff = 90,
+    cutoff_other = 87.875
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for Diastolic BP',
+    caption = 'Clinical cutoff is 90 and \n percentile-determined cutoff is 88.'
+  )+
+  annotate("text", x = 83, y = 14, label = "Percentile") +
+  annotate("text", x = 94, y = 14, label = "Clinical")
+
+#quantile(p$bp_dia_avg, 0.75, na.rm = TRUE)
+
+```
+
+### Body Mass Index (BMI) Description
+
+These data include variables on body mass index (BMI), including weight and height collected from participants. Higher scores indicate higher BMI. 
+
+Using BMI values, allostatic load indicators for high BMI were computed. The missing data rule was not applied since all participants who were asked BMI questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
+
+### BMI Variables
+
+#### Value Labels
+
+Allostatic load indicators, `bmi_cal`, `bmi_pal`, are dichotomous:
+
+```{r bmi-al-labels, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+#### Variables
+
+All BMI variables are presented in the following table: 
+
+```{r bmi-var-tbl, results = 'asis'}
+#create table for bmi vars
+print(create_bio_var_tbl(bio_md, "bmi"))
+```
+
+#### Composite Variables
+
+Using height and weight, BMI was calculated. Two allostatic load indicators were calculated based on BMI. One based on the clinical cut off for high BMI (`bmi_cal`) and the other is a percentile-based cut-off for BMI (`bmi_pal`) defined as the top 25% of values.
+
+Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
+
+
+```{r bmi-comp-tbl, results = 'asis'}
+#create table of info for AL indicators
+bmi_scale_df <- data.frame(
+  var_name = c("bmi_score", "bmi_cal", "bmi_pal"),
+  scale = c("Body mass index",
+            "Allostatic load indicator based on clinical cut-off for high BMI (1)",
+            "Allostatic load indicator based on top 25% of BMI values (1)"),
+  scale_construction = c("`bmi2` / ((`bmi1` / 100)^2)",
+                         "`bmi_score` > 29",
+                         "Top 25% of observed `bmi_score` values"),
+  scale_range = c(" ", "0-1", "0-1")) #MARIA INSERT POSSIBLE BMI RANGE OR NA
+
+#create gt table
+bmi_scale_table <- bmi_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(bmi_scale_table)
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for BMI variables.
+
+**Continuous values:** 
+
+```{r bmi-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+bmi_sum_tbl <- bio_df %>% 
+  select(bmi1, bmi2, bmi_score) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+bmi_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r bmi-dichot-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+bmi_dichot_df <- bio_df %>% 
+  select(starts_with("bmi")) %>%
+  select(ends_with("al")) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+
+#create table
+bmi_tbl_dichot <- create_dichot_gt_table(bmi_dichot_df)
+
+#print table
+bmi_tbl_dichot
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for BMI scores and allostatic load indicators.
+
+**BMI scores:** 
+
+```{r bmi-avg-plot}
+p_bmi_avg <- bio_df %>%
+  mutate(across(bmi_score, ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = bmi_score) + 
+  labs(title = "Distribution of BMI Values") + 
+  theme(plot.title = element_text(hjust = 0.5))
+  
+#print
+p_bmi_avg
+
+```
+
+**Allostatic load indicators:**  
+
+```{r bmi-cal-plots}
+#bmi_cal
+p_bmi_cal <- create_AL_plot(bio_df, "bmi_cal", "BMI Clinical \nAL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#bmi_pal
+p_bmi_pal <- create_AL_plot(bio_df, "bmi_pal", "BMI Percentile-\nBased AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_bmi_cal, p_bmi_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for BMI alongside the clinical and percentile-determined allostatic load cutoffs are presented below: 
+
+```{r bmi-clinical-plot}
+bio_df %>%
+  filter(bmi_score != "-99" & bmi_score != "-55") %>% 
+  mutate(bmi_score = as.numeric(bmi_score)) %>% 
+  cutoff_plot2(
+    x = bmi_score,
+    cutoff = 30,
+    cutoff_other = 36.52
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for BMI',
+    caption = 'Clinical cutoff is 30 and \n percentile-determined cutoff is 36.5.'
+  )+
+  annotate("text", x = 40, y = 20, label = "Percentile") +
+  annotate("text", x = 27.5, y = 20, label = "Clinical")
+
+
+```
+
+### Waist-to-Hip Ratio (WTH) Description
+
+These data include variables on waist-to-hip ratio collected from participants. Higher scores indicate higher measurements. 
+
+Using waist and hip measurements, waist-to-hip ratio was calculated. Allostatic load indicators for high waist-to-hip ratio were computed. The missing data rule was not applied since all participants who were asked WTH questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
+
+### WTH Variables
+
+#### Value Labels
+
+Allostatic load indicators, `wth_cal`, `wth_pal`, are dichotomous:
+
+```{r wth-al-labels, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+#### Variables
+
+All WTH variables are presented in the following table: 
+
+```{r wth-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "wth"))
+```
+
+#### Composite Variables
+
+Using waist circumference and hip measurement collected from participants, waist-to-hip ratio was calculated. Two allostatic load indicators were calculated based on waist-to-hip ratio. One based on the clinical cut off for high waist-to-hip ratio (`wth_cal`) and the other is a percentile-based cut-off for waist-to-hip ratio (`wth_pal`) defined as the top 25% of values.
+
+Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
+
+
+```{r wth-comp-tbl, results = 'asis'}
+#create table of info for AL indicators
+wth_scale_df <- data.frame(
+  var_name = c("wth_ratio", "wth_cal", "wth_pal"),
+  scale = c("Waist-to-hip ratio",
+            "Allostatic load indicator based on clinical cut-off for high waist-to-hip ratio (1)",
+            "Allostatic load indicator based on top 25% of waist-to-hip ratio values (1)"),
+  scale_construction = c("`wth1`/`wth2`",
+                         "`wth_ratio` > 0.84",
+                         "Top 25% of observed `wth_ratio` values"),
+  scale_range = c(" ", "0-1", "0-1")) #MARIA enter possible range for WTH ratio
+
+#create gt table
+wth_scale_table <- wth_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  apply_tbl_theme() 
+
+#print table
+print(wth_scale_table)
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for WTH variables.
+
+**Continuous values:** 
+
+```{r wth-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+wth_sum_tbl <- bio_df %>% 
+  select(wth1, wth2, wth_ratio) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+wth_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r wth-dichot-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+wth_dichot_df <- bio_df %>% 
+  select(starts_with("wth")) %>%
+  select(ends_with("al")) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+
+#create table
+wth_tbl_dichot <- create_dichot_gt_table(wth_dichot_df)
+
+#print table
+wth_tbl_dichot
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for WTH ratio and allostatic load indicators.
+
+**WTH ratio values:** 
+
+```{r wth-avg-plot}
+p_wth_avg <- bio_df %>%
+  mutate(across(wth_ratio, ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = wth_ratio) + 
+  labs(title = "Distribution of WTH Ratio Values") + 
+  theme(plot.title = element_text(hjust = 0.5))
+  
+#print
+p_wth_avg
+
+```
+
+**Allostatic load indicators:**  
+
+```{r wth-cal-plots}
+#wth_cal
+p_wth_cal <- create_AL_plot(bio_df, "wth_cal", "WTH Ratio \nClinical AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#wth_pal
+p_wth_pal <- create_AL_plot(bio_df, "wth_pal", "WTH Ratio \nPercentile-Based AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_wth_cal, p_wth_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for waist-to-hip ratio alongside the clinical and percentile-determined allostatic load cutoffs are presented below: 
+
+```{r wth-clinical-plot}
+bio_df %>%
+  filter(wth_ratio != "-99" & wth_ratio != "-55") %>% 
+  mutate(wth_ratio = as.numeric(wth_ratio)) %>% 
+  cutoff_plot2(
+    x = wth_ratio,
+    cutoff = .85,
+    cutoff_other = .9765
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for WTH Ratio',
+    caption = 'Clinical cutoff is 0.85 and \n percentile-determined cutoff is 0.98.'
+  )+
+  annotate("text", x = .799, y = 21.5, label = "Percentile") +
+  annotate("text", x = 1.02, y = 21.5, label = "Clinical")
+
+```
+
+
+### Peak Expiratory Flow (PEF) Description
+
+These data include variables on peak expiratory flow collected from participants, including direct peak expiratory flow and forced expiratory volume measurements. Lower scores indicate worse performance. 
+
+Using peak expiratory flow values, average peak expiratory flow was calculated. Allostatic load indicators for high peak expiratory flow were also computed. The missing data rule was applied. Calculations were completed for participants with no missing data. Missing data for each variable is presented in the descriptive statistics table below.
+
+### PEF Variables
+
+#### Value Labels
+
+Allostatic load indicators, `pef_cal`, `pef_pal`, are dichotomous:
+
+```{r pef-al-labels, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+#### Variables
+
+All PEF variables are presented in the following table: 
+
+```{r pef-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "pef"))
+```
+
+#### Composite Variables
+
+For peak expiratory flow, an average was computed. Using this average, two allostatic load indicators were calculated. One based on the clinical cut off for high peak expiratory flow (`pef_cal`) and the other is a percentile-based cut-off for peak expiratory flow (`pef_pal`) defined as the bottom 25% of values.
+
+Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
+
+
+```{r pef-comp-tbl, results = 'asis'}
+#create table of info for AL indicators
+pef_scale_df <- data.frame(
+  var_name = c("pef_avg", "pef_cal", "pef_pal"),
+  scale = c("Average peak expiratory flow",
+            "Allostatic load indicator based on clinical cut-off for low peak expiratory flow (1)",
+            "Allostatic load indicator based on bottom 25% of peak expiratory flow values (1)"),
+  scale_construction = c("(`pef1`+`pef2`+`pef3`) / 3",
+                         "`pef_avg` < 320",
+                         "Bottom 25% of observed `pef_avg` values"),
+  scale_range = c(" ", "0-1", "0-1")) #MARIA enter possible range for pef average
+
+#create gt table
+pef_scale_table <- pef_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  apply_tbl_theme() 
+
+#print table
+print(pef_scale_table)
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for PEF variables.
+
+**Continuous values:** 
+
+```{r pef-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+pef_sum_tbl <- bio_df %>% 
+  select(pef1, pef2, pef3, pef4, pef5, pef6, pef_avg) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+pef_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r pef-dichot-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+pef_dichot_df <- bio_df %>% 
+  select(starts_with("pef")) %>%
+  select(ends_with("al")) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+
+#create table
+pef_tbl_dichot <- create_dichot_gt_table(pef_dichot_df)
+
+#print table
+pef_tbl_dichot
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for the average score and allostatic load indicators.
+
+**PEF average:** 
+
+```{r pef-avg-plot}
+p_pef_avg <- bio_df %>%
+  mutate(across(pef_avg, ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = pef_avg) + 
+  labs(title = "Distribution of average PEF Values") + 
+  theme(plot.title = element_text(hjust = 0.5))
+  
+#print
+p_pef_avg
+
+```
+
+**Allostatic load indicators:**  
+
+```{r pef-cal-plots}
+#pef_cal
+p_pef_cal <- create_AL_plot(bio_df, "pef_cal", "PEF \nClinical AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#pef_pal
+p_pef_pal <- create_AL_plot(bio_df, "pef_pal", "PEF \nPercentile-Based AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_pef_cal, p_pef_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for average peak expiratory flow alongside the clinical and percentile-determined allostatic load cutoffs are presented below: 
+
+```{r pef-clinical-plot}
+bio_df %>%
+  filter(pef_avg != "-99" & pef_avg != "-55") %>% 
+  mutate(pef_avg = as.numeric(pef_avg)) %>% 
+  cutoff_plot2(
+    x = pef_avg,
+    cutoff = 319,
+    cutoff_other = 193.585
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for PEF',
+    caption = 'Clinical cutoff is 319 and \n percentile-determined cutoff is 193.6.'
+  )+
+  annotate("text", x = 150, y = 13.5, label = "Percentile") +
+  annotate("text", x = 354, y = 13.5, label = "Clinical")
+
+#quantile(p$pef_avg, 0.25, na.rm = TRUE)
+
+```
+
+
+### Pulse Reading (PULSE) Description
+
+These data include variables on pulse readings collected from participants. Higher scores indicate increased resting pulse rate. 
+
+Using pulse readings, average pulse rate was calculated. Allostatic load indicators for high pulse rate were computed. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
+
+### PULSE Variables
+
+#### Value Labels
+
+Allostatic load indicators, `pulse_cal`, `pulse_pal`, are dichotomous:
+
+```{r pulse-al-labels, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+#### Variables
+
+All PULSE variables are presented in the following table: 
+
+```{r pulse-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "pulse"))
+```
+
+#### Composite Variables
+
+Using both resting pulse readings, average pulse rate was calculated. Two allostatic load indicators were calculated based on average pulse rate. One based on the clinical cut off for high resting pulse (`pulse_cal`) and the other is a percentile-based cut-off for resting pulse (`pulse_pal`) defined as the top 25% of values.
+
+Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
+
+
+```{r pulse-comp-tbl, results = 'asis'}
+#create table of info for AL indicators
+pulse_scale_df <- data.frame(
+  var_name = c("pulse_avg", "pulse_cal", "pulse_pal"),
+  scale = c("Average resting pulse",
+            "Allostatic load indicator based on clinical cut-off for high resting pulse (1)",
+            "Allostatic load indicator based on top 25% of average resting pulse values (1)"),
+  scale_construction = c("(`pulse1`+`pulse2`) / 2",
+                         "`pulse_avg` > 89",
+                         "Top 25% of observed `pulse_avg` values"),
+  scale_range = c(" ", "0-1", "0-1")) #MARIA enter possible range for pulse 
+
+#create gt table
+pulse_scale_table <- pulse_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  apply_tbl_theme() 
+
+#print table
+print(pulse_scale_table)
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for PULSE variables.
+
+**Continuous values:** 
+
+```{r pulse-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+pulse_sum_tbl <- bio_df %>% 
+  select(pulse1, pulse2, pulse_avg) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+pulse_sum_tbl
+
+```
+
+**Allostatic load indicators:**  
+
+```{r pulse-dichot-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+pulse_dichot_df <- bio_df %>% 
+  select(starts_with("pulse")) %>%
+  select(ends_with("al")) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+
+#create table
+pulse_tbl_dichot <- create_dichot_gt_table(pulse_dichot_df)
+
+#print table
+pulse_tbl_dichot
+
+
+```
+
+#### Distributions
+
+Distributions are presented below for average resting pulse and allostatic load indicators.
+
+**Average PULSE value:** 
+
+```{r pulse-avg-plot}
+p_pulse_avg <- bio_df %>%
+  mutate(across(pulse_avg, ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = pulse_avg) + 
+  labs(title = "Distribution of Average Resting Pulse Values") + 
+  theme(plot.title = element_text(hjust = 0.5))
+  
+#print
+p_pulse_avg
+
+```
+
+**Allostatic load indicators:**  
+
+```{r pulse-cal-plots}
+#pulse_cal
+p_pulse_cal <- create_AL_plot(bio_df, "pulse_cal", "PULSE \nClinical AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#pulse_pal
+p_pulse_pal <- create_AL_plot(bio_df, "pulse_pal", "PULSE \nPercentile-Based AL Indicator") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#arrange
+ggarrange(p_pulse_cal, p_pulse_pal)
+
+```
+
+#### Clinical Categories
+
+The distribution for average resting pulse rate alongside the clinical and percentile-determined allostatic load cutoffs are presented below: 
+
+```{r pulse-clinical-plot}
+bio_df %>%
+  filter(pulse_avg != "-99" & pulse_avg != "-55") %>% 
+  mutate(pulse_avg = as.numeric(pulse_avg)) %>% 
+  cutoff_plot2(
+    x = pulse_avg,
+    cutoff = 90,
+    cutoff_other = 87.5
+  ) +
+  labs(
+    title = 'Allostatic Load Cutoff Values for PULSE',
+    caption = 'Clinical cutoff is 90 and \n percentile-determined cutoff is 87.5.'
+  )+
+  annotate("text", x = 81.5, y = 17, label = "Percentile") +
+  annotate("text", x = 94.5, y = 17, label = "Clinical")
+
+#quantile(p$pulse_avg, 0.75, na.rm = TRUE)
+```
+
+
+### Total Allostatic Load (TOTAL) Description
+
+These data include one variable representing total allostatic load. It is a count of all allostatic load indicators in the full dataset, including allostatic load indicators from the Dried Blood Spot assessment (DBS). Higher scores indicate increased allostatic load. 
+
+The missing data rule was applied. Calculations were completed for participants that has less than 20% missing data on allostatic load indicators. Missing data for total allostatic load is presented in the descriptive statistics table below.
+
+### TOTAL Variables
+
+#### Value Labels
+
+There are no value labels, this variable is a count. 
+
+#### Variables
+
+Information for the `total_al` variable is presented in the following table: 
+
+```{r pulse-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "total"))
+```
+
+#### Composite Variables
+
+The total allostatic load score was calculated by creating a sum of all clinical allostatic load indicator variables (ending in `_cal`), including those in the DBS data collection. The percentile-based allostatic load indicator was used for Epstein-Barr virus (`ebv_pal`) since a clinical indicator was not calculated. 
+
+Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
+
+
+```{r total-comp-tbl, results = 'asis'}
+#create table of info for AL indicators
+total_scale_df <- data.frame(
+  var_name = c("total_al"),
+  scale = c("Total allostatic load score"),
+  scale_construction = c("`bp_sys_cal` + `bp_dia_cal` + `bmi_cal` + `wth_cal` + \n`pef_cal` + `pulse_cal`+
+                         `a1c_cal` + `cho_cal` + `crp_cal` + \n`ebv_pal` + `hdl_cal` + `il6_cal` + `trp_cal`"),
+  scale_range = c("0-13"))  
+
+#create gt table
+total_scale_table <- total_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  apply_tbl_theme() 
+
+#print table
+print(total_scale_table)
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for the total allostatic load score:
+
+```{r total-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+total_sum_tbl <- bio_df %>% 
+  select(total_al) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+total_sum_tbl
+
+```
+
+
+#### Distributions
+
+Distributions are presented below for the total allostatic load score:
+
+```{r total-avg-plot}
+p_total_avg <- bio_df %>%
+  mutate(across(total_al, ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = total_al) + 
+  labs(title = "Distribution of Total Allostatic Load Score") + 
+  theme(plot.title = element_text(hjust = 0.5))
+  
+#print
+p_total_avg
+
+```
+
+#### Clinical Categories
+
+The distribution for total allostatic load score alongside the clinical and percentile-determined cutoffs are presented below: 
+
+```{r pulse-clinical-plot}
+# bio_df %>%
+#   filter(total_al != "-99" & total_al != "-55") %>% 
+#   mutate(total_al = as.numeric(total_al)) %>% 
+#   cutoff_plot2(
+#     x = total_al,
+#     cutoff = 90,
+#     cutoff_other = 87.5
+#   ) +
+#   labs(
+#     title = 'Clinical Cutoff Values for Total AL Score',
+#     caption = 'Clinical cutoff is 90 and \n percentile-determined cutoff is 87.5.'
+#   )+
+#   annotate("text", x = 81.5, y = 17, label = "Percentile") +
+#   annotate("text", x = 94.5, y = 17, label = "Clinical")
+
+```
+
+
+
