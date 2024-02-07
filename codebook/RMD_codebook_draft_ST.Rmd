@@ -4995,7 +4995,7 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
                                             \n 7 = Student
                                             \n 8 = Something else, please briefly describe
                                             \n -77 = Decline to Answer",
-                           row_number() %in% c(8,9) ~ "1 = Always or almost always
+                           row_number() %in% c(9, 10) ~ "1 = Always or almost always
                                             \n 2 = Often
                                             \n 3 = About half the time
                                             \n 4 = Occasionally
@@ -5099,7 +5099,7 @@ cint_socio_tbl <- cint_socio_summary_data %>%
              Missing = "% Missing") %>% 
   # cols_width(everything() ~ pct(100)) %>%
   cols_align(columns = c("Missing"), align = "left")  %>%
-  tab_options(table.border.bottom.style = "hidden") %>%
+  # tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 
 # Render the table
@@ -6769,7 +6769,7 @@ print(pct_label_table)
 
 
   
-#### PCT Survey Items
+### PCT Survey Items
 PCT survey items are presented in the following table:
 
 **Question stem: Thinking about your partner, how often is it true that they:**
@@ -7159,14 +7159,145 @@ Reference:
   
 ### PCL Variables
   
-#### Value Labels
+#### Value LabelsNot Endorsed
+Answer Option A
+```{r LEC-label-table, results = 'asis'}
+lec_label_df <- data.frame(
+  value = c("0", "1"),
+  label = c("Not Endorsed","Happen to me"),
+  label2 = c("Not Endorsed","Witnessed it"),
+  label3 = c("Not Endorsed","Learned about it"),
+  label4 = c("Not Endorsed","No (Did not happen)")
+  ) %>% 
+  t() %>% 
+  as.data.frame()
+
+lec_label_df <- setNames(lec_label_df[-1, ], unlist(lec_label_df[1, ]))
 
 
+#create table
+lec_label_table <- lec_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>%
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(lec_label_table)
+```
+
+Answer Option B
+```{r LEC-label-table-2, results = 'asis'}
+lec_label_df_2 <- data.frame(
+  value = c("0", "1"),
+  label = c("Not Endorsed","Ages 0-5"),
+  label2 = c("Not Endorsed","Ages 6-11"),
+  label3 = c("Not Endorsed","Ages 12-19"),
+  label4 = c("Not Endorsed","Adulthood")
+  ) %>% 
+  t() %>% 
+  as.data.frame()
+
+lec_label_df_2 <- setNames(lec_label_df_2[-1, ], unlist(lec_label_df_2[1, ]))
+
+
+#create table
+lec_label_table_2 <- lec_label_df_2 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>%
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(lec_label_table_2)
+```
   
-####
+  
+Answer Option C
+```{r LEC-label-table-3, results = 'asis'}
+lec_label_df_3 <- data.frame(
+  value = c("1", "2", "3", "4"),
+  label = c("Ages 0-5","Ages 6-11", "Ages 12-19", "Adulthood")
+  ) %>% 
+  t() %>% 
+  as.data.frame()
+
+lec_label_df_3 <- setNames(lec_label_df_3[-1, ], unlist(lec_label_df_3[1, ]))
+
+
+#create table
+lec_label_table_3 <- lec_label_df_3 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>%
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(lec_label_table_3)
+```
+
+Answer Option D
+```{r LEC-label-table-4, results = 'asis'}
+lec_label_df_4 <- data.frame(
+  value = c("0", "1", "2", "3", "4", "5", "6"),
+  label = c("None - did not experience","1 time ever", "2 or more times", "1-2 month", "1-2 times per week", "2-3 times each week", "Almost daily")
+  ) %>% 
+  t() %>% 
+  as.data.frame()
+
+lec_label_df_4 <- setNames(lec_label_df_4[-1, ], unlist(lec_label_df_4[1, ]))
+
+
+#create table
+lec_label_table_4 <- lec_label_df_4 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>%
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(lec_label_table_4)
+```
+Answer Option E
+```{r LEC-label-table-5, results = 'asis'}
+lec_label_df_5 <- data.frame(
+  value = c("0", "1"),
+  label = c("No","Yes")) %>% 
+  t() %>% 
+  as.data.frame()
+
+lec_label_df_5 <- setNames(lec_label_df_5[-1, ], unlist(lec_label_df_5[1, ]))
+
+
+#create table
+lec_label_table_5 <- lec_label_df_5 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>%
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(lec_label_table_5)
+```
+#### PCL Survey Items 
 PCL survey items are presented in the following table:
-  
-Leading question: Thinking about your partner, how often is it true that they:
+
+
 ```{r pcl-var-prep}
 # Pull question wording from Qualtrics data
 pcl_word <- qualtrics %>% 
@@ -7187,11 +7318,7 @@ pcl_word_long <- pcl_word %>%
          notes = as.character("")) %>% 
   # Edits Variable description and value
   mutate(description = if_else(var_name == "pcl1", "Natural disaster (for example, flood, hurricane, tornado, earthquake).", description)) %>%
-  mutate(description = if_else(var_name == "pcl1", "How old were you when this occurred?.", description))
-  
- # mutate(Value = if_else(var_name %in% everything(), paste0("This item should be reverse scored. ", var_name, "_r is reverse scored", `Value`)) 
-
-
+  mutate(description = if_else(var_name == "pcl1", "How old were you when this occurred?.", description)) 
 ```
 
 ```{r pcl-var-table, results ='asis'}
@@ -7205,7 +7332,7 @@ pcl_gt_table <- pcl_gt_table %>%
              #notes = "Notes"
   ) %>% 
   apply_tbl_theme() %>% 
-  cols_width(description ~ px(300),
+  cols_width(notes ~ px(150),
              var_name ~ px(100)
   ) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
