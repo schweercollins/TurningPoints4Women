@@ -2390,8 +2390,6 @@ dyadc_word <- qualtrics %>%
 
 #create table with variable name, description, and notes
 
-## this is a new try for adding in the screener which needs to be added to raw data, too MARIA TODO
-
 
 dyadc_word_long <- dyadc_word %>% 
   pivot_longer(cols = everything(), 
@@ -2399,25 +2397,14 @@ dyadc_word_long <- dyadc_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-<<<<<<< HEAD
          Value = case_when(
          between(row_number(), 2, 16)  ~ "0 = Always Disagree 
-=======
-         Value = case_when(between(row_number(), 2, 16)  ~ "0 = Always Disagree 
->>>>>>> ebabd855cc94dcf2eae301bae9bcd83cc6b4caf1
                                                  \n1 = Almost Always Disagree
                                                  \n2 = Frequently Disagree
                                                  \n3 = Occasionally Disagree
                                                  \n4 = Almost Always Agree
-<<<<<<< HEAD
                                                  \n5 = Always Agree",
   row_number() %in% c(17, 18, 21:23) ~ "0 = All the time 
-=======
-                                                 \n5 = Always Agree")) %>%
-  ## adding this in for the screener notes
-  mutate(Value = case_when(row_number() %in% c(1) ~ "0 = no, \n1 = yes")) %>%
-    mutate(Value = case_when(row_number() %in% c(17, 18, 21:23) ~ "0 = All the time 
->>>>>>> ebabd855cc94dcf2eae301bae9bcd83cc6b4caf1
                                                  \n1 = Most of the time
                                                  \n2 = More often than not
                                                  \n3 = Occasionally
@@ -2463,6 +2450,7 @@ dyadc_word_long <- dyadc_word %>%
   mutate(Value = case_when(var_name == "dyadc screener" ~ "0 = No \n1 = Yes", TRUE ~ Value)) %>%
   mutate(var_name = if_else(var_name == "dyadc screener", "dyadc_screener", var_name)) %>%
   slice(1:33)
+
 
 
 ```
