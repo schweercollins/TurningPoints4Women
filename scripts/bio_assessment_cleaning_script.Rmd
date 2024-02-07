@@ -218,7 +218,7 @@ bio_td <- bio_df %>%
   mutate(missing_data_proportion = rowMeans(select(., ends_with("_cal")) %>% 
       mutate(across(everything(), ~ is.na(.) | . == -99 | . == -55)), na.rm = TRUE)) %>% 
   mutate(total_al = ifelse(missing_data_proportion < 0.20, 
-                           rowSums(select(., ends_with("_cal")) == 1, na.rm = TRUE), 
+                           rowSums(select(., ends_with("_cal"), ebv_pal) == 1, na.rm = TRUE), 
                            NA)) %>% 
   mutate(across(any_of(vars_not_incar), ~ ifelse(is.na(.) & (family == "HR181" | family == "P819"), "-55", .))) %>% 
   rename(bp1 = bp1a,
