@@ -2358,13 +2358,14 @@ completed only with participants that had less than 20% missing data (this inclu
 
 -   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
--   There are no reverse scored variables.
+-   There are two reverse scored variables: `das18_r` and `das19_r` are the reverse scored variables archived in this file.
 
 -   Participants who reported they were not currently in a (romantic) relationship, or in a relationship in the past 6 months, were not administered this survey. 
 
 -   Guidance on clinical cutoffs are presented in the Spanier 1976 article and may be obtained through other empirical papers that use the DAS.
 
 References:  
+
 -   [@spanier1976measuring](https://www.jstor.org/stable/350547)
 
 -   [@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug)

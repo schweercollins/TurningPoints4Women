@@ -3081,7 +3081,15 @@ cint_substance <- tpw_raw %>%
     cint84_5 = case_when(cint84_5 == "5. Romantic partner" ~ "5", TRUE ~ cint84_5),
     cint84_6 = case_when(cint84_6 == "6. Other" ~ "6", TRUE ~ cint84_6),
     cint84_77 = case_when(cint84_77 == "Decline to Answer" ~ "-77", TRUE ~ cint84_77)
-)
+) %>%
+  # update data errors verified 
+  mutate(cint40 = ifelse(id == "P844", 180, cint40)) %>%
+  mutate(cint42 = ifelse(id == "HR163", 15, cint42)) %>%
+  mutate(cint42 = ifelse(id == "P871", 10, cint42)) %>%
+  mutate(cint42 = ifelse(id == "P893", 10, cint42)) %>%
+  mutate(cint42 = ifelse(id == "HR128", 7, cint42)) %>%
+  # to be consistent with 180 = 3 months
+  mutate(cint40 = ifelse(id == "P835", 180, cint40))
 
 # Combine cint1 answer options to cint1 due to skip rule 
 cint_substance$cint84 <- apply(cint_substance[, c("cint84_1", "cint84_2", "cint84_3", "cint84_4", "cint84_5", "cint84_6", "cint84_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
