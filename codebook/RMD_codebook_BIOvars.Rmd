@@ -34,7 +34,7 @@ dbs_a1c_df <- read_excel(dbs_fp, sheet = "A1c")
 
 dbs_il6_df <- read_excel(dbs_fp, sheet = "IL6")
 
-#Import BIO assessment file
+#import BIO assessment file
 bio_df <- read_excel(here("do_not_push", "bio_archive.xlsx"))
 #import meta data for variable tables
 bio_md <- read_excel(here("do_not_push", "bio_metadata_archive.xlsx")) %>% 
@@ -3165,7 +3165,7 @@ bio_df %>%
 
 ### Total Allostatic Load (TOTAL) Description
 
-These data include one variable representing total allostatic load. It is a count of all allostatic load indicators in the full dataset, including allostatic load indicators from the Dried Blood Spot assessment (DBS). Higher scores indicate increased allostatic load. 
+These data include one variable representing total allostatic load. It is a count of all allostatic load indicators in the full data set, including allostatic load indicators from the Dried Blood Spot assessment (DBS). Higher scores indicate increased allostatic load. 
 
 The missing data rule was applied. Calculations were completed for participants that has less than 20% missing data on allostatic load indicators. Missing data for total allostatic load is presented in the descriptive statistics table below.
 
@@ -3179,7 +3179,7 @@ There are no value labels, this variable is a count.
 
 Information for the `total_al` variable is presented in the following table: 
 
-```{r pulse-var-tbl, results = 'asis'}
+```{r total-var-tbl, results = 'asis'}
 #create table for vars
 print(create_bio_var_tbl(bio_md, "total"))
 ```
@@ -3262,7 +3262,7 @@ p_total_avg
 
 The distribution for total allostatic load score alongside the clinical and percentile-determined cutoffs are presented below: 
 
-```{r pulse-clinical-plot}
+```{r total-clinical-plot}
 # bio_df %>%
 #   filter(total_al != "-99" & total_al != "-55") %>% 
 #   mutate(total_al = as.numeric(total_al)) %>% 
@@ -3281,4 +3281,35 @@ The distribution for total allostatic load score alongside the clinical and perc
 ```
 
 
+### RAND Health Survey, SF-36 (RHS)
 
+The RAND Health Survey SF-36 (RHS) is designed to measure health concepts, such as limitations, well-being, and general health. 
+
+For the present study, 12 out of the 36 items from the RHS were collected in order to calculate the **General health**, **Role limitations due to physical health**, and **Role limitations due to emotional problems** subscales.
+    + **General health** reflects ... <MARIA> INSERT INFO
+    + **Role limitations due to physical health** reflects ...
+    + **Role limitations due to emotional problems** reflects...
+
+Item numbers in this data set may not match original item numbers from the RHS-SF36. See the following table for corresponding item numbers from the original RHS_SF36:
+
+MAKE HTML TABLE WITH OG VARIABLE NUMBERS (OR CREATE TEMPLATE FOR SOMEONE TO FILL OUT)
+
+REVERSE SCORED
+
+PERCENTAGE VARS
+
+HIGHER SCORES INDICATE...
+
+MISSING DATA RULE
+
+FOLLOW MAIN CODEBOOK SURVEY DATA DESCRIPTION AND FLOW FOR REST OF SECTIONS
+
+
+
+
+### ... ETC
+(bio measures from bio file and AL indicators, and total AL)
+
+**explain data file**
+
+**explain total AL as own table/section OR as total score from other health measures?**
