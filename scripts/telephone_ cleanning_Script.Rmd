@@ -897,6 +897,7 @@ bcap_complete <- bcap %>%
 ### DAS Select Variables and Recode 
 ```{r dyadc}
 # Referred to as dyadc in coding, but this is the DAS. 
+# Min can you please pull in the dyad screener variable and we will add it to the binary table; I think it is called this `DYADC Screener`; please rename for consistency with codebook to dyadc_screener
 dyadc <-
   tpw_raw %>% 
   select(
@@ -944,6 +945,7 @@ dyadc <-
         TRUE ~ .x
       )
     ),
+    # Min, make the reversed (_r) and then create unreversed variables for 18 and 19
     across(
       .cols = c(e18,e19), 
       .fns = ~case_when(

@@ -2349,22 +2349,22 @@ bcap_tbl_binary
 
 The DAS is a self-report measure used to assess dyadic adjustment (e.g., interpersonal tensions, dyadic satisfaction, dyadic functioning).
 
--   For the present study, all 32 items from the DAS were collected, and the **total score** and all subscales are included: **Consensus**, **Affective Expression**, **Satisfaction**, and **Cohesion**, thus there are 37 total items.
+-   For the present study, all 32 items from the DAS were collected, and the **total score** and all subscales are included: **Consensus**, **Affective Expression**, **Satisfaction**, and **Cohesion**, and the screener item, thus there are 38 total items.
 
 -   **Higher** scores indicate **more** positive dyadic (couple) adjustment, and **greater** consensus, affective expression, satisfaction, and cohesion in the couple relationship.
 
--   The missing data rule was applied. Calculations were
-completed only with participants that had less than 20% missing data (this includes `-77` responses) # MARIA TO DO CHECK
+-   The missing data rule was applied. See coding script for details. Calculations were
+completed only with participants that had less than 20% missing data (this includes `-77` responses).
 
 -   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
--   There are two reverse scored variables: `das18_r` and `das19_r` are the reverse scored variables archived in this file.
+-   There are two reverse scored variables: `das18_r` and `das19_r` and the reverse scored variables archived in this file.
 
--   Participants who reported they were not currently in a (romantic) relationship, or in a relationship in the past 6 months, were not administered this survey. 
+-   Participants who reported they were not currently in a (romantic) relationship, or in a relationship in the past 6 months, were not administered this survey. This screening item is included in the data. 
 
 -   Guidance on clinical cutoffs are presented in the Spanier 1976 article and may be obtained through other empirical papers that use the DAS.
 
-References:  
+References:    
 
 -   [@spanier1976measuring](https://www.jstor.org/stable/350547)
 
@@ -2503,7 +2503,8 @@ Information on total score and subscale variables are below. The total score and
 
 
 ```{r dyadc alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-#Calculate internal reliability 
+# TODO update with reverse scored items
+# Calculate internal reliability 
 dyadc_alpha <-
   complete %>% 
   select(
@@ -2596,10 +2597,14 @@ dyadc_data_subset <- complete %>%
 
 # Calculate the summary statistics for each variable
 dyadc_summary_data <- lapply(dyadc_data_subset, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -2632,20 +2637,25 @@ dyadc_tbl
 For binary items:
 
 ```{r dyadc-binary-desc}
-
+# TODO add in the screening item here
 # Create subset of BCAP items
 dyadc_data_subset_binary <- complete %>%
   select(das29, das30)
 
 # Calculate the dichotomous summary statistics for each variable
 dyadc_summary_data_binary <- lapply(dyadc_data_subset_binary, function(x) {
-  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
-  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
-  num_no <- sum(x == 0, na.rm = TRUE)
-  num_yes <-sum(x == 1, na.rm = TRUE)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  per_no <- paste0(round(sum(x_no_negatives == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x_no_negatives == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x_no_negatives == 0, na.rm = TRUE)
+  num_yes <-sum(x_no_negatives == 1, na.rm = TRUE)
   miss_val <- round(mean(is.na(x)) * 100, 2)
   c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
+
 
 # Convert summary_data to a data frame
 dyadc_summary_data_binary <- as.data.frame(dyadc_summary_data_binary)
@@ -2675,7 +2685,8 @@ dyadc_tbl_binary <- dyadc_summary_data_binary %>%
   apply_tbl_theme() %>% 
   tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
             locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
-  tab_options(table.width = pct(100))
+  tab_options(table.width = pct(100)) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable")
 
 # Render the table
 dyadc_tbl_binary
@@ -2687,6 +2698,7 @@ Distributions are presented below for the total score and each subscale:
 
 ```{r dyadc-distributions, class.source='fold', echo = FALSE}
 p_dyadc_total <- complete %>%
+  filter(dyadc_total >= 0) %>%
   composite_hist(
     x = dyadc_total
   ) +
@@ -2695,6 +2707,7 @@ p_dyadc_total <- complete %>%
   )
 
 p_dyadc_con <- complete %>%
+  filter(dyadc_con >= 0) %>%
   composite_hist(
     x = dyadc_con
   ) +
@@ -2703,6 +2716,7 @@ p_dyadc_con <- complete %>%
   )
 
 p_dyadc_aff_e <- complete %>%
+  filter(dyadc_aff_exp >= 0) %>%
   composite_hist(
     x = dyadc_aff_exp,
     bins = 10
@@ -2712,6 +2726,7 @@ p_dyadc_aff_e <- complete %>%
   )
 
 p_dyadc_satis <- complete %>%
+  filter(dyadc_satis >= 0) %>%
   composite_hist(
     x = dyadc_satis
   ) +
@@ -2720,6 +2735,7 @@ p_dyadc_satis <- complete %>%
   )
 
 p_dyadc_choes <- complete %>%
+  filter(dyadc_cohes >= 0) %>%
   composite_hist(
     x = dyadc_cohes
   ) +
@@ -2978,6 +2994,7 @@ arq_tbl <- arq_summary_data %>%
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
   tab_options(table.width = pct(100))%>%
+  cols_width(`1` ~ px(200)) %>%
   apply_tbl_theme()
 
 # Render the table
