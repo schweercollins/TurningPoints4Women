@@ -2217,7 +2217,6 @@ ibq <-
         )
       ),
       ibq10_77 = case_when(ibq10_77 == "Decline to Answer" ~ "-77", TRUE ~ "0"),
-      
     across(
       .cols = c(ibq10_1:ibq10_9),
       .fns = ~if_else(!is.na(.x), "1", "0"))
@@ -2226,7 +2225,8 @@ ibq <-
 ) %>%
   mutate(ibq9 = ifelse(ibq9 %in% c("N/A"), "-55", ibq9)) %>% 
   mutate(across(ibq10_1:ibq10_9, as.numeric))%>%
-  mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>% # ibq 10, how many specific systems they selected
+  #ibq10 is total number of systems selected 
+  mutate(ibq10 = rowSums(select(., ibq10_1:ibq10_9), na.rm = TRUE))%>% 
 # Min, we may consider ibq = 1 they selected systems; 0 none selected and then create a new variable that shows the total number of systems selected -> ibq10 is total number 
   # mutate(ibq10 = as.character(ibq10))%>% 
   mutate(ibq10_77 = as.numeric(ibq10_77))%>%
@@ -2244,9 +2244,6 @@ ibq <-
   rename(ibq10_other_text = ibq10_9_text) %>%
   relocate(ibq10, .after = ibq9) %>%
   relocate(ibq10_other_text, .after = ibq10_other)
-
-
-
 ```
 
 ### IBQ Missing Data 
@@ -2259,8 +2256,9 @@ ibq <- ibq %>%
 
 ibq_miss <- ibq %>%
   mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
+  select(id, ibq1:ibq7) %>%  # only ibq1:ibq7 was used to calculated ibq_total
   pct_miss_fun(
-    id = c("id", "ibq10_school", "ibq10_juvenile_justice", "ibq10_legal_system", "ibq10_police", "ibq10_medical", "ibq10_church", "ibq10_foster_care", "ibq10_child_welfare","ibq10_other","ibq10_other_text", "ibq10_77"),
+    id = c("id"),
     n_items = 10
   ) 
 
@@ -2270,6 +2268,7 @@ ibq_miss %>%
     title = 'IBQ Missing Data',
     subtitle = 'By Participant')
 
+ibq_remove <- ibq_miss %>% filter(miss_pct >= 30) %>% pull(id)
 ```
 
 ### IBQ Calculations & Subscale
@@ -2295,16 +2294,19 @@ ibq <- ibq %>%
 # IBQ Total Sum Score creation
 ibq_complete <-
   ibq_calc %>%
-  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) 
+  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) %>%
+  # Apply missing rule for ibq_total 
+  mutate_at(vars(ibq_total), ~case_when(id %in% ibq_remove ~ -99, TRUE ~ .))
 
 
 ## Pull in missing values
 # drop ibq10_77 as this is an empty value
 
 ibq_complete <- ibq_complete %>%
-  select(id, ibq10_school:ibq10_other_text, ibq_total) %>% # dropped ibq10_77 no values
+  select(id, ibq10_school:ibq10_other_text, ibq_total) %>% # value in ibq10_77 is represented in other ibq10 items 
   merge(ibq, by="id") %>%
-  relocate(ibq10_school:ibq10_other_text, .after = "ibq10")
+  relocate(ibq10_school:ibq10_other_text, .after = "ibq10") %>%
+  relocate(ibq_total, .after = "ibq10_other_text")
 
 ## de-identify ibq10 open text
 ## update values when person endorsed a system already listed
@@ -2315,7 +2317,6 @@ ibq_complete <- ibq_complete %>%
 # code goes here
 # this code also handles missing data
 
- 
 
 ```
 
