@@ -6197,7 +6197,7 @@ For binary items:
 ```{r sex-binary}
 # Create subset of sex binary items
 sex_data_subset_binary <- complete %>%
-  select(s25_genitalherpes:s25_8_text, s32_maleSame:s32_NBOlder2)
+  select(s25_genitalherpes:s25_other, s32_maleSame:s32_NBOlder2)
 
 # Calculate the dichotomous summary statistics for each variable
 sex_summary_data_binary <- lapply(sex_data_subset_binary, function(x) {
@@ -6226,9 +6226,12 @@ sex_tbl_binary <- sex_summary_data_binary %>%
              num_yes = "N",
              per_yes = "%",
              Missing = "% Missing") %>% 
-  cols_width(everything() ~ px(115),
-             num_no ~ px(100),
-             num_yes ~ px(100)) %>%
+  cols_width(#everything() ~ px(115),
+             `1` ~ px(200),
+             num_no ~ px(120),
+             num_yes ~ px(120),
+             per_no ~ px(120),
+             per_yes ~ px(120)) %>%
   cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
   tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
   tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
