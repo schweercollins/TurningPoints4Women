@@ -2389,27 +2389,8 @@ dyadc_word <- qualtrics %>%
 
 #create table with variable name, description, and notes
 
-## this is a new try for adding in the screener which needs to be added to raw data, too
-## Maria edit here
-dyadc_word_long <- dyadc_word %>% 
-  pivot_longer(cols = everything(), 
-               names_to = "var_name",
-               values_to = "description") %>% 
-  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
-         var_name = str_to_lower(var_name)) %>%
-  mutate(Value = case_when(
-    between(row_number(), 2, 16) ~ "0 = Always Disagree \n1 = Almost Always Disagree \n2 = Frequently Disagree \n3 = Occasionally Disagree \n4 = Almost Always Agree \n5 = Always Agree",
-    row_number() %in% c(17, 18, 21:23) ~ "0 = All the time \n1 = Most of the time \n2 = More often than not \n3 = Occasionally \n4 = Rarely \n5 = Never",
-    row_number() %in% c(19,20) ~ "0 = Never \n1 = Rarely \n2 = Occasionally \n3 = More often than not \n4 = Most of the time \n5 = All the time ",
-    between(row_number(), 24, 25 ) ~ "0 = Never \n1 = Rarely \n2 = Occasionally \n3 = Almost every day \n4 = Every day",
-    between(row_number(), 26,29) ~ "0 = Never \n1 = Less than once a month \n2 = Once or twice a month \n3 = Once or twice a week \n4 = Once a day \n5 = More often",
-    row_number() %in% c(30,31) ~ "0 = Yes \n1 = No",
-    row_number() == 32 ~ "0 = Extremely Unhappy \n1 = Fairly Unhappy \n2 = A Little Unhappy \n3 = Happy \n4 = Very Happy \n5 = Extremely Happy \n6 = Perfect",
-    row_number() >= 33 ~ "0 = My relationship can never succeed, and there is no more that I can do to keep the relationship going. \n1 = It would be nice if it succeeded, but I refuse to do any more than I am doing now to keep the relationship going. \n2 = It would be nice if my relationship succeeded, but I can’t do much more than I’m doing now to help it succeed. \n3 = I want very much for my relationship to succeed, and will do my fair share to see that it does. \n4 = I want very much for my relationship to succeed, and will do all I can to see that it does. \n5 = I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
-  )) %>%
-  mutate(description = if_else(var_name == "das31", " Please indicate the number that best describes the degree of happiness in your relationship.",
-                               if_else(var_name == "das32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
-  slice(1:33)
+## this is a new try for adding in the screener which needs to be added to raw data, too MARIA TODO
+
 
 dyadc_word_long <- dyadc_word %>% 
   pivot_longer(cols = everything(), 
@@ -2417,15 +2398,14 @@ dyadc_word_long <- dyadc_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         Value = between(row_number(), 2, 16)  ~ "0 = Always Disagree 
+         Value = case_when(
+         between(row_number(), 2, 16)  ~ "0 = Always Disagree 
                                                  \n1 = Almost Always Disagree
                                                  \n2 = Frequently Disagree
                                                  \n3 = Occasionally Disagree
                                                  \n4 = Almost Always Agree
-                                                 \n5 = Always Agree") %>%
-  ## adding this in for the screener notes
-  mutate(Value = case_when(row_number() %in% c(1) ~ "0 = no, \n1 = yes",
-    mutate(Value = case_when(row_number() %in% c(17, 18, 21:23) ~ "0 = All the time 
+                                                 \n5 = Always Agree",
+  row_number() %in% c(17, 18, 21:23) ~ "0 = All the time 
                                                  \n1 = Most of the time
                                                  \n2 = More often than not
                                                  \n3 = Occasionally
@@ -2463,9 +2443,13 @@ dyadc_word_long <- dyadc_word %>%
                                                  \n3 =	I want very much for my relationship to succeed, and will do my fair share to see that it does.
                                                  \n4 =	I want very much for my relationship to succeed, and will do all I can to see that it does.
                                                  \n5 =	I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
-                           ))%>% 
+                           )) %>% 
    mutate(description = if_else(var_name == "das31", " Please indicate the number that best describes the degree of happiness in your relationship.",
-                               if_else(var_name == "das32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description))) %>%
+                                if_else(var_name == "dyadc screener", "Are you currently or have you been in a (romantic) relationship in the past 6 months?",
+                                
+                               if_else(var_name == "das32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description)))) %>%
+  mutate(Value = case_when(var_name == "dyadc screener" ~ "0 = No \n1 = Yes", TRUE ~ Value)) %>%
+  mutate(var_name = if_else(var_name == "dyadc screener", "dyadc_screener", var_name)) %>%
   slice(1:33)
 
 
@@ -2755,24 +2739,37 @@ ggarrange(p_dyadc_total, p_dyadc_con + rremove("ylab"),
 
 ### ARQ Description
 
-The ARQ is a self-report measure used to categorize attachment styles in
-adulthood. <MARIA> CONFIRM THIS IS CORRECT
+The ARQ is a brief self-report measure used to categorize attachment styles in adulthood. 
 
-For the present study, all 5 items from the ARQ were collected in order
-to construct four attachment styles (secure, fearful, preoccupied, and
-dismissing).
+-   For the present study, all 5 items from the ARQ were collected in order to construct four attachment styles (secure, dismissing, preoccupied, fearful).
 
-No items need to be reverse scored. Participants self-select one
-attachment style that best describes them in the first question `rq1`,
-then rate their agreement with each attachment style for `rqa` - `rqd`.
-Higher ratings indicate more agreement with the statement.
+-   There are a total of 8 items, including original items and computed scores.
 
-The missing data rule is applied. Calculations were completed for
+-   No items need to be reverse scored. 
+
+-   Scoring Information  
+
+    + Participants self-select one attachment style that best describes them in the first question `rq1`, and then rate their agreement with each attachment style for `rqa` - `rqd`.
+
+    + Higher ratings indicate more agreement with the statement.
+
+    + `arq_group` is a variable that represents each participants highest rating for attachment style across `rqa` - `rqd`, Participants were classified into one of four attachment groups (secure, dismissing, preoccupied, fearful). In cases where the participant's highest rating was equivalent across multiple styles, no classficiation was given (`-99`).
+
+    + `arq_model_self_attach_anxiety` Model of the self (i.e., attachment anxiety) was calculated by summing secure and dismissing ratings then subtracting the sum of preoccupied and fearful items. 
+
+    + `arq_model_other_attach_avoid` Model of the other (i.e., attachment avoidance) was constructed by summing secure and preoccupied items and subtracting the sum of dismissing and fearful items. 
+
+    + Postive scores on the two attachment models (self and other) indicate more positive attachment models ad negative scores indicate more negative models. See cited references for more information. 
+
+-   The missing data rule is applied. Calculations were completed for
 participants with 20% or less missing data (this includes -77 responses)
 
-Reference:
-[@bartholomew1991attachment](https://psycnet.apa.org/record/1991-33075-001);[DOI](https://doi.org/10.1037/0022-3514.61.2.226)
-# add this references MARIA https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8470855/
+Reference:  
+
+-   [@bartholomew1991attachment](https://psycnet.apa.org/record/1991-33075-001)  
+
+-   [@wongpakaran2021validation](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8470855/)
+
 ### ARQ Variables
 
 #### Value Labels
@@ -2891,24 +2888,12 @@ print(arq_gt_table)
 ```
 
 #### Scale and Subscales
-## MIN why is this included in the codebook?
-Min' note: this is for how we construct those scales, same with other measure, but this one doesn't including range and alpha. 
 
-Information on constructed attachment groups is presented below. The
-highest rating for attachment style was used to classify participants
-into one of four attachment groups (secure, dismissing, preoccupied,
-fearful). Model of the self (i.e., attachment anxiety) was calculated by
-summing secure and dismissing ratings then subtracting the sum of
-preoccupied and fearful items. Model of the other (i.e., attachment
-avoidance) was constructed by summing secure and preoccupied items and
-subtracting the sum of dismissing and fearful items. Higher scores on
-attachment models indicate more positive attachment models. <MARIA>
-CONFIRM THIS IS CORRECT
 
+Information on constructed attachment groups and two subscales is presented below.  
 
 ```{r arq-subscales}
 # no internal consistency should be calculated
-# DATA CLEANING CODE - create arq categories
 vars_to_check <- c("arqa", "arqb", "arqc", "arqd")
 
 arq_subscale <- complete %>% 
@@ -2931,8 +2916,8 @@ arq_subscale <- complete %>%
 # Create the table as a data frame
 # Maria to update these names
 arq_scale_df <- data.frame(
-  var_name = c("arq_group", "arq_model_self", "arq_model_other"),
-  scale = c("Attachment Group", "Model of Self", "Model of Other"),
+  var_name = c("arq_group", "arq_model_self_attach_anxiety", "arq_model_other_attach_avoid"),
+  scale = c("Attachment Group", "Model of Self - Attachment Anxiety", "Model of Other - Avoidant Attachment"),
   scale_construction = c("Highest rating among `arqa`, `arqb`, `arqc`, `arqd`", "(`arqa` + `arqd`) - (`arqc` + `arqb`)", "(`arqa` + `arqc`) - (`arqd` + `arqb`)"))
 
 # Create the gt table object
@@ -2952,21 +2937,25 @@ print(arq_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and
-total/subscale score
+Descriptive statistics are presented below for each continuous item and subscale score.
 
 ```{r ARQ-mean-items}
 # Create subset of ARQ items
-# Maria to do, this should not inlcude rq1 and arq_group, but all other subscales should also be included 
+
 arq_data_subset <- complete %>%
-  select(arq1,arqa,	arqb, arqc, arqd)
+  select(arqa,	arqb, arqc, arqd, arq_model_self_attach_anxiety, arq_model_other_attach_avoid)
 
 # Calculate the summary statistics for each variable
+
 arq_summary_data <- lapply(arq_data_subset, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < -13 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -2998,52 +2987,25 @@ arq_tbl
 
 #### Distributions
 
-Distributions are presented for the two subscales only 
-*TODO:
-JP's graphs are count on x axis*
+Distributions are presented for the two continuous subscales only. 
 
 ```{r ARQ-distributions, class.source='fold', echo = FALSE}
-p_arq1 <- complete %>%
-  select(arq1) %>%
-  mutate(
-    across(
-      .cols = arq1,
-      .fns = ~case_when(
-        .x == "A" ~ 1,
-        .x == "B" ~ 2,
-        .x == "C" ~ 3,
-        .x == "D" ~ 4,
-        TRUE ~ NA_real_
-      )
-    )
-    ) %>%
-  composite_hist(x = arq1, bins = 4) +
-  scale_x_continuous(breaks=c(1,2,3,4),
-    #breaks=c("1","2","3","4"),
-        labels=c("A","B", "C", "D")) +
-  labs(title = 'arq1') 
 
-p_arqa <- complete %>%
-  composite_hist(x = arqa, bins = 10) +
-  labs(title = 'arqa')
+p_arq_model_s<-complete %>%
+  filter(arq_model_self_attach_anxiety >= -13) %>%
+  composite_hist(x = arq_model_self_attach_anxiety, bins = 10) +
+  labs(title = 'ARQ Model Self',
+       x = "")
 
-p_arqb <- complete %>%
-  composite_hist(x = arqb, bins = 10) +
-  labs(title = 'arqb')
+p_arq_model_o<-complete %>%
+  filter(arq_model_other_attach_avoid >= -13) %>%
+  composite_hist(x = arq_model_other_attach_avoid, bins = 10) +
+  labs(title = 'ARQ Model Other',
+       x = "")
 
-p_arqc<-complete %>%
-  composite_hist(x = arqc, bins = 10) +
-  labs(title = 'arqc')
-
-p_arqd<-complete %>%
-  composite_hist(x = arqd, bins = 10) +
-  labs(title = 'arqd')
-
-ggarrange(p_arq1, p_arqa + rremove("ylab"),
-          p_arqb+ rremove("ylab"), p_arqc,
-          p_arqd + rremove("ylab")
+ggarrange(p_arq_model_s, p_arq_model_o 
           ) %>%
-  annotate_figure(top = text_grob( "Distribution for ARQ \n(x-axis and y-axis are in different scales)"))
+  annotate_figure(top = text_grob( "Distribution for ARQ Subscales"))
 ```
 
 
@@ -6824,7 +6786,7 @@ print(pct_gt_table)
 Only missing percentages of variables are presented. 
 
 ```{r pct-missing}
-# Create subset of BSI items
+# Create subset of items
 pct_data_subset_binary <- complete %>%
   select(p00a, starts_with("pct"))
 
