@@ -6778,12 +6778,26 @@ cts_pc_tbl
 
 ### PCT Description
   
-  <MARIA> please insert a breif description for this measure 
+The Pregnancy and Childbirth Trauma Questionnaire used in this study was adapted from (cite). Adaptations include our introduction to the measure to acknowledge that we had asked participants about their pregnancy losses at other assessment waves. Additionally, we included a screening item that asked if the participant considered any prior pregnancy or childbirth loss traumatic. If a participant answered "no" they skipped this questionnaire. Participants endorsed each child and pregnancy trauma with 'yes' or 'no' rather than on a likert scale. 
 
+-   This measure contains two subscales: 
 
-* No items need to be reverse scored. 
+    + `pct_preg_total` is the total number of traumatic pregnancy experiences the participant endorsed. 
 
+    + `pct_childbirth_total` is the total number of traumatic childbirth experiences the participants endorsed. 
 
+-   Because this is a sensitive topic and participants in this study have told us about their pregnancy losses previously, we introduced the measure with the following text: 
+>  
+**"We know that pregnancy loss and trauma is a much more common experience than is often acknowledged. In this study, we are interested in better understanding any experience that has contributed stress to women’s lives, so we are going to ask a few follow-up questions about your experiences in pregnancy and childbirth. Remember, you do not have to answer any question that you do not want to answer."**
+> 
+ 
+-   No items need to be reverse scored. 
+
+-   This measure contains 12 items, including one item asking about pregnancies.
+
+-   skip rules?
+
+-   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
 
 Reference:
@@ -6793,14 +6807,14 @@ Reference:
   
 #### Value Labels
 
-Response options for `cts parent screen`
+Response options for the measure are listed below.
 
 ```{r pct-label-table, results = 'asis'}
 
 pct_label_df <- data.frame(
-  value = c("1", "2"),
-  label = c("Yes",
-            "No")
+  value = c("0", "1"),
+  label = c("No",
+  "Yes")
 ) %>% 
   t() %>% 
   as.data.frame()
@@ -6829,7 +6843,6 @@ print(pct_label_table)
 ### PCT Survey Items
 PCT survey items are presented in the following table:
 
-**Question stem: Thinking about your partner, how often is it true that they:**
 ```{r pct-var-prep}
 # Pull question wording from Qualtrics data
 pct_word <- qualtrics %>% 
@@ -6837,21 +6850,27 @@ pct_word <- qualtrics %>%
   slice(1)
 
 #create table with variable name, description, and notes
-pct_word_long <- pct_word %>% 
+
+pct_word_long <- pct_word %>%
   pivot_longer(cols = everything(), 
                names_to = "var_name",
-               values_to = "description") %>% 
+               values_to = "description") %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          description = str_replace(description, "READ:", ""),
          description = str_replace(description, "\\d+[a-zA-Z]\\. ", ""),
          var_name = str_to_lower(var_name),
          notes = as.character("")) %>%
+  mutate(description = case_when(
+    var_name == "p00a" ~ "How many times have you been pregnant since we last talked on _____, (last interview date mm/yyyy)? Please include if you were pregnant at that interview.",
+    var_name == "pct2e" ~ "During which pregnancy or pregnancies did this occur?",
+    var_name == "pct3e" ~ "During which pregnancy or pregnancies did this occur?",
+    TRUE ~ description
+  )) %>%
+  # %>%
+  slice(-2)  # remove not in codebook or valid data
   # Edits Variable description and value
-  mutate(description = if_else(var_name == "p00a", "How many times have you been pregnant since we last talked on _____, 
-                               (last interview date mm/yyyy)? Please include if you were pregnant at that interview.", description)) %>%
-    mutate(description = if_else(var_name == "pct0", "Has TC reported any pregnancies?", description)) %>%
-    mutate(description = if_else(var_name == "pct2e", "During which pregnancy or pregnancies did this occur?", description)) %>%
-    mutate(description = if_else(var_name == "pct3e", "During which pregnancy or pregnancies did this occur?", description))
+
+
 ```
 
 ```{r pct-var-table, results ='asis'}
