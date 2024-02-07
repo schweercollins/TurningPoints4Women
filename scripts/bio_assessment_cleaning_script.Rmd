@@ -178,12 +178,13 @@ bio_df <- all_incarvars_td %>%
   rename(pef2 = temp_hr2,
          fev1b = temp_hr5)
 
+
+
 #remove excess variables from qualtrics, slice, re-order, rename, and create calculated variables
 bio_td <- bio_df %>% 
   slice(-1:-2) %>% 
   mutate_all(~ifelse(is.nan(.), NA, .)) %>% 
-  mutate(across(all_of(vars_not_incar), ~ ifelse(is.na(.) & (family == "HR181" | family == "P819"), "-55", .)),
-          start_day = as.Date(mdy_hm(start_date)),
+  mutate( start_day = as.Date(mdy_hm(start_date)),
           start_time = format(mdy_hm(start_date), "%H:%M"),
           end_day = as.Date(mdy_hm(end_date)),
           end_time = format(mdy_hm(end_date), "%H:%M")) %>% 
@@ -195,30 +196,31 @@ bio_td <- bio_df %>%
   mutate_at(vars(starts_with("pef"), starts_with("fev")), ~ ifelse(. == 0, NA, .)) %>% 
   left_join(pulse_td) %>% 
   left_join(dbs_td) %>% 
-  mutate(bp_sys_avg = ifelse(bp1a != -55 & bp2a != -55, rowMeans(select(., bp1a, bp2a), na.rm = TRUE), -55),
-         bp_dia_avg = ifelse(bp1b != -55 & bp2b != -55, rowMeans(select(., bp1b, bp2b), na.rm = TRUE), -55),
-         bp_sys_cal = ifelse(bp_sys_avg != -55, ifelse(bp_sys_avg >= 140, 1, 0), -55),
-         bp_dia_cal = ifelse(bp_dia_avg != -55, ifelse(bp_dia_avg >= 90, 1, 0), -55),
-         bp_sys_pal = ifelse(bp_sys_avg != -55, ifelse(bp_sys_avg >= quantile(bp_sys_avg, 0.75, na.rm = TRUE), 1, 0), -55),
-         bp_dia_pal = ifelse(bp_dia_avg != -55, ifelse(bp_dia_avg >= quantile(bp_dia_avg, 0.75, na.rm = TRUE), 1, 0), -55),
+  mutate(bp_sys_avg = rowMeans(select(., bp1a, bp2a), na.rm = TRUE),
+         bp_dia_avg = rowMeans(select(., bp1b, bp2b), na.rm = TRUE),
+         bp_sys_cal = ifelse(bp_sys_avg >= 140, 1, 0),
+         bp_dia_cal = ifelse(bp_dia_avg >= 90, 1, 0),
+         bp_sys_pal = ifelse(bp_sys_avg >= quantile(bp_sys_avg, 0.75, na.rm = TRUE), 1, 0),
+         bp_dia_pal = ifelse(bp_dia_avg >= quantile(bp_dia_avg, 0.75, na.rm = TRUE), 1, 0),
          pef_avg = round(rowMeans(select(., starts_with("pef")), na.rm = TRUE), 2),
-         pef_cal    = ifelse(pef_avg != -55, ifelse(pef_avg <= 319, 1, 0), -55),
-         pef_pal    = ifelse(pef_avg != -55, ifelse(pef_avg <= quantile(pef_avg, 0.25, na.rm = TRUE), 1, 0), -55),
-         wth_ratio  = ifelse(iliac_crest_measure != -55 & hip_measure != -55, round(iliac_crest_measure / hip_measure, 3), -55),
-         wth_cal = ifelse(wth_ratio != -55, ifelse(wth_ratio >= 0.85, 1, 0), -55),
-         wth_pal = ifelse(wth_ratio != -55, ifelse(wth_ratio >= quantile(wth_ratio, 0.75, na.rm = TRUE), 1, 0), -55),
-         bmi_score  = ifelse(weight_measure != -55 & height_measure != -55, weight_measure / ((height_measure / 100)^2), -55),
-         bmi_cal    = ifelse(bmi_score != -55, ifelse(bmi_score >= 30, 1, 0), -55),
-         bmi_pal    = ifelse(bmi_score != -55, ifelse(bmi_score >= quantile(bmi_score, 0.75, na.rm = TRUE), 1, 0), -55),
-         pulse_avg  = ifelse(pulse1 != -55 & pulse2 != -55, rowMeans(select(., pulse1, pulse2), na.rm = TRUE), -55),
-         pulse_cal  = ifelse(pulse_avg != -55, ifelse(pulse_avg >= 90, 1, 0), -55),
-         pulse_pal  = ifelse(pulse_avg != -55, ifelse(pulse_avg >= quantile(pulse_avg, 0.75, na.rm = TRUE), 1, 0), -55)) %>%
+         pef_cal    = ifelse(pef_avg <= 319, 1, 0),
+         pef_pal    = ifelse(pef_avg <= quantile(pef_avg, 0.25, na.rm = TRUE), 1, 0),
+         wth_ratio  = round(iliac_crest_measure / hip_measure, 3),
+         wth_cal = ifelse(wth_ratio >= 0.85, 1, 0),
+         wth_pal = ifelse(wth_ratio >= quantile(wth_ratio, 0.75, na.rm = TRUE), 1, 0),
+         bmi_score  = weight_measure / ((height_measure / 100)^2),
+         bmi_cal    = ifelse(bmi_score >= 30, 1, 0),
+         bmi_pal    = ifelse(bmi_score >= quantile(bmi_score, 0.75, na.rm = TRUE), 1, 0),
+         pulse_avg  = rowMeans(select(., pulse1, pulse2), na.rm = TRUE),
+         pulse_cal  = ifelse(pulse_avg >= 90, 1, 0),
+         pulse_pal  = ifelse(pulse_avg >= quantile(pulse_avg, 0.75, na.rm = TRUE), 1, 0)) %>%
   #calculate AL total score with applied missing data rule
   mutate(missing_data_proportion = rowMeans(select(., ends_with("_cal")) %>% 
-      mutate(across(everything(), ~ is.na(.) | . == -99 | . == -55)), na.rm = TRUE),
-      total_al = ifelse(missing_data_proportion < 0.20, 
-                        rowSums(select(., ends_with("_cal")) == 1, na.rm = TRUE), 
-                        NA)) %>% 
+      mutate(across(everything(), ~ is.na(.) | . == -99 | . == -55)), na.rm = TRUE)) %>% 
+  mutate(total_al = ifelse(missing_data_proportion < 0.20, 
+                           rowSums(select(., ends_with("_cal"), ebv_pal) == 1, na.rm = TRUE), 
+                           NA)) %>% 
+  mutate(across(any_of(vars_not_incar), ~ ifelse(is.na(.) & (family == "HR181" | family == "P819"), "-55", .))) %>% 
   rename(bp1 = bp1a,
          bp2 = bp1b,
          bp3 = bp2a,
@@ -270,9 +272,9 @@ bio_td <- bio_df %>%
   rename_at(vars(matches("^r[0-9]")), ~paste0("rhs", substr(., 2, nchar(.)))) %>%
   rename_at(vars(matches("^x[0-9]")), ~paste0("chc", substr(., 2, nchar(.)))) %>%
   rename_at(vars(matches("^q[0-9]")), ~paste0("cev", substr(., 2, nchar(.)))) %>% 
-  mutate_at(vars(bmi1, bmi2, wth2, ), ~ round(., 1)) %>% 
-  mutate_at(vars(bmi_score, pef5), ~ round(., 2)) %>% 
-  mutate_at(vars(pef2, pef3), ~ round(.)) %>% 
+  mutate_at(vars(bmi1, bmi2, wth2, ), ~ round(as.numeric(.), 1)) %>% 
+  mutate_at(vars(bmi_score, pef5), ~ round(as.numeric(.), 2)) %>% 
+  mutate_at(vars(pef2, pef3), ~ round(as.numeric(.))) %>% 
   mutate(chc20a = gsub("\\..*$", "", chc20a)) %>% 
   #transform all characters to numbers for survey variables
   mutate_if(is.character, ~ case_when(. == "Yes" ~ "1",
@@ -466,7 +468,7 @@ bio_na <- bio_td %>%
                   hbc9b_elapsed, hbc10c_elapsed, hbc11c_elapsed, hbc12b_elapsed, hbc12c_elapsed, hbc18f_elapsed, 
                   pulse1, pulse2, pulse_avg, pulse_cal, pulse_pal, total_al), 
                 ~ ifelse(family == "HR181" | family == "P819" , "-55", .))) %>% 
-    mutate_all(~ ifelse(is.na(.) | is.nan(.), -99, .)) %>%  #last after all conditional are dealt with
+    mutate_all(~ ifelse(is.na(.) | is.nan(.) | . == "NaN", -99, .)) %>%  #last after all conditional are dealt with
     select(family, start_date, end_date, starts_with("bp"), starts_with("bmi"), starts_with("wth"), 
            pef1, pef2, pef3, pef4, pef5, pef6, pef_avg, pef_cal, pef_pal, 
            starts_with("pulse"), total_al, starts_with("rhs"), starts_with("cev"), 

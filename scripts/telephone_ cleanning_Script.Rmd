@@ -2244,7 +2244,6 @@ ibq <-
   relocate(ibq10_other_text, .after = ibq10_other)
 
 
-  mutate_at(vars(i8, i10, i12), ~case_when(id %in% c("P847") & is.na(.) ~ "-99", TRUE ~ .)) 
 
 ```
 
@@ -4321,7 +4320,7 @@ pcl <- pcl %>%
         .x == "1-2 times per week" ~ "4",
         .x == "2-3 times each week" ~ "5",
         .x == "Almost daily" ~ "6",
-        .x == "Decline to Answer" ~ "7",
+        .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
     ),
@@ -5046,7 +5045,7 @@ pcl_witness_remove <- pcl_miss_witness %>% filter(miss_pct >= 20)
 
 ```
 
-### PCL Calculation
+### LEC Calculation
 ```{r}
 pcl_calc <- pcl %>%
   mutate(across(ends_with("_happen"), as.numeric)) %>%
