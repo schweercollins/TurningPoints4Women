@@ -3246,20 +3246,20 @@ complete %>%
 
 ### SSQ Description
 
-The SSQ is a 8-item questionnaire designed to measure *Maria insert*.
+The SSQ is a 8-item questionnaire designed to measure abuse-related stigma and shame. These emotions are important to assess in the context of trauma exposure given they have been shown to promote cognitive and behavioral avoidance and therefore may contribute to prolonged or exacerbated posttraumatic stress symptoms. 
 
-For the present study, 8 items from the SSQ were collected in order to
-#TODO: insert text here
+-   No items need to be reverse scored. 
 
-No items need to be reverse scored. *TODO: need change text here Higher
-scores indicate more severe mental health symptoms.*
+-   **Higher** scores indicate **greater** experiences of stigma and shame. 
 
-The missing data rule was applied. Calculations were completed for
-participants with 33% or less missing data (this includes -77 responses)
+-   There are 10 total items presented below, included the computed total score `ssq_total` and the empirical cutoff score for high and low shame `ssq_total_cutoff`.
 
-Reference:
-[@feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686);
-[DOI](https://doi.org/10.1177/1077559505276686)
+-   The cutoffs for `ssq_total_cutoff` are as follows: >= 12 represents "high shame" and <= 11 represents "low shame." As stated by the measure authors, scores of 12 or higher were considered evidence of high shame because this indicated that a participant felt at
+least a moderate ('somewhat true') to high levels of shame on at least six of the eight items. 
+
+-   The missing data rule was applied. Calculations were completed for participants with 30% or less missing data (this includes `-77` responses)
+
+Reference: [@feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686)
 
 ### SSQ Variables
 
@@ -3342,8 +3342,8 @@ print(ssq_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
-Variables were constructed by summing included items.
+Information on the total score is presented below.
+The total score was constructed by summing included items.
 
 ```{r ssq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
@@ -3440,7 +3440,7 @@ ssq_tbl
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale:
+The distribution for the total score is presented below.
 
 ```{r ssq-distributions, class.source='fold', echo = FALSE}
 ssq_data_subset %>%
