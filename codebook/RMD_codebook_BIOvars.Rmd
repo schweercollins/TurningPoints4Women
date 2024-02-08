@@ -2536,7 +2536,7 @@ Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
 #create table of info for AL indicators
 bmi_scale_df <- data.frame(
   var_name = c("bmi_score", "bmi_cal", "bmi_pal"),
-  scale = c("Body mass index",
+  scale = c("Body mass index (2)",
             "Allostatic load indicator based on clinical cut-off for high BMI (1)",
             "Allostatic load indicator based on top 25% of BMI values (1)"),
   scale_construction = c("`bmi2` / ((`bmi1` / 100)^2)",
@@ -2702,7 +2702,7 @@ Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
 #create table of info for AL indicators
 wth_scale_df <- data.frame(
   var_name = c("wth_ratio", "wth_cal", "wth_pal"),
-  scale = c("Waist-to-hip ratio",
+  scale = c("Waist-to-hip ratio (2)",
             "Allostatic load indicator based on clinical cut-off for high waist-to-hip ratio (1)",
             "Allostatic load indicator based on top 25% of waist-to-hip ratio values (1)"),
   scale_construction = c("`wth1`/`wth2`",
@@ -2867,7 +2867,7 @@ Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
 #create table of info for AL indicators
 pef_scale_df <- data.frame(
   var_name = c("pef_avg", "pef_cal", "pef_pal"),
-  scale = c("Average peak expiratory flow",
+  scale = c("Average peak expiratory flow (3)",
             "Allostatic load indicator based on clinical cut-off for low peak expiratory flow (1)",
             "Allostatic load indicator based on bottom 25% of peak expiratory flow values (1)"),
   scale_construction = c("(`pef1`+`pef2`+`pef3`) / 3",
@@ -3034,7 +3034,7 @@ Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
 #create table of info for AL indicators
 pulse_scale_df <- data.frame(
   var_name = c("pulse_avg", "pulse_cal", "pulse_pal"),
-  scale = c("Average resting pulse",
+  scale = c("Average resting pulse (2)",
             "Allostatic load indicator based on clinical cut-off for high resting pulse (1)",
             "Allostatic load indicator based on top 25% of average resting pulse values (1)"),
   scale_construction = c("(`pulse1`+`pulse2`) / 2",
@@ -3195,7 +3195,7 @@ Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
 #create table of info for AL indicators
 total_scale_df <- data.frame(
   var_name = c("total_al"),
-  scale = c("Total allostatic load score"),
+  scale = c("Total allostatic load score (13"),
   scale_construction = c("`bp_sys_cal` + `bp_dia_cal` + `bmi_cal` + `wth_cal` + \n`pef_cal` + `pulse_cal`+
                          `a1c_cal` + `cho_cal` + `crp_cal` + \n`ebv_pal` + `hdl_cal` + `il6_cal` + `trp_cal`"),
   scale_range = c("0-13"))  
@@ -3281,7 +3281,7 @@ The distribution for total allostatic load score alongside the clinical and perc
 ```
 
 
-### RAND Health Survey, SF-36 (RHS)
+### RAND Health Survey, SF-36 (RHS) Description
 
 The RAND Health Survey SF-36 (RHS) is designed to measure health concepts, such as limitations, well-being, and general health. 
 
@@ -3290,19 +3290,178 @@ For the present study, 12 out of the 36 items from the RHS were collected in ord
     + **Role limitations due to physical health** reflects ...
     + **Role limitations due to emotional problems** reflects...
 
-Item numbers in this data set may not match original item numbers from the RHS-SF36. See the following table for corresponding item numbers from the original RHS_SF36:
+Item numbers in this data set may not match original item numbers from the RHS-SF36. See the following table for corresponding item numbers from the original RHS-SF36:
 
-MAKE HTML TABLE WITH OG VARIABLE NUMBERS (OR CREATE TEMPLATE FOR SOMEONE TO FILL OUT)
+| Variable | Original Item |
+|----------|-------------|
+| rhs1     | Item 1      |
+| rhs2     | Item 13     |
+| rhs3     | Item 14     |
+| rhs4     | Item 15     |
+| rhs5     | Item 16     |
+| rhs6     | Item 17     |
+| rhs7     | Item 18     |
+| rhs8     | Item 19     |
+| rhs9     | Item 33     |
+| rhs10    | Item 34     |
+| rhs11    | Item 35     |
+| rhs12    | Item 36     |
 
-REVERSE SCORED
+Raw RHS variables were recoded per the [RHS-SF36 scoring guide](https://www.rand.org/health-care/surveys_tools/mos/36-item-short-form/scoring.html). All recoded variables end with `_p` and range from 0 to 100. Higher scores indicate a more favorable health state. Recoded variables were used to calculate the subscales. 
 
-PERCENTAGE VARS
+The missing data rule was not applied since all participants had less than 20% missing data. 
 
-HIGHER SCORES INDICATE...
+**<MARIA> INSERT REFERENCE**
 
-MISSING DATA RULE
+### RHS Variables
 
-FOLLOW MAIN CODEBOOK SURVEY DATA DESCRIPTION AND FLOW FOR REST OF SECTIONS
+#### Value labels
+
+The value labels for `rhs1` are below:
+
+```{r rhs-label-table, results = 'asis'}
+
+rhs_label_df <- data.frame(
+  value = c("1", "2", "3", "4", "5"),
+  label = c("Excellent",
+            "Very good",
+            "Good",
+            "Fair",
+            "Poor")) %>% 
+  t() %>% 
+  as.data.frame()
+
+rhs_label_df <- setNames(rhs_label_df[-1, ], unlist(rhs_label_df[1, ]))
+
+
+#create table
+rhs_label_table <- rhs_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(rhs_label_table)
+
+
+```
+
+Variables `rhs2`, `rhs3`, `rhs4`, `rhs5`, `rhs6`, `rhs7`, and `rhs8` are dichotomous:
+
+```{r rhs-dichot-label, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+The value labels for `rhs9`, `rhs10`, `rhs11`, and `rhs12` are as follows:
+
+```{r rhs-labels2, results = 'asis'}
+rhs_label_df <- data.frame(
+  value = c("1", "2", "3", "4", "5"),
+  label = c("Definitely true",
+            "Mostly true",
+            "Don't know",
+            "Mostly false",
+            "Definitely false")) %>% 
+  t() %>% 
+  as.data.frame()
+
+rhs_label_df <- setNames(rhs_label_df[-1, ], unlist(rhs_label_df[1, ]))
+
+
+#create table
+rhs_label_table <- rhs_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(rhs_label_table)
+
+```
+
+#### Survey Items
+
+All RHS survey items and recoded variables are presented in the following table: 
+```{r rhs-var-tbl, results = 'asis'}
+#create df of vars
+rhs_var_md <- bio_md %>% 
+  filter(str_starts(Variable, "rhs")) %>% 
+  head(-3)
+
+#create and format the table
+rhs_var_table <- rhs_var_md %>%
+  gt() %>%
+  cols_width(
+      Variable ~ pct(25),
+      Description ~ pct(75)) %>% 
+  apply_tbl_theme() %>%
+  tab_style(style = cell_text(align = "left"), 
+      locations = cells_column_labels()) %>% 
+  tab_row_group(label = "Recoded variables for computing subscales:", 
+                rows = 13:24,
+                id = "p_vars")  %>% 
+    tab_row_group(label = "How true or false is each of the following statements for you.", 
+                rows = 9:12,
+                id = "gen_health")  %>% 
+    tab_row_group(label = "During the past 4 weeks, have you had any of the following problems with your work or other regular daily activities as a result of any emotional problems (such as feeling depressed or anxious)?", 
+                rows = 6:8,
+                id = "emo_limit") %>%
+  tab_row_group(label = "During the past 4 weeks, have you had any of the following problems with your work or other regular activities as a result of your physical health?", 
+                rows = 2:5,
+                id = "phys_limit") %>%
+  tab_row_group(label = "", 
+                rows = 1,
+                id = "rhs1") %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("phys_limit", "emo_limit", "gen_health", "rhs1", "p_vars"))) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print
+rhs_var_table
+
+```
+
+#### Subscales
+
+Using the recoded RHS variables (`_p`), subscales were computed by averaging individual items per the [RHS-SF36 scoring guide](https://www.rand.org/health-care/surveys_tools/mos/36-item-short-form/scoring.html).
+
+```{r rhs-comp-tbl, results = 'asis'}
+#create table of subscale info
+rhs_scale_df <- data.frame(
+  var_name = c("rhs_health",
+               "rhs_phys_limit",
+               "rhs_emo_limit"),
+  scale = c("Total allostatic load score",
+            "",
+            ""),
+  scale_construction = c("`bp_sys_cal` + `bp_dia_cal` + `bmi_cal`",
+                         "",
+                         ""),
+  scale_range = c("0-13", "", ""))  
+
+#create gt table
+rhs_scale_table <- rhs_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale (# of items)", 
+            scale_construction = "Scale Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  apply_tbl_theme() 
+
+#print table
+print(rhs_scale_table)
+```
+
 
 
 
