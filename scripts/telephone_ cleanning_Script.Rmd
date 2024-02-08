@@ -1885,7 +1885,7 @@ mhc_calc <-
   )
 
 
-# can we just keep the final three columns for diagnosis -- those in character format?
+
 mhc_complete <-
   mhc_calc %>%
   composite_total_avg_fun(
@@ -1900,15 +1900,15 @@ mhc_complete <-
   ) %>%
   subscale_create(
     total_only = TRUE,
-    scale1 = c("h1", "h2", "h3"),
+    scale1 = c("h1", "h2", "h3"), # mhc_pa
     scale1_nitems = 3,
-    scale2 = c("h4", "h5", "h6", "h7", "h8"),
+    scale2 = c("h4", "h5", "h6", "h7", "h8"),# mhc_swb
     scale2_nitems = 5,
-    scale3 = c("h9", "h10", "h11", "h12", "h13", "h14"),
+    scale3 = c("h9", "h10", "h11", "h12", "h13", "h14"), # mhc_pwb
     scale3_nitems = 6
   ) %>%
   rename(
-    mhc_total = sum_values,
+    mhc_total = sum_values,  # all 14 items 
     #mhc_avg = mean_values,
     mhc_pa = total1,
     #mhc_pa_avg = avg1,
@@ -1933,11 +1933,6 @@ mhc_complete <- mhc %>%
     #update prefix h to mhc
   rename_with(~ paste0("mhc", as.numeric(substring(., 2))), starts_with("h"))
 
-
-
-
-## MIN, is there a way to mutate and create new variables that are converted; I want to retain all originla values
-### Maira I don't know what do you mean for comment above, but I think the mhc_complete is what you want for final achrive data 
 ## MARIA to do -- add note about diagnoses in codebook
   
 ```

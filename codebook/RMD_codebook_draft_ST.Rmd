@@ -4055,6 +4055,7 @@ MHC survey items are presented in the following table:
 # Pull question wording from qualtrics data
 mhc_word <- qualtrics %>% 
   select(starts_with("h"))%>%
+  rename_with(~ paste0("mhc", as.numeric(substring(., 2))), starts_with("h")) %>%
   slice(1)
 
 #create table with variable name, description, and notes
@@ -4084,8 +4085,6 @@ mhc_gt_table <- mhc_gt_table %>%
 
 # Print the table
 print(mhc_gt_table)
-
-
 ```
 
 #### Scale and Subscales
@@ -4102,7 +4101,6 @@ mhc_complete <-
     matches("^mhc"), 
     mhc_total,mhc_pa,mhc_swb, mhc_pwb
   )
-
 ```
 
 
@@ -4139,7 +4137,7 @@ mhc_scale_df <- data.frame(
   scale_construction = c(" `mhc1`, `mhc2`, `mhc3`, `mhc4`, `mhc5`, `mhc6`, `mhc7`, `mhc8`, `mhc9`, `mhc10`, `mhc11`, `mhc12`, `mhc13`, `mhc14`",
                          "`mhc1`, `mhc2`,`mhc3`", "`mhc4`, `mhc5`, `mhc6`, `mhc7`, `mhc8`", "`mhc9`, `mhc10`, `mhc11`, `mhc12`, `mhc13`, `mhc14`"
                          ),
-  scale_range = c(""), #TODO fill in range 
+  scale_range = c("0-70", "0-5", "0-20", "0-30"), #TODO Maria, double check 
   alpha = c(round(mhc_alpha$total$raw_alpha, 3),
             round(mhc_pa_alpha$total$raw_alpha, 3),
             round(mhc_swb_alpha$total$raw_alpha, 3),
@@ -4162,8 +4160,6 @@ mhc_scale_df <- gt(mhc_scale_df) %>%
 
 # Print the table
 print(mhc_scale_df)
-
-
 ```
 
 ### Summary Statistics
@@ -4176,10 +4172,14 @@ subscale score:
 ```{r mhc-mean-items}
 # Calculate the summary statistics for each variable
 mhc_summary_data <- lapply(mhc_complete, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -4206,7 +4206,6 @@ mhc_tbl <- mhc_summary_data %>%
 
 # Render the table
 mhc_tbl
-
 ```
 
 #### Distributions
@@ -4216,30 +4215,34 @@ Distributions are presented below for the total score and each subscale:
 ```{r mhc-distributions, class.source='fold', echo = FALSE}
 
 p_mhc_total <- mhc_complete %>%
+  filter(mhc_total >= 0) %>%
   composite_hist(
     x = mhc_total
   ) +
   labs(title = 'Total Scores')
 
-p_mhc_swb <- mhc_complete %>%
+p_mhc_pa <- mhc_complete %>%
+  filter(mhc_pa >= 0) %>%
   composite_hist(
     x = mhc_pa
   ) +
   labs(title = 'Positive Affect Subscale')
 
 p_mhc_swb <- mhc_complete %>%
+  filter(mhc_swb >= 0) %>%
   composite_hist(
     x = mhc_swb
   ) +
   labs(title = 'Social Well-being Subscale')
 
 p_mhc_pwb <- mhc_complete %>%
+   filter(mhc_pwb >= 0) %>%
   composite_hist(
     x = mhc_pwb
   ) +
   labs(title = 'Psychological Well-being Subscale')
 
-ggarrange(p_mhc_total, p_mhc_swb + rremove("ylab"), 
+ggarrange(p_mhc_total, p_mhc_pa + rremove("ylab"), 
           p_mhc_swb, p_mhc_pwb + rremove("ylab")
           ) %>%
   annotate_figure(top = text_grob( "Distribution for MHC-SF total and subscale \n(x-axis and y-axis are in different scales)"))
