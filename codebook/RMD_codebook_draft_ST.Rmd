@@ -3363,11 +3363,13 @@ ssq_data_subset <-
 
 # Create the table as a data frame
 ssq_scale_df <- data.frame(
-  var_name = c("ssq_total"),
-  scale = c("SSQ Total score (8)"),
-  scale_construction = c("`ssq1`, `ssq2`, `ssq3`, `ssq4`,`ssq5`, `ssq6`, `ssq7`, `ssq8`"),
-  scale_range = c("0-32"), # possible range
-  alpha = c(round(ssq_alpha$total$raw_alpha, 3))
+  var_name = c("ssq_total", "ssq_total_cutoff"),
+  scale = c("SSQ Total score (8)", "SSQ High and Low Shame Cutoff"),
+  scale_construction = c("`ssq1`, `ssq2`, `ssq3`, `ssq4`,`ssq5`, `ssq6`, `ssq7`, `ssq8`",
+                         "ssq_total >= 12 ~ `high shame`        \nssq_total <= 11 ~ `low shame`"),
+  scale_range = c("0-32", "NA"), # possible range
+  alpha = c(round(ssq_alpha$total$raw_alpha, 3),
+            "NA")
 )
 
 
