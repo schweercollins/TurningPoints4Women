@@ -945,19 +945,31 @@ dyadc <-
         TRUE ~ .x
       )
     ),
-    # Min, make the reversed (_r) and then create unreversed variables for 18 and 19
     across(
       .cols = c(e18,e19), 
       .fns = ~case_when(
-        .x == "All the time" ~ "5",
-        .x == "Most of the time" ~ "4",
-        .x == "More often than not" ~ "3",
-        .x == "Occasionally" ~ "2",
-        .x == "Rarely" ~ "1",
-        .x == "Never" ~ "0",
+        .x == "All the time" ~ "0",
+        .x == "Most of the time" ~ "1",
+        .x == "More often than not" ~ "2",
+        .x == "Occasionally" ~ "3",
+        .x == "Rarely" ~ "4",
+        .x == "Never" ~ "5",
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
+    ),
+    across(
+      .cols = c(e18, e19),
+      .fns = ~case_when(
+        .x == "0" ~ "5",
+        .x == "1" ~ "4",
+        .x == "2" ~ "3",
+        .x == "3" ~ "2",
+        .x == "4" ~ "1",
+        .x == "5" ~ "0",
+        TRUE ~ .x
+      ),
+      .names = '{.col}_r'
     ),
     across(
       .cols = c(e23:e24),
@@ -987,8 +999,8 @@ dyadc <-
     across(
       .cols = c(e29, e30),
       .fns = ~case_when(
-        .x == "Yes" ~ "0",
-        .x == "No" ~ "1",
+        .x == "Yes" ~ "1",
+        .x == "No" ~ "0",
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
@@ -1023,9 +1035,9 @@ There are missing data in DAS and missing rule applied through the unique "COUNT
 ```{r dyadc_missing}
 dyadc <- dyadc %>%
   # if answered no for screening question, the entire survey is skipped.
-  mutate_at(vars(e1:e32), ~case_when(dyadc_screener == 0  ~ "-55", TRUE ~ . )) %>%
+  mutate_at(vars(e1:e19_r), ~case_when(dyadc_screener == 0  ~ "-55", TRUE ~ . )) %>%
     # Participants who were incarcerated at the time of assessment where not administered this survey
-  mutate_at(vars(dyadc_screener, e1:e32), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .)) 
+  mutate_at(vars(dyadc_screener, e1:e19_r), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .)) 
 
 dyadc %>%
     mutate(across(-id, as.numeric)) %>%
@@ -1189,8 +1201,9 @@ dyadc_complete <- dyadc_complete %>%
 
 # DAS finalized data 
 dyadc_complete <- dyadc %>%
-  select(id, starts_with("e")) %>%
+  select(id, c(dyadc_screener, starts_with("e"))) %>%
   rename_with(~sub("^e", "das", .), starts_with("e"))%>%
+  rename(das_screener = dyadc_screener) %>%
   merge(dyadc_complete, by = "id")
 ```
 
@@ -2045,9 +2058,7 @@ flo_calc <-
   )
 
 
-
-# MIN we also need a "secure flourish" and averae of items i11 and i12
-
+# calculate flo_total; Secure_flourish; And apply missing rule
 flo_complete <- flo_calc %>%
   # total score should only contain 1-10
   mutate(flo_total = rowSums(select(., i1:i10), na.rm = T)) %>%
@@ -2055,9 +2066,10 @@ flo_complete <- flo_calc %>%
   mutate_at(vars(flo_total), ~case_when(id %in% flo_remove ~ -99, TRUE ~ .x )) %>%
   # "secure flourish": average of items i11 and i12
   mutate(Secure_flourish = rowMeans(select(., i11:i12), na.rm = T)) %>%
+  # Apply missing rule: replacing total score with -99 because due to 50% missing data this score isn't valid  
   mutate_at(vars(Secure_flourish), ~case_when(id %in% secure_flourish_remove ~ -99, TRUE ~ .x )) 
   
-  
+# Create final flo df 
 flo_complete <- flo_complete %>%
   select(id, flo_total, Secure_flourish) %>%
   merge(flo, by = "id") %>%
