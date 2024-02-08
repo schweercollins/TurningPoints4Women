@@ -4716,7 +4716,7 @@ For the present study, 10 items from the IBQ were collected in order to
 No items need to be reverse scored. *TODO: need change text here Higher
 scores indicate more severe mental health symptoms.*
 
-The missing data rule was applied. Calculations were completed for
+<Maria> Please edit ( we did not apply missing rule in the telephone script) The missing data rule was applied. Calculations were completed for
 participants with 30% or less missing data (this includes -77 responses)
 
 Reference:
@@ -4726,7 +4726,7 @@ Reference:
 
 #### Value Labels
 
-IBQ variables response options for ibp1 - ibq9.
+IBQ variables response options for ibp1 - ibq10. <Maria, please check if we want mention ibq10 other items>
 
 ```{r ibq-label-table, results = 'asis'}
 ibq_label_df <- data.frame(
@@ -4801,8 +4801,6 @@ ibq_gt_table <- ibq_gt_table %>%
 
 # Print the table
 print(ibq_gt_table)
-
-
 ```
 
 #### Scale and Subscales
