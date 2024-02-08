@@ -2040,9 +2040,7 @@ flo_calc <-
   )
 
 
-
-# MIN we also need a "secure flourish" and averae of items i11 and i12
-
+# calculate flo_total; Secure_flourish; And apply missing rule
 flo_complete <- flo_calc %>%
   # total score should only contain 1-10
   mutate(flo_total = rowSums(select(., i1:i10), na.rm = T)) %>%
@@ -2050,9 +2048,10 @@ flo_complete <- flo_calc %>%
   mutate_at(vars(flo_total), ~case_when(id %in% flo_remove ~ -99, TRUE ~ .x )) %>%
   # "secure flourish": average of items i11 and i12
   mutate(Secure_flourish = rowMeans(select(., i11:i12), na.rm = T)) %>%
+  # Apply missing rule: replacing total score with -99 because due to 50% missing data this score isn't valid  
   mutate_at(vars(Secure_flourish), ~case_when(id %in% secure_flourish_remove ~ -99, TRUE ~ .x )) 
   
-  
+# Create final flo df 
 flo_complete <- flo_complete %>%
   select(id, flo_total, Secure_flourish) %>%
   merge(flo, by = "id") %>%

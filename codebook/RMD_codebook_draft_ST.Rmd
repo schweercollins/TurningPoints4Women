@@ -4313,10 +4313,11 @@ ALL Flourishing Index variables have the same response options.
 # Pull question wording from qualtrics data
 flo_word <- qualtrics %>% 
   select(I1:I12)%>%
+  # changing prefix to align "i" to "flo"
+  rename_with(~str_replace(., "^I", "flo"), matches("^I\\d")) %>%
   slice(1)
 
 #create table with variable name, description, and notes
-# MIN #TODO make sure that these have prefix "flo" instead of i
 flo_word_long <- flo_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
@@ -4353,7 +4354,7 @@ Information on the total score is below.
 Variables were constructed by summing included items.
 ```{r  flo, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 flo_complete <- complete %>%
-  select(flo1:flo12, flo_total)
+  select(flo1:flo12, flo_total,Secure_flourish)
 ```
 
 ```{r flo alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
@@ -4361,16 +4362,21 @@ flo_complete <- complete %>%
 flo_alpha <- flo_complete %>% 
   select(flo1:flo12) %>% 
   psych::alpha(check.keys = TRUE)
+
+flo_sf_alpha <- flo_complete %>% 
+  select(flo11:flo12) %>% 
+  psych::alpha(check.keys = TRUE)
 ```
 
 ```{r flo-scale-table, results = 'asis'}
 # Create the table as a data frame
 flo_scale_df <- data.frame(
-  var_name = c("flo_total"),
-  scale = c("FLO Total score (12)"),
-  scale_construction = c(" `flo1`, `flo2`, `flo3`, `flo4`, `flo5`, `flo6`, `flo7`, `flo8`, `flo9`, `flo10`, `flo11`, `flo12`"),
-  scale_range = c("0-120"), 
-  alpha = c(round(flo_alpha$total$raw_alpha, 3))
+  var_name = c("flo_total", "Secure_flourish"),
+  scale = c("FLO Total score (12)","Secure Flourish (2)"),
+  scale_construction = c(" `flo1`, `flo2`, `flo3`, `flo4`, `flo5`, `flo6`, `flo7`, `flo8`, `flo9`, `flo10`, `flo11`, `flo12`", "`i11`, `i12`"),
+  scale_range = c("0-120", "0-10"), 
+  alpha = c(round(flo_alpha$total$raw_alpha, 3),
+            round(flo_sf_alpha$total$raw_alpha, 3))
 )
 
 # Create the gt table object
@@ -4389,8 +4395,6 @@ flo_scale_df <- gt(flo_scale_df) %>%
 
 # Print the table
 print(flo_scale_df)
-
-
 ```
 
 ### Summary Statistics
@@ -4402,10 +4406,14 @@ Descriptive statistics are presented below for each item and the total score:
 ```{r flo-mean-items}
 # Calculate the summary statistics for each variable
 flo_summary_data <- lapply(flo_complete, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -4438,11 +4446,23 @@ flo_tbl
 
 
 ```{r flo-distributions, class.source='fold', echo = FALSE}
-flo_complete %>%
+p_flo_complete <- flo_complete %>%
+  filter(flo_total >= 0) %>%
   composite_hist(
     x = flo_total
   ) +
   labs(title = 'Distribution of Total Scores for Flourishing Index')
+
+p_flo_sf_complete <- flo_complete %>%
+  filter(Secure_flourish >= 0) %>%
+  composite_hist(
+    x = Secure_flourish
+  ) +
+  labs(title = 'Distribution of for Secure Flourish')
+
+ggarrange(p_flo_complete, p_flo_sf_complete + rremove("ylab")
+          ) %>%
+  annotate_figure(top = text_grob( "Distribution for Flourishing Index Subscale \n(x-axis and y-axis are in different scales)"))
 ```
 
 
