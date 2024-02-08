@@ -479,7 +479,7 @@ dast %>%
 ### DAST Calculations & Subscale
 ```{r dast_calculations}
 # Below is the code that treat negative values (-77, -55) as NA
-# Apply NA rule
+# turn negative number to NA for calculation 
 dast_calc <-
   dast %>% 
   mutate(across(-id, as.numeric)) %>%
@@ -552,7 +552,7 @@ dast_complete <- dast_complete %>%
   relocate(dast_total, dast_total_r, .after = "d5_r") %>%
   relocate(d4_r, .after = "d4") %>%
   relocate(d5_r, .after = "d5") %>%
-    # input missing values for the scored variables
+  # input missing values for the scored variables
   #mutate_at(vars(dast_total), ~case_when(is.na(dast_total) ~ -99, TRUE ~.x)) %>%
   mutate_at(vars(dast_total, dast_total_r), ~case_when(
   dast_screen == 1 | dast_screen == -55 ~ "-99",

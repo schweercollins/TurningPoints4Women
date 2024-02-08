@@ -1249,7 +1249,7 @@ ibq_miss <- ibq %>%
   select(id, ibq1:ibq7) %>%  # only ibq1:ibq7 was used to calculated ibq_total
   pct_miss_fun(
     id = c("id"),
-    n_items = 10
+    n_items = 7
   )
 
 ibq_miss %>%

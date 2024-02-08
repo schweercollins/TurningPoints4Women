@@ -1218,12 +1218,14 @@ All DAST survey items are presented in the following table:
 dast_word <- qualtrics %>% 
   select(starts_with("D")) %>% 
   rename(dast_screen = D00) %>%
+  rename_with(~sub("D", "dast", .), matches("D\\d")) %>%
+  rename(dast1 = dast1A) %>%
   slice(1)
 
 #create table with variable name, description, and notes
 dast_word_long <- dast_word %>% 
-  select(-D2A) %>%
-  rename(d2 = D2B) %>%
+  select(-dast2A) %>%
+  rename(dast2 = dast2B) %>%
   pivot_longer(cols = everything(), 
                names_to = "var_name",
                values_to = "description") %>% 
@@ -1237,6 +1239,7 @@ dast_word_long <- dast_word %>%
                            )
          ) %>% 
   mutate(description = if_else(var_name == "dast_screen", "Is TC currently pregnant?", description)) %>%
+  mutate(description = if_else(var_name == "dast2", "Have you misused prescription drugs in the last 6 months?", description)) %>%
   slice(4:25)
 
 ```
@@ -1326,7 +1329,7 @@ For binary items:
 ```{r dast-binary-desc}
 # Create subset of DAST items
 dast_data_subset_binary <- complete %>%
-  select(dast1:dast20)
+  select(dast1:dast20, -dast4_r, -dast5_r)
 
 # Calculate the dichotomous summary statistics for each variable
 dast_summary_data_binary <- lapply(dast_data_subset_binary, function(x) {
@@ -1382,10 +1385,14 @@ dast_data_subset <- complete %>%
 
 # Calculate the dichotomous summary statistics for each variable
 dast_summary_data <- lapply(dast_data_subset, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
