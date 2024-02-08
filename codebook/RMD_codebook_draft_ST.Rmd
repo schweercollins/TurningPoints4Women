@@ -6993,6 +6993,7 @@ pct_scale_table <- gt(pct_scale_df) %>%
             alpha = "Alpha") %>% 
   tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
+  cols_width(scale_construction ~ pct(100)) %>% 
   #cols_width(scale_construction ~ pct(100)) %>% 
   apply_tbl_theme() 
 
@@ -7097,6 +7098,7 @@ pct_tbl_cont <- pct_summary_data_cont %>%
              Range = "Range*",
              Missing = "% Missing") %>% 
   cols_width(everything() ~ pct(100)) %>%
+  tab_options(table.width = pct(100))%>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
   tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
@@ -7114,15 +7116,16 @@ Distributions are presented below for each subscale:
 ```{r pct-distributions, class.source='fold', echo = FALSE}
 # min please check; these aren't working 
 p_pct_preg <- complete %>%
-  filter(pct_preg_total < 0) %>%
-  composite_hist(x = pct_preg_total) 
+  filter(pct_preg_total >= 0) %>%
+  composite_hist(pct_preg_total, bins = 4) 
 
 p_pct_childbirth <- complete %>%
-  filter(pct_childbirth_total < 0) %>%
-  composite_hist(x = pct_childbirth_total) 
+  filter(pct_childbirth_total >= 0) %>%
+  composite_hist(pct_childbirth_total, bins = 4) 
 
-p_pct_childbirth
-ggarrange(p_pct_preg +  p_pct_childbirth) %>%
+
+
+ggarrange(p_pct_preg, p_pct_childbirth + rremove("ylab")) %>%
   annotate_figure(top = text_grob( "Distribution for PCT Subscales"))
 ```
 
