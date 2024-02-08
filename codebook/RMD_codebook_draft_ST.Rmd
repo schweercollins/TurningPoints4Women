@@ -4451,14 +4451,14 @@ p_flo_complete <- flo_complete %>%
   composite_hist(
     x = flo_total
   ) +
-  labs(title = 'Distribution of Total Scores for Flourishing Index')
+  labs(title = 'Total Scores for Flourishing Index')
 
 p_flo_sf_complete <- flo_complete %>%
   filter(Secure_flourish >= 0) %>%
   composite_hist(
     x = Secure_flourish
   ) +
-  labs(title = 'Distribution of for Secure Flourish')
+  labs(title = 'Secure Flourish')
 
 ggarrange(p_flo_complete, p_flo_sf_complete + rremove("ylab")
           ) %>%
