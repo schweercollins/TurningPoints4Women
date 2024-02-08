@@ -6844,7 +6844,7 @@ cts_pc_tbl
 
 ### PCT Description
   
-The Pregnancy and Childbirth Trauma Questionnaire used in this study was adapted from (cite). Adaptations include our introduction to the measure to acknowledge that we had asked participants about their pregnancy losses at other assessment waves. Additionally, we included a screening item that asked if the participant considered any prior pregnancy or childbirth loss traumatic. If a participant answered "no" they skipped this questionnaire. Participants endorsed each child and pregnancy trauma with 'yes' or 'no' rather than on a likert scale. 
+The Pregnancy and Childbirth Trauma Measure used in this study is an adaptation of the Birth Experiences Questionnaire (Saxbe et al., 2018). Adaptations include our introduction to the measure to acknowledge that we had asked participants about their pregnancy losses at other assessment waves. Additionally, we included a screening item that asked if the participant considered any prior pregnancy or childbirth loss traumatic. Participants endorsed each child and pregnancy trauma with 'yes' or 'no' rather than on a likert scale.  
 
 -   This measure contains two subscales: 
 
@@ -6852,22 +6852,22 @@ The Pregnancy and Childbirth Trauma Questionnaire used in this study was adapted
 
     + `pct_childbirth_total` is the total number of traumatic childbirth experiences the participants endorsed. 
 
--   Because this is a sensitive topic and participants in this study have told us about their pregnancy losses previously, we introduced the measure with the following text: 
+-   Because this is a sensitive topic and participants in this study have told us about their pregnancy losses previously, we introduced the measure with the following text:  
+
 >  
 **"We know that pregnancy loss and trauma is a much more common experience than is often acknowledged. In this study, we are interested in better understanding any experience that has contributed stress to women’s lives, so we are going to ask a few follow-up questions about your experiences in pregnancy and childbirth. Remember, you do not have to answer any question that you do not want to answer."**
-> 
+>   
  
 -   No items need to be reverse scored. 
 
--   This measure contains 12 items, including one item asking about pregnancies.
+-   This measure contains 12 items, including one item asking about pregnancies and one screening item.
 
--   skip rules?
+-   If a participant answered "no" to the screening item `pct1` they skipped this questionnaire (`-55`). 
 
 -   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
 
-Reference:
-  <Maria, please add a reference if needed> 
+Reference: [@saxbe2018birth](https://psycnet.apa.org/fulltext/2018-14802-010.pdf)
   
 ### PCT Variables
   
@@ -6932,8 +6932,7 @@ pct_word_long <- pct_word %>%
     var_name == "pct3e" ~ "During which pregnancy or pregnancies did this occur?",
     TRUE ~ description
   )) %>%
-  # %>%
-  slice(-2)  # remove not in codebook or valid data
+  slice(-2,-8,-13)  # remove not in codebook and/or identifiable data
   # Edits Variable description and value
 
 
@@ -6958,26 +6957,81 @@ pct_gt_table <- pct_gt_table %>%
 # Print the table
 print(pct_gt_table)
 ```
+#### Scale and Subscales
+
+Information on the subscale variables are below.
+Variables were constructed by summing the included items. 
+
+```{r pct alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+#Calculate internal reliability 
+
+pct_preg_trauma_alpha <-
+  complete %>%
+  select(pct2a, pct2b, pct2c, pct2d) %>%
+  psych::alpha(check.keys = TRUE)
+
+pct_childbirth_trauma_alpha <-
+  complete %>%
+  select(pct3a, pct3b, pct3c, pct3d) %>%
+  psych::alpha(check.keys = TRUE)
+
+
+```
+
+```{r pct-scale-table, results = 'asis'}
+# Create the table as a data frame
+pct_scale_df <- data.frame(
+  var_name = c("pct_preg_total", "pct_childbirth_total"),
+  scale = c("Pregnancy Trauma (4)", "Childbirth Trauma (4)"),
+  scale_construction = c("`pct2a`, `pct2b`, `pct2c`, `pct2d`",
+                           "`pct3a`, `pct3b`, `pct3c`, `pct3d`"),
+  scale_range = c("0-4", "0-4"),
+  alpha = c(round(pct_preg_trauma_alpha$total$raw_alpha, 3), 
+            round(pct_childbirth_trauma_alpha$total$raw_alpha, 3))
+)
+
+# Create the gt table object
+pct_scale_table <- gt(pct_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale (# of items)", 
+            scale_construction = "Scale Construction",
+            scale_range = "Range*",
+            alpha = "Alpha") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(pct_scale_table)
+
+```
+
 
 ### Summary Statistics
 
 #### Descriptive Statistics
 
-Only missing percentages of variables are presented. 
+Descriptive statistics for binary variables
 
 ```{r pct-missing}
 # Create subset of items
 pct_data_subset_binary <- complete %>%
-  select(p00a, starts_with("pct"))
+  select(p00a, starts_with("pct")) %>%
+  select(-pct_preg_total, - pct_childbirth_total)
 
 
 # Calculate the dichotomous summary statistics for each variable
 pct_summary_data <- lapply(pct_data_subset_binary, function(x) {
-  x <- replace(x, x < -40, NA)
-  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
-  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
-  num_no <- sum(x == 0, na.rm = TRUE)
-  num_yes <-sum(x == 1, na.rm = TRUE)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  per_no <- paste0(round(sum(x_no_negatives == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x_no_negatives == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x_no_negatives == 0, na.rm = TRUE)
+  num_yes <-sum(x_no_negatives == 1, na.rm = TRUE)
   miss_val <- round(mean(is.na(x)) * 100, 2)
   c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
@@ -7014,8 +7068,70 @@ pct_tbl_binary <- pct_summary_data %>%
 pct_tbl_binary
 
 ```
+Descriptive statistics for continuous variables
+
+```{r pct-missing_cont}
+# Create subset of items
+pct_data_subset_cont <- complete %>%
+  select(pct_preg_total, pct_childbirth_total)
+
+# start here
+# Calculate the continuous summary statistics for each variable
+pct_summary_data_cont <- lapply(pct_data_subset_cont, function(x) {
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+pct_summary_data_cont <- as.data.frame(pct_summary_data_cont)
+
+# Set items as first row
+pct_summary_data_cont <- rbind(names(pct_summary_data_cont), pct_summary_data_cont) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+pct_tbl_cont <- pct_summary_data_cont %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
 
 
+# Render the table
+pct_tbl_cont
+
+```
+#### Distributions
+
+Distributions are presented below for each subscale:
+
+```{r pct-distributions, class.source='fold', echo = FALSE}
+# min please check; these aren't working 
+p_pct_preg <- complete %>%
+  filter(pct_preg_total < 0) %>%
+  composite_hist(x = pct_preg_total) 
+
+p_pct_childbirth <- complete %>%
+  filter(pct_childbirth_total < 0) %>%
+  composite_hist(x = pct_childbirth_total) 
+
+p_pct_childbirth
+ggarrange(p_pct_preg +  p_pct_childbirth) %>%
+  annotate_figure(top = text_grob( "Distribution for PCT Subscales"))
+```
 
 # Service Utilization Survey (SUS)
 
