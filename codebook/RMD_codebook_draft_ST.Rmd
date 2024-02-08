@@ -2225,6 +2225,7 @@ All BCAP survey items are presented in the following table:
 # Pull question wording from qualtrics data
 bcap_word <- qualtrics %>% 
   select(starts_with("q")) %>% 
+  rename_with(~sub("^Q", "bcap", .), starts_with("Q")) %>%
   slice(1)
 
 #create table with variable name, description, and notes
@@ -2235,12 +2236,10 @@ bcap_word_long <- bcap_word %>%
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
-         notes = case_when(var_name == "q1" ~ "This item should be reverse scored. `bcap1_r` is reverse scored",
-                           var_name == "q2" ~ "This item should be reverse scored. `bcap2_r` is reverse scored",
-                           var_name == "q23" ~ "This item should be reverse scored. `bcap23_r` is reverse scored",
-                           var_name == "q29" ~ "This item should be reverse scored. `bcap29_r` is reverse scored",
-                           
-                           var_name %in% c("c22", "c23") ~ "Skipped if `c21` = No",
+         notes = case_when(var_name == "bcap1" ~ "This item should be reverse scored. `bcap1_r` is reverse scored",
+                           var_name == "bcap2" ~ "This item should be reverse scored. `bcap2_r` is reverse scored",
+                           var_name == "bcap23" ~ "This item should be reverse scored. `bcap23_r` is reverse scored",
+                           var_name == "bcap29" ~ "This item should be reverse scored. `bcap29_r` is reverse scored",
                            TRUE ~ as.character(""))) %>%
   slice(1:34)
 
@@ -2291,13 +2290,7 @@ For binary items:
 
 # Create subset of BCAP items
 bcap_data_subset_binary <- complete %>%
-  select(bcap1_r,
-         bcap2_r,
-         bcap3:bcap22,
-         bcap23_r,
-         bcap24:bcap28,
-         bcap29_r,
-         bcap30:bcap34)
+  select(bcap1 : bcap34)
 
 # Calculate the dichotomous summary statistics for each variable
 bcap_summary_data_binary <- lapply(bcap_data_subset_binary, function(x) {

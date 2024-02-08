@@ -806,6 +806,7 @@ cts_complete <- cts_complete %>%
   
 
 ```
+
 ## BCAP
 ### BCAP Select Variables and Recode
 ```{r bcap}
@@ -843,9 +844,8 @@ bcap <-
 
 # Please refer to code book for cite the scoring info 
 
-## merging for original missing data codes
-## changing prefix for measure
 
+## changing prefix for measure
 bcap_complete <- bcap %>%
   # select(id, bcap_risk:bcap_random) %>%
   # full_join(bcap, by="id") %>%
