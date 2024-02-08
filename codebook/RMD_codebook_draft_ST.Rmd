@@ -2390,7 +2390,8 @@ dyadc_word <- qualtrics %>%
   select(`DYADC Screener`, starts_with("E")) %>%
   slice(1) %>%
   select(-(2:3)) %>%
-  rename_with(~sub("^E", "das", .), starts_with("E"))
+  rename_with(~sub("^E", "das", .), starts_with("E")) %>%
+  rename(das_screener = `DYADC Screener`)
 
 #create table with variable name, description, and notes
 
@@ -2414,12 +2415,12 @@ dyadc_word_long <- dyadc_word %>%
                                                  \n3 = Occasionally
                                                  \n4 = Rarely
                                                  \n5 = Never",
-                           row_number() %in% c(19,20) ~ "0 = Never
-                                                 \n1 = Rarely
-                                                \n2 = Occasionally
-                                                 \n3 = More often than not
-                                                 \n4 = Most of the time
-                                                 \n5 = All the time ",
+                           row_number() %in% c(19,20) ~ "5 = Never
+                                                 \n4 = Rarely
+                                                 \n3 = Occasionally
+                                                 \n2 = More often than not
+                                                 \n1 = Most of the time
+                                                 \n0 = All the time ",
                            between(row_number(), 24, 25 ) ~ "0 = Never
                                                  \n1 = Rarely
                                                  \n2 = Occasionally
@@ -2431,8 +2432,8 @@ dyadc_word_long <- dyadc_word %>%
                                                  \n3 = Once or twice a week
                                                  \n4 = Once a day
                                                  \n5 = More often",
-                           row_number() %in% c(30,31) ~ "0 = Yes
-                                                 \n1 = No",
+                           row_number() %in% c(30,31) ~ "1 = Yes
+                                                 \n0 = No",
                            row_number() %in% c(32) ~ "0 = Extremely Unhappy
                                                  \n1 = Fairly Unhappy
                                                  \n2 = A Little Unhappy
@@ -2448,11 +2449,11 @@ dyadc_word_long <- dyadc_word %>%
                                                  \n5 =	I want desperately for my relationship to succeed, and would go to almost any length to see that it does."
                            )) %>% 
    mutate(description = if_else(var_name == "das31", " Please indicate the number that best describes the degree of happiness in your relationship.",
-                                if_else(var_name == "dyadc screener", "Are you currently or have you been in a (romantic) relationship in the past 6 months?",
+                                if_else(var_name == "das_screener", "Are you currently or have you been in a (romantic) relationship in the past 6 months?",
                                 
                                if_else(var_name == "das32", "Which of the following statements best describes how you feel about the future of your relationship? Please indicate only one answer", description)))) %>%
-  mutate(Value = case_when(var_name == "dyadc screener" ~ "0 = No \n1 = Yes", TRUE ~ Value)) %>%
-  mutate(var_name = if_else(var_name == "dyadc screener", "dyadc_screener", var_name)) %>%
+  mutate(Value = case_when(var_name == "das_screener" ~ "0 = No \n1 = Yes", TRUE ~ Value)) %>%
+ # mutate(var_name = if_else(var_name == "dyadc screener", "dyadc_screener", var_name)) %>%
   slice(1:33)
 
 
@@ -2644,7 +2645,7 @@ For binary items:
 # TODO add in the screening item here
 # Create subset of BCAP items
 dyadc_data_subset_binary <- complete %>%
-  select(das29, das30)
+  select(das_screener, das29, das30)
 
 # Calculate the dichotomous summary statistics for each variable
 dyadc_summary_data_binary <- lapply(dyadc_data_subset_binary, function(x) {
