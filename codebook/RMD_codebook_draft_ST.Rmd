@@ -86,6 +86,15 @@ qualtrics <- read_csv(here("do_not_push", "tpw_raw_qualtrics_5-30-23.csv"))
 source(here("functions", "codebook_fun.R"))
 ```
 
+```{css style settings, echo = FALSE}
+blockquote {
+    padding: 10px 20px;
+    margin: 0 0 20px;
+    font-size: 13px;
+    border-left: 5px solid #eee;
+}
+```
+
 ```{r plot-style, echo=FALSE}
 # Color palettes 
  Two_color = c("#246B69", "#604C41")
@@ -6837,7 +6846,17 @@ cts_pc_tbl
 
 ### PCT Description
   
-The Pregnancy and Childbirth Trauma Measure used in this study is an adaptation of the Birth Experiences Questionnaire (Saxbe et al., 2018). Adaptations include our introduction to the measure to acknowledge that we had asked participants about their pregnancy losses at other assessment waves. Additionally, we included a screening item that asked if the participant considered any prior pregnancy or childbirth loss traumatic. Participants endorsed each child and pregnancy trauma with 'yes' or 'no' rather than on a likert scale.  
+The Pregnancy and Childbirth Trauma Measure used in this study is an adaptation of the Birth Experiences Questionnaire (*BEQ*; Saxbe et al., 2018). Adaptations include our introduction to the measure to acknowledge that we had asked participants about their pregnancy losses at other assessment waves. Additionally, we included a screening item that asked if the participant considered any prior pregnancy or childbirth loss traumatic. Participants endorsed each child and pregnancy trauma with 'yes' or 'no' rather than on a likert scale.  
+
+-   Because this is a sensitive topic and participants in this study have told us about their pregnancy losses previously, we introduced the measure with the following text:  
+
+>  
+**"We know that pregnancy loss and trauma is a much more common experience than is often acknowledged. In this study, we are interested in better understanding any experience that has contributed stress to women’s lives, so we are going to ask a few follow-up questions about your experiences in pregnancy and childbirth. Remember, you do not have to answer any question that you do not want to answer."**
+>   
+
+-   If a participant answered "no" to the screening item `pct1` they skipped this questionnaire (`-55`). 
+
+-   This measure contains 12 items, including one item asking about pregnancies and one screening item.
 
 -   This measure contains two subscales: 
 
@@ -6845,19 +6864,13 @@ The Pregnancy and Childbirth Trauma Measure used in this study is an adaptation 
 
     + `pct_childbirth_total` is the total number of traumatic childbirth experiences the participants endorsed. 
 
--   Because this is a sensitive topic and participants in this study have told us about their pregnancy losses previously, we introduced the measure with the following text:  
+-   **Higher** scores represent **greater** pregnancy and childbirth trauma. 
 
->  
-**"We know that pregnancy loss and trauma is a much more common experience than is often acknowledged. In this study, we are interested in better understanding any experience that has contributed stress to women’s lives, so we are going to ask a few follow-up questions about your experiences in pregnancy and childbirth. Remember, you do not have to answer any question that you do not want to answer."**
->   
- 
 -   No items need to be reverse scored. 
 
--   This measure contains 12 items, including one item asking about pregnancies and one screening item.
+-   This survey was not administered for participants who were incarcerated at the time of the assessment.
 
--   If a participant answered "no" to the screening item `pct1` they skipped this questionnaire (`-55`). 
-
--   This survey was not administered for participants who were incarcerated at the time of the assessment. 
+-   Missing data rules were applied.
 
 
 Reference: [@saxbe2018birth](https://psycnet.apa.org/fulltext/2018-14802-010.pdf)
@@ -7062,6 +7075,7 @@ pct_tbl_binary <- pct_summary_data %>%
 pct_tbl_binary
 
 ```
+
 Descriptive statistics for continuous variables
 
 ```{r pct-missing_cont}
@@ -7114,7 +7128,7 @@ pct_tbl_cont
 Distributions are presented below for each subscale:
 
 ```{r pct-distributions, class.source='fold', echo = FALSE}
-# min please check; these aren't working 
+
 p_pct_preg <- complete %>%
   filter(pct_preg_total >= 0) %>%
   composite_hist(pct_preg_total, bins = 4) 
