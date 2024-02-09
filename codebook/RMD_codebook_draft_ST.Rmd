@@ -4491,6 +4491,7 @@ scores indicate more severe mental health symptoms.*
 
 The missing data rule was applied. Calculations were completed for
 participants with 33% or less missing data (this includes -77 responses)
+<Maria, we removed missing rule> 
 
 Reference:
 [@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/10.1111/acps.12956?casa_token=K4GIoIIYOkwAAAAA%3ABuaGU3cOQZwsFiM78FxHp_PHTQXDc72xABnVp8nlMCYRCHzf4c0oOMropyrzVjdClA3pFA-m01heootZ)
@@ -4550,6 +4551,7 @@ itq_word_long <- itq_word %>%
   slice(1:9)
 ```
 
+
 ```{r itq-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
 itq_gt_table <- gt(itq_word_long)
@@ -4585,8 +4587,16 @@ itq_complete <- complete %>%
 
 ```{r itq alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-itq_alpha <- itq_complete %>% 
-  select(itq1:itq9) %>% 
+itq_re_alpha <- itq_complete %>% 
+  select(itq1,itq2) %>% 
+  psych::alpha(check.keys = TRUE)
+
+itq_av_alpha <- itq_complete %>% 
+  select(itq3,itq4) %>% 
+  psych::alpha(check.keys = TRUE)
+
+itq_th_alpha <- itq_complete %>% 
+  select(itq5,itq6) %>% 
   psych::alpha(check.keys = TRUE)
 ```
 
@@ -4597,12 +4607,14 @@ itq_alpha <- itq_complete %>%
 # MARIA TO DO SHIFT
 itq_scale_df <- data.frame(
   var_name = c("Re-experiencing Subscale (2)", " Avoidance Subscale (2)", 
-               "Thread Subscale (2)", "Functioninal Impairment (3)", "PTSD Total (6)"),
-  scale = c("itq_re_total", "itq_av_total", "itq_th_total", "itq_fi_total", ""),
-  scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`", 
-                         "`itq1`, `itq2`, `itq3`, `itq4`, `itq5`,`itq6`", ""), # Maria, after you figure this out, please double check the scale construction 
-  scale_range = c("","","","", ""), #TODO fill in range 
-  alpha = c("","","","", "")
+               "Thread Subscale (2)"),
+  scale = c("itq_re_total", "itq_av_total", "itq_th_total"),
+  scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`"), # Maria, after you figure this out, please double check the scale construction 
+  scale_range = c("0-8","0-8","0-8"), 
+  alpha = c(round(itq_re_alpha$total$raw_alpha, 3), 
+            round(itq_av_alpha$total$raw_alpha, 3), 
+            round(itq_th_alpha$total$raw_alpha, 3)
+            )
 )
 
 # Create the gt table object
@@ -4616,7 +4628,8 @@ itq_scale_df <- gt(itq_scale_df) %>%
              ) %>% 
   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+ # cols_width(var_name ~ px (300)) %>% 
+  tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
 # Print the table
@@ -4635,10 +4648,14 @@ subscale score:
 ```{r itq-mean-items}
 # Calculate the summary statistics for each variable
 itq_summary_data <- lapply(itq_complete, function(x) {
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -4673,39 +4690,32 @@ Distributions are presented below for the total score and each subscale:
 
 ```{r itq-distributions, class.source='fold', echo = FALSE}
 # Maria, I'm comment out this section, so I can render, after we have the computation figured out we can work on this section
-# p_itq_ad_total <- itq_complete %>%
-#   composite_hist(
-#     x = itq_ad_total,
-#     bins = 15
-#   ) +
-#   labs(title = "Affective Dysregulation Subscale")
-# 
-# p_itq_nsc_total <- itq_complete %>%
-#   composite_hist(
-#     x = itq_nsc_total,
-#     bins = 15
-#   ) +
-#   labs(title = "Negative Self-Concept Subscale")
-# 
-# p_itq_dr_total <- itq_complete %>%
-#   composite_hist(
-#     x = itq_dr_total,
-#     bins = 15
-#   ) +
-#   labs(title = "Relationships Subscale")
-# 
-# 
-# p_itq_dso <- itq_complete %>%
-#   composite_hist(
-#     x = itq_dso,
-#     bins = 15
-#   ) +
-#   labs(title = "DSO Subscale")
-# 
-# ggarrange(p_itq_ad_total, p_itq_nsc_total + rremove("ylab"),
-#           p_itq_dr_total, p_itq_dso + rremove("ylab")
-#           ) %>%
-#   annotate_figure(top = text_grob( "Distribution for ITQ Subscale \n(x-axis and y-axis are in different scales)"))
+p_itq_re_total <- itq_complete %>%
+  composite_hist(
+    x = itq_re_total,
+    bins = 8
+  ) +
+  labs(title = "Re-experiencing Subscale Subscale")
+
+p_itq_av_total <- itq_complete %>%
+  composite_hist(
+    x = itq_av_total,
+    bins = 8
+  ) +
+  labs(title = "Avoidance Subscale Subscale")
+
+p_itq_th_total <- itq_complete %>%
+  composite_hist(
+    x = itq_th_total,
+    bins = 8
+  ) +
+  labs(title = "Thread Subscale Subscale")
+
+
+ggarrange(p_itq_re_total, p_itq_av_total + rremove("ylab"),
+          p_itq_th_total
+          ) %>%
+  annotate_figure(top = text_grob( "Distribution for ITQ Subscale \n(x-axis and y-axis are in different scales)"))
 
 ```
 

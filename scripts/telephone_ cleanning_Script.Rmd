@@ -2110,7 +2110,8 @@ itq <- tpw_raw %>%
 There are missing data and missing rule applied. 
 ```{r itq_missing}
 itq <- itq %>%
-  # partially finished TC
+  # partially finished TC 
+  #TODO: Maria, please double check that hr 173 did not do this measure
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) 
 
 itq_miss <- itq %>%
@@ -2194,7 +2195,7 @@ itq_complete <-
   #     -c(id
   #     ),
   #    ~case_when(
-  #      id %in% itq_remove ~ NA,
+  #      id %in% itq_remove ~ -99,
   #        TRUE ~ .x
   #      )
   #   )
