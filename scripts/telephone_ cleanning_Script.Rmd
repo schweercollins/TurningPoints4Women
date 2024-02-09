@@ -479,7 +479,7 @@ dast %>%
 ### DAST Calculations & Subscale
 ```{r dast_calculations}
 # Below is the code that treat negative values (-77, -55) as NA
-# turn negative number to NA for calculation 
+# Apply NA rule
 dast_calc <-
   dast %>% 
   mutate(across(-id, as.numeric)) %>%
@@ -552,7 +552,7 @@ dast_complete <- dast_complete %>%
   relocate(dast_total, dast_total_r, .after = "d5_r") %>%
   relocate(d4_r, .after = "d4") %>%
   relocate(d5_r, .after = "d5") %>%
-  # input missing values for the scored variables
+    # input missing values for the scored variables
   #mutate_at(vars(dast_total), ~case_when(is.na(dast_total) ~ -99, TRUE ~.x)) %>%
   mutate_at(vars(dast_total, dast_total_r), ~case_when(
   dast_screen == 1 | dast_screen == -55 ~ "-99",
@@ -1184,7 +1184,7 @@ dyadc_complete <- dyadc_calc %>%
   # add appropriate missing values back in
   # if answered no for screening question, the entire survey is skipped.
   # Incarcerated TC weren't administered for this survey
-   mutate(dyadc_screener = ifelse(id %in% c("HR211", "HR181", "P819"), "-55", as.character(dyadc_screener)),
+   mutate(dyadc_screener = ifelse(id %in% c("HR211", "HR181", "P819", "HR218"), "-55", as.character(dyadc_screener)),
          across(starts_with("das"), ~case_when(dyadc_screener == 0 ~ "-55", TRUE ~ as.character(.))),
          dyadc_con = ifelse(is.na(dyadc_con), -99, dyadc_con),
          dyadc_aff_exp = ifelse(is.na(dyadc_aff_exp), -99, dyadc_aff_exp),
@@ -1637,7 +1637,7 @@ ell <- ell %>%
   # partial finished TC
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
    # Incarcerated TC weren't administered for this survey
-  mutate_at(vars(ell1:ell39a), ~ ifelse(id %in% c("HR211", "HR181", "P819"), -55, .)) %>%
+  mutate_at(vars(ell1:ell39a), ~ ifelse(id %in% c("HR211", "HR181", "P819", "HR218"), -55, .)) %>%
   # if ell20, ell21, ell22 are all less than 0 then then ell23 wasn't shown
   mutate(ell23 = case_when(ell20 <= 0 & ell21 <=0 & ell22 <=0 ~ -55, TRUE ~ ell23)) 
   
@@ -2110,8 +2110,7 @@ itq <- tpw_raw %>%
 There are missing data and missing rule applied. 
 ```{r itq_missing}
 itq <- itq %>%
-  # partially finished TC 
-  #TODO: Maria, please double check that hr 173 did not do this measure
+  # partially finished TC
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) 
 
 itq_miss <- itq %>%
@@ -2195,7 +2194,7 @@ itq_complete <-
   #     -c(id
   #     ),
   #    ~case_when(
-  #      id %in% itq_remove ~ -99,
+  #      id %in% itq_remove ~ NA,
   #        TRUE ~ .x
   #      )
   #   )
@@ -2267,7 +2266,21 @@ ibq <- ibq %>%
   # partial finished TC
   mutate(across(-c(id,ibq10_other_text), ~ifelse(id == "HR173", "-99", .))) 
 
-# We are not applying missing rule on this measure
+ibq_miss <- ibq %>%
+  mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
+  select(id, ibq1:ibq7) %>%  # only ibq1:ibq7 was used to calculated ibq_total
+  pct_miss_fun(
+    id = c("id"),
+    n_items = 10
+  ) 
+
+ibq_miss %>% 
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'IBQ Missing Data',
+    subtitle = 'By Participant')
+
+ibq_remove <- ibq_miss %>% filter(miss_pct >= 30) %>% pull(id)
 ```
 
 ### IBQ Calculations & Subscale
@@ -2293,7 +2306,9 @@ ibq <- ibq %>%
 # IBQ Total Sum Score creation
 ibq_complete <-
   ibq_calc %>%
-  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) 
+  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) %>%
+  # Apply missing rule for ibq_total 
+  mutate_at(vars(ibq_total), ~case_when(id %in% ibq_remove ~ -99, TRUE ~ .))
 
 
 ## Pull in missing values
@@ -5087,7 +5102,6 @@ pcl_internal_old_variable <- pcl %>%
   select(id, pcl1b:pcl19b_text)
 
 ```
-
 
 ## Merge
 Merge together all measures 

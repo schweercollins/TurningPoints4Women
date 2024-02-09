@@ -2364,8 +2364,7 @@ The DAS is a self-report measure used to assess dyadic adjustment (e.g., interpe
 
 -   **Higher** scores indicate **more** positive dyadic (couple) adjustment, and **greater** consensus, affective expression, satisfaction, and cohesion in the couple relationship.
 
--   The missing data rule was applied. See coding script for details. Calculations were
-completed only with participants that had less than 20% missing data (this includes `-77` responses).
+-   The missing data rule was applied. See coding script for details. 
 
 -   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
