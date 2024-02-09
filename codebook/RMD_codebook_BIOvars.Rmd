@@ -3665,7 +3665,77 @@ cev_c_table
 
 ### Health and Biological Confound (HBC) Description
 
+The Health and Biological Confound (HBC) survey is a self-report measure designed to assess various health behaviors that could impact the biological data collection. *<MARIA CONFIRM/CORRECT>*
 
+There were no subscales computed since the HBC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. *<MARIA CONFIRM/CORRECT>* Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales.
+
+**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
+
+### HBC Variables
+
+#### Value labels
+
+Due to the quantity of HBC variables and different value labels, value labels are presented in the variable table below
+
+#### Survey Items
+
+All HBC survey items are presented in the following table. If the variable has value, labels those are presented in the last column, if there are no value labels the type of variable is listed. 
+
+```{r hbc-var-tbl, results = 'asis'}
+HERE HERE HERE ADD VALUE LABELS/VARIABLE TYPE IF APPLICABLE TO TABLE AS COLUMN AND SPECIFY COLUMN NAME TO INCLUDE BOTH WHEN APPLICABLE - hbc8
+#create vector of dichotomous hbc vars
+vec_hbc_dichot <- c("hbc2", "hbc3", "hbc4", "hbc5", "hbc6", "hbc7", "hbc7a", "hbc8",
+                    "hbc8a", "hbc9", "hbc9a", "hbc10", "hbc10a", "hbc11", "hbc11a", 
+                    "hbc12", "hbc13", "hbc14", "hbc15", "hbc16", "hbc17", "hbc17b",
+                    "hbc18", "hbc18e")
+#create df of vars
+hbc_var_md <- bio_md %>% 
+  filter(str_starts(Variable, "hbc")) %>% 
+  mutate(Description = str_remove(Description, "^[0-9]+[a-zA-Z]?\\. "),
+         var_info = case_when(Variable %in% c("hbc7b", "hbc9c", "hbc18a") ~ "Open Text Variable",
+                              Variable %in% c("hbc1", "hbc7c", "hbc8b", "hbc9b",
+                                              "hbc10b", "hbc11b", "hbc12b",
+                                              "hbc12c", "hbc18b", "hbc18c", "hbc18f") ~ "Continuous Variable",
+                              Variable %in% vec_hbc_dichot ~ "0 = No 
+                                                             \n1 = Yes",
+                              Variable %in% c("hbc12a", "hbc12d") ~ "1 = 1 cigarette 
+                                                                  \n2 = 2-5 cigarettes
+                                                                  \n3 = 1 pack
+                                                                  \n4 = 2 packs",
+                              Variable %in% c("hbc13a", "hbc14a", "hbc15a", "hbc16a") ~
+                                            "1 = Never 
+                                           \n2 = .5-1 hour/day
+                                           \n3 = 1-5 hours/day
+                                           \n4 = 5 or more hours/day",
+                              Variable %in% c("hbc17a", "hbc17c") ~ 
+                                             "1 = 0 cups or cans 
+                                            \n2 = 1-3 cups or cans
+                                            \n3 = 4-6 cups or cans
+                                            \n4 = 7-9 cups or cans
+                                            \n5 = 10 or more cups or cans",
+                              Variable == "hbc18d" ~ "1 = Mild 
+                                                     \n2 = Moderate
+                                                     \n3 = Vigorous",
+                              TRUE ~ ""))
+
+
+#create and format the table
+hbc_var_table <- hbc_var_md %>%
+  gt() %>%
+  cols_width(
+      Variable ~ pct(25),
+      Description ~ pct(50),
+      var_info ~ pct(50)) %>% 
+  cols_label(var_info = "Variable Type or Value Labels") %>% 
+  apply_tbl_theme() %>%
+  tab_style(style = cell_text(align = "left"), 
+      locations = cells_column_labels()) %>% 
+  fmt_mark
+
+
+#print
+hbc_var_table
+```
 
 
 
