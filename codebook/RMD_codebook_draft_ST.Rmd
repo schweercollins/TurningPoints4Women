@@ -7449,16 +7449,16 @@ sus_tbl
 ```
 
 
-# PCL
+# LEC
 <MARIA: you might want to switch this to full name to be consistent with other measure.> 
   
   
-### PCL Description
+### LEC Description
   
   <MARIA> please insert a breif description for this measure 
 
 
-* All items need to be reverse scored. 
+* reverse scored. 
 
 * This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
 
@@ -7467,9 +7467,9 @@ sus_tbl
 Reference:
   <Maria, please add a reference if needed> 
   
-### PCL Variables
+### LEC Variables
   
-#### Value LabelsNot Endorsed
+#### Value Labels
 Answer Option A
 ```{r LEC-label-table, results = 'asis'}
 lec_label_df <- data.frame(
@@ -7490,7 +7490,7 @@ lec_label_table <- lec_label_df %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  #cols_width(everything() ~ px(180)) %>%
+  cols_width(everything() ~ px(400)) %>%
   tab_options(table.width = pct(100))%>%
   apply_labtab_theme()
 
@@ -7519,7 +7519,7 @@ lec_label_table_2 <- lec_label_df_2 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  #cols_width(everything() ~ px(180)) %>%
+  cols_width(everything() ~ px(400)) %>%
   tab_options(table.width = pct(100))%>%
   apply_labtab_theme()
 
@@ -7596,7 +7596,7 @@ lec_label_table_5 <- lec_label_df_5 %>%
   gt() %>% 
   tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
               table.border.left.width = 1, table.border.right.width = 1) %>% 
-  #cols_width(everything() ~ px(180)) %>%
+  cols_width(everything() ~ px(400)) %>%
   tab_options(table.width = pct(100))%>%
   apply_labtab_theme()
 
@@ -7604,19 +7604,19 @@ lec_label_table_5 <- lec_label_df_5 %>%
 # Print the table
 print(lec_label_table_5)
 ```
-#### PCL Survey Items 
-PCL survey items are presented in the following table:
+#### LEC Survey Items 
+LEC survey items are presented in the following table:
 
 
-```{r pcl-var-prep}
+```{r lec-var-prep}
 # Pull question wording from Qualtrics data
-pcl_word <- qualtrics %>% 
-  select(starts_with("pcl")) %>%
+lec_word <- qualtrics %>% 
+  select(starts_with("lec"), -lec_total_happen, -lec_total_witness) %>%
   slice(1) 
 
 
 #create table with variable name, description, and notes
-pcl_word_long <- pcl_word %>% 
+lec_word_long <- lec_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
                values_to = "description") %>% 
@@ -7626,17 +7626,30 @@ pcl_word_long <- pcl_word %>%
          description = str_replace(description, "\\d+[a-zA-Z]\\d+ READ:", ""),
          var_name = str_to_lower(var_name),
          notes = as.character("")) %>% 
-  # Edits Variable description and value
-  mutate(description = if_else(var_name == "pcl1", "Natural disaster (for example, flood, hurricane, tornado, earthquake).", description)) %>%
-  mutate(description = if_else(var_name == "pcl1", "How old were you when this occurred?.", description)) 
+  # Edits Variable value label
+  mutate(notes = if_else(endsWith(var_name, "_happen") | endsWith(var_name, "_witness")| endsWith(var_name, "_learn") | endsWith(var_name, "_no"),
+                         "Answer option A", 
+                         notes)) %>%
+  mutate(notes = if_else(endsWith(var_name, "_hapwit_ages_0_5") | endsWith(var_name, "_hapwit_ages_6_11") | endsWith(var_name, "_hapwit_ages_12_19") | endsWith(var_name, "_hapwit_adulthood"),
+                         "Answer option B", 
+                         notes)) %>%
+  mutate(notes = if_else(endsWith(var_name, "_hapwit_dev") |endsWith(var_name, "_devperiod"),
+                         "Answer option C", 
+                         notes)) %>%
+  mutate(notes = if_else(endsWith(var_name, "_freq0-5") | endsWith(var_name, "_freq6-11") | endsWith(var_name, "_freq12-19") | endsWith(var_name, "_freqadult"),
+                         "Answer option D", 
+                         notes)) %>%
+  mutate(notes = if_else(endsWith(var_name, "_text"),
+                         "Open Text Entry", 
+                         notes)) 
 ```
 
-```{r pcl-var-table, results ='asis'}
+```{r lec-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
-pcl_gt_table <- gt(pcl_word_long)
+lec_gt_table <- gt(lec_word_long)
 
 # Table-specific formatting (col width, names)
-pcl_gt_table <- pcl_gt_table %>% 
+lec_gt_table <- lec_gt_table %>% 
   cols_label(var_name = "Variable", 
              description = "Description"
              #notes = "Notes"
@@ -7648,7 +7661,7 @@ pcl_gt_table <- pcl_gt_table %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
-print(pcl_gt_table)
+print(lec_gt_table)
 ```
 
 ### Summary Statistics
@@ -7657,32 +7670,36 @@ print(pcl_gt_table)
 
 Only missing percentages of variables are presented. 
 
-```{r pcl-missing}
+```{r lec-missing}
 # Create subset of items
-pcl_data_subset <- complete %>%
-  select(starts_with("sg"))
+lec_data_subset <- complete %>%
+  select(starts_with("lec"))
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
-pcl_summary_data <- lapply(pcl_data_subset, function(x) {
-  x <- replace(x, x < -40, NA)
-  mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  sd_val <- round(sd(x, na.rm = TRUE), 2)
-  range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
+lec_summary_data <- lapply(lec_data_subset, function(x) {
+   x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  per_no <- paste0(round(sum(x_no_negatives == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x_no_negatives == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x_no_negatives == 0, na.rm = TRUE)
+  num_yes <-sum(x_no_negatives == 1, na.rm = TRUE)
   miss_val <- round(mean(is.na(x)) * 100, 2)
-  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
 
 # Convert summary_data to a data frame
-pcl_summary_data <- as.data.frame(pcl_summary_data)
+lec_summary_data <- as.data.frame(lec_summary_data)
 
 # Set items as first row
-pcl_summary_data <- rbind(names(pcl_summary_data), pcl_summary_data) %>% 
+lec_summary_data <- rbind(names(lec_summary_data), lec_summary_data) %>% 
   t() %>% 
   as.data.frame()
 
 # Create the gt table
-pcl_tbl <- pcl_summary_data %>%
+lec_tbl <- lec_summary_data %>%
   gt() %>%
   cols_label(`1` = "Variable",
              Missing = "% Missing") %>% 
@@ -7693,7 +7710,7 @@ pcl_tbl <- pcl_summary_data %>%
   apply_tbl_theme()
 
 # Render the table
-pcl_tbl
+lec_tbl
 
 ```
   
