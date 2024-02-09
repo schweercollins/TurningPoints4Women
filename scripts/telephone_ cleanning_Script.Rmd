@@ -479,7 +479,7 @@ dast %>%
 ### DAST Calculations & Subscale
 ```{r dast_calculations}
 # Below is the code that treat negative values (-77, -55) as NA
-# Apply NA rule
+# turn negative number to NA for calculation 
 dast_calc <-
   dast %>% 
   mutate(across(-id, as.numeric)) %>%
@@ -552,7 +552,7 @@ dast_complete <- dast_complete %>%
   relocate(dast_total, dast_total_r, .after = "d5_r") %>%
   relocate(d4_r, .after = "d4") %>%
   relocate(d5_r, .after = "d5") %>%
-    # input missing values for the scored variables
+  # input missing values for the scored variables
   #mutate_at(vars(dast_total), ~case_when(is.na(dast_total) ~ -99, TRUE ~.x)) %>%
   mutate_at(vars(dast_total, dast_total_r), ~case_when(
   dast_screen == 1 | dast_screen == -55 ~ "-99",
@@ -2110,7 +2110,8 @@ itq <- tpw_raw %>%
 There are missing data and missing rule applied. 
 ```{r itq_missing}
 itq <- itq %>%
-  # partially finished TC
+  # partially finished TC 
+  #TODO: Maria, please double check that hr 173 did not do this measure
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) 
 
 itq_miss <- itq %>%
@@ -2194,7 +2195,7 @@ itq_complete <-
   #     -c(id
   #     ),
   #    ~case_when(
-  #      id %in% itq_remove ~ NA,
+  #      id %in% itq_remove ~ -99,
   #        TRUE ~ .x
   #      )
   #   )
@@ -2266,21 +2267,7 @@ ibq <- ibq %>%
   # partial finished TC
   mutate(across(-c(id,ibq10_other_text), ~ifelse(id == "HR173", "-99", .))) 
 
-ibq_miss <- ibq %>%
-  mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
-  select(id, ibq1:ibq7) %>%  # only ibq1:ibq7 was used to calculated ibq_total
-  pct_miss_fun(
-    id = c("id"),
-    n_items = 10
-  ) 
-
-ibq_miss %>% 
-  gt::gt() %>% 
-  gt::tab_header(
-    title = 'IBQ Missing Data',
-    subtitle = 'By Participant')
-
-ibq_remove <- ibq_miss %>% filter(miss_pct >= 30) %>% pull(id)
+# We are not applying missing rule on this measure
 ```
 
 ### IBQ Calculations & Subscale
@@ -2306,9 +2293,7 @@ ibq <- ibq %>%
 # IBQ Total Sum Score creation
 ibq_complete <-
   ibq_calc %>%
-  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) %>%
-  # Apply missing rule for ibq_total 
-  mutate_at(vars(ibq_total), ~case_when(id %in% ibq_remove ~ -99, TRUE ~ .))
+  mutate(ibq_total = rowSums(select(., ibq1:ibq7), na.rm = T)) 
 
 
 ## Pull in missing values

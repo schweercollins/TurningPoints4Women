@@ -1243,4 +1243,19 @@ ell_count_complete <- ell_count_complete%>%
 # pct_remove <- pct_miss %>% filter(miss_pct >= 20) %>% filter(id != "P836") %>% pull(id)
 # # above we retain P836 because they are only missing items from one subscale
 
+# IBQ Missing ###########################
+ibq_miss <- ibq %>%
+  mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
+  select(id, ibq1:ibq7) %>%  # only ibq1:ibq7 was used to calculated ibq_total
+  pct_miss_fun(
+    id = c("id"),
+    n_items = 7
+  )
 
+ibq_miss %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = 'IBQ Missing Data',
+    subtitle = 'By Participant')
+
+ibq_remove <- ibq_miss %>% filter(miss_pct >= 30) %>% pull(id)
