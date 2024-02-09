@@ -2353,7 +2353,7 @@ bcap_tbl_binary
 
 The DAS is a self-report measure used to assess dyadic adjustment (e.g., interpersonal tensions, dyadic satisfaction, dyadic functioning).
 
--   For the present study, all 32 items from the DAS were collected, and the **total score** and all subscales are included: **Consensus**, **Affective Expression**, **Satisfaction**, and **Cohesion**, and the screener item, thus there are 38 total items.
+-   For the present study, all 32 items from the DAS were collected, and the **total score** and all subscales are included: **Consensus**, **Affective Expression**, **Satisfaction**, and **Cohesion**, the screener item, to reverse-scored items, thus there are 40 total items.
 
 -   **Higher** scores indicate **more** positive dyadic (couple) adjustment, and **greater** consensus, affective expression, satisfaction, and cohesion in the couple relationship.
 
