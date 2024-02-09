@@ -3038,7 +3038,7 @@ ggarrange(p_arq_model_s, p_arq_model_o
 
 The PRSS is a brief 5-item questionnaire designed to assess the construct of posttraumatic risk-seeking (Kerig, 2019) which proposes that, following trauma exposure, some individuals, particularly youth, engage in behaviors that that involve fear-defiance, rushing toward danger, and the cultivation of risky situations that might result in harm to themselves or others. This description was taken from the measure documentation. 
 
--   Please note that because PRSS is hypothesized to follow from trauma, individuals who do not endorse a trauma exposure will not have valid scores on the measure. Although our study appended the PRSS to other trauma indices, no decision rules were built in, thus individuals who analyze these data should be sure to check variable `pcl_total_happen` and `pcl_total_witness` to ensure that trauma exposure has occurred and that PRSS data are valid for analysis. 
+-   Please note that because PRSS is hypothesized to follow from trauma, individuals who do not endorse a trauma exposure will not have valid scores on the measure. Although our study appended the PRSS to other trauma indices, no decision rules were built in, thus individuals who analyze these data should be sure to check variable `lec_total_happen` and `lec_total_witness` to ensure that trauma exposure has occurred and that PRSS data are valid for analysis. 
 
 -   No items need to be reverse scored. 
 
