@@ -37,7 +37,7 @@ dbs_il6_df <- read_excel(dbs_fp, sheet = "IL6")
 #import BIO assessment file
 bio_df <- read_excel(here("do_not_push", "bio_archive.xlsx"))
 #import meta data for variable tables
-bio_md <- read_excel(here("do_not_push", "bio_metadata_archive.xlsx")) %>% 
+bio_md <- read_excel(here("codebook", "bio_metadata_archive.xlsx")) %>% 
   rename(Variable = DATA,
          Description = `Variable description`)
 
@@ -3682,7 +3682,6 @@ Due to the quantity of HBC variables and different value labels, value labels ar
 All HBC survey items are presented in the following table. If the variable has value, labels those are presented in the last column, if there are no value labels the type of variable is listed. 
 
 ```{r hbc-var-tbl, results = 'asis'}
-HERE HERE HERE ADD VALUE LABELS/VARIABLE TYPE IF APPLICABLE TO TABLE AS COLUMN AND SPECIFY COLUMN NAME TO INCLUDE BOTH WHEN APPLICABLE - hbc8
 #create vector of dichotomous hbc vars
 vec_hbc_dichot <- c("hbc2", "hbc3", "hbc4", "hbc5", "hbc6", "hbc7", "hbc7a", "hbc8",
                     "hbc8a", "hbc9", "hbc9a", "hbc10", "hbc10a", "hbc11", "hbc11a", 
@@ -3725,12 +3724,12 @@ hbc_var_table <- hbc_var_md %>%
   cols_width(
       Variable ~ pct(25),
       Description ~ pct(50),
-      var_info ~ pct(50)) %>% 
+      var_info ~ pct(40)) %>% 
   cols_label(var_info = "Variable Type or Value Labels") %>% 
   apply_tbl_theme() %>%
   tab_style(style = cell_text(align = "left"), 
       locations = cells_column_labels()) %>% 
-  fmt_mark
+  fmt_markdown()
 
 
 #print
