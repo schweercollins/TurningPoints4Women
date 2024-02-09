@@ -3400,8 +3400,6 @@ rhs_var_table <- rhs_var_md %>%
       Variable ~ pct(25),
       Description ~ pct(75)) %>% 
   apply_tbl_theme() %>%
-  tab_style(style = cell_text(align = "left"), 
-      locations = cells_column_labels()) %>% 
   tab_row_group(label = "Recoded variables for computing subscales:", 
                 rows = 13:24,
                 id = "p_vars")  %>% 
@@ -3437,13 +3435,13 @@ rhs_scale_df <- data.frame(
   var_name = c("rhs_health",
                "rhs_phys_limit",
                "rhs_emo_limit"),
-  scale = c("Total allostatic load score",
-            "",
-            ""),
-  scale_construction = c("`bp_sys_cal` + `bp_dia_cal` + `bmi_cal`",
-                         "",
-                         ""),
-  scale_range = c("0-13", "", ""))  
+  scale = c("General health (4)",
+            "Role limitations due to physical health (4)",
+            "Role limitations due to emotional problems (3)"),
+  scale_construction = c("mean(`rhs9_p`, `rhs10_p`, `rhs11_p`, `rhs12_p`)",
+                         "mean(`rhs2_p`, `rhs3_p`, `rhs4_p`, `rhs5_p`)",
+                         "mean(`rhs6_p`, `rhs7_p`, `rhs8_p`)"),
+  scale_range = c("0-100", "0-100", "0-100"))  
 
 #create gt table
 rhs_scale_table <- rhs_scale_df %>%
@@ -3462,8 +3460,219 @@ rhs_scale_table <- rhs_scale_df %>%
 print(rhs_scale_table)
 ```
 
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for all RHS variables.
+
+**Non-binary variables:** 
+
+```{r rhs-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+rhs_sum_tbl <- bio_df %>% 
+  select(rhs1, rhs9:rhs_emo_limit) %>%
+  mutate_all(~ifelse(. == -99 | . == -55 | . == -77, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+rhs_sum_tbl
+
+```
+
+**Binary variables:**
+
+```{r rhs-dichot-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+rhs_dichot_df <- bio_df %>% 
+  select(rhs2:rhs8) %>%
+  mutate_all(~ifelse(. == -99 | . == -55| . == -77, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
 
 
+#create table
+rhs_tbl_dichot <- create_dichot_gt_table(rhs_dichot_df)
+
+#print table
+rhs_tbl_dichot
+
+```
+
+#### Distributions
+
+Distributions are presented below for each subscale:
+
+```{r rhs-avg-plot}
+p_rhs_health <- bio_df %>%
+  mutate(across(rhs_health, ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = rhs_health) + 
+  labs(title = "General Health") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+p_rhs_phys <- bio_df %>%
+  mutate(across(rhs_phys_limit, ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = rhs_phys_limit) + 
+  labs(title = "Physical Limitations") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+p_rhs_emo <- bio_df %>%
+  mutate(across(rhs_emo_limit, ~ifelse(. == -99 | . == -55 , NA, as.numeric(.)))) %>% 
+  composite_hist(x = rhs_emo_limit) + 
+  labs(title = "Emotional Limitations") + 
+  theme(plot.title = element_text(hjust = 0.5))
+  
+#arrange
+ggarrange(p_rhs_health, p_rhs_phys, p_rhs_emo) %>% 
+  annotate_figure(top = text_grob( "Distribution for RHS Subscales"))
+
+```
+
+#### Clinical Categories
+
+*<MARIA> INSERT CLINICAL DISTRIBUTION TABLE, IF APPLICABLE*
+
+### COVID-19 Exposure and Vaccination (CEV) Description
+
+The COVID-19 Exposure and Vaccination (CEV) is a self-report measure with 10-items assessing ... *<MARIA INSERT DESCRIPTION OF CEV>*
+
+There were no subscales computed since the CEV is not a standardized measure with developed subscales but meant to assess COVID-19 exposure. *<MARIA CONFIRM/CORRECT>* Similarly, no distributions or clinical categories are presented as no subscales were calculated. 
+
+**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
+
+### CEV Variables
+
+#### Value labels
+
+Variables `cev1` through `cev9` are dichotomous:
+
+```{r cev-dichot-label, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+Value labels for `cev10` are below:
+
+```{r cev-label-table, results = 'asis'}
+cev_label_df <- data.frame(
+  value = c("1", "2", "3"),
+  label = c("Johnson & Johnson",
+            "Moderna",
+            "Pfizer")) %>% 
+  t() %>% 
+  as.data.frame()
+
+cev_label_df <- setNames(cev_label_df[-1, ], unlist(cev_label_df[1, ]))
+
+#create table
+cev_label_table <- cev_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cev_label_table)
+
+
+```
+
+#### Survey Items
+
+All CEV survey items are presented in the following table: 
+
+```{r cev-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "cev"))
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for all CEV variables.
+
+**Binary variables:** 
+
+```{r cev-dichot-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+cev_dichot_df <- bio_df %>% 
+  select(starts_with("cev")) %>%
+  select(-cev10) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55| . == -77, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+
+#create table
+cev_tbl_dichot <- create_dichot_gt_table(cev_dichot_df)
+
+#print table
+cev_tbl_dichot
+
+```
+
+**Categorical variables:**
+
+```{r cev-cat-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+cev_cat_df <- bio_df %>% 
+  select(cev10) %>%
+  mutate_all(~ifelse(. == -99 | . == -55 | . == -77, NA, as.numeric(.))) %>% 
+  count(cev10) %>% 
+  mutate(percent = paste0(n / sum(n) * 100, "%")) %>% 
+  pivot_wider(names_from = cev10,
+              values_from = c(n, percent),
+              names_prefix = "grp_",
+              names_sep = "_") %>% 
+  select(-n_grp_NA) %>% 
+  mutate(Variable = "cev10") %>% 
+  select(Variable, everything())
+
+
+#create table
+cev_c_table <- cev_cat_df %>%
+    gt() %>%
+    cols_label(n_grp_1 = "N",
+               percent_grp_1 = "%",
+               n_grp_2 = "N",
+               percent_grp_2 = "%",
+               n_grp_3 = "N",
+               percent_grp_3 = "%",
+               percent_grp_NA = "% Missing") %>%
+    tab_options(table.width = pct(100)) %>%
+    cols_align(columns = c(n_grp_1, n_grp_2, n_grp_3, percent_grp_1, percent_grp_2, percent_grp_3, percent_grp_NA), align = "center") %>%
+    tab_spanner(label = "Johnson & Johnson", columns = c(n_grp_1, percent_grp_1)) %>%
+    tab_spanner(label = "Moderna", columns = c(n_grp_2, percent_grp_2)) %>%
+    tab_spanner(label = "Pfizer", columns = c(n_grp_3, percent_grp_3)) %>%
+    tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(n_grp_1, n_grp_2, n_grp_3, percent_grp_1, percent_grp_2, percent_grp_3,))) %>% 
+  cols_width(Variable ~ pct(20),
+             starts_with("n_") ~ pct(20),
+             starts_with("percent_") ~ pct(20))
+
+#print table
+cev_c_table
+
+```
+
+
+### Health and Biological Confound (HBC) Description
+
+
+
+
+
+### Chronic Health Conditions (CHC) Description
+
+
+### CHC Variables
 
 
 ### ... ETC
