@@ -2812,6 +2812,7 @@ lec_label_table_4 <- lec_label_df_4 %>%
 # Print the table
 print(lec_label_table_4)
 ```
+
 Answer Option E
 ```{r LEC-label-table-5, results = 'asis'}
 lec_label_df_5 <- data.frame(
@@ -2840,7 +2841,7 @@ print(lec_label_table_5)
 LEC survey items are presented in the following table:
 
 
-```{r lec-var-prep, eval = FALSE, echo = FALSE}
+```{r lec-var-prep}
 # Pull question wording from Qualtrics data
 lec_word <- qualtrics %>% 
   select(starts_with("lec"), -lec_total_happen, -lec_total_witness) %>%
@@ -2873,10 +2874,17 @@ lec_word_long <- lec_word %>%
                          notes)) %>%
   mutate(notes = if_else(endsWith(var_name, "_text"),
                          "Open Text Entry", 
-                         notes)) 
+                         notes)) %>%
+  mutate(notes = if_else(endsWith(var_name, "_relation"),
+                         "a. Your childoffspring; 
+                         \nb. Someone your were close to (romantic partnerfamily member, friedn)
+                         \n nc. Someone you were not close to 
+                         \n Did not witness it at this age 
+                         \n Decline to Answer", 
+                         notes))
 ```
 
-```{r lec-var-table, results ='asis', eval = FALSE, echo = FALSE}
+```{r lec-var-table}
 # Create the gt table object and apply generic theme
 lec_gt_table <- gt(lec_word_long)
 
@@ -2893,24 +2901,67 @@ lec_gt_table <- lec_gt_table %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
-print(lec_gt_table)
+lec_gt_table
 ```
 
 ### Summary Statistics
 
 #### Descriptive Statistics
 
-Only missing percentages of variables are presented. 
+Descriptive statistics are presented below for each item, total, and subscale score:
 
-```{r lec-missing, eval = FALSE, echo = FALSE}
-# Create subset of items
+```{r}
+# subset items
 lec_data_subset <- complete %>%
-  select(starts_with("lec"))
+  select(matches("^lec\\d+_freq"),  lec_total_happen, lec_total_witness, -ends_with("text"))
 
 # Calculate the summary statistics for each variable
-## mean is showing 2 decimals per authors
 lec_summary_data <- lapply(lec_data_subset, function(x) {
    x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+lec_summary_data <- as.data.frame(lec_summary_data)
+
+# Set items as first row
+lec_summary_data <- rbind(names(lec_summary_data), lec_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+lec_tbl <- lec_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+lec_tbl
+```
+For binary items: 
+  
+```{r lec-missing}
+# Create subset of items
+lec_data_subset_binary <- complete %>%
+  select(starts_with("lec"), -ends_with("_hapwit_dev"),-ends_with("_freq0-5"),-ends_with("_freq6-11"),-ends_with("_freq12-19") , -ends_with("_freqadult"), -ends_with("_text"), -ends_with("_relation"))
+
+
+# Calculate the dichotomous summary statistics for each variable
+lec_summary_data <- lapply(lec_data_subset_binary, function(x) {
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
   x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
   # Exclude negative values and specific negative values from calculations
   x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
@@ -2931,21 +2982,33 @@ lec_summary_data <- rbind(names(lec_summary_data), lec_summary_data) %>%
   as.data.frame()
 
 # Create the gt table
-lec_tbl <- lec_summary_data %>%
+lec_tbl_binary <- lec_summary_data %>%
   gt() %>%
   cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
              Missing = "% Missing") %>% 
-  # cols_width(everything() ~ pct(100)) %>%
-  cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>%
-  apply_tbl_theme()
+  tab_options(table.width = pct(100))%>%
+  cols_width(`1` ~ px(200)) %>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable")
 
 # Render the table
-lec_tbl
+lec_tbl_binary
+
 
 ```
 
+Non
 
 ## International Trauma Questionnaire (ITQ)
 
