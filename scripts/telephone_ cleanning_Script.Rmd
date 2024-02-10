@@ -4767,16 +4767,16 @@ for (column in columns_hapWit_dev) {
 }
 
 
-# Frequence ##################################################################################
+# Frequency ##################################################################################
 
 columns_freq0_5 <- paste0("pcl", 1:19, "_freq0-5")
 for (column in columns_freq0_5) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(                         
         # if _hapWit_ages_0_5 is 0 then _freq0-5 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "0" ~ "-55",
         # if _hapWit_ages_0_5 is -77 then _freq0-5 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "-77" ~ "-55",
         # if _freq0-5 are still NA then _freq0-5 should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
@@ -4802,9 +4802,9 @@ for (column in columns_freq6_11) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(                         
         # if _hapWit_ages_6_11 is 0 then _freq6-11 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_6_11")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_6_11")) == "0" ~ "-55",
         # if _hapWit_ages_6_11 is -77 then _freq6-11 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_6_11")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_6_11")) == "-77" ~ "-55",
         # if _freq6-11 are still NA then _freq6-11 should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
@@ -4814,11 +4814,11 @@ columns_freq6_11_text <- paste0("pcl", 1:19, "_freq6-11_text")
 for (column in columns_freq6_11_text) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(    
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) != "2" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) != "2" ~ "-55",
         # if _freq6-11 is -55 then _freq0-5_text should be -55 
         get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) == "-55" ~ "-55",
         # if _freq6-11 is -77 then _freq0-5_text should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) == "-77" ~ "-55",
         # if _freq6-11 is -99 then _freq0-5_text should be -55 
         get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) == "-99" ~ "-55",
         TRUE ~ get(column)
@@ -4831,9 +4831,9 @@ for (column in columns_freq12_19) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(                         
         # if _hapWit_ages_12_19 is 0 then _freq12-19 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_12_19")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_12_19")) == "0" ~ "-55",
         # if _hapWit_ages_12_19 is -77 then _freq12-19 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_12_19")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_12_19")) == "-77" ~ "-55",
         # if _freq12-19 are still NA then _freq12-19 should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
@@ -4859,9 +4859,9 @@ for (column in columns_freqadult) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(                         
         # if _hapWit_adulthood is 0 then _freqadult should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_adulthood")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_adulthood")) == "0" ~ "-55",
         # if _hapWit_adulthood is -77 then _freqadult should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_adulthood")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_adulthood")) == "-77" ~ "-55",
         # if _freqadult are still NA then _freqadult should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)

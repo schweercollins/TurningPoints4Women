@@ -853,10 +853,10 @@ dbs_hdl_df %>%
   ) +
   labs(
     title = 'Allostatic Load Cutoff Values for HDL',
-    caption = 'Clinical cutoff is <39 and \n percentile-determined cutoff is <37.'
+    caption = 'Clinical cutoff is 39 and \n percentile-determined cutoff is 37.'
   )+
-  annotate("text", x = 58, y = 15, label = "Percentile") +
-  annotate("text", x = 35, y = 15, label = "Clinical")
+  annotate("text", x = 32.5, y = 15, label = "Percentile") +
+  annotate("text", x = 43, y = 15, label = "Clinical")
 
 ```
 
@@ -3667,7 +3667,9 @@ cev_c_table
 
 The Health and Biological Confound (HBC) survey is a self-report measure designed to assess various health behaviors that could impact the biological data collection. *<MARIA CONFIRM/CORRECT>*
 
-There were no subscales computed since the HBC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. *<MARIA CONFIRM/CORRECT>* Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales.
+There were no subscales computed since the HBC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. *<MARIA CONFIRM/CORRECT>* Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales. 
+
+Note: There are many conditional questions in this data set, thus there are many "Not Applicable" responses (`-55`).
 
 **<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
 
@@ -3736,17 +3738,40 @@ hbc_var_table <- hbc_var_md %>%
 hbc_var_table
 ```
 
-
-
 ### Chronic Health Conditions (CHC) Description
 
+The Chronic Health Conditions (CHC) survey is a self-report measure designed to assess various health conditions that could impact the biological data collection. *<MARIA CONFIRM/CORRECT>*
+
+There were no subscales computed since the CHC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. *<MARIA CONFIRM/CORRECT>* Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales.
+
+Note: There are many conditional questions in this data set, thus there are many "Not Applicable" responses (`-55`).
+
+**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
 
 ### CHC Variables
 
+#### Value labels
 
-### ... ETC
-(bio measures from bio file and AL indicators, and total AL)
+All CHC variables are dichotomous.
 
-**explain data file**
+```{r chc-dichot-label, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
 
-**explain total AL as own table/section OR as total score from other health measures?**
+
+#### Survey Items
+
+All CHC survey items are presented in the following table:
+
+```{r chc-var-tbl, results = 'asis'}
+#create df of vars
+chc_var_md <- bio_md %>% 
+  filter(str_starts(Variable, "chc")) %>% 
+  mutate(Description = str_remove(Description, "^[0-9]+[a-zA-Z]?\\. "))
+
+#create table for vars
+print(create_bio_var_tbl(chc_var_md, "chc"))
+
+```
+
