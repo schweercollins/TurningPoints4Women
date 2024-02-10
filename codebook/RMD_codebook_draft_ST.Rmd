@@ -53,7 +53,7 @@ editor_options:
 }
 
 </style>
-TODO: double check codebook_fun.r composite_total_avg_fun
+
 
 ```{r setup, include = FALSE}
 library(tidyverse)
@@ -2837,8 +2837,8 @@ lec_label_table_5 <- lec_label_df_5 %>%
 print(lec_label_table_5)
 ```
 #### LEC Survey Items 
-LEC survey items are presented in the following table:
 
+LEC survey items are presented in the following table:
 
 ```{r lec-var-prep, eval = FALSE, echo = FALSE}
 # Pull question wording from Qualtrics data
@@ -2954,7 +2954,11 @@ lec_tbl
 The ITQ is a 9-item questionnaire designed to measure *insert*.
 
 For the present study, 9 items from the ITQ were collected in order to
-#TODO: insert text here
+#TODO: insert text here We introduced the measure with the following text: 
+
+>
+"Below are a number of problems that people sometimes report in response to traumatic or stressful life events. Please read each item carefully, then circle one of the numbers to the right to indicate how much you have been bothered by that problem in the past month."
+>
 
 No items need to be reverse scored. *TODO: need change text here Higher
 scores indicate more severe mental health symptoms.*
@@ -3002,7 +3006,7 @@ print(itq_label_table)
 
 #### Survey Items
 
-All ITQ variables have the same response options.
+ITQ survey items are presented in the following table:
 
 ```{r itq-var-prep}
 # Pull question wording from qualtrics data
@@ -3190,30 +3194,30 @@ ggarrange(p_itq_re_total, p_itq_av_total + rremove("ylab"),
 ```
 
 
-## Institutional Betrayal Trauma Questionnaire (IBQ)
+## Institutional Betrayal Questionnaire (IBQ)
 
 ### IBQ Description
 
-The IBQis a 10-item questionnaire designed to measure *insert*.
+The IBQ is a 10-item questionnaire originally designed to measure institutional betrayal that occurs following a sexual assault; however, in the current study we appended this measure to our trauma assessment battery and introduced the measure with the following language to asses institutional betrayal for any type of trauma experience: 
 
-For the present study, 10 items from the IBQ were collected in order to
+>
+"For this section, I will ask you to think about larger institutions or systems which you may have been part of or enrolled in, which may or may not call to mind specific individuals. This may include large systems such as a school or college, the child welfare system, juvenile justice, a medical or mental health clinic, foster care, local police, the legal system, or an organized religion. Additionally, this can refer to parts of these systems such as a specific school or sports club, a specific foster care placement, or a particular church."
+>
 
-#TODO: insert text here
+-   For the present study, 10 items from the IBQ were collected. Additionally, through data cleaning we created 11 additional variables, thus, there are 21 IBQ variables in this dataset.
 
-No items need to be reverse scored. *TODO: need change text here Higher
-scores indicate more severe mental health symptoms.*
+-   No items need to be reverse scored.  
 
-<Maria> Please edit ( we did not apply missing rule in the telephone script) The missing data rule was applied. Calculations were completed for
-participants with 30% or less missing data (this includes -77 responses)
+-   We did not apply the missing data rule to this measure.
 
 Reference:
-<TODO: Maria, please add reference> 
+[@smith2013dangerous](https://onlinelibrary.wiley.com/doi/full/10.1002/jts.21778?casa_token=2m5ZSrH6mjkAAAAA%3AOnxlt5T633N8PJ8KABcms0ZAFOHr5ByDBon9qb8tKStrfgjwUqMPmWeJRjirmXjHfdNToPDCW1zrMw)
 
 ### IBQ Variables
 
 #### Value Labels
 
-IBQ variables response options for ibp1 - ibq10. <Maria, please check if we want mention ibq10 other items>
+IBQ variables response options for `ibq1` - `ibq10` and all `ibq10` options with the exception of `ibq10_9_text` 
 
 ```{r ibq-label-table, results = 'asis'}
 ibq_label_df <- data.frame(
@@ -3267,8 +3271,9 @@ ibq_word_long <- ibq_word %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>%
-  mutate(description = if_else(var_name == "ibq10", "Total nnumber of institutions involved.", description)) %>%
-  mutate(description = if_else(var_name == "ibq10_9_text", "Part of question ibq10: Does TC select Other - Text", description)) 
+  mutate(description = if_else(var_name == "ibq10", "Total number of institutions involved.", description)) %>%
+  mutate(description = if_else(var_name == "ibq10_9_text", "Part of question ibq10: Does TC select Other", description)) %>%
+  mutate(notes = if_else(var_name == "ibq10_9_text", "Open text response", notes)) 
 ```
 
 ```{r ibq-var-table, results ='asis'}
@@ -3292,7 +3297,7 @@ print(ibq_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
+Information on the computed variables are below.
 Variables were constructed by summing included items.
 
 ```{r ibq df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
@@ -3309,10 +3314,11 @@ ibq_complete <- complete %>%
 ```{r ibq-scale-table, results = 'asis'}
 # Create the table as a data frame
 ibq_scale_df <- data.frame(
-  var_name = c("IBQ Total Score(7)"),
-  scale = c("ibq_total"),
-  scale_construction = c("`ibq1`, `ibq2`, `ibq3`, `ibq4`, `ibq5`,`ibq6`, `ibp7`"),
-  scale_range = c("0-7") #TODO fill in range 
+  var_name = c("ibq_total", "ibq10"),
+  scale = c("IBQ Total Score(7)", "ibq10"),
+  scale_construction = c("`ibq1`, `ibq2`, `ibq3`, `ibq4`, `ibq5`,`ibq6`, `ibp7`",
+                         "Total number of all institutions endorsed in ibq10_ variables"),
+  scale_range = c("0-7", "0-9") 
 )
 
 # Create the gt table object
@@ -3342,8 +3348,12 @@ print(ibq_scale_df)
 Descriptive statistics are presented below for each item, total, and subscale score:
 
 ```{r ibq-mean-items}
+
+ibq_continuous <- complete %>%
+  select("ibq10", "ibq_total") 
+    
 # Calculate the summary statistics for each variable
-ibq_summary_data <- lapply(ibq_complete, function(x) {
+ibq_summary_data <- lapply(ibq_continuous, function(x) {
    x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
   x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
   # Exclude negative values and specific negative values from calculations
@@ -3387,15 +3397,18 @@ For binary items:
 ```{r ibq-binary}
 # Create subset of IBQ items
 ibq_data_subset_binary <- complete %>%
-  select(ibq10_school:ibq10_other)
+  select(ibq1:ibq9,ibq10_school:ibq10_other)
 
 # Calculate the dichotomous summary statistics for each variable
 ibq_summary_data_binary <- lapply(ibq_data_subset_binary, function(x) {
-  x <- replace(x, x < -40, NA)
-  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
-  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
-  num_no <- sum(x == 0, na.rm = TRUE)
-  num_yes <-sum(x == 1, na.rm = TRUE)
+   x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  per_no <- paste0(round(sum(x_no_negatives == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x_no_negatives == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x_no_negatives == 0, na.rm = TRUE)
+  num_yes <-sum(x_no_negatives == 1, na.rm = TRUE)
   miss_val <- round(mean(is.na(x)) * 100, 2)
   c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
@@ -3987,8 +4000,7 @@ The SSQ is a 8-item questionnaire designed to measure abuse-related stigma and s
 
 -   There are 10 total items presented below, included the computed total score `ssq_total` and the empirical cutoff score for high and low shame `ssq_total_cutoff`.
 
--   The cutoffs for `ssq_total_cutoff` are as follows: >= 12 represents "high shame" and <= 11 represents "low shame." As stated by the measure authors, scores of 12 or higher were considered evidence of high shame because this indicated that a participant felt at
-least a moderate ('somewhat true') to high levels of shame on at least six of the eight items. 
+-   The cutoffs for `ssq_total_cutoff` are as follows: >= 12 represents "high shame" and <= 11 represents "low shame." As stated by the measure authors, scores of 12 or higher were considered evidence of high shame because this indicated that a participant felt at least a moderate ('somewhat true') to high levels of shame on at least six of the eight items. 
 
 -   The missing data rule was applied. Calculations were completed for participants with 30% or less missing data (this includes `-77` responses)
 
@@ -4032,7 +4044,9 @@ print(ssq_label_table)
 
 #### Survey Items
 
-SSQ survey items are presented in the following table:
+SSQ survey items are presented in the following table.
+
+**Measure introduction: In the next section, I will ask you about thoughts or behaviors people can have after bad things happen. Please think about the bad things that have happened to you and that bother you now. Please tell me how often you have had the thought in the *past month*.**
 
 ```{r ssq-var-prep}
 # Pull question wording from qualtrics data
