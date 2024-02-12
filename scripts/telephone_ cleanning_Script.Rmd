@@ -4761,15 +4761,18 @@ for (column in columns_hapWit_dev) {
 
 
 # Frequency ##################################################################################
+# correct frequency 
+#if pcl1_hapWit_ages_1_5 - NA then move pcl1_freq0_5 to pcl1b? 
+# # if pcl1_hapWit_ages_1_5 is.na, then pcl1_freq0-5 should be na
 
 columns_freq0_5 <- paste0("pcl", 1:19, "_freq0-5")
 for (column in columns_freq0_5) {
     pcl <- pcl %>%
-      mutate({{column}} := case_when(                         
+      mutate({{column}} := case_when( 
         # if _hapWit_ages_0_5 is 0 then _freq0-5 should be -55 
-        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "0" ~ "-55",
+        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "0" ~ "-55",
         # if _hapWit_ages_0_5 is -77 then _freq0-5 should be -55 
-        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "-77" ~ "-55",
+        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "-77" ~ "-55",
         # if _freq0-5 are still NA then _freq0-5 should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
