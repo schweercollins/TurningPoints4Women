@@ -2257,14 +2257,14 @@ There are missing data, however missing data rule not applied given this is a to
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 ibq <- ibq %>%
   # partial finished TC
-  mutate(across(-c(id,ibq10_other_text), ~ifelse(id == "HR173", "-99", .))) 
+  mutate(across(-c(id), ~ifelse(id == "HR173", "-99", .))) 
 
 ibq_miss <- ibq %>%
   mutate(across(-c(id,ibq10_other_text), as.numeric))%>%
   select(id, ibq1:ibq7) %>%  # only ibq1:ibq7 was used to calculated ibq_total
   pct_miss_fun(
     id = c("id"),
-    n_items = 10
+    n_items = 7
   ) 
 
 ibq_miss %>% 
