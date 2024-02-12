@@ -422,7 +422,7 @@ dast <-
 ```
 
 ### DAST Missing Data 
-There are missing data in DAST and missing rule applied. All but one instance of missing data is due to the skip logic; even still, those participants cannot get scored on the DAST 
+There are missing data in DAST and the missing rule was applied. All but one instance of missing data is due to the skip logic.
 ```{r dast_missing }
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for skip logic (conditional question)
 # if dast_screen is Yes-1, rest column should be NA(-55)
@@ -433,7 +433,7 @@ There are missing data in DAST and missing rule applied. All but one instance of
 # correct missing value: Not Applicable = -55 = The subject was never asked a question for some reason (conditional question)
 dast <- dast %>% 
   # participants who were incarcerated at the time of survey completion were not administered this survey
-  mutate_at(vars(dast_screen:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(dast_screen:d20,d4_r, d5_r), ~case_when(id %in% c("HR211", "HR181", "P819", "HR218") & is.na(.) ~ "-55", TRUE ~ .)) %>%
   # Skip rule: if dast_screen == 1 (TC is pregnant) the rest survey are skipped
   mutate_at(vars(d1a:d20,d4_r, d5_r), ~case_when(dast_screen == 1 ~ "-55", TRUE ~ . )) %>%
   # skip rule: if d1a != 1, d2a should be NA(-55)
@@ -484,7 +484,7 @@ dast_calc <-
   dast %>% 
   mutate(across(-id, as.numeric)) %>%
   select(-dast_screen,
-         -d4,
+         -d4, # dropping because we are using reverse scored d4 and d5
          -d5) %>%
   pct_miss_fun(
     id = 'id',
@@ -621,7 +621,7 @@ cts <- cts %>%
   # if answered no for screening question, the entire survey is skipped.
   mutate_at(vars(ct1:ct20), ~case_when(cts_screen == 0  ~ "-55", TRUE ~ . )) %>%
   # participants who were incarcerated at the time of participation were not administered this survey
-  mutate_at(vars(cts_screen, ct1:ct20), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .))
+  mutate_at(vars(cts_screen, ct1:ct20), ~ ifelse(id %in% c("HR211", "HR181", "P819", "HR218"), "-55", .))
 
 cts %>%
   mutate(across(-id, as.numeric)) %>%
@@ -1037,7 +1037,7 @@ dyadc <- dyadc %>%
   # if answered no for screening question, the entire survey is skipped.
   mutate_at(vars(e1:e19_r), ~case_when(dyadc_screener == 0  ~ "-55", TRUE ~ . )) %>%
     # Participants who were incarcerated at the time of assessment where not administered this survey
-  mutate_at(vars(dyadc_screener, e1:e19_r), ~ ifelse(id %in% c("HR211", "HR181", "P819"), "-55", .)) 
+  mutate_at(vars(dyadc_screener, e1:e19_r), ~ ifelse(id %in% c("HR211", "HR181", "P819", "HR218"), "-55", .)) 
 
 dyadc %>%
     mutate(across(-id, as.numeric)) %>%
@@ -1842,7 +1842,7 @@ mhc_pa_miss %>%
     subtitle = 'By Each Participant'
   )
  
-mhc_pa_remove <- mhc_pa_miss %>% filter(miss_pct >= 33) %>% pull(id) # No one need to be removed 
+mhc_pa_remove <- mhc_pa_miss %>% filter(miss_pct >= 33) %>% pull(id) # No one needs to be removed 
 
 ###### Missing percentage for mhc_swb
 mhc_swb_miss <- mhc %>%
@@ -1878,7 +1878,7 @@ mhc_pwb_miss %>%
     subtitle = 'By Each Participant'
   )
  
-mhc_pwb_remove <- mhc_pwb_miss %>% filter(miss_pct >= 33) %>% pull(id)  # No one need to be removed 
+mhc_pwb_remove <- mhc_pwb_miss %>% filter(miss_pct >= 33) %>% pull(id)  # No one needs to be removed 
 
 ```
 
@@ -1898,7 +1898,6 @@ mhc_calc <-
   )
 
 
-# can we just keep the final three columns for diagnosis -- those in character format?
 mhc_complete <-
   mhc_calc %>%
   composite_total_avg_fun(
@@ -1946,12 +1945,6 @@ mhc_complete <- mhc %>%
     #update prefix h to mhc
   rename_with(~ paste0("mhc", as.numeric(substring(., 2))), starts_with("h"))
 
-
-
-
-## MIN, is there a way to mutate and create new variables that are converted; I want to retain all originla values
-### Maira I don't know what do you mean for comment above, but I think the mhc_complete is what you want for final achrive data 
-## MARIA to do -- add note about diagnoses in codebook
   
 ```
 
@@ -2064,17 +2057,17 @@ flo_complete <- flo_calc %>%
   mutate(flo_total = rowSums(select(., i1:i10), na.rm = T)) %>%
   # apply missing rule: replacing total score with -99 because due to 25% missing data this score isn't valid  
   mutate_at(vars(flo_total), ~case_when(id %in% flo_remove ~ -99, TRUE ~ .x )) %>%
-  # "secure flourish": average of items i11 and i12
-  mutate(Secure_flourish = rowMeans(select(., i11:i12), na.rm = T)) %>%
+  # "secure flourish": average of all items including i11 and i12
+  mutate(secure_flourish = rowSums(select(., i1:i12), na.rm = T)) %>%
   # Apply missing rule: replacing total score with -99 because due to 50% missing data this score isn't valid  
-  mutate_at(vars(Secure_flourish), ~case_when(id %in% secure_flourish_remove ~ -99, TRUE ~ .x )) 
+  mutate_at(vars(secure_flourish), ~case_when(id %in% secure_flourish_remove ~ -99, TRUE ~ .x )) 
   
 # Create final flo df 
 flo_complete <- flo_complete %>%
-  select(id, flo_total, Secure_flourish) %>%
+  select(id, flo_total, secure_flourish) %>%
   merge(flo, by = "id") %>%
   relocate(flo_total, .after = "i12") %>%
-  relocate(Secure_flourish, .after = "flo_total") %>%
+  relocate(secure_flourish, .after = "flo_total") %>%
   # changing prefix to align "i" to "flo"
   rename_with(~str_replace(., "^i", "flo"), matches("^i\\d"))
 ```
@@ -2802,7 +2795,7 @@ cint_socio <- tpw_raw %>%
 cint_socio$cint1 <- apply(cint_socio[, c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77")], 1, function(x) paste(x[!is.na(x)], collapse = ";"))
 
 #Although these were created from the above 9 variables, each participant only selected no more than two choices, so we recoded according to choice 1 and choice 2
-# Maria this create warning, I wasn't sure if this matters
+# Warning just indicates that when a participant didn't have two choices, they were given a NA for choice 2
 cint_socio <- cint_socio %>%
   separate(cint1, into = c("cint1_choice1", "cint1_choice2"), sep = ";", remove = FALSE) %>%
   mutate(
@@ -4767,16 +4760,16 @@ for (column in columns_hapWit_dev) {
 }
 
 
-# Frequence ##################################################################################
+# Frequency ##################################################################################
 
 columns_freq0_5 <- paste0("pcl", 1:19, "_freq0-5")
 for (column in columns_freq0_5) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(                         
         # if _hapWit_ages_0_5 is 0 then _freq0-5 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "0" ~ "-55",
         # if _hapWit_ages_0_5 is -77 then _freq0-5 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_0_5")) == "-77" ~ "-55",
         # if _freq0-5 are still NA then _freq0-5 should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
@@ -4802,9 +4795,9 @@ for (column in columns_freq6_11) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(                         
         # if _hapWit_ages_6_11 is 0 then _freq6-11 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_6_11")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_6_11")) == "0" ~ "-55",
         # if _hapWit_ages_6_11 is -77 then _freq6-11 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_6_11")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_6_11")) == "-77" ~ "-55",
         # if _freq6-11 are still NA then _freq6-11 should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
@@ -4814,11 +4807,11 @@ columns_freq6_11_text <- paste0("pcl", 1:19, "_freq6-11_text")
 for (column in columns_freq6_11_text) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(    
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) != "2" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) != "2" ~ "-55",
         # if _freq6-11 is -55 then _freq0-5_text should be -55 
         get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) == "-55" ~ "-55",
         # if _freq6-11 is -77 then _freq0-5_text should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) == "-77" ~ "-55",
         # if _freq6-11 is -99 then _freq0-5_text should be -55 
         get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_freq6-11")) == "-99" ~ "-55",
         TRUE ~ get(column)
@@ -4831,9 +4824,9 @@ for (column in columns_freq12_19) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(                         
         # if _hapWit_ages_12_19 is 0 then _freq12-19 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_12_19")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_12_19")) == "0" ~ "-55",
         # if _hapWit_ages_12_19 is -77 then _freq12-19 should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_12_19")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_ages_12_19")) == "-77" ~ "-55",
         # if _freq12-19 are still NA then _freq12-19 should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
@@ -4859,9 +4852,9 @@ for (column in columns_freqadult) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(                         
         # if _hapWit_adulthood is 0 then _freqadult should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_adulthood")) == "0" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_adulthood")) == "0" ~ "-55",
         # if _hapWit_adulthood is -77 then _freqadult should be -55 
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_adulthood")) == "-77" ~ "-55",
+        #get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_hapWit_adulthood")) == "-77" ~ "-55",
         # if _freqadult are still NA then _freqadult should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)

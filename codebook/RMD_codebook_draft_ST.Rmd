@@ -53,7 +53,7 @@ editor_options:
 }
 
 </style>
-TODO: double check codebook_fun.r composite_total_avg_fun
+
 
 ```{r setup, include = FALSE}
 library(tidyverse)
@@ -2812,6 +2812,7 @@ lec_label_table_4 <- lec_label_df_4 %>%
 # Print the table
 print(lec_label_table_4)
 ```
+
 Answer Option E
 ```{r LEC-label-table-5, results = 'asis'}
 lec_label_df_5 <- data.frame(
@@ -2837,10 +2838,10 @@ lec_label_table_5 <- lec_label_df_5 %>%
 print(lec_label_table_5)
 ```
 #### LEC Survey Items 
+
 LEC survey items are presented in the following table:
 
-
-```{r lec-var-prep, eval = FALSE, echo = FALSE}
+```{r lec-var-prep, eval = FALSE}
 # Pull question wording from Qualtrics data
 lec_word <- qualtrics %>% 
   select(starts_with("lec"), -lec_total_happen, -lec_total_witness) %>%
@@ -2873,10 +2874,17 @@ lec_word_long <- lec_word %>%
                          notes)) %>%
   mutate(notes = if_else(endsWith(var_name, "_text"),
                          "Open Text Entry", 
-                         notes)) 
+                         notes)) %>%
+  mutate(notes = if_else(endsWith(var_name, "_relation"),
+                         "a. Your childoffspring; 
+                         \nb. Someone your were close to (romantic partnerfamily member, friedn)
+                         \n nc. Someone you were not close to 
+                         \n Did not witness it at this age 
+                         \n Decline to Answer", 
+                         notes))
 ```
 
-```{r lec-var-table, results ='asis', eval = FALSE, echo = FALSE}
+```{r lec-var-table, eval = FALSE}
 # Create the gt table object and apply generic theme
 lec_gt_table <- gt(lec_word_long)
 
@@ -2893,24 +2901,67 @@ lec_gt_table <- lec_gt_table %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
 
 # Print the table
-print(lec_gt_table)
+lec_gt_table
 ```
 
 ### Summary Statistics
 
 #### Descriptive Statistics
 
-Only missing percentages of variables are presented. 
+Descriptive statistics are presented below for each item, total, and subscale score:
 
-```{r lec-missing, eval = FALSE, echo = FALSE}
-# Create subset of items
+```{r}
+# subset items
 lec_data_subset <- complete %>%
-  select(starts_with("lec"))
+  select(matches("^lec\\d+_freq"),  lec_total_happen, lec_total_witness, -ends_with("text"))
 
 # Calculate the summary statistics for each variable
-## mean is showing 2 decimals per authors
 lec_summary_data <- lapply(lec_data_subset, function(x) {
    x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+lec_summary_data <- as.data.frame(lec_summary_data)
+
+# Set items as first row
+lec_summary_data <- rbind(names(lec_summary_data), lec_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+lec_tbl <- lec_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+lec_tbl
+```
+For binary items: 
+  
+```{r lec-missing, eval = FALSE}
+# Create subset of items
+lec_data_subset_binary <- complete %>%
+  select(starts_with("lec"), -ends_with("_hapwit_dev"),-ends_with("_freq0-5"),-ends_with("_freq6-11"),-ends_with("_freq12-19") , -ends_with("_freqadult"), -ends_with("_text"), -ends_with("_relation"))
+
+
+# Calculate the dichotomous summary statistics for each variable
+lec_summary_data <- lapply(lec_data_subset_binary, function(x) {
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
   x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
   # Exclude negative values and specific negative values from calculations
   x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
@@ -2931,18 +2982,29 @@ lec_summary_data <- rbind(names(lec_summary_data), lec_summary_data) %>%
   as.data.frame()
 
 # Create the gt table
-lec_tbl <- lec_summary_data %>%
+lec_tbl_binary <- lec_summary_data %>%
   gt() %>%
   cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
              Missing = "% Missing") %>% 
-  # cols_width(everything() ~ pct(100)) %>%
-  cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>%
-  apply_tbl_theme()
+  tab_options(table.width = pct(100))%>%
+  cols_width(`1` ~ px(200)) %>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable")
 
 # Render the table
-lec_tbl
+lec_tbl_binary
+
 
 ```
 
@@ -2954,7 +3016,11 @@ lec_tbl
 The ITQ is a 9-item questionnaire designed to measure *insert*.
 
 For the present study, 9 items from the ITQ were collected in order to
-#TODO: insert text here
+#TODO: insert text here We introduced the measure with the following text: 
+
+>
+"Below are a number of problems that people sometimes report in response to traumatic or stressful life events. Please read each item carefully, then circle one of the numbers to the right to indicate how much you have been bothered by that problem in the past month."
+>
 
 No items need to be reverse scored. *TODO: need change text here Higher
 scores indicate more severe mental health symptoms.*
@@ -3002,7 +3068,7 @@ print(itq_label_table)
 
 #### Survey Items
 
-All ITQ variables have the same response options.
+ITQ survey items are presented in the following table:
 
 ```{r itq-var-prep}
 # Pull question wording from qualtrics data
@@ -3190,30 +3256,30 @@ ggarrange(p_itq_re_total, p_itq_av_total + rremove("ylab"),
 ```
 
 
-## Institutional Betrayal Trauma Questionnaire (IBQ)
+## Institutional Betrayal Questionnaire (IBQ)
 
 ### IBQ Description
 
-The IBQis a 10-item questionnaire designed to measure *insert*.
+The IBQ is a 10-item questionnaire originally designed to measure institutional betrayal that occurs following a sexual assault; however, in the current study we appended this measure to our trauma assessment battery and introduced the measure with the following language to asses institutional betrayal for any type of trauma experience: 
 
-For the present study, 10 items from the IBQ were collected in order to
+>
+"For this section, I will ask you to think about larger institutions or systems which you may have been part of or enrolled in, which may or may not call to mind specific individuals. This may include large systems such as a school or college, the child welfare system, juvenile justice, a medical or mental health clinic, foster care, local police, the legal system, or an organized religion. Additionally, this can refer to parts of these systems such as a specific school or sports club, a specific foster care placement, or a particular church."
+>
 
-#TODO: insert text here
+-   For the present study, 10 items from the IBQ were collected. Additionally, through data cleaning we created 11 additional variables, thus, there are 21 IBQ variables in this dataset.
 
-No items need to be reverse scored. *TODO: need change text here Higher
-scores indicate more severe mental health symptoms.*
+-   No items need to be reverse scored.  
 
-<Maria> Please edit ( we did not apply missing rule in the telephone script) The missing data rule was applied. Calculations were completed for
-participants with 30% or less missing data (this includes -77 responses)
+-   We did not apply the missing data rule to this measure.
 
 Reference:
-<TODO: Maria, please add reference> 
+[@smith2013dangerous](https://onlinelibrary.wiley.com/doi/full/10.1002/jts.21778?casa_token=2m5ZSrH6mjkAAAAA%3AOnxlt5T633N8PJ8KABcms0ZAFOHr5ByDBon9qb8tKStrfgjwUqMPmWeJRjirmXjHfdNToPDCW1zrMw)
 
 ### IBQ Variables
 
 #### Value Labels
 
-IBQ variables response options for ibp1 - ibq10. <Maria, please check if we want mention ibq10 other items>
+IBQ variables response options for `ibq1` - `ibq10` and all `ibq10` options with the exception of `ibq10_9_text` 
 
 ```{r ibq-label-table, results = 'asis'}
 ibq_label_df <- data.frame(
@@ -3267,8 +3333,9 @@ ibq_word_long <- ibq_word %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>%
-  mutate(description = if_else(var_name == "ibq10", "Total nnumber of institutions involved.", description)) %>%
-  mutate(description = if_else(var_name == "ibq10_9_text", "Part of question ibq10: Does TC select Other - Text", description)) 
+  mutate(description = if_else(var_name == "ibq10", "Total number of institutions involved.", description)) %>%
+  mutate(description = if_else(var_name == "ibq10_9_text", "Part of question ibq10: Does TC select Other", description)) %>%
+  mutate(notes = if_else(var_name == "ibq10_9_text", "Open text response", notes)) 
 ```
 
 ```{r ibq-var-table, results ='asis'}
@@ -3292,7 +3359,7 @@ print(ibq_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
+Information on the computed variables are below.
 Variables were constructed by summing included items.
 
 ```{r ibq df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
@@ -3309,10 +3376,11 @@ ibq_complete <- complete %>%
 ```{r ibq-scale-table, results = 'asis'}
 # Create the table as a data frame
 ibq_scale_df <- data.frame(
-  var_name = c("IBQ Total Score(7)"),
-  scale = c("ibq_total"),
-  scale_construction = c("`ibq1`, `ibq2`, `ibq3`, `ibq4`, `ibq5`,`ibq6`, `ibp7`"),
-  scale_range = c("0-7") #TODO fill in range 
+  var_name = c("ibq_total", "ibq10"),
+  scale = c("IBQ Total Score(7)", "ibq10"),
+  scale_construction = c("`ibq1`, `ibq2`, `ibq3`, `ibq4`, `ibq5`,`ibq6`, `ibp7`",
+                         "Total number of all institutions endorsed in ibq10_ variables"),
+  scale_range = c("0-7", "0-9") 
 )
 
 # Create the gt table object
@@ -3342,8 +3410,12 @@ print(ibq_scale_df)
 Descriptive statistics are presented below for each item, total, and subscale score:
 
 ```{r ibq-mean-items}
+
+ibq_continuous <- complete %>%
+  select("ibq10", "ibq_total") 
+    
 # Calculate the summary statistics for each variable
-ibq_summary_data <- lapply(ibq_complete, function(x) {
+ibq_summary_data <- lapply(ibq_continuous, function(x) {
    x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
   x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
   # Exclude negative values and specific negative values from calculations
@@ -3387,15 +3459,18 @@ For binary items:
 ```{r ibq-binary}
 # Create subset of IBQ items
 ibq_data_subset_binary <- complete %>%
-  select(ibq10_school:ibq10_other)
+  select(ibq1:ibq9,ibq10_school:ibq10_other)
 
 # Calculate the dichotomous summary statistics for each variable
 ibq_summary_data_binary <- lapply(ibq_data_subset_binary, function(x) {
-  x <- replace(x, x < -40, NA)
-  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
-  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
-  num_no <- sum(x == 0, na.rm = TRUE)
-  num_yes <-sum(x == 1, na.rm = TRUE)
+   x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  per_no <- paste0(round(sum(x_no_negatives == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x_no_negatives == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x_no_negatives == 0, na.rm = TRUE)
+  num_yes <-sum(x_no_negatives == 1, na.rm = TRUE)
   miss_val <- round(mean(is.na(x)) * 100, 2)
   c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
@@ -3987,8 +4062,7 @@ The SSQ is a 8-item questionnaire designed to measure abuse-related stigma and s
 
 -   There are 10 total items presented below, included the computed total score `ssq_total` and the empirical cutoff score for high and low shame `ssq_total_cutoff`.
 
--   The cutoffs for `ssq_total_cutoff` are as follows: >= 12 represents "high shame" and <= 11 represents "low shame." As stated by the measure authors, scores of 12 or higher were considered evidence of high shame because this indicated that a participant felt at
-least a moderate ('somewhat true') to high levels of shame on at least six of the eight items. 
+-   The cutoffs for `ssq_total_cutoff` are as follows: >= 12 represents "high shame" and <= 11 represents "low shame." As stated by the measure authors, scores of 12 or higher were considered evidence of high shame because this indicated that a participant felt at least a moderate ('somewhat true') to high levels of shame on at least six of the eight items. 
 
 -   The missing data rule was applied. Calculations were completed for participants with 30% or less missing data (this includes `-77` responses)
 
@@ -4032,7 +4106,9 @@ print(ssq_label_table)
 
 #### Survey Items
 
-SSQ survey items are presented in the following table:
+SSQ survey items are presented in the following table.
+
+**Measure introduction: In the next section, I will ask you about thoughts or behaviors people can have after bad things happen. Please think about the bad things that have happened to you and that bother you now. Please tell me how often you have had the thought in the *past month*.**
 
 ```{r ssq-var-prep}
 # Pull question wording from qualtrics data
@@ -5618,34 +5694,23 @@ ggarrange(p_cts_neg, p_cts_part + rremove("ylab")
 ```
 
 
-
-
 ## Brief Child Abuse Potential Inventory (BCAP)
 
 ### BCAP Description
 
-The BCAP is a self-report inventory used to assess parental child abuse
-risk.
+The BCAP is a 34-item brief version of the Child Abuse Potential Inventory (CAPI), a self-report inventory used to assess parental child abuse risk.          
 
-For the present study, <SHAINA> CONFIRM 34 items from the BCAP were
-collected and <SHAINA/MARIA> CONFIRM all 9 subscales were computed:
-Happiness, Feelings of Persecution, Loneliness, Family Conflict,
-Rigidity, Distress, Financial Insecurity, Lie, and Random Responding.
+-   For the present study, 34 items from the BCAP were
+collected. # update if there are 4 reverse scored items 
 
-Four items (`bcap1`, `bcap2`, `bcap23`, and `bcap29`) should be reverse scored which
-is noted in the variable table below and the reverse scored variables
-are provided (`bcap1_r`, `bcap2_r`, `bcap23_r`, and `bcap29_r`). Higher scores on
-the BCAP indicates increased risk.
+-   reverse scoring noted here?
 
-<SHAINA> CONFIRM\> The missing data rule was applied. Calculations were
-completed only with participants that had less than 20% missing data
-(this includes `-77` responses).
+-   **Higher** scores indicate **greater** risk for child abuse.  As noted by the measure authors and in alignment with the CAPI, high scores by no means indicate the presence or the immediate likelihood of child maltreatment. The BCAP should be used in conjunction with relevant research on the BCAP. 
+
+-   Because no scales were computed, the missing data rules were not applied. 
 
 Reference:
-[@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug);
-[DOI](https://doi.org/10.1207/s15374424jccp3402_9)
-
-<Maria> please add note for scoring reference and note that we are only presenting the items and cite the scoring info (not calculated items). 
+[@ondersma2005brief](https://www.tandfonline.com/doi/abs/10.1207/s15374424jccp3402_9?casa_token=ZIJ3j8CLmK0AAAAA:_ztEWiTg5FO0Y3Jb_fL-zTuyqSmH623f0Q91STiqNR3jYvQyPzUiTqLSW3E5_U4iAucWcpqvbHAUug)
 
 ### BCAP Variables
 
@@ -5736,17 +5801,13 @@ print(bcap_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
-<SHAINA/MARIA> INSERT Variables were constructed by ...
-
-<Maria> We decide nove including subscales, please add a note here 
+No scales or subscales were computed. Please see reference for scoring information. 
 
 ### Summary Statistics
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and
-subscale score.
+Descriptive statistics are presented below for each item.
 
 For binary items:
 
@@ -5758,10 +5819,14 @@ bcap_data_subset_binary <- complete %>%
 
 # Calculate the dichotomous summary statistics for each variable
 bcap_summary_data_binary <- lapply(bcap_data_subset_binary, function(x) {
-  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
-  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
-  num_no <- sum(x == 0, na.rm = TRUE)
-  num_yes <-sum(x == 1, na.rm = TRUE)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  per_no <- paste0(round(sum(x_no_negatives == 0, na.rm = TRUE) / length(x_no_negatives) *100, 1), "%")
+  per_yes <- paste0(round(sum(x_no_negatives == 1, na.rm = TRUE) / length(x_no_negatives) *100, 1), "%")
+  num_no <- sum(x_no_negatives == 0, na.rm = TRUE)
+  num_yes <-sum(x_no_negatives == 1, na.rm = TRUE)
   miss_val <- round(mean(is.na(x)) * 100, 2)
   c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
@@ -6781,48 +6846,35 @@ sus_tbl
 
 ### DAST Description
 
-<MIN/SHAINA>TODO: ROW DATA INCORRECTLY CLEANED, WILL NEED RE_CLEAN!
+The DAST was designed to provide a brief instrument for clinical and non-clinical screening to detect drug use disorders. It is most useful in settings in which seeking treatment for drug use problems is not the patient’s stated goal. It was adapted from the MAST to detect drug use disorders to a range of psychoactive substances other than alcohol. The 20-item version of the DAST used in the current study was found to have psychometric properties comparable with the original 28-item version.
 
-<SHAINA> TODO: CHECK AFTER DATA IS CLEANED
+-   For the present study, 22 items from the DAST were collected and a total score (`dast_total`) was constructed as well as a categorical variable representing drug use severity (`dast_total_r`). There are 25 items in the datefile, included the dast screener, the original dast items, the reverse scored variables, and the two computed variables.
 
-The DAST is a self-report instrument used to assess problems related to
-substance use.
+-   Two items (`d4` and `d5`) should to be reverse scored. The reverse scored variables are saved in the dataset (`d4_r` and `d5_r`). 
 
-For the present study, 22 items from the DAST were collected and a total
-score was constructed. No subscales were created for this measure as
-there was a lack of evidence supporting a subscale structure.
+-   Higher scores indicate more problems related to drug use.
 
-Two items (`d4` and `d5`) should to be reverse scored which is noted in
-the variable table below and the reverse scored variables are provided
-(`d4_r` and `d5_r`). Higher scores indicate more problems related to
-substance use.
+-   Participants who were incarcerated at the time of the interview were not administered this survey.
 
-<TODO:  MIN this is done! I've updated language
-Participants who were incarcerated at the time of the interview were not adminstered this survey.
-
-<SHAINA> TODO: CONFIRM THIS IS CORRECT AND IF SHOULD BE APPLIED IN
-TABLES BELOW - specify -77 The missing data rule was applied.
-Calculations were completed only with participants that had less than
-20% missing data (this includes `-77` responses)
-
-This survey was not administered for participants who were incarcerated at the time of the assessment. 
+-   The missing data rule was applied. Calculations were completed only with participants that had less than 20% missing data (this includes `-77` responses). Only one participant was missing data due to a `-77` declined response, whereas all other participants with missing data did not complete the survey due to skip rules (`-55`). 
 
 Reference:
-[@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1360-0443.1989.tb03463.x);[DOI](https://doi.org/10.1111/j.1360-0443.1989.tb03463.x)
+
+-   [@skinner1982drug](https://www.sciencedirect.com/science/article/abs/pii/0306460382900053)
+-   [@gavin1989diagnostic](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1360-0443.1989.tb03463.x)
 
 ### DAST Variables
 
 #### Value Labels
 
-All The Drug Abuse Screening Test variables have the same response
-options.
+All The DAST variables have the same response options.
 
 ```{r DAST-label-table, results = 'asis'}
 
 dast_label_df <- data.frame(
-  value = c(1,0),
-  label = c("Yes",
-            "No")) %>% 
+  value = c(0,1),
+  label = c("No",
+            "Yes")) %>% 
   t() %>% 
   as.data.frame()
 
@@ -6843,8 +6895,7 @@ print(dast_label_table)
 
 ```
 
-<MARIA> TODO: CONFIRM THIS TABLE SHOULD BE INCLUDED AND WHAT VARIABLES
-THEY APPLY TO Re-coded total value label `dast_total_r`
+Re-coded total value labels for `dast_total_r`
 
 ```{r DAST-label-table-total, results = 'asis'}
 dast_label_total <- data.frame(
@@ -6879,7 +6930,7 @@ print(dast_label_table_total)
 
 All DAST survey items are presented in the following table:
 
-*Question Stem* This questionnaire deals with certain drug use and social behavior patterns. Please answer each of the items truthfully by stating Yes or No to me, thinking about the past 6 months.
+**Question Stem: This questionnaire deals with certain drug use and social behavior patterns. Please answer each of the items truthfully by stating Yes or No, thinking about the past 6 months.**
 
 ```{r DAST-var-prep}
 # Pull question wording from qualtrics data
@@ -6898,11 +6949,11 @@ dast_word_long <- dast_word %>%
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
-         description = case_when(var_name == "d2" ~ "Have you misused prescription drugs in the last 6 months?",
+         description = case_when(var_name == "dast2" ~ "Have you misused prescription drugs in the last 6 months?",
                                  TRUE ~ description),
          var_name = str_to_lower(var_name),
-         notes = case_when(var_name == "d4" ~ "This item should be reverse scored. `d4_r` is reverse scored",
-                           var_name == "d5" ~ "This item should be reverse scored. `d4_r` is reverse scored",
+         notes = case_when(var_name == "dast4" ~ "This item should be reverse scored. `dast4_r` is reverse scored",
+                           var_name == "dast5" ~ "This item should be reverse scored. `dast4_r` is reverse scored",
                            TRUE ~ as.character("")
                            )
          ) %>% 
@@ -6937,51 +6988,57 @@ print(dast_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score is below. The total score was constructed
-by summing all items.
+Information on the total score is below. The total score was constructed by summing all items.
 
-```{r dast alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-#turn eval to TRUE MARIA TO DO
-#Calculate internal reliability 
-# dast_alpha <-
-#   complete %>%
-#   select(d1a:d3, d6:d5_r) %>%
-#   mutate(d2 = coalesce(d2a, d2b)) %>% 
-#   select(-d2a, -d2b) %>% 
-#   drop_na(d2) %>% 
-#   psych::alpha(check.keys = TRUE)
+```{r dast alpha}
+
+# Calculate internal reliability
+dast_alpha <- complete %>%
+  filter(dast1 >= 0 & dast2 >= 0 & dast3 >= 0 & dast4_r >= 0 & dast5_r >= 0 & 
+         dast6 >= 0 & dast7 >= 0 & dast8 >= 0 & dast9 >= 0 & dast10 >= 0 & 
+         dast11 >= 0 & dast12 >= 0 & dast13 >= 0 & dast14 >= 0 & dast15 >= 0 & 
+         dast16 >= 0 & dast17 >= 0 & dast18 >= 0 & dast19 >= 0 & dast20 >= 0) %>%
+  select(dast1:dast3, dast4_r, dast5_r, dast6:dast20) %>%
+  psych::alpha(check.keys = TRUE)
+
 
 ```
 
-<MIN> DATA CLEANING TODO: need check the total
+
 
 ```{r DAST-scale-table, results = 'asis'}
-# Create the table as a data frame
-# dast_scale_df <- data.frame(
-#   var_name = c("dast_total"),
-#   scale = c("Total Score (20)"),
-#   scale_construction = c(" `d1a`, `d2`, `d3`, `d4_r`, `d5_r`, `d6`, `d7`, `d8`, `d9`, `d10`, `d11`, `d12`, `d13`, `d14`, `d15`, `d16`, `d17`, `d18`, `d19`, `d20`"),
-#   scale_range = c("0-20"),
-#   alpha = c(round(dast_alpha$total$raw_alpha, 3))
-# )
-# 
-# # Create the gt table object
-# dast_scale_table <- gt(dast_scale_df) %>%
-#   cols_align(columns = c("scale_range"), align = "center") %>% 
-#   cols_label(var_name = "Variable Name",
-#              scale = "Scale (# of items)", 
-#              scale_construction = "Scale Construction",
-#              scale_range = "Range*",
-#              alpha = "Alpha") %>% 
-#   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
-#   tab_options(table.border.bottom.style = "hidden") %>% 
-#   cols_width(scale ~ px(150),
-#              scale_construction ~ pct(50)) %>% 
-#   tab_options(table.width = pct(100))%>%
-#   apply_tbl_theme() 
-# 
-# # Print the table
-# print(dast_scale_table)
+#Create the table as a data frame
+dast_scale_df <- data.frame(
+  var_name = c("dast_total", "dast_total_r"),
+  scale = c("Total Score (20)", "Dast Severity (1)"),
+  scale_construction = c(" `dast1a`, `dast2`, `dast3`, `dast4_r`, `dast5_r`, `dast6`, `dast7`, `dast8`, `dast9`, `dast10`, `dast11`, `d12`, `d13`, `d14`, `dast15`, `dast16`, `dast17`, `dast18`, `dast19`, `dast20`", 
+                     "`dast_total == 0 ~ 0`, 
+                     `\ndast_total %in% 1:5 ~ 1`,
+                     `\ndast_total %in% 6:10 ~ 2`,
+                     `\ndast_total %in% 11:15 ~ 3`,
+                     `\ndast_total %in% 16:20 ~ 4`"),
+  scale_range = c("0-20", "0-4"),
+  alpha = c(round(dast_alpha$total$raw_alpha, 3),
+            "NA")
+)
+
+# Create the gt table object
+dast_scale_table <- gt(dast_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>%
+  cols_label(var_name = "Variable Name",
+             scale = "Scale (# of items)",
+             scale_construction = "Scale Construction",
+             scale_range = "Range*",
+             alpha = "Alpha") %>%
+  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>%
+  cols_width(scale ~ px(150),
+             scale_construction ~ pct(50)) %>%
+  tab_options(table.width = pct(100))%>%
+  apply_tbl_theme()
+
+# Print the table
+print(dast_scale_table)
 
 ```
 
@@ -6989,23 +7046,25 @@ by summing all items.
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and the total
-score.
+Descriptive statistics are presented below for each item.
 
 For binary items:
 
 ```{r dast-binary-desc}
 # Create subset of DAST items
 dast_data_subset_binary <- complete %>%
-  select(dast1:dast20, -dast4_r, -dast5_r)
+  select(dast_screen:dast20)
 
 # Calculate the dichotomous summary statistics for each variable
 dast_summary_data_binary <- lapply(dast_data_subset_binary, function(x) {
-  x <- replace(x, x < -40, NA)
-  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
-  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
-  num_no <- sum(x == 0, na.rm = TRUE)
-  num_yes <-sum(x == 1, na.rm = TRUE)
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  per_no <- paste0(round(sum(x_no_negatives == 0, na.rm = TRUE) / length(x_no_negatives) *100, 1), "%")
+  per_yes <- paste0(round(sum(x_no_negatives == 1, na.rm = TRUE) / length(x_no_negatives) *100, 1), "%")
+  num_no <- sum(x_no_negatives == 0, na.rm = TRUE)
+  num_yes <-sum(x_no_negatives == 1, na.rm = TRUE)
   miss_val <- round(mean(is.na(x)) * 100, 2)
   c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
 })
@@ -7053,7 +7112,7 @@ dast_data_subset <- complete %>%
 
 # Calculate the dichotomous summary statistics for each variable
 dast_summary_data <- lapply(dast_data_subset, function(x) {
-x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
   x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
   # Exclude negative values and specific negative values from calculations
   x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
@@ -7064,15 +7123,14 @@ x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
 })
 
+
 # Convert summary_data to a data frame
 dast_summary_data <- as.data.frame(dast_summary_data) 
 
 # Set items as first row
 dast_summary_data <- rbind(names(dast_summary_data),dast_summary_data) %>% 
   t() %>% 
-  as.data.frame() %>%
-  mutate(Mean = if_else(Mean == "NaN", "NA", Mean)) %>%
-  mutate(Range = if_else(Range == "Inf--Inf", "NA", Range))
+  as.data.frame() 
 
  
 
@@ -7100,7 +7158,6 @@ dast_tbl
 
 The distribution for the total score is presented below:
 
-<#TODO: Maria, should I use reversed total score for this distributions?>
 ```{r}
 complete %>%
   filter(dast_total >= 0) %>%  # Filter out missing data
@@ -7366,7 +7423,7 @@ print(mhc_gt_table)
 #### Scale and Subscales
 
 Information on the total score and subscale variables are below.
-Variables were c onstructed by summing included items.
+Variables were constructed by summing included items.
 
 ```{r mhc df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 mhc_complete <-
@@ -7384,23 +7441,26 @@ mhc_complete <-
 #Calculate internal reliability 
 mhc_alpha <-
   mhc_complete %>%
-  select(mhc1:mhc3) %>%
+  filter(across(mhc1:mhc14, ~ . >= 0)) %>%
+  select(mhc1:mhc14) %>%
   psych::alpha(check.keys = TRUE)
 
 
 mhc_pa_alpha <-
   mhc_complete %>%
+  filter(across(mhc1:mhc3, ~ . >= 0)) %>%
   select(mhc1:mhc3) %>%
   psych::alpha(check.keys = TRUE)
 
-# MIN check this alpha is greater than 1?
 mhc_swb_alpha <-
   mhc_complete %>%
+  filter(across(mhc4:mhc8, ~ . >= 0)) %>%
   select(mhc4:mhc8) %>%
   psych::alpha(check.keys = TRUE)
 
 mhc_pwb_alpha <-
   mhc_complete %>%
+  filter(across(mhc9:mhc14, ~ . >= 0)) %>%
   select(mhc9:mhc14) %>%
   psych::alpha(check.keys = TRUE)
 ```
@@ -7442,8 +7502,7 @@ print(mhc_scale_df)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and
-subscale score:
+Descriptive statistics are presented below for each item, total, and subscale score:
 
 ```{r mhc-mean-items}
 # Calculate the summary statistics for each variable
@@ -7531,13 +7590,15 @@ ggarrange(p_mhc_total, p_mhc_pa + rremove("ylab"),
 
 The Flourishing Index is a 12-item questionnaire designed to measure five domains of flourishing. The scale contains 2 items for each domain, including happiness and life satisfaction, mental and physical health, meaning and purpose, character and virtue, and close social relationships. There are also two items that represent "secure flourish" indicating financial and material stability, noted by the measure authors to help individuals sustain flourishing across other domains captured through the measure. 
 
-  * Although not computed in our datafile, subscales based on the five domains can be computed. See the measure reference for more scoring details. 
-  
-  * No items need to be reverse scored. 
-  
-  * **Higher** scores indicate greater flourishing.
+-   The dataset contains 14 FLO items, including the Flourishing Index `flo_total` and the Secure Flourish Index `secure_flourish`.
 
-  * The missing data rule was applied. Calculations were completed for participants with 20% or less missing data (this includes -77 responses)
+-   Although not computed in our datafile, subscales based on the five domains can be computed. See the measure reference for additional scoring details. 
+  
+-   No items need to be reverse scored. 
+  
+-   **Higher** scores indicate **greater** flourishing.
+
+-   The missing data rule was applied. Calculations were completed for participants with 20% or less missing data (this includes -77 responses)
 
 Reference:
 [@vanderweele2017promotion](https://www.pnas.org/doi/abs/10.1073/pnas.1702996114)
@@ -7546,7 +7607,7 @@ Reference:
 
 #### Value Labels
 
-All Flourishing Index variables have the same response options.
+Each of the FLO questions is assessed on a scale of 0 – 10. Please see the table below for the specific response option wording used for each item.
 
 ```{r flo-label-table, results = 'asis'}
 
@@ -7583,7 +7644,7 @@ print(flo_label_table)
 ```
 #### Survey Items
 
-ALL Flourishing Index variables have the same response options.
+FLO survey items are presented in the following table:
 
 ```{r flo-var-prep}
 # Pull question wording from qualtrics data
@@ -7594,6 +7655,7 @@ flo_word <- qualtrics %>%
   slice(1)
 
 #create table with variable name, description, and notes
+
 flo_word_long <- flo_word %>% 
   pivot_longer(cols = everything(), 
                names_to = "var_name",
@@ -7601,7 +7663,10 @@ flo_word_long <- flo_word %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>% 
+  mutate(notes = gsub("^.*Note: ", "", description),  # Extract text after "Note:" into "notes"
+         description = gsub("Note:.*$", "", description)) %>%
   slice(1:12)
+
 ```
 
 ```{r flo-var-table, results ='asis'}
@@ -7630,30 +7695,36 @@ Information on the total score is below.
 Variables were constructed by summing included items.
 ```{r  flo, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 flo_complete <- complete %>%
-  select(flo1:flo12, flo_total,Secure_flourish)
+  select(flo1:flo12, flo_total,secure_flourish)
 ```
 
 ```{r flo alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-flo_alpha <- flo_complete %>% 
-  select(flo1:flo12) %>% 
+flo_alpha <- flo_complete %>%
+  select(flo1:flo10) %>% 
+  filter(across(everything(), ~. >= 0)) %>%
   psych::alpha(check.keys = TRUE)
 
 flo_sf_alpha <- flo_complete %>% 
-  select(flo11:flo12) %>% 
+  select(flo1:flo12) %>%
+  filter(across(everything(), ~. >= 0)) %>%
   psych::alpha(check.keys = TRUE)
 ```
 
 ```{r flo-scale-table, results = 'asis'}
 # Create the table as a data frame
 flo_scale_df <- data.frame(
-  var_name = c("flo_total", "Secure_flourish"),
-  scale = c("FLO Total score (12)","Secure Flourish (2)"),
-  scale_construction = c(" `flo1`, `flo2`, `flo3`, `flo4`, `flo5`, `flo6`, `flo7`, `flo8`, `flo9`, `flo10`, `flo11`, `flo12`", "`i11`, `i12`"),
-  scale_range = c("0-120", "0-10"), 
+  var_name = c("flo_total", "secure_flourish"),
+  scale = c("FLO Total (10)","Secure Flourish (12)"),
+  scale_construction = c(" `flo1`, `flo2`, `flo3`, `flo4`, `flo5`, `flo6`, `flo7`, `flo8`, `flo9`, `flo10`",
+                         "`flo1`, `flo2`, `flo3`, `flo4`, `flo5`, `flo6`, `flo7`, `flo8`, `flo9`, `flo10`, `flo11`, `flo12`,`flo11`, `flo12`"),
+  scale_range = c("0-100", "0-120"), 
   alpha = c(round(flo_alpha$total$raw_alpha, 3),
             round(flo_sf_alpha$total$raw_alpha, 3))
 )
+
+
+
 
 # Create the gt table object
 flo_scale_df <- gt(flo_scale_df) %>%
@@ -7662,10 +7733,10 @@ flo_scale_df <- gt(flo_scale_df) %>%
              scale = "Scale (# of items)", 
              scale_construction = "Scale Construction",
              scale_range = "Range*",
-             # alpha = "Alpha"
+             alpha = "Alpha"
              ) %>% 
   tab_footnote(footnote = "*Range of possible values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>% 
+#  tab_options(table.border.bottom.style = "hidden") %>% 
   cols_width(scale ~ px(135)) %>% 
   apply_tbl_theme() 
 
@@ -7730,15 +7801,15 @@ p_flo_complete <- flo_complete %>%
   labs(title = 'Total Scores for Flourishing Index')
 
 p_flo_sf_complete <- flo_complete %>%
-  filter(Secure_flourish >= 0) %>%
+  filter(secure_flourish >= 0) %>%
   composite_hist(
-    x = Secure_flourish
+    x = secure_flourish
   ) +
   labs(title = 'Secure Flourish')
 
 ggarrange(p_flo_complete, p_flo_sf_complete + rremove("ylab")
           ) %>%
-  annotate_figure(top = text_grob( "Distribution for Flourishing Index Subscale \n(x-axis and y-axis are in different scales)"))
+  annotate_figure(top = text_grob( "Distribution for Flourishing Index and Flourish Secure Index\n(x-axis and y-axis are in different scales)"))
 ```
 
 
