@@ -2930,6 +2930,8 @@ lec_summary_data <- lapply(lec_data_subset, function(x) {
 
 # Convert summary_data to a data frame
 lec_summary_data <- as.data.frame(lec_summary_data)
+# correct column name 
+names(lec_summary_data) <- gsub("\\.", "-", names(lec_summary_data))
 
 # Set items as first row
 lec_summary_data <- rbind(names(lec_summary_data), lec_summary_data) %>% 
@@ -2953,7 +2955,7 @@ lec_tbl
 ```
 For binary items: 
   
-```{r lec-missing, eval = FALSE}
+```{r lec-missing}
 # Create subset of items
 lec_data_subset_binary <- complete %>%
   select(starts_with("lec"), -ends_with("_hapwit_dev"),-ends_with("_freq0-5"),-ends_with("_freq6-11"),-ends_with("_freq12-19") , -ends_with("_freqadult"), -ends_with("_text"), -ends_with("_relation"))
