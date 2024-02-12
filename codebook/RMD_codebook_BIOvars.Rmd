@@ -203,6 +203,124 @@ apply_labtab_theme <- function(table) {
 
 ```
 
+```{r bio-functions-KEEP}
+#custom functions for bio codebook
+#create function for calculating continuous summary statistics
+calc_cont_sum_stats <- function(df) {
+  stats_list <- lapply(names(df), function(name) {
+    x <- df[[name]]
+    mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+    sd_val <- round(sd(x, na.rm = TRUE), 2)
+    range_val <- paste(round(min(x, na.rm = TRUE), 2),
+                       round(max(x, na.rm = TRUE), 2), sep = "-")
+    miss_val <- round(mean(is.na(x)) * 100, 2)
+    data.frame(Variable = name, Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  })
+  stats_df <- do.call(rbind, stats_list)
+  return(stats_df)
+}
+
+#create function for calculating dichotomous summary statistics
+calc_dichot_sum_stats <- function(df) {
+  stats_list <- lapply(names(df), function(name) {
+    x <- df[[name]]
+    per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+    per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+    num_no <- sum(x == 0, na.rm = TRUE)
+    num_yes <-sum(x == 1, na.rm = TRUE)
+    miss_val <- round(mean(is.na(x)) * 100, 2)
+    data.frame(Variable = name, per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+  })
+  stats_df <- do.call(rbind, stats_list)
+  return(stats_df)
+}
+
+#create function to create plot for AL indicators
+create_AL_plot <- function(data, column_name, composite_name) {
+  transform_AL_plot <- function(x) {
+    factor(x, levels = c("0", "1", "-99"), labels = c("No", "Yes", "Missing"))
+  }
+  if (!is.character(column_name) || !column_name %in% names(data)) {
+    stop("column_name must be a character string and exist in the dataframe.")
+  }
+  data %>%
+    mutate("{column_name}" := transform_AL_plot(.[[column_name]])) %>%
+    ggplot(aes_string(x = column_name)) +
+    bar_style +
+    labs(x = "Response", y = "Count", title = paste("Distribution for", composite_name)) +
+    THEME
+}
+
+#create function to process columns with multiple responses
+calc_multi_column <- function(column, responses) {
+  responses_list <- strsplit(as.character(column), ";")
+  flat_responses <- unlist(responses_list)
+  flat_responses <- trimws(flat_responses)  
+
+  valid_responses <- flat_responses[flat_responses %in% c(responses, "-55")]
+
+  count_response <- function(response) {
+    sum(valid_responses == response, na.rm = TRUE)
+  }
+
+  total_valid_responses <- length(valid_responses)
+
+  response_counts <- sapply(c(responses, "-55"), count_response)
+  response_percents <- round(response_counts / total_valid_responses * 100, 1)
+
+  data.frame(
+    Response = c(responses, "-55"),
+    Count = response_counts,
+    Percent = response_percents,
+    stringsAsFactors = FALSE
+  )
+}
+
+#create function for all bio vars in bio data
+create_bio_var_tbl <- function(data, prefix) {
+  filtered_data <- data %>%
+    filter(str_starts(Variable, prefix))
+
+  var_table <- filtered_data %>%
+    gt() %>%
+    cols_width(
+      Variable ~ pct(25),
+      Description ~ pct(75)) %>%
+    apply_tbl_theme() %>%
+    tab_style(
+      style = cell_text(align = "left"), 
+      locations = cells_column_labels())
+
+  return(var_table)
+}
+
+#create function to make dichotomous table
+create_dichot_gt_table <- function(data) {
+  table <- data %>%
+    gt() %>%
+    cols_label(num_no = "N",
+               per_no = "%",
+               num_yes = "N",
+               per_yes = "%",
+               Missing = "% Missing") %>%
+    tab_options(table.width = pct(100)) %>%
+    cols_align(columns = c(per_no, per_yes, num_no, num_yes, Missing), align = "center") %>%
+    tab_spanner(label = "No", columns = c(num_no, per_no)) %>%
+    tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>%
+    tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no)))
+  
+  return(table)
+}
+
+
+
+
+```
+
 
 # Allostatic Load Assessment
 
@@ -368,22 +486,6 @@ Descriptive statistics are presented below for key CHO variables.
 **Raw cholesterol values:** 
 
 ```{r cho-cont-summary-table, results = 'asis'}
-#create function for calculating continuous summary statistics
-calc_cont_sum_stats <- function(df) {
-  stats_list <- lapply(names(df), function(name) {
-    x <- df[[name]]
-    mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-    sd_val <- round(sd(x, na.rm = TRUE), 2)
-    range_val <- paste(round(min(x, na.rm = TRUE), 2),
-                       round(max(x, na.rm = TRUE), 2), sep = "-")
-    miss_val <- round(mean(is.na(x)) * 100, 2)
-    data.frame(Variable = name, Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
-  })
-  stats_df <- do.call(rbind, stats_list)
-  return(stats_df)
-}
-
-
 #apply function to calculate summary stats
 cho_sum_df <- dbs_cho_df %>% 
   select(cho_direct, cho_pe) %>% 
@@ -409,21 +511,6 @@ cho_sum_tbl
 **Allostatic load indicators:** 
 
 ```{r cho-dichot-summary-table, results = 'asis'}
-#create function for calculating dichotomous summary statistics
-calc_dichot_sum_stats <- function(df) {
-  stats_list <- lapply(names(df), function(name) {
-    x <- df[[name]]
-    per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
-    per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
-    num_no <- sum(x == 0, na.rm = TRUE)
-    num_yes <-sum(x == 1, na.rm = TRUE)
-    miss_val <- round(mean(is.na(x)) * 100, 2)
-    data.frame(Variable = name, per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
-  })
-  stats_df <- do.call(rbind, stats_list)
-  return(stats_df)
-}
-
 #apply function to calculate summary stats
 cho_dichot_df <- dbs_cho_df %>% 
   select(cho_cal, cho_pal) %>% 
@@ -456,32 +543,6 @@ cho_tbl_dichot
 **Data collection notes:** 
 
 ```{r cho-cat-summary-table, results = 'asis'}
-#create function to process columns with multiple responses
-calc_multi_column <- function(column, responses) {
-  responses_list <- strsplit(as.character(column), ";")
-  flat_responses <- unlist(responses_list)
-  flat_responses <- trimws(flat_responses)  # Remove leading/trailing spaces
-  
-  # Modify to include -55 as a valid response
-  valid_responses <- flat_responses[flat_responses %in% c(responses, "-55")]
-
-  count_response <- function(response) {
-    sum(valid_responses == response, na.rm = TRUE)
-  }
-
-  total_valid_responses <- length(valid_responses)
-
-  response_counts <- sapply(c(responses, "-55"), count_response)
-  response_percents <- round(response_counts / total_valid_responses * 100, 1)
-
-  data.frame(
-    Response = c(responses, "-55"),
-    Count = response_counts,
-    Percent = response_percents,
-    stringsAsFactors = FALSE
-  )
-}
-
 #notes for cho_df
 cho_notes <- c(1, 4, 5, 37, 42)
 
@@ -541,28 +602,6 @@ print(cho_tbl_notes)
 Distributions are presented below for the allostatic load indicators.
 
 ```{r cho-dist-plots}
-#create function to create plot for AL indicators
-create_AL_plot <- function(data, column_name, composite_name) {
-  #transform values to labels
-  transform_AL_plot <- function(x) {
-    factor(x, levels = c("0", "1", "-99"), labels = c("No", "Yes", "Missing"))
-  }
-
-  #ensure that column_name is a character and exists in the dataframe
-  if (!is.character(column_name) || !column_name %in% names(data)) {
-    stop("column_name must be a character string and exist in the dataframe.")
-  }
-  
-  #create plot
-  data %>%
-    mutate("{column_name}" := transform_AL_plot(.[[column_name]])) %>%
-    ggplot(aes_string(x = column_name)) +
-    bar_style +
-    labs(x = "Response", y = "Count", title = paste("Distribution for", composite_name)) +
-    THEME
-}
-
-
 #cho_cal
 p_cho_cal <- create_AL_plot(dbs_cho_df, "cho_cal", "CHO Clinical \nAllostatic Load (AL) Indicator") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -2256,26 +2295,6 @@ print(dichot_label_table)
 All BP variables are presented in the following table: 
 
 ```{r bp-var-tbl, results = 'asis'}
-#create function for all bio vars in bio data
-create_bio_var_tbl <- function(data, prefix) {
-  filtered_data <- data %>%
-    filter(str_starts(Variable, prefix))
-  
-  # Generate and format the table
-  var_table <- filtered_data %>%
-    gt() %>%
-    cols_width(
-      Variable ~ pct(25),
-      Description ~ pct(75)) %>%
-    apply_tbl_theme() %>%
-    tab_style(
-      style = cell_text(align = "left"), 
-      locations = cells_column_labels())
-  
-  # Return the formatted table
-  return(var_table)
-}
-
 #create table for bp vars
 print(create_bio_var_tbl(bio_md, "bp"))
 ```
@@ -2357,28 +2376,6 @@ bp_sum_tbl
 **Allostatic load indicators:**  
 
 ```{r bp-dichot-summary-table, results = 'asis'}
-#create function to make dichotomous table
-create_dichot_gt_table <- function(data) {
-  table <- data %>%
-    gt() %>%
-    cols_label(num_no = "N",
-               per_no = "%",
-               num_yes = "N",
-               per_yes = "%",
-               Missing = "% Missing") %>%
-    tab_options(table.width = pct(100)) %>%
-    cols_align(columns = c(per_no, per_yes, num_no, num_yes, Missing), align = "center") %>%
-    tab_spanner(label = "No", columns = c(num_no, per_no)) %>%
-    tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>%
-    tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
-            locations = cells_column_spanners()) %>% 
-  apply_tbl_theme() %>% 
-  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
-            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no)))
-  
-  return(table)
-}
-
 #create df - apply function to calculate summary stats and create
 bp_dichot_df <- bio_df %>% 
   select(starts_with("bp")) %>%
