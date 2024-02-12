@@ -2232,6 +2232,7 @@ These data are in the `bio_archive.xlsx` file. Participant ID corresponds to the
 
 *<MARIA> INSERT brief description about how bio assessment (bio variables and survey variables) was measured and any special considerations for the full file/sample (e.g., incarcerated participants were not asked some questions)*
 
+The original survey included exact dates/times and confidential health information. To protect participant confidentiality, exact dates/times were transformed into approximate time elapsed since date/time. Confidential health information was removed from this data file. 
 
 ### Blood Pressure (BP) Description
 
