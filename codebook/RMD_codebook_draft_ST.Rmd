@@ -4693,7 +4693,7 @@ socinf_gen_word_long <- socinf_gen_word %>%
   mutate(description = if_else(var_name == "socinf_general_screener", "ASSESSOR RESPOND: Has TC reported being in a (romantic) relationship in the past 6 months?", description)) %>%
  
   mutate(Value = "") %>%
-  mutate(Value = if_else(var_name %in% c("socinf_preg_screener", "socinf_relationship_screener"), "1 = Yes\n 0 = No" , `Value`)) %>%
+  mutate(Value = if_else(var_name %in% c("socinf_general_screener"), "1 = Yes\n 0 = No" , `Value`)) %>%
   mutate(Value = if_else(var_name %in% c("sg1", "sg2","sg3", "sg5"), "0 = Never or almost never true
         \n1 = Hardly ever true
         \n2 = Sometimes true
@@ -7050,8 +7050,8 @@ socinf_sub_gt_table <- socinf_sub_gt_table %>%
              #notes = "Notes"
   ) %>% 
   apply_tbl_theme() %>% 
-  cols_width(description ~ px(300),
-             var_name ~ px(100)
+  cols_width(description ~ px(400),
+             var_name ~ px(220)
   ) %>%
   tab_options(table.width = pct(100))%>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
