@@ -5131,11 +5131,11 @@ cts_pc_tbl
 
 ```
 
-## Conflict Tactics Scales (CTS)
+## Revised Conflict Tactics Scale - Short Form (CTS2S)
 
-### CTS Description
+### CTS2S Description
 
-The CTS is a self-report measure used to assess tactics used when there
+The CTS2S is a self-report measure used to assess tactics used when there
 is conflict in a relationship.
 
 For the present study, all 20 items from the CTS short form were
@@ -5144,8 +5144,8 @@ Psychological Aggression) and supplemental scales (Assault and Sexual
 Coercion) were calculated.
 
 Authors describe that internal reliability is not appropriate for the
-CTS measure. CTS should not have a calculated total/average composite
-score. Instead, CTS has three different ways of scoring (Prevalence,
+CTS measure. CTS2S should not have a calculated total/average composite
+score. Instead, CTS2S has three different ways of scoring (Prevalence,
 Severity, Mutuality).
 
 No items need to be reverse scored. <MARIA> TODO: How to word
@@ -5162,11 +5162,11 @@ Reference:
 [@straus2004short](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract);
 [DOI](10.1891/vivi.19.5.507.63686)
 
-### CTS Variables
+### CTS2S Variables
 
 #### Value Labels
 
-All CTS variables have the same response options.
+All CTS2S variables have the same response options.
 
 ```{r CTS-label-table, results = 'asis'}
 
@@ -5205,7 +5205,7 @@ print(CTS_label_table)
 
 #### Survey Items
 
-All CTS survey items are presented in the following table:
+All CTS2S survey items are presented in the following table:
 This survey was not adminstered for participants who were incarcerated at the time of the assessment. 
 
 ```{r CTS-var-prep}
@@ -5225,7 +5225,7 @@ CTS_word_long <- CTS_word %>%
          
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>% 
-  mutate(notes = if_else(var_name == "cts screen", "If TC answered No for this question the rest of survey will be skipped", notes),
+  mutate(notes = if_else(var_name == "cts screen", "If TC answered `No` for this question the rest of survey will be skipped", notes),
     description = if_else(var_name ==  "cts screen", "Have you been in a (romantic) relationship in the past year?", description))
 ```
 
@@ -5337,8 +5337,7 @@ print(CTS_scale_table)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and subscale
-score:
+Descriptive statistics are presented below for each item and subscale score:
 
 For binary items: 
 ```{r cts-binary}
@@ -7106,7 +7105,7 @@ socinf_sub_tbl
 # Well-Being
 
 
-## Mental Health Contimuun - SF (MHC-SF)
+## Mental Health Continuum - Short Form (MHC-SF)
 
 ### MHC Description
 
