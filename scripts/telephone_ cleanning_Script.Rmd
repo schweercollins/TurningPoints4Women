@@ -800,13 +800,6 @@ cts_complete <- cts_complete %>%
   merge(cts, by="id") %>%
   # reorder dataset 
   relocate(cts_psy_agg_ind_sev:cts_sex_mutual, .after = "ct20") %>%
-  # add in -99 for midpoint ranges that cannot be computed due to -55 codes
-  #  mutate(
-  #   ct1_midpoint = if_else(is.na(ct1_midpoint), -99, ct1_midpoint),
-  #   ct2_midpoint = if_else(is.na(ct2_midpoint), -99, ct2_midpoint),
-  #   ct7_midpoint = if_else(is.na(ct7_midpoint), -99, ct7_midpoint),
-  #   ct8_midpoint = if_else(is.na(ct8_midpoint), -99, ct8_midpoint)
-  # ) %>%
   rename_with(~ ifelse(substr(., 1, 2) == "ct" & substr(., 1, 3) != "cts", paste0("cts", substr(., 3, nchar(.))), .), starts_with("ct"))
   
   
@@ -3528,7 +3521,8 @@ cts_pc_complete <- cts_pc_complete %>%
  # mutate(across(c(a1:a23, a1_r:a23_r), ~ifelse(cts_parent_screen == 0, -55, ifelse(is.na(.), -77, as.numeric(.))))) %>%
   mutate(across(c(cts_pc_nvdp:cts_pc_negep), ~ifelse(cts_parent_screen == 0, -99, ifelse(is.na(.), -77, as.numeric(.))))) %>%
   # update a prefix to cts_pc
-  rename_with(~ sub("^a", "cts_pc", .), starts_with("a"))
+  rename_with(~ sub("^a", "cts_pc", .), starts_with("a")) %>%
+  relocate(cts_parent_screen:cts_pc23_r, .after = "id")
 
 ```
 

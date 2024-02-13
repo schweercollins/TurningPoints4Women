@@ -1363,4 +1363,448 @@ ibq_remove <- ibq_miss %>% filter(miss_pct >= 30) %>% pull(id)
 #
 #
 
+# cts un used code ####
+# cts_complete <- cts_complete %>%
+# add in -99 for midpoint ranges that cannot be computed due to -55 codes
+#  mutate(
+#   ct1_midpoint = if_else(is.na(ct1_midpoint), -99, ct1_midpoint),
+#   ct2_midpoint = if_else(is.na(ct2_midpoint), -99, ct2_midpoint),
+#   ct7_midpoint = if_else(is.na(ct7_midpoint), -99, ct7_midpoint),
+#   ct8_midpoint = if_else(is.na(ct8_midpoint), -99, ct8_midpoint)
+# ) %>%
+# CTS PLOTS ######
+```{r CTS-Severity-TC-distributions, class.source='fold', echo = FALSE}
+# Psychological Aggression
+p_cts_psy_agg_ind_sev <- complete %>%
+  mutate(
+    cts_psy_agg_ind_sev = case_when(
+      cts_psy_agg_ind_sev == 0 ~ 'No Psychological Aggression',  #TODO: <Maria> Can I short this to No Psy. Aggre. etc...
+      cts_psy_agg_ind_sev == 1 ~ 'Minor Psychological Aggression',
+      cts_psy_agg_ind_sev == 2 ~ 'Severe Psychological Aggression'
+    ),
+    cts_psy_agg_ind_sev = as.factor(cts_psy_agg_ind_sev),
+    cts_psy_agg_ind_sev = relevel(cts_psy_agg_ind_sev, 'No Psychological Aggression')
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_ind_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10),guide = guide_axis(n.dodge=3)) +
+  labs(title = 'Individual (TC) Psychological Aggression Severity',
+       y = "Number of Participants") +
+  THEME
+
+
+# Psychical Injury
+p_cts_injury_ind_sev <- complete %>%
+  mutate(
+    cts_injury_ind_sev = case_when(
+      cts_injury_ind_sev == 0 ~ 'No Injury',
+      cts_injury_ind_sev == 1 ~ 'Minor Injury',
+      cts_injury_ind_sev == 2 ~ 'Severe Injury'
+    ),
+    cts_injury_ind_sev = as.factor(cts_injury_ind_sev),
+    cts_injury_ind_sev = relevel(cts_injury_ind_sev, 'No Injury')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_ind_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Individual (TC) Physical Injury Severity',
+       y = "Number of Participants") +
+  THEME
+
+# Assault
+p_cts_assault_ind_sev <- complete %>%
+  mutate(
+    cts_assault_ind_sev = case_when(
+      cts_assault_ind_sev == 0 ~ 'No Assault',
+      cts_assault_ind_sev == 1 ~ 'Minor Assault',
+      cts_assault_ind_sev == 2 ~ 'Severe Assault'
+    ),
+    cts_assault_ind_sev = as.factor(cts_assault_ind_sev),
+    cts_assault_ind_sev = relevel(cts_assault_ind_sev, 'No Assault')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_ind_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Individual (TC) Assault Severity',
+       y = 'Number of Participants') +
+  THEME
+
+# Sexual Cohesion
+p_cts_sex_ind_sev <- complete %>%
+  mutate(
+    cts_sex_ind_sev = case_when(
+      cts_sex_ind_sev == 0 ~ 'No Sexual Cohesion',
+      cts_sex_ind_sev == 1 ~ 'Minor Sexual Cohesion',
+      cts_sex_ind_sev == 2 ~ 'Severe Sexual Cohesion'
+    ),
+    cts_sex_ind_sev = as.factor(cts_sex_ind_sev),
+    cts_sex_ind_sev = relevel(cts_sex_ind_sev, 'No Sexual Cohesion')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_ind_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Individual (TC) Sexual Cohesion Severity',
+       y = "Number of Participants") +
+  THEME
+
+#TODO: <Min FIX the x axis overlap>
+ggarrange(p_cts_psy_agg_ind_sev, p_cts_injury_ind_sev + rremove("ylab"),
+          p_cts_assault_ind_sev, p_cts_sex_ind_sev + rremove("ylab")) %>%
+  annotate_figure(top = text_grob( "Distribution for CTS Individual (TC) Serverity \n(x-axis and y-axis are in different scales)"))
+```
+
+
+
+```{r CTS-Severity-Partner-distributions, class.source='fold', echo = FALSE}
+# Psychological Aggression
+p_cts_psy_agg_part_sev <- complete %>%
+  mutate(
+    cts_psy_agg_part_sev = case_when(
+      cts_psy_agg_part_sev == 0 ~ 'No Psychological Aggression',
+      cts_psy_agg_part_sev == 1 ~ 'Minor Psychological Aggression',
+      cts_psy_agg_part_sev == 2 ~ 'Severe Psychological Aggression'
+    ),
+    cts_psy_agg_part_sev = as.factor(cts_psy_agg_part_sev),
+    cts_psy_agg_part_sev = relevel(cts_psy_agg_part_sev, 'No Psychological Aggression')
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_part_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Partner Psychological Aggression Severity',
+       y = "Number of Participants") +
+  THEME +
+  theme(axis.text.x = element_text(angle = -45))
+
+# Physical Injury
+p_cts_injury_part_sev <- complete %>%
+  mutate(
+    cts_injury_part_sev = case_when(
+      cts_injury_part_sev == 0 ~ 'No Injury',
+      cts_injury_part_sev == 1 ~ 'Minor Injury',
+      cts_injury_part_sev == 2 ~ 'Severe Injury'
+    ),
+    cts_injury_part_sev = as.factor(cts_injury_part_sev),
+    cts_injury_part_sev = relevel(cts_injury_part_sev, 'No Injury')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_part_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Partner Physical Injury Severity',
+       y = "Number of Participants") +
+  THEME
+
+
+# Assault
+p_cts_assault_part_sev <- complete %>%
+  mutate(
+    cts_assault_part_sev = case_when(
+      cts_assault_part_sev == 0 ~ 'No Assault',
+      cts_assault_part_sev == 1 ~ 'Minor Assault',
+      cts_assault_part_sev == 2 ~ 'Severe Assault'
+    ),
+    cts_assault_part_sev = as.factor(cts_assault_part_sev),
+    cts_assault_part_sev = relevel(cts_assault_part_sev, 'No Assault')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_part_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Partner Assault Severity',
+       y = "Number of Participants") +
+  THEME
+
+# Sexual Cohesion
+p_cts_sex_part_sev <- complete %>%
+  mutate(
+    cts_sex_part_sev = case_when(
+      cts_sex_part_sev == 0 ~ 'No Sexual Cohesion',
+      cts_sex_part_sev == 1 ~ 'Minor Sexual Cohesion',
+      cts_sex_part_sev == 2 ~ 'Severe Sexual Cohesion'
+    ),
+    cts_sex_part_sev = as.factor(cts_sex_part_sev),
+    cts_sex_part_sev = relevel(cts_sex_part_sev, 'No Sexual Cohesion')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_part_sev
+    )
+  ) +
+  bar_style +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(title = 'Partner Sexual Cohesion Severity',
+       y = "Number of Participants") +
+  THEME
+
+# TODO: Min fix x axis overlap
+ggarrange(p_cts_psy_agg_part_sev, p_cts_injury_part_sev + rremove("ylab"),
+          p_cts_assault_part_sev, p_cts_sex_part_sev + rremove("ylab")) %>%
+  annotate_figure(top = text_grob( "Distribution for CTS Partner Serverity \n(x-axis and y-axis are in different scales)"))
+```
+
+##### Prevalence distributions
+
+<MIN> TODO NA was removed when generating following Prevalence plot
+MZ note: I think NA was removed when colculate the prevalence score.
+
+```{r CTS-Prevalence-distributions, class.source='fold', echo = FALSE}
+# Psychological Aggression
+p_cts_psy_agg_pre <- complete %>%
+  pivot_longer(
+    cols = c(cts_psy_agg_ind_prev, cts_psy_agg_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_psy_agg_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_psy_agg_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence, na.rm = T)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Psychological Aggression Prevalence') +
+  scale_fill_manual(values = Two_color) +
+  THEME
+
+# Physical Injury
+p_cts_inj_pre <- complete %>%
+  pivot_longer(
+    cols = c(cts_injury_ind_prev, cts_injury_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_injury_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_injury_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence, na.rm = T)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Physical Injury Prevalence') +
+  scale_fill_manual(values = Two_color) +
+  THEME
+
+# Assault
+p_cts_ass_pre <- complete %>%
+  pivot_longer(
+    cols = c(cts_assault_ind_prev, cts_assault_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_assault_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_assault_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence, na.rm = T)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Assault Prevalence') +
+  scale_fill_manual(values = Two_color) +
+  THEME
+
+# Sexual Cohesion
+p_cts_sex_pre <- complete %>%
+  pivot_longer(
+    cols = c(cts_sex_ind_prev, cts_sex_part_prev),
+    names_to = 'ind_part',
+    values_to = 'prevalence'
+  ) %>%
+  mutate(
+    ind_part = case_when(
+      ind_part == 'cts_sex_ind_prev' ~ 'Individual (TC)',
+      ind_part == 'cts_sex_part_prev' ~ 'Partner'
+    )
+  ) %>%
+  group_by(ind_part) %>%
+  mutate(
+    sum_prev = sum(prevalence, na.rm = T)
+  ) %>%
+  ungroup() %>%
+  ggplot(
+    aes(
+      ind_part, sum_prev
+    )
+  ) +
+  geom_col(
+    aes(fill = ind_part),
+    position = 'dodge'
+  ) +
+  labs(title = 'Sexual Cohesion Prevalence') +
+  scale_fill_manual(values = Two_color) +
+  THEME
+
+ggarrange(p_cts_psy_agg_pre + rremove("legend"), p_cts_inj_pre + rremove("ylab"),
+          p_cts_ass_pre + rremove("legend"), p_cts_sex_pre + rremove("ylab")) %>%
+  annotate_figure(top = text_grob( "Distribution for CTS Prevalence \n(x-axis and y-axis are in different scales)"))
+```
+
+
+
+##### Mutuality distributions
+
+```{r CTS-Mutuality-distributions, class.source='fold', echo = FALSE}
+
+# Psychological Aggression
+p_cts_psy_mut <- complete %>%
+  mutate(
+    cts_psy_agg_mutual = case_when(
+      cts_psy_agg_mutual == 0 ~ 'Neither',
+      cts_psy_agg_mutual == 1 ~ 'Male',
+      cts_psy_agg_mutual == 2 ~ 'Female',
+      cts_psy_agg_mutual == 3 ~ 'Both'
+    ),
+    cts_psy_agg_mutual = as.factor(cts_psy_agg_mutual),
+    cts_psy_agg_mutual = relevel(cts_psy_agg_mutual, 'Male')
+  ) %>%
+  ggplot(
+    aes(
+      cts_psy_agg_mutual
+    )
+  ) +
+  bar_style +
+  labs(title = 'Mutual Psychological Aggression',
+       y = "Number of Participants") +
+  THEME
+
+
+
+# Physical Injury
+p_cts_ing_mut <-
+  complete %>%
+  mutate(
+    cts_injury_mutual = case_when(
+      cts_injury_mutual == 0 ~ 'Neither',
+      cts_injury_mutual == 1 ~ 'Male',
+      cts_injury_mutual == 2 ~ 'Female',
+      cts_injury_mutual == 3 ~ 'Both'
+    ),
+    cts_injury_mutual = as.factor(cts_injury_mutual),
+    cts_injury_mutual = relevel(cts_injury_mutual, 'Female')
+  ) %>%
+  ggplot(
+    aes(
+      cts_injury_mutual
+    )
+  ) +
+  bar_style +
+  labs(title = 'Mutual Physical Injury',
+       y = "Number of Participants") +
+  THEME
+
+
+# Assault
+p_cts_ass_mut <- complete %>%
+  mutate(
+    cts_assault_mutual = case_when(
+      cts_assault_mutual == 0 ~ 'Neither',
+      cts_assault_mutual == 1 ~ 'Male',
+      cts_assault_mutual == 2 ~ 'Female',
+      cts_assault_mutual == 3 ~ 'Both'
+    ),
+    cts_assault_mutual = as.factor(cts_assault_mutual),
+    cts_assault_mutual = relevel(cts_assault_mutual, 'Male')
+  ) %>%
+  ggplot(
+    aes(
+      cts_assault_mutual
+    )
+  ) +
+  bar_style +
+  labs(title = 'Mutual Assault',
+       y = "Number of Participants") +
+  THEME
+
+# Sexual Cohesion
+p_cts_sex_mut <- complete %>%
+  mutate(
+    cts_sex_mutual = case_when(
+      cts_sex_mutual == 0 ~ 'Neither',
+      cts_sex_mutual == 1 ~ 'Male',
+      cts_sex_mutual == 2 ~ 'Female',
+      cts_sex_mutual == 3 ~ 'Both'
+    ),
+    cts_sex_mutual = as.factor(cts_sex_mutual),
+    cts_sex_mutual = relevel(cts_sex_mutual, 'Male')
+  ) %>%
+  ggplot(
+    aes(
+      cts_sex_mutual
+    )
+  ) +
+  bar_style +
+  labs(title = 'Mutual Sexual Cohesion',
+       y = "Number of Participants") +
+  THEME
+
+ggarrange(p_cts_psy_mut, p_cts_ing_mut + rremove("ylab"),
+          p_cts_ass_mut, p_cts_sex_mut + rremove("ylab")) %>%
+  annotate_figure(top = text_grob( "Distribution for CTS Mutual Subscale \n(x-axis and y-axis are in different scales)"))
+```
+
+
 
