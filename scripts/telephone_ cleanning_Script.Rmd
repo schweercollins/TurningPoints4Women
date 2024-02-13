@@ -4424,232 +4424,312 @@ pcl <- pcl %>%
   # combine multiple choice question columns 
   
   # PCL1
-  mutate(pcl1_relation = combine_columns(., c("pcl1c1_1", "pcl1c1_2", "pcl1c1_3", "pcl1c1_9999", 
-                                              "pcl1c1_77", "pcl1c2_1", "pcl1c2_2", "pcl1c2_3", "pcl1c2_9999", 
-                                              "pcl1c2_77", "pcl1c3_1", "pcl1c3_2", "pcl1c3_3", "pcl1c3_9999", 
-                                              "pcl1c3_77", "pcl1c4_1", "pcl1c4_2", "pcl1c4_3", "pcl1c4_9999", 
-                                              "pcl1c4_77", "pcl1d_1", "pcl1d_2", "pcl1d_3", "pcl1d_77"), sep = ";") )%>%
-  relocate(pcl1_relation, .after = "pcl1_freqadult_3_text") %>%
+  mutate(pcl1_witnessed_relation_0_5 = combine_columns(., c("pcl1c1_1", "pcl1c1_2", "pcl1c1_3", "pcl1c1_9999", "pcl1c1_77"), sep = ";") )%>%
+  mutate(pcl1_witnessed_relation_6_11 = combine_columns(., c("pcl1c2_1", "pcl1c2_2", "pcl1c2_3", "pcl1c2_9999", "pcl1c2_77"), sep = ";") )%>%
+  mutate(pcl1_witnessed_relation_12_19 = combine_columns(., c("pcl1c3_1", "pcl1c3_2", "pcl1c3_3", "pcl1c3_9999", "pcl1c3_77"), sep = ";") )%>%
+  mutate(pcl1_witnessed_relation_adult = combine_columns(., c("pcl1c4_1", "pcl1c4_2", "pcl1c4_3", "pcl1c4_9999", "pcl1c4_77"), sep = ";") )%>%
+  mutate(pcl1_learned_relation = combine_columns(., c("pcl1d_1", "pcl1d_2", "pcl1d_3", "pcl1d_77"), sep = ";") )%>%
+  
+  relocate(pcl1_witnessed_relation_0_5, .after = "pcl1_freqadult_3_text") %>%
+  relocate(pcl1_witnessed_relation_6_11, .after = "pcl1_witnessed_relation_0_5") %>%
+  relocate(pcl1_witnessed_relation_12_19, .after = "pcl1_witnessed_relation_6_11") %>%
+  relocate(pcl1_witnessed_relation_adult, .after = "pcl1_witnessed_relation_12_19") %>%
+  relocate(pcl1_learned_relation, .after = "pcl1_witnessed_relation_adult") %>%
+  
   select(-c("pcl1c1_1", "pcl1c1_2", "pcl1c1_3", "pcl1c1_9999", "pcl1c1_77",
             "pcl1c2_1", "pcl1c2_2", "pcl1c2_3", "pcl1c2_9999", "pcl1c2_77",
             "pcl1c3_1", "pcl1c3_2", "pcl1c3_3", "pcl1c3_9999", "pcl1c3_77",
             "pcl1c4_1", "pcl1c4_2", "pcl1c4_3", "pcl1c4_9999", "pcl1c4_77",
             "pcl1d_1", "pcl1d_2", "pcl1d_3", "pcl1d_77")) %>%
   # PCL2
-  mutate(pcl2_relation = combine_columns(., c("pcl2c1_1", "pcl2c1_2", "pcl2c1_3", "pcl2c1_9999", 
-                                              "pcl2c1_77", "pcl2c2_1", "pcl2c2_2", "pcl2c2_3", "pcl2c2_9999", 
-                                              "pcl2c2_77", "pcl2c3_1", "pcl2c3_2", "pcl2c3_3", "pcl2c3_9999", 
-                                              "pcl2c3_77", "pcl2c4_1", "pcl2c4_2", "pcl2c4_3", "pcl2c4_9999", 
-                                              "pcl2c4_77", "pcl2d_1", "pcl2d_2", "pcl2d_3", "pcl2d_77"), sep = ";") )%>%
-  relocate(pcl2_relation, .after = "pcl2_freqadult_3_text") %>%
+  mutate(pcl2_witnessed_relation_0_5 = combine_columns(., c("pcl2c1_1", "pcl2c1_2", "pcl2c1_3", "pcl2c1_9999", "pcl2c1_77"), sep = ";") )%>%
+  mutate(pcl2_witnessed_relation_6_11 = combine_columns(., c("pcl2c2_1", "pcl2c2_2", "pcl2c2_3", "pcl2c2_9999", "pcl2c2_77"), sep = ";") )%>%
+  mutate(pcl2_witnessed_relation_12_19 = combine_columns(., c("pcl2c3_1", "pcl2c3_2", "pcl2c3_3", "pcl2c3_9999", "pcl2c3_77"), sep = ";") )%>%
+  mutate(pcl2_witnessed_relation_adult = combine_columns(., c("pcl2c4_1", "pcl2c4_2", "pcl2c4_3", "pcl2c4_9999", "pcl2c4_77"), sep = ";") )%>%
+  mutate(pcl2_learned_relation = combine_columns(., c("pcl2d_1", "pcl2d_2", "pcl2d_3", "pcl2d_77"), sep = ";") )%>%
+  
+  relocate(pcl2_witnessed_relation_0_5, .after = "pcl2_freqadult_3_text") %>%
+  relocate(pcl2_witnessed_relation_6_11, .after = "pcl2_witnessed_relation_0_5") %>%
+  relocate(pcl2_witnessed_relation_12_19, .after = "pcl2_witnessed_relation_6_11") %>%
+  relocate(pcl2_witnessed_relation_adult, .after = "pcl2_witnessed_relation_12_19") %>%
+  relocate(pcl2_learned_relation, .after = "pcl2_witnessed_relation_adult") %>%
+  
   select(-c("pcl2c1_1", "pcl2c1_2", "pcl2c1_3", "pcl2c1_9999", "pcl2c1_77",
             "pcl2c2_1", "pcl2c2_2", "pcl2c2_3", "pcl2c2_9999", "pcl2c2_77",
             "pcl2c3_1", "pcl2c3_2", "pcl2c3_3", "pcl2c3_9999", "pcl2c3_77",
             "pcl2c4_1", "pcl2c4_2", "pcl2c4_3", "pcl2c4_9999", "pcl2c4_77",
             "pcl2d_1", "pcl2d_2", "pcl2d_3", "pcl2d_77")) %>%
   # PCL3
-  mutate(pcl3_relation = combine_columns(., c("pcl3c1_1", "pcl3c1_2", "pcl3c1_3", "pcl3c1_9999", 
-                                              "pcl3c1_77", "pcl3c2_1", "pcl3c2_2", "pcl3c2_3", "pcl3c2_9999", 
-                                              "pcl3c2_77", "pcl3c3_1", "pcl3c3_2", "pcl3c3_3", "pcl3c3_9999", 
-                                              "pcl3c3_77", "pcl3c4_1", "pcl3c4_2", "pcl3c4_3", "pcl3c4_9999", 
-                                              "pcl3c4_77", "pcl3d_1", "pcl3d_2", "pcl3d_3", "pcl3d_77"), sep = ";") )%>%
-  relocate(pcl3_relation, .after = "pcl3_freqadult_3_text") %>%
+  mutate(pcl3_witnessed_relation_0_5 = combine_columns(., c("pcl3c1_1", "pcl3c1_2", "pcl3c1_3", "pcl3c1_9999", "pcl3c1_77"), sep = ";") )%>%
+  mutate(pcl3_witnessed_relation_6_11 = combine_columns(., c("pcl3c2_1", "pcl3c2_2", "pcl3c2_3", "pcl3c2_9999", "pcl3c2_77"), sep = ";") )%>%
+  mutate(pcl3_witnessed_relation_12_19 = combine_columns(., c("pcl3c3_1", "pcl3c3_2", "pcl3c3_3", "pcl3c3_9999", "pcl3c3_77"), sep = ";") )%>%
+  mutate(pcl3_witnessed_relation_adult = combine_columns(., c("pcl3c4_1", "pcl3c4_2", "pcl3c4_3", "pcl3c4_9999", "pcl3c4_77"), sep = ";") )%>%
+  mutate(pcl3_learned_relation = combine_columns(., c("pcl3d_1", "pcl3d_2", "pcl3d_3", "pcl3d_77"), sep = ";") )%>%
+  
+  relocate(pcl3_witnessed_relation_0_5, .after = "pcl3_freqadult_3_text") %>%
+  relocate(pcl3_witnessed_relation_6_11, .after = "pcl3_witnessed_relation_0_5") %>%
+  relocate(pcl3_witnessed_relation_12_19, .after = "pcl3_witnessed_relation_6_11") %>%
+  relocate(pcl3_witnessed_relation_adult, .after = "pcl3_witnessed_relation_12_19") %>%    
+  relocate(pcl3_learned_relation, .after = "pcl3_witnessed_relation_adult") %>%
   select(-c("pcl3c1_1", "pcl3c1_2", "pcl3c1_3", "pcl3c1_9999", "pcl3c1_77",
             "pcl3c2_1", "pcl3c2_2", "pcl3c2_3", "pcl3c2_9999", "pcl3c2_77",
             "pcl3c3_1", "pcl3c3_2", "pcl3c3_3", "pcl3c3_9999", "pcl3c3_77",
             "pcl3c4_1", "pcl3c4_2", "pcl3c4_3", "pcl3c4_9999", "pcl3c4_77",
             "pcl3d_1", "pcl3d_2", "pcl3d_3", "pcl3d_77")) %>%
   # PCL4
-  mutate(pcl4_relation = combine_columns(., c("pcl4c1_1", "pcl4c1_2", "pcl4c1_3", "pcl4c1_9999", 
-                                              "pcl4c1_77","pcl4c2_1", "pcl4c2_2", "pcl4c2_3", "pcl4c2_9999", 
-                                              "pcl4c2_77","pcl4c3_1", "pcl4c3_2", "pcl4c3_3", "pcl4c3_9999", 
-                                              "pcl4c3_77","pcl4c4_1", "pcl4c4_2", "pcl4c4_3", "pcl4c4_9999", 
-                                              "pcl4c4_77","pcl4d_1", "pcl4d_2", "pcl4d_3", "pcl4d_77"), sep = ";") )%>%
-  relocate(pcl4_relation, .after = "pcl4_freqadult_3_text") %>%
+  mutate(pcl4_witnessed_relation_0_5 = combine_columns(., c("pcl4c1_1", "pcl4c1_2", "pcl4c1_3", "pcl4c1_9999", "pcl4c1_77"), sep = ";") )%>%
+  mutate(pcl4_witnessed_relation_6_11 = combine_columns(., c("pcl4c2_1", "pcl4c2_2", "pcl4c2_3", "pcl4c2_9999", "pcl4c2_77"), sep = ";") )%>%
+  mutate(pcl4_witnessed_relation_12_19 = combine_columns(., c("pcl4c3_1", "pcl4c3_2", "pcl4c3_3", "pcl4c3_9999", "pcl4c3_77"), sep = ";") )%>%
+  mutate(pcl4_witnessed_relation_adult = combine_columns(., c("pcl4c4_1", "pcl4c4_2", "pcl4c4_3", "pcl4c4_9999", "pcl4c4_77"), sep = ";") )%>%
+  mutate(pcl4_learned_relation = combine_columns(., c("pcl4d_1", "pcl4d_2", "pcl4d_3", "pcl4d_77"), sep = ";") )%>%
+ 
+  relocate(pcl4_witnessed_relation_0_5, .after = "pcl4_freqadult_3_text") %>%
+  relocate(pcl4_witnessed_relation_6_11, .after = "pcl4_witnessed_relation_0_5") %>%
+  relocate(pcl4_witnessed_relation_12_19, .after = "pcl4_witnessed_relation_6_11") %>%
+  relocate(pcl4_witnessed_relation_adult, .after = "pcl4_witnessed_relation_12_19") %>%
+  relocate(pcl4_learned_relation, .after = "pcl4_witnessed_relation_adult") %>%
   select(-c("pcl4c1_1", "pcl4c1_2", "pcl4c1_3", "pcl4c1_9999", "pcl4c1_77",
             "pcl4c2_1", "pcl4c2_2", "pcl4c2_3", "pcl4c2_9999", "pcl4c2_77",
             "pcl4c3_1", "pcl4c3_2", "pcl4c3_3", "pcl4c3_9999", "pcl4c3_77",
             "pcl4c4_1", "pcl4c4_2", "pcl4c4_3", "pcl4c4_9999", "pcl4c4_77",
             "pcl4d_1", "pcl4d_2", "pcl4d_3", "pcl4d_77")) %>%  
   # PCL5
-  mutate(pcl5_relation = combine_columns(., c("pcl5c1_1", "pcl5c1_2", "pcl5c1_3", "pcl5c1_9999", 
-                                              "pcl5c1_77","pcl5c2_1", "pcl5c2_2", "pcl5c2_3", "pcl5c2_9999", 
-                                              "pcl5c2_77","pcl5c3_1", "pcl5c3_2", "pcl5c3_3", "pcl5c3_9999", 
-                                              "pcl5c3_77","pcl5c4_1", "pcl5c4_2", "pcl5c4_3", "pcl5c4_9999", 
-                                              "pcl5c4_77","pcl5d_1", "pcl5d_2", "pcl5d_3", "pcl5d_77"), sep = ";") )%>%
-  relocate(pcl5_relation, .after = "pcl5_freqadult_3_text") %>%
+  mutate(pcl5_witnessed_relation_0_5 = combine_columns(., c("pcl5c1_1", "pcl5c1_2", "pcl5c1_3", "pcl5c1_9999", "pcl5c1_77"), sep = ";") )%>%
+  mutate(pcl5_witnessed_relation_6_11 = combine_columns(., c("pcl5c2_1", "pcl5c2_2", "pcl5c2_3", "pcl5c2_9999", "pcl5c2_77"), sep = ";") )%>%
+  mutate(pcl5_witnessed_relation_12_19 = combine_columns(., c("pcl5c3_1", "pcl5c3_2", "pcl5c3_3", "pcl5c3_9999", "pcl5c3_77"), sep = ";") )%>%
+  mutate(pcl5_witnessed_relation_adult = combine_columns(., c("pcl5c4_1", "pcl5c4_2", "pcl5c4_3", "pcl5c4_9999", "pcl5c4_77"), sep = ";") )%>%
+  mutate(pcl5_learned_relation = combine_columns(., c("pcl5d_1", "pcl5d_2", "pcl5d_3", "pcl5d_77"), sep = ";") )%>%
+  
+  relocate(pcl5_witnessed_relation_0_5, .after = "pcl5_freqadult_3_text") %>%
+  relocate(pcl5_witnessed_relation_6_11, .after = "pcl5_witnessed_relation_0_5") %>%
+  relocate(pcl5_witnessed_relation_12_19, .after = "pcl5_witnessed_relation_6_11") %>%
+  relocate(pcl5_witnessed_relation_adult, .after = "pcl5_witnessed_relation_12_19") %>%
+  relocate(pcl5_learned_relation, .after = "pcl5_witnessed_relation_adult") %>%
   select(-c("pcl5c1_1", "pcl5c1_2", "pcl5c1_3", "pcl5c1_9999", "pcl5c1_77",
             "pcl5c2_1", "pcl5c2_2", "pcl5c2_3", "pcl5c2_9999", "pcl5c2_77",
             "pcl5c3_1", "pcl5c3_2", "pcl5c3_3", "pcl5c3_9999", "pcl5c3_77",
             "pcl5c4_1", "pcl5c4_2", "pcl5c4_3", "pcl5c4_9999", "pcl5c4_77",
             "pcl5d_1", "pcl5d_2", "pcl5d_3", "pcl5d_77")) %>%  
     # PCL6
-  mutate(pcl6_relation = combine_columns(., c("pcl6c1_1", "pcl6c1_2", "pcl6c1_3", "pcl6c1_9999", 
-                                              "pcl6c1_77","pcl6c2_1", "pcl6c2_2", "pcl6c2_3", "pcl6c2_9999", 
-                                              "pcl6c2_77","pcl6c3_1", "pcl6c3_2", "pcl6c3_3", "pcl6c3_9999", 
-                                              "pcl6c3_77","pcl6c4_1", "pcl6c4_2", "pcl6c4_3", "pcl6c4_9999", 
-                                              "pcl6c4_77","pcl6d_1", "pcl6d_2", "pcl6d_3", "pcl6d_77"), sep = ";") )%>%
-  relocate(pcl6_relation, .after = "pcl6_freqadult_3_text") %>%
+  mutate(pcl6_witnessed_relation_0_5 = combine_columns(., c("pcl6c1_1", "pcl6c1_2", "pcl6c1_3", "pcl6c1_9999", "pcl6c1_77"), sep = ";") )%>%
+  mutate(pcl6_witnessed_relation_6_11 = combine_columns(., c("pcl6c2_1", "pcl6c2_2", "pcl6c2_3", "pcl6c2_9999", "pcl6c2_77"), sep = ";") )%>%
+  mutate(pcl6_witnessed_relation_12_19 = combine_columns(., c("pcl6c3_1", "pcl6c3_2", "pcl6c3_3", "pcl6c3_9999", "pcl6c3_77"), sep = ";") )%>%
+  mutate(pcl6_witnessed_relation_adult = combine_columns(., c("pcl6c4_1", "pcl6c4_2", "pcl6c4_3", "pcl6c4_9999", "pcl6c4_77"), sep = ";") )%>%
+  mutate(pcl6_learned_relation = combine_columns(., c("pcl6d_1", "pcl6d_2", "pcl6d_3", "pcl6d_77"), sep = ";") )%>%
+  
+  relocate(pcl6_witnessed_relation_0_5, .after = "pcl6_freqadult_3_text") %>%
+  relocate(pcl6_witnessed_relation_6_11, .after = "pcl6_witnessed_relation_0_5") %>%
+  relocate(pcl6_witnessed_relation_12_19, .after = "pcl6_witnessed_relation_6_11") %>%
+  relocate(pcl6_witnessed_relation_adult, .after = "pcl6_witnessed_relation_12_19") %>%
+  relocate(pcl6_learned_relation, .after = "pcl6_witnessed_relation_adult") %>%
   select(-c("pcl6c1_1", "pcl6c1_2", "pcl6c1_3", "pcl6c1_9999", "pcl6c1_77",
             "pcl6c2_1", "pcl6c2_2", "pcl6c2_3", "pcl6c2_9999", "pcl6c2_77",
             "pcl6c3_1", "pcl6c3_2", "pcl6c3_3", "pcl6c3_9999", "pcl6c3_77",
             "pcl6c4_1", "pcl6c4_2", "pcl6c4_3", "pcl6c4_9999", "pcl6c4_77",
             "pcl6d_1", "pcl6d_2", "pcl6d_3", "pcl6d_77")) %>%  
     # PCL7
-  mutate(pcl7_relation = combine_columns(., c("pcl7c1_1", "pcl7c1_2", "pcl7c1_3", "pcl7c1_9999", 
-                                              "pcl7c1_77","pcl7c2_1", "pcl7c2_2", "pcl7c2_3", "pcl7c2_9999", 
-                                              "pcl7c2_77","pcl7c3_1", "pcl7c3_2", "pcl7c3_3", "pcl7c3_9999", 
-                                              "pcl7c3_77","pcl7c4_1", "pcl7c4_2", "pcl7c4_3", "pcl7c4_9999", 
-                                              "pcl7c4_77","pcl7d_1", "pcl7d_2", "pcl7d_3", "pcl7d_77"), sep = ";") )%>%
-  relocate(pcl7_relation, .after = "pcl7_freqadult_3_text") %>%
+  mutate(pcl7_witnessed_relation_0_5 = combine_columns(., c("pcl7c1_1", "pcl7c1_2", "pcl7c1_3", "pcl7c1_9999", "pcl7c1_77"), sep = ";") )%>%
+  mutate(pcl7_witnessed_relation_6_11 = combine_columns(., c("pcl7c2_1", "pcl7c2_2", "pcl7c2_3", "pcl7c2_9999", "pcl7c2_77"), sep = ";") )%>%
+  mutate(pcl7_witnessed_relation_12_19 = combine_columns(., c("pcl7c3_1", "pcl7c3_2", "pcl7c3_3", "pcl7c3_9999", "pcl7c3_77"), sep = ";") )%>%
+  mutate(pcl7_witnessed_relation_adult = combine_columns(., c("pcl7c4_1", "pcl7c4_2", "pcl7c4_3", "pcl7c4_9999", "pcl7c4_77"), sep = ";") )%>%
+  mutate(pcl7_learned_relation = combine_columns(., c("pcl7d_1", "pcl7d_2", "pcl7d_3", "pcl7d_77"), sep = ";") )%>%
+  relocate(pcl7_witnessed_relation_0_5, .after = "pcl7_freqadult_3_text") %>%
+  relocate(pcl7_witnessed_relation_6_11, .after = "pcl7_witnessed_relation_0_5") %>%
+  relocate(pcl7_witnessed_relation_12_19, .after = "pcl7_witnessed_relation_6_11") %>%
+  relocate(pcl7_witnessed_relation_adult, .after = "pcl7_witnessed_relation_12_19") %>%
+  relocate(pcl7_learned_relation, .after = "pcl7_witnessed_relation_adult") %>%
   select(-c("pcl7c1_1", "pcl7c1_2", "pcl7c1_3", "pcl7c1_9999", "pcl7c1_77",
             "pcl7c2_1", "pcl7c2_2", "pcl7c2_3", "pcl7c2_9999", "pcl7c2_77",
             "pcl7c3_1", "pcl7c3_2", "pcl7c3_3", "pcl7c3_9999", "pcl7c3_77",
             "pcl7c4_1", "pcl7c4_2", "pcl7c4_3", "pcl7c4_9999", "pcl7c4_77",
             "pcl7d_1", "pcl7d_2", "pcl7d_3", "pcl7d_77")) %>% 
     # PCL8
-  mutate(pcl8_relation = combine_columns(., c("pcl8c1_1", "pcl8c1_2", "pcl8c1_3", "pcl8c1_9999", 
-                                              "pcl8c1_77","pcl8c2_1", "pcl8c2_2", "pcl8c2_3", "pcl8c2_9999", 
-                                              "pcl8c2_77","pcl8c3_1", "pcl8c3_2", "pcl8c3_3", "pcl8c3_9999", 
-                                               "pcl8c3_77","pcl8c4_1", "pcl8c4_2", "pcl8c4_3", "pcl8c4_9999", 
-                                               "pcl8c4_77","pcl8d_1", "pcl8d_2", "pcl8d_3", "pcl8d_77"), sep = ";") )%>%
-  relocate(pcl8_relation, .after = "pcl8_freqadult_3_text") %>%
+  mutate(pcl8_witnessed_relation_0_5 = combine_columns(., c("pcl8c1_1", "pcl8c1_2", "pcl8c1_3", "pcl8c1_9999", "pcl8c1_77"), sep = ";") )%>%
+  mutate(pcl8_witnessed_relation_6_11 = combine_columns(., c("pcl8c2_1", "pcl8c2_2", "pcl8c2_3", "pcl8c2_9999", "pcl8c2_77"), sep = ";") )%>%
+  mutate(pcl8_witnessed_relation_12_19 = combine_columns(., c("pcl8c3_1", "pcl8c3_2", "pcl8c3_3", "pcl8c3_9999", "pcl8c3_77"), sep = ";") )%>%
+  mutate(pcl8_witnessed_relation_adult = combine_columns(., c("pcl8c4_1", "pcl8c4_2", "pcl8c4_3", "pcl8c4_9999", "pcl8c4_77"), sep = ";") )%>%
+  mutate(pcl8_learned_relation = combine_columns(., c("pcl8d_1", "pcl8d_2", "pcl8d_3", "pcl8d_77"), sep = ";") )%>%
+  relocate(pcl8_witnessed_relation_0_5, .after = "pcl8_freqadult_3_text") %>%
+  relocate(pcl8_witnessed_relation_6_11, .after = "pcl8_witnessed_relation_0_5") %>%
+  relocate(pcl8_witnessed_relation_12_19, .after = "pcl8_witnessed_relation_6_11") %>%
+  relocate(pcl8_witnessed_relation_adult, .after = "pcl8_witnessed_relation_12_19") %>%
+  relocate(pcl8_learned_relation, .after = "pcl8_witnessed_relation_adult") %>%
   select(-c("pcl8c1_1", "pcl8c1_2", "pcl8c1_3", "pcl8c1_9999", "pcl8c1_77",
             "pcl8c2_1", "pcl8c2_2", "pcl8c2_3", "pcl8c2_9999", "pcl8c2_77",
             "pcl8c3_1", "pcl8c3_2", "pcl8c3_3", "pcl8c3_9999", "pcl8c3_77",
             "pcl8c4_1", "pcl8c4_2", "pcl8c4_3", "pcl8c4_9999", "pcl8c4_77",
             "pcl8d_1", "pcl8d_2", "pcl8d_3", "pcl8d_77")) %>%  
     # PCL9
-  mutate(pcl9_relation = combine_columns(., c("pcl9c1_1", "pcl9c1_2", "pcl9c1_3", "pcl9c1_9999", 
-                                              "pcl9c1_77","pcl9c2_1", "pcl9c2_2", "pcl9c2_3", "pcl9c2_9999", 
-                                              "pcl9c2_77","pcl9c3_1", "pcl9c3_2", "pcl9c3_3", "pcl9c3_9999", 
-"pcl9c3_77","pcl9c4_1", "pcl9c4_2", "pcl9c4_3", "pcl9c4_9999", 
-"pcl9c4_77","pcl9d_1", "pcl9d_2", "pcl9d_3", "pcl9d_77"), sep = ";") )%>%
-  relocate(pcl9_relation, .after = "pcl9_freqadult_3_text") %>%
+  mutate(pcl9_witnessed_relation_0_5 = combine_columns(., c("pcl9c1_1", "pcl9c1_2", "pcl9c1_3", "pcl9c1_9999", "pcl9c1_77"), sep = ";") )%>%
+  mutate(pcl9_witnessed_relation_6_11 = combine_columns(., c("pcl9c2_1", "pcl9c2_2", "pcl9c2_3", "pcl9c2_9999", "pcl9c2_77"), sep = ";") )%>%
+  mutate(pcl9_witnessed_relation_12_19 = combine_columns(., c("pcl9c3_1", "pcl9c3_2", "pcl9c3_3", "pcl9c3_9999", "pcl9c3_77"), sep = ";") )%>%
+  mutate(pcl9_witnessed_relation_adult = combine_columns(., c("pcl9c4_1", "pcl9c4_2", "pcl9c4_3", "pcl9c4_9999", "pcl9c4_77"), sep = ";") )%>%
+  mutate(pcl9_learnsed_relation = combine_columns(., c("pcl9d_1", "pcl9d_2", "pcl9d_3", "pcl9d_77"), sep = ";") )%>%
+  relocate(pcl9_witnessed_relation_0_5, .after = "pcl9_freqadult_3_text") %>%
+  relocate(pcl9_witnessed_relation_6_11, .after = "pcl9_witnessed_relation_0_5") %>%
+  relocate(pcl9_witnessed_relation_12_19, .after = "pcl9_witnessed_relation_6_11") %>%
+  relocate(pcl9_witnessed_relation_adult, .after = "pcl9_witnessed_relation_12_19") %>%
+  relocate(pcl9_learnsed_relation, .after = "pcl9_witnessed_relation_adult") %>%
   select(-c("pcl9c1_1", "pcl9c1_2", "pcl9c1_3", "pcl9c1_9999", "pcl9c1_77",
             "pcl9c2_1", "pcl9c2_2", "pcl9c2_3", "pcl9c2_9999", "pcl9c2_77",
             "pcl9c3_1", "pcl9c3_2", "pcl9c3_3", "pcl9c3_9999", "pcl9c3_77",
             "pcl9c4_1", "pcl9c4_2", "pcl9c4_3", "pcl9c4_9999", "pcl9c4_77",
             "pcl9d_1", "pcl9d_2", "pcl9d_3", "pcl9d_77")) %>%  
     # PCL10
-  mutate(pcl10_relation = combine_columns(., c("pcl10c1_1", "pcl10c1_2", "pcl10c1_3", "pcl10c1_9999", 
-                                               "pcl10c1_77","pcl10c2_1", "pcl10c2_2", "pcl10c2_3", 
-                                               "pcl10c2_9999", "pcl10c2_77","pcl10c3_1", "pcl10c3_2", "pcl10c3_3", "pcl10c3_9999", 
-"pcl10c3_77","pcl10c4_1", "pcl10c4_2", "pcl10c4_3", "pcl10c4_9999", 
-"pcl10c4_77","pcl10d_1", "pcl10d_2", "pcl10d_3", "pcl10d_77"), sep = ";") )%>%
-  relocate(pcl10_relation, .after = "pcl10_freqadult_3_text") %>%
+  mutate(pcl10_witnessed_relation_0_5 = combine_columns(., c("pcl10c1_1", "pcl10c1_2", "pcl10c1_3", "pcl10c1_9999", "pcl10c1_77"), sep = ";") )%>%
+  mutate(pcl10_witnessed_relation_6_11 = combine_columns(., c("pcl10c2_1", "pcl10c2_2", "pcl10c2_3", "pcl10c2_9999", "pcl10c2_77"), sep = ";") )%>%
+  mutate(pcl10_witnessed_relation_12_19 = combine_columns(., c("pcl10c3_1", "pcl10c3_2", "pcl10c3_3", "pcl10c3_9999", "pcl10c3_77"), sep = ";") )%>%
+  mutate(pcl10_witnessed_relation_adult = combine_columns(., c("pcl10c4_1", "pcl10c4_2", "pcl10c4_3", "pcl10c4_9999",  "pcl10c4_77"), sep = ";") )%>%
+  mutate(pcl10_learned_relation = combine_columns(., c("pcl10d_1", "pcl10d_2", "pcl10d_3", "pcl10d_77"), sep = ";") )%>%
+  relocate(pcl10_witnessed_relation_0_5, .after = "pcl10_freqadult_3_text") %>%
+  relocate(pcl10_witnessed_relation_6_11, .after = "pcl10_witnessed_relation_0_5") %>%
+  relocate(pcl10_witnessed_relation_12_19, .after = "pcl10_witnessed_relation_6_11") %>%
+  relocate(pcl10_witnessed_relation_adult, .after = "pcl10_witnessed_relation_12_19") %>%
+  relocate(pcl10_learned_relation, .after = "pcl10_witnessed_relation_adult") %>%
   select(-c("pcl10c1_1", "pcl10c1_2", "pcl10c1_3", "pcl10c1_9999", "pcl10c1_77",
             "pcl10c2_1", "pcl10c2_2", "pcl10c2_3", "pcl10c2_9999", "pcl10c2_77",
             "pcl10c3_1", "pcl10c3_2", "pcl10c3_3", "pcl10c3_9999", "pcl10c3_77",
             "pcl10c4_1", "pcl10c4_2", "pcl10c4_3", "pcl10c4_9999", "pcl10c4_77",
             "pcl10d_1", "pcl10d_2", "pcl10d_3", "pcl10d_77")) %>%
     # PCL11
-  mutate(pcl11_relation = combine_columns(., c("pcl11c_1", "pcl11c_2", "pcl11c_3", "pcl11c_9999", 
-                                               "pcl11c_77","pcl11c2_1", "pcl11c2_2", "pcl11c2_3", "pcl11c2_9999", 
-                                               "pcl11c2_77","pcl11c3_1", "pcl11c3_2", "pcl11c3_3", "pcl11c3_9999", 
-"pcl11c3_77","pcl11c4_1", "pcl11c4_2", "pcl11c4_3", "pcl11c4_9999", 
-"pcl11c4_77","pcl11d_1", "pcl11d_2", "pcl11d_3", "pcl11d_77"), sep = ";") )%>%
-  relocate(pcl11_relation, .after = "pcl11_freqadult_3_text") %>%
+  mutate(pcl11_witnessed_relation_0_5 = combine_columns(., c("pcl11c_1", "pcl11c_2", "pcl11c_3", "pcl11c_9999", "pcl11c_77"), sep = ";") )%>%
+  mutate(pcl11_witnessed_relation_6_11 = combine_columns(., c("pcl11c2_1", "pcl11c2_2", "pcl11c2_3", "pcl11c2_9999", "pcl11c2_77"), sep = ";") )%>%
+  mutate(pcl11_witnessed_relation_12_19 = combine_columns(., c("pcl11c3_1", "pcl11c3_2", "pcl11c3_3", "pcl11c3_9999",  "pcl11c3_77"), sep = ";") )%>%
+  mutate(pcl11_witnessed_relation_adult = combine_columns(., c("pcl11c4_1", "pcl11c4_2", "pcl11c4_3", "pcl11c4_9999", "pcl11c4_77"), sep = ";") )%>%
+  mutate(pcl11_learned_relation = combine_columns(., c("pcl11d_1", "pcl11d_2", "pcl11d_3", "pcl11d_77"), sep = ";") )%>%
+  relocate(pcl11_witnessed_relation_0_5, .after = "pcl11_freqadult_3_text") %>%
+  relocate(pcl11_witnessed_relation_6_11, .after = "pcl11_witnessed_relation_0_5") %>%
+  relocate(pcl11_witnessed_relation_12_19, .after = "pcl11_witnessed_relation_6_11") %>%
+  relocate(pcl11_witnessed_relation_adult, .after = "pcl11_witnessed_relation_12_19") %>%
+  relocate(pcl11_learned_relation, .after = "pcl11_witnessed_relation_adult") %>%
   select(-c("pcl11c_1", "pcl11c_2", "pcl11c_3", "pcl11c_9999", "pcl11c_77",
             "pcl11c2_1", "pcl11c2_2", "pcl11c2_3", "pcl11c2_9999", "pcl11c2_77",
             "pcl11c3_1", "pcl11c3_2", "pcl11c3_3", "pcl11c3_9999", "pcl11c3_77",
             "pcl11c4_1", "pcl11c4_2", "pcl11c4_3", "pcl11c4_9999", "pcl11c4_77",
             "pcl11d_1", "pcl11d_2", "pcl11d_3", "pcl11d_77")) %>%
     # PCL12
-  mutate(pcl12_relation = combine_columns(., c("pcl12c1_1", "pcl12c1_2", "pcl12c1_3", "pcl12c1_9999", 
-                                               "pcl12c1_77","pcl12c2_1", "pcl12c2_2", "pcl12c2_3", "pcl12c2_9999", 
-                                               "pcl12c2_77","pcl12c3_1", "pcl12c3_2", "pcl12c3_3", "pcl12c3_9999", 
-                                               "pcl12c3_77","pcl12c4_1", "pcl12c4_2", "pcl12c4_3", "pcl12c4_9999", 
-                                               "pcl12c4_77","pcl12d_1", "pcl12d_2", "pcl12d_3", "pcl12d_77"), sep = ";") )%>%
-  relocate(pcl12_relation, .after = "pcl12_freqadult_3_text") %>%
+  mutate(pcl12_witnessed_relation_0_5 = combine_columns(., c("pcl12c1_1", "pcl12c1_2", "pcl12c1_3", "pcl12c1_9999", "pcl12c1_77"), sep = ";") )%>%
+  mutate(pcl12_witnessed_relation_6_11 = combine_columns(., c("pcl12c2_1", "pcl12c2_2", "pcl12c2_3", "pcl12c2_9999", "pcl12c2_77"), sep = ";") )%>%
+  mutate(pcl12_witnessed_relation_12_19 = combine_columns(., c("pcl12c3_1", "pcl12c3_2", "pcl12c3_3", "pcl12c3_9999", "pcl12c3_77"), sep = ";") )%>%
+  mutate(pcl12_witnessed_relation_adult = combine_columns(., c("pcl12c4_1", "pcl12c4_2", "pcl12c4_3", "pcl12c4_9999", "pcl12c4_77"), sep = ";") )%>%
+  mutate(pcl12_learned_relation = combine_columns(., c("pcl12d_1", "pcl12d_2", "pcl12d_3", "pcl12d_77"), sep = ";") )%>%
+  relocate(pcl12_witnessed_relation_0_5, .after = "pcl12_freqadult_3_text") %>%
+  relocate(pcl12_witnessed_relation_6_11, .after = "pcl12_witnessed_relation_0_5") %>%
+  relocate(pcl12_witnessed_relation_12_19, .after = "pcl12_witnessed_relation_6_11") %>%
+  relocate(pcl12_witnessed_relation_adult, .after = "pcl12_witnessed_relation_12_19") %>%
+  relocate(pcl12_learned_relation, .after = "pcl12_witnessed_relation_adult") %>%
   select(-c("pcl12c1_1", "pcl12c1_2", "pcl12c1_3", "pcl12c1_9999", "pcl12c1_77",
             "pcl12c2_1", "pcl12c2_2", "pcl12c2_3", "pcl12c2_9999", "pcl12c2_77",
             "pcl12c3_1", "pcl12c3_2", "pcl12c3_3", "pcl12c3_9999", "pcl12c3_77",
             "pcl12c4_1", "pcl12c4_2", "pcl12c4_3", "pcl12c4_9999", "pcl12c4_77",
             "pcl12d_1", "pcl12d_2", "pcl12d_3", "pcl12d_77")) %>%
       # PCL13
-  mutate(pcl13_relation = combine_columns(., c("pcl13c1_1", "pcl13c1_2", "pcl13c1_3", "pcl13c1_9999", 
-                                               "pcl13c1_77","pcl13c2_1", "pcl13c2_2", "pcl13c2_3", "pcl13c2_9999", 
-                                               "pcl13c2_77","pcl13c3_1", "pcl13c3_2", "pcl13c3_3", "pcl13c3_9999", 
-                                               "pcl13c3_77","pcl13c4_1", "pcl13c4_2", "pcl13c4_3", "pcl13c4_9999", 
-                                               "pcl13c4_77","pcl13d_1", "pcl13d_2", "pcl13d_3", "pcl13d_77"), sep = ";") )%>%
-  relocate(pcl13_relation, .after = "pcl13_freqadult_3_text") %>%
+  mutate(pcl13_witnessed_relation_0_5 = combine_columns(., c("pcl13c1_1", "pcl13c1_2", "pcl13c1_3", "pcl13c1_9999", "pcl13c1_77"), sep = ";") )%>%
+  mutate(pcl13_witnessed_relation_6_11 = combine_columns(., c("pcl13c2_1", "pcl13c2_2", "pcl13c2_3", "pcl13c2_9999", "pcl13c2_77"), sep = ";") )%>%
+  mutate(pcl13_witnessed_relation_12_19 = combine_columns(., c("pcl13c3_1", "pcl13c3_2", "pcl13c3_3", "pcl13c3_9999", "pcl13c3_77"), sep = ";") )%>%
+  mutate(pcl13_witnessed_relation_adult = combine_columns(., c("pcl13c4_1", "pcl13c4_2", "pcl13c4_3", "pcl13c4_9999",  "pcl13c4_77"), sep = ";") )%>%
+  mutate(pcl13_learned_relation = combine_columns(., c("pcl13d_1", "pcl13d_2", "pcl13d_3", "pcl13d_77"), sep = ";") )%>%
+  relocate(pcl13_witnessed_relation_0_5, .after = "pcl13_freqadult_3_text") %>%
+  relocate(pcl13_witnessed_relation_6_11, .after = "pcl13_witnessed_relation_0_5") %>%
+  relocate(pcl13_witnessed_relation_12_19, .after = "pcl13_witnessed_relation_6_11") %>%
+  relocate(pcl13_witnessed_relation_adult, .after = "pcl13_witnessed_relation_12_19") %>%
+  relocate(pcl13_learned_relation, .after = "pcl13_witnessed_relation_adult") %>%
   select(-c("pcl13c1_1", "pcl13c1_2", "pcl13c1_3", "pcl13c1_9999", "pcl13c1_77",
             "pcl13c2_1", "pcl13c2_2", "pcl13c2_3", "pcl13c2_9999", "pcl13c2_77",
             "pcl13c3_1", "pcl13c3_2", "pcl13c3_3", "pcl13c3_9999", "pcl13c3_77",
             "pcl13c4_1", "pcl13c4_2", "pcl13c4_3", "pcl13c4_9999", "pcl13c4_77",
             "pcl13d_1", "pcl13d_2", "pcl13d_3", "pcl13d_77")) %>%
       # PCL14
-  mutate(pcl14_relation = combine_columns(., c("pcl14c1_1", "pcl14c1_2", "pcl14c1_3", "pcl14c1_9999", 
-                                               "pcl14c1_77","pcl14c2_1", "pcl14c2_2", "pcl14c2_3", "pcl14c2_9999", 
-                                               "pcl14c2_77","pcl14c3_1", "pcl14c3_2", "pcl14c3_3", "pcl14c3_9999", 
-                                               "pcl14c3_77","pcl14c4_1", "pcl14c4_2", "pcl14c4_3", "pcl14c4_9999", 
-                                               "pcl14c4_77","pcl14d_1", "pcl14d_2", "pcl14d_3", "pcl14d_77"), sep = ";") )%>%
-  relocate(pcl14_relation, .after = "pcl14_freqadult_3_text") %>%
+  mutate(pcl14_witnessed_relation_0_5 = combine_columns(., c("pcl14c1_1", "pcl14c1_2", "pcl14c1_3", "pcl14c1_9999", "pcl14c1_77"), sep = ";") )%>%
+  mutate(pcl14_witnessed_relation_6_11 = combine_columns(., c("pcl14c2_1", "pcl14c2_2", "pcl14c2_3", "pcl14c2_9999", "pcl14c2_77"), sep = ";") )%>%
+  mutate(pcl14_witnessed_relation_12_19 = combine_columns(., c("pcl14c3_1", "pcl14c3_2", "pcl14c3_3", "pcl14c3_9999", "pcl14c3_77"), sep = ";") )%>%
+  mutate(pcl14_witnessed_relation_adult = combine_columns(., c("pcl14c4_1", "pcl14c4_2", "pcl14c4_3", "pcl14c4_9999", "pcl14c4_77"), sep = ";") )%>%
+  mutate(pcl14_learned_relation = combine_columns(., c("pcl14d_1", "pcl14d_2", "pcl14d_3", "pcl14d_77"), sep = ";") )%>%
+  relocate(pcl14_witnessed_relation_0_5, .after = "pcl14_freqadult_3_text") %>%
+  relocate(pcl14_witnessed_relation_6_11, .after = "pcl14_witnessed_relation_0_5") %>%
+  relocate(pcl14_witnessed_relation_12_19, .after = "pcl14_witnessed_relation_6_11") %>%
+  relocate(pcl14_witnessed_relation_adult, .after = "pcl14_witnessed_relation_12_19") %>%
+  relocate(pcl14_learned_relation, .after = "pcl14_witnessed_relation_adult") %>%
   select(-c("pcl14c1_1", "pcl14c1_2", "pcl14c1_3", "pcl14c1_9999", "pcl14c1_77",
             "pcl14c2_1", "pcl14c2_2", "pcl14c2_3", "pcl14c2_9999", "pcl14c2_77",
             "pcl14c3_1", "pcl14c3_2", "pcl14c3_3", "pcl14c3_9999", "pcl14c3_77",
             "pcl14c4_1", "pcl14c4_2", "pcl14c4_3", "pcl14c4_9999", "pcl14c4_77",
             "pcl14d_1", "pcl14d_2", "pcl14d_3", "pcl14d_77")) %>%
       # PCL15
-  mutate(pcl15_relation = combine_columns(., c("pcl15c1_1", "pcl15c1_2", "pcl15c1_3", "pcl15c1_9999", 
-                                               "pcl15c1_77","pcl15c2_1", "pcl15c2_2", "pcl15c2_3", "pcl15c2_9999", 
-                                               "pcl15c2_77","pcl15c3_1", "pcl15c3_2", "pcl15c3_3", "pcl15c3_9999", 
-                                               "pcl15c3_77","pcl15c4_1", "pcl15c4_2", "pcl15c4_3", "pcl15c4_9999", 
-                                               "pcl15c4_77","pcl15d_1", "pcl15d_2", "pcl15d_3", "pcl15d_77"), sep = ";") )%>%
-  relocate(pcl15_relation, .after = "pcl15_freqadult_3_text") %>%
+  mutate(pcl15_witnessed_relation_0_5 = combine_columns(., c("pcl15c1_1", "pcl15c1_2", "pcl15c1_3", "pcl15c1_9999", "pcl15c1_77"), sep = ";") )%>%
+  mutate(pcl15_witnessed_relation_6_11 = combine_columns(., c("pcl15c2_1", "pcl15c2_2", "pcl15c2_3", "pcl15c2_9999",  "pcl15c2_77"), sep = ";") )%>%
+  mutate(pcl15_witnessed_relation_12_19 = combine_columns(., c("pcl15c3_1", "pcl15c3_2", "pcl15c3_3", "pcl15c3_9999", "pcl15c3_77"), sep = ";") )%>%
+  mutate(pcl15_witnessed_relation_adult = combine_columns(., c("pcl15c4_1", "pcl15c4_2", "pcl15c4_3", "pcl15c4_9999", "pcl15c4_77"), sep = ";") )%>%
+  mutate(pcl15_learned_relation = combine_columns(., c("pcl15d_1", "pcl15d_2", "pcl15d_3", "pcl15d_77"), sep = ";") )%>%
+  relocate(pcl15_witnessed_relation_0_5, .after = "pcl15_freqadult_3_text") %>%
+  relocate(pcl15_witnessed_relation_6_11, .after = "pcl15_witnessed_relation_0_5") %>%
+  relocate(pcl15_witnessed_relation_12_19, .after = "pcl15_witnessed_relation_6_11") %>%
+  relocate(pcl15_witnessed_relation_adult, .after = "pcl15_witnessed_relation_12_19") %>%
+  relocate(pcl15_learned_relation, .after = "pcl15_witnessed_relation_adult") %>%
   select(-c("pcl15c1_1", "pcl15c1_2", "pcl15c1_3", "pcl15c1_9999", "pcl15c1_77",
             "pcl15c2_1", "pcl15c2_2", "pcl15c2_3", "pcl15c2_9999", "pcl15c2_77",
             "pcl15c3_1", "pcl15c3_2", "pcl15c3_3", "pcl15c3_9999", "pcl15c3_77",
             "pcl15c4_1", "pcl15c4_2", "pcl15c4_3", "pcl15c4_9999", "pcl15c4_77",
             "pcl15d_1", "pcl15d_2", "pcl15d_3", "pcl15d_77")) %>% 
     # PCL16
-  mutate(pcl16_relation = combine_columns(., c("pcl16c1_1", "pcl16c1_2", "pcl16c1_3", "pcl16c1_9999", 
-                                               "pcl16c1_77","pcl16c2_1", "pcl16c2_2", "pcl16c2_3", "pcl16c2_9999", 
-                                               "pcl16c2_77","pcl16c3_1", "pcl16c3_2", "pcl16c3_3", 
-                                               "pcl16c3_9999", "pcl16c3_77","pcl16c4_1", "pcl16c4_2", "pcl16c4_3", 
-                                               "pcl16c4_9999", "pcl16c4_77","pcl16d_1", "pcl16d_2", "pcl16d_3", "pcl16d_77"), sep = ";") )%>%
-  relocate(pcl16_relation, .after = "pcl16_freqadult_3_text") %>%
+  mutate(pcl16_witnessed_relation_0_5 = combine_columns(., c("pcl16c1_1", "pcl16c1_2", "pcl16c1_3", "pcl16c1_9999", "pcl16c1_77"), sep = ";") )%>%
+  mutate(pcl16_witnessed_relation_6_11 = combine_columns(., c("pcl16c2_1", "pcl16c2_2", "pcl16c2_3", "pcl16c2_9999",  "pcl16c2_77"), sep = ";") )%>%
+  mutate(pcl16_witnessed_relation_12_19 = combine_columns(., c("pcl16c3_1", "pcl16c3_2", "pcl16c3_3", "pcl16c3_9999", "pcl16c3_77"), sep = ";") )%>%
+  mutate(pcl16_witnessed_relation_adult = combine_columns(., c("pcl16c4_1", "pcl16c4_2", "pcl16c4_3",  "pcl16c4_9999", "pcl16c4_77"), sep = ";") )%>%
+  mutate(pcl16_learned_relation = combine_columns(., c("pcl16d_1", "pcl16d_2", "pcl16d_3", "pcl16d_77"), sep = ";") )%>%
+  relocate(pcl16_witnessed_relation_0_5, .after = "pcl16_freqadult_3_text") %>%
+  relocate(pcl16_witnessed_relation_6_11, .after = "pcl16_witnessed_relation_0_5") %>%
+  relocate(pcl16_witnessed_relation_12_19, .after = "pcl16_witnessed_relation_6_11") %>%
+  relocate(pcl16_witnessed_relation_adult, .after = "pcl16_witnessed_relation_12_19") %>%
+  relocate(pcl16_learned_relation, .after = "pcl16_witnessed_relation_adult") %>%
   select(-c("pcl16c1_1", "pcl16c1_2", "pcl16c1_3", "pcl16c1_9999", "pcl16c1_77",
             "pcl16c2_1", "pcl16c2_2", "pcl16c2_3", "pcl16c2_9999", "pcl16c2_77",
             "pcl16c3_1", "pcl16c3_2", "pcl16c3_3", "pcl16c3_9999", "pcl16c3_77",
             "pcl16c4_1", "pcl16c4_2", "pcl16c4_3", "pcl16c4_9999", "pcl16c4_77",
             "pcl16d_1", "pcl16d_2", "pcl16d_3", "pcl16d_77")) %>% 
       # PCL17
-  mutate(pcl17_relation = combine_columns(., c("pcl17c1_1", "pcl17c1_2", "pcl17c1_3", "pcl17c1_9999", 
-                                               "pcl17c1_77","pcl17c2_1", "pcl17c2_2", "pcl17c2_3", "pcl17c2_9999", 
-                                               "pcl17c2_77","pcl17c3_1", "pcl17c3_2", "pcl17c3_3", "pcl17c3_9999", 
-                                               "pcl17c3_77","pcl17c4_1", "pcl17c4_2", "pcl17c4_3", "pcl17c4_9999", 
-                                               "pcl17c4_77","pcl17d_1", "pcl17d_2", "pcl17d_3", "pcl17d_77"), sep = ";") )%>%
-  relocate(pcl17_relation, .after = "pcl17_freqadult_3_text") %>%
+  mutate(pcl17_witnessed_relation_0_5 = combine_columns(., c("pcl17c1_1", "pcl17c1_2", "pcl17c1_3", "pcl17c1_9999", "pcl17c1_77"), sep = ";") )%>%
+  mutate(pcl17_witnessed_relation_6_11 = combine_columns(., c("pcl17c2_1", "pcl17c2_2", "pcl17c2_3", "pcl17c2_9999", "pcl17c2_77"), sep = ";") )%>%
+  mutate(pcl17_witnessed_relation_12_19 = combine_columns(., c("pcl17c3_1", "pcl17c3_2", "pcl17c3_3", "pcl17c3_9999", "pcl17c3_77"), sep = ";") )%>%
+  mutate(pcl17_witnessed_relation_adult = combine_columns(., c("pcl17c4_1", "pcl17c4_2", "pcl17c4_3", "pcl17c4_9999", "pcl17c4_77"), sep = ";") )%>%
+  mutate(pcl17_learned_relation = combine_columns(., c("pcl17d_1", "pcl17d_2", "pcl17d_3", "pcl17d_77"), sep = ";") )%>%
+  relocate(pcl17_witnessed_relation_0_5, .after = "pcl17_freqadult_3_text") %>%
+  relocate(pcl17_witnessed_relation_6_11, .after = "pcl17_witnessed_relation_0_5") %>%
+  relocate(pcl17_witnessed_relation_12_19, .after = "pcl17_witnessed_relation_6_11") %>%
+  relocate(pcl17_witnessed_relation_adult, .after = "pcl17_witnessed_relation_12_19") %>%
+  relocate(pcl17_learned_relation, .after = "pcl17_witnessed_relation_adult") %>%
   select(-c("pcl17c1_1", "pcl17c1_2", "pcl17c1_3", "pcl17c1_9999", "pcl17c1_77",
             "pcl17c2_1", "pcl17c2_2", "pcl17c2_3", "pcl17c2_9999", "pcl17c2_77",
             "pcl17c3_1", "pcl17c3_2", "pcl17c3_3", "pcl17c3_9999", "pcl17c3_77",
             "pcl17c4_1", "pcl17c4_2", "pcl17c4_3", "pcl17c4_9999", "pcl17c4_77",
             "pcl17d_1", "pcl17d_2", "pcl17d_3", "pcl17d_77")) %>%
       # PCL18
-  mutate(pcl18_relation = combine_columns(., c("pcl18c1_1", "pcl18c1_2", "pcl18c1_3", "pcl18c1_9999", 
-                                               "pcl18c1_77","pcl18c2_1", "pcl18c2_2", "pcl18c2_3", "pcl18c2_9999", 
-                                               "pcl18c2_77","pcl18c3_1", "pcl18c3_2", "pcl18c3_3", "pcl18c3_9999", 
-                                               "pcl18c3_77","pcl18c4_1", "pcl18c4_2", "pcl18c4_3", "pcl18c4_9999", 
-                                               "pcl18c4_77","pcl18d_1", "pcl18d_2", "pcl18d_3", "pcl18d_77"), sep = ";") )%>%
-  mutate(pcl18c2 = combine_columns(., c(), sep = ";") )%>%
-  mutate(pcl18c3 = combine_columns(., c(), sep = ";") )%>%
-  mutate(pcl18c4 = combine_columns(., c(), sep = ";") )%>%
-  mutate(pcl18d = combine_columns(., c(), sep = ";") )%>%
-  relocate(pcl18_relation, .after = "pcl18_freqadult_3_text") %>%
+  mutate(pcl18_witnessed_relation_0_5 = combine_columns(., c("pcl18c1_1", "pcl18c1_2", "pcl18c1_3", "pcl18c1_9999", "pcl18c1_77"), sep = ";") )%>%
+  mutate(pcl18_witnessed_relation_6_11 = combine_columns(., c("pcl18c2_1", "pcl18c2_2", "pcl18c2_3", "pcl18c2_9999", "pcl18c2_77"), sep = ";") )%>%
+  mutate(pcl18_witnessed_relation_12_19 = combine_columns(., c("pcl18c3_1", "pcl18c3_2", "pcl18c3_3", "pcl18c3_9999", "pcl18c3_77"), sep = ";") )%>%
+  mutate(pcl18_witnessed_relation_adult = combine_columns(., c("pcl18c4_1", "pcl18c4_2", "pcl18c4_3", "pcl18c4_9999", "pcl18c4_77"), sep = ";") )%>%
+  mutate(pcl18_learned_relation = combine_columns(., c("pcl18d_1", "pcl18d_2", "pcl18d_3", "pcl18d_77"), sep = ";") )%>%
+  relocate(pcl18_witnessed_relation_0_5, .after = "pcl18_freqadult_3_text") %>%
+  relocate(pcl18_witnessed_relation_6_11, .after = "pcl18_witnessed_relation_0_5") %>%
+  relocate(pcl18_witnessed_relation_12_19, .after = "pcl18_witnessed_relation_6_11") %>%
+  relocate(pcl18_witnessed_relation_adult, .after = "pcl18_witnessed_relation_12_19") %>%
+  relocate(pcl18_learned_relation, .after = "pcl18_witnessed_relation_adult") %>%
   select(-c("pcl18c1_1", "pcl18c1_2", "pcl18c1_3", "pcl18c1_9999", "pcl18c1_77",
             "pcl18c2_1", "pcl18c2_2", "pcl18c2_3", "pcl18c2_9999", "pcl18c2_77",
             "pcl18c3_1", "pcl18c3_2", "pcl18c3_3", "pcl18c3_9999", "pcl18c3_77",
             "pcl18c4_1", "pcl18c4_2", "pcl18c4_3", "pcl18c4_9999", "pcl18c4_77",
             "pcl18d_1", "pcl18d_2", "pcl18d_3", "pcl18d_77")) %>%  
       # PCL19
-  mutate(pcl19_relation = combine_columns(., c("pcl19c1_1", "pcl19c1_2", "pcl19c1_3", 
-                                               "pcl19c1_9999", "pcl19c1_77","pcl19c2_1", "pcl19c2_2", "pcl19c2_3", "pcl19c2_9999", 
-                                               "pcl19c2_77","pcl19c3_1", "pcl19c3_2", "pcl19c3_3", "pcl19c3_9999", 
-                                               "pcl19c3_77","pcl19c4_1", "pcl19c4_2", "pcl19c4_3", "pcl19c4_9999", 
-                                               "pcl19c4_77","pcl19d_1", "pcl19d_2", "pcl19d_3", "pcl19d_77"), sep = ";") )%>%
-  relocate(pcl19_relation, .after = "pcl19_freqadult_3_text") %>%
+  mutate(pcl19_witnessed_relation_0_5 = combine_columns(., c("pcl19c1_1", "pcl19c1_2", "pcl19c1_3", "pcl19c1_9999", "pcl19c1_77"), sep = ";") )%>%
+  mutate(pcl19_witnessed_relation_6_11 = combine_columns(., c("pcl19c2_1", "pcl19c2_2", "pcl19c2_3", "pcl19c2_9999", "pcl19c2_77"), sep = ";") )%>%
+  mutate(pcl19_witnessed_relation_12_19 = combine_columns(., c("pcl19c3_1", "pcl19c3_2", "pcl19c3_3", "pcl19c3_9999", "pcl19c3_77"), sep = ";") )%>%
+  mutate(pcl19_witnessed_relation_adult = combine_columns(., c("pcl19c4_1", "pcl19c4_2", "pcl19c4_3", "pcl19c4_9999", "pcl19c4_77"), sep = ";") )%>%
+  mutate(pcl19_learned_relation = combine_columns(., c("pcl19d_1", "pcl19d_2", "pcl19d_3", "pcl19d_77"), sep = ";") )%>%
+  relocate(pcl19_witnessed_relation_0_5, .after = "pcl19_freqadult_3_text") %>%
+  relocate(pcl19_witnessed_relation_6_11, .after = "pcl19_witnessed_relation_0_5") %>%
+  relocate(pcl19_witnessed_relation_12_19, .after = "pcl19_witnessed_relation_6_11") %>%
+  relocate(pcl19_witnessed_relation_adult, .after = "pcl19_witnessed_relation_12_19") %>%
+  relocate(pcl19_learned_relation, .after = "pcl19_witnessed_relation_adult") %>%
   select(-c("pcl19c1_1", "pcl19c1_2", "pcl19c1_3", "pcl19c1_9999", "pcl19c1_77",
             "pcl19c2_1", "pcl19c2_2", "pcl19c2_3", "pcl19c2_9999", "pcl19c2_77",
             "pcl19c3_1", "pcl19c3_2", "pcl19c3_3", "pcl19c3_9999", "pcl19c3_77",
@@ -4878,15 +4958,15 @@ for (column in columns_freqadult_text) {
 }
 
 # relation  ##################################################################################
-columns_relation <- paste0("pcl", 1:19, "_relation")
+columns_relation <- c(paste0("pcl", 1:19, "_witnessed_relation_0_5"), paste0("pcl", 1:19, "_witnessed_relation_6_11"), paste0("pcl", 1:19, "_witnessed_relation_12_19"), paste0("pcl", 1:19, "_witnessed_relation_adult"))
 for (column in columns_relation) {
     pcl <- pcl %>%
       mutate({{column}} := case_when(       
         # if _witness is 0 and _learn is 0 then _relation is -55
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_witness")) == "0" & get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_learn")) == "0" ~ "-55",
+        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_witness")) == "0" ~ "-55",
         # if _witness is -77/-55/-99 and _learn is -77/-55/-99 then _relation is -55
-        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_witness")) %in% c("-77","-55", "-99") & get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_learn")) %in% c("-77","-55", "-99") ~ "-55",
-        # if _relation are still NA then _relation should be truly missing 
+        get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_witness")) %in% c("-77","-55", "-99")  ~ "-55",
+        get(column) == "" ~ "-99",
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
       ))
@@ -4900,7 +4980,7 @@ for (column in columns_devperiod) {
       mutate({{column}} := case_when(   
         # if _happen is 0 then _devperiod should be -55
         get(paste0("pcl", gsub("pcl(\\d+).*", "\\1", column), "_happen")) == "0" ~ "-55",
-        # if _relation are still NA then _relation should be truly missing 
+        # if _relation are still NA or empty then _devperiod should be truly missing 
         is.na(get(column)) ~ "-99",
         TRUE ~ get(column)
       ))
@@ -4981,7 +5061,7 @@ pcl_complete <- pcl_calc %>%
   select(id, pcl_total_happen, pcl_total_witness) %>%
   merge(pcl, by = "id") %>%
   # Dropping these variables for archive. 
-  select(-c(pcl1b:pcl19b_text, pcl18c2:pcl18d, matches("pcl\\d+_77"), matches("pcl\\d+_hapWit_ages_77"))) %>%
+  select(-c(pcl1b:pcl19b_text, matches("pcl\\d+_77"), matches("pcl\\d+_hapWit_ages_77"))) %>%
   select(-c(pcl_total_happen, pcl_total_witness), everything(), pcl_total_happen, pcl_total_witness) %>%
   rename_with(~ paste0("lec", str_replace(., "^pcl", "")), starts_with("pcl")) 
   
