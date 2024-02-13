@@ -2876,11 +2876,11 @@ lec_word_long <- lec_word %>%
                          "Open Text Entry", 
                          notes)) %>%
   mutate(notes = if_else(endsWith(var_name, "_relation"),
-                         "a. Your childoffspring; 
-                         \nb. Someone your were close to (romantic partnerfamily member, friedn)
-                         \n nc. Someone you were not close to 
+                         "a. Your childoffspring
+                         \n b.Someone your were close to (romantic partnerfamily member, friedn)
+                         \n c.Someone you were not close to 
                          \n Did not witness it at this age 
-                         \n Decline to Answer", 
+                         \n Decline to Answer",
                          notes))
 ```
 
