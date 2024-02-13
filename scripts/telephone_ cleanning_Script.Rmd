@@ -2721,7 +2721,7 @@ sex_complete <- sex %>%
 ```{r cint_soci}
 # once we create new raw file we need to pull in glptx", "sex", "ethnic", "age_14_ex into the cleaned file and add to codebook
 cint_socio <- tpw_raw %>%
-  select(id,cint_0:cint_income_support, cint_identity, cint_identity_8_text)#, glptx, sex, ethnic, age_14_ex) %>%
+  select(id,cint_0:cint_income_support, cint_identity, cint_identity_8_text) %>%#, glptx, sex, ethnic, age_14_ex) %>%
   mutate(
     across(
       .cols = c(cint2:cint5),
