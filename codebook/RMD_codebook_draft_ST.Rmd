@@ -2841,7 +2841,7 @@ print(lec_label_table_5)
 
 LEC survey items are presented in the following table:
 
-```{r lec-var-prep, eval = FALSE}
+```{r lec-var-prep}
 # Pull question wording from Qualtrics data
 lec_word <- qualtrics %>% 
   select(starts_with("lec"), -lec_total_happen, -lec_total_witness) %>%
@@ -2884,7 +2884,7 @@ lec_word_long <- lec_word %>%
                          notes))
 ```
 
-```{r lec-var-table, eval = FALSE}
+```{r lec-var-table}
 # Create the gt table object and apply generic theme
 lec_gt_table <- gt(lec_word_long)
 
