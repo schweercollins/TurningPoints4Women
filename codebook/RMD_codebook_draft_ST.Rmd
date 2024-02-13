@@ -4874,7 +4874,7 @@ print(cts_pc_label_table2)
 
 ```
   
-####
+####Survey items
 CTS Parent Child  survey items are presented in the following table:
   
 Leading question: Thinking about your partner, how often is it true that they:
@@ -4882,6 +4882,7 @@ Leading question: Thinking about your partner, how often is it true that they:
 # Pull question wording from Qualtrics data
 cts_pc_word <- qualtrics %>% 
   select(`CTS PARENT SCREEN`:A23) %>%
+  rename_with(~ sub("^A", "cts_pc", .), starts_with("A")) %>%
   slice(1)
 
 #create table with variable name, description, and notes
@@ -4895,11 +4896,11 @@ cts_pc_word_long <- cts_pc_word %>%
          notes = as.character("")) %>% 
   # Edits Variable description and value
   # Min: NAMING UPDATE Maria changed these values so if it won't render check here; also remove note once it renders; need these to be updated to cts_pc from "a"
-  mutate(description = if_else(var_name == "a parent screen", "Have you parented a child (under 18) in the past year?", description)) %>%
-  mutate(notes = if_else(var_name %in% c("a1", "a2", "a3", "a4", "a5", "a6",
-                                         "a7",  "a8",  "a9",  "a10" , "a11",  "a12" , "a13",              
-                                        "a14", "a15", "a16", "a17"  ,"a18" , "a19"  ,"a20",              
-                                        "a21", "a22", "a23"), paste0("This item should be reverse scored. `", var_name, "_r` is reverse scored"), notes)) 
+  mutate(description = if_else(var_name == "cts parent screen", "Have you parented a child (under 18) in the past year?", description)) %>%
+  mutate(notes = if_else(var_name %in% c("cts_pc1", "cts_pc2", "cts_pc3", "cts_pc4", "cts_pc5", "cts_pc6",
+                                         "cts_pc7",  "cts_pc8",  "cts_pc9",  "cts_pc10" , "cts_pc11",  "cts_pc12" , "cts_pc13",              
+                                        "cts_pc14", "cts_pc15", "cts_pc16", "cts_pc17"  ,"cts_pc18" , "cts_pc19"  ,"cts_pc20",              
+                                        "cts_pc21", "cts_pc22", "cts_pc23"), paste0("This item should be reverse scored. `", var_name, "_r` is reverse scored"), notes)) 
 
 ```
 
@@ -4911,7 +4912,6 @@ cts_pc_gt_table <- gt(cts_pc_word_long)
 cts_pc_gt_table <- cts_pc_gt_table %>% 
   cols_label(var_name = "Variable", 
              description = "Description"
-             #notes = "Notes"
   ) %>% 
   apply_tbl_theme() %>% 
   cols_width(description ~ px(300),
@@ -4923,16 +4923,175 @@ cts_pc_gt_table <- cts_pc_gt_table %>%
 print(cts_pc_gt_table)
 ```
 
+#### Scale and Subscales
+
+Information on total score and subscale variables are below. Prevalence
+scales are calculated ... <MARIA> INSERT INFO ON COMPOSITE SCORE
+CREATION. Severity scores are calculated ... <MARIA> INSERT INFO ON
+COMPOSITE SCORE CREATION. Mutuatlity scores are created by ... <MARIA>
+INSERT INFO ON COMPOSITE SCORE CREATION
+
+<SHAINA/MIN> TODO: NEED fill Range once we understand how composite
+scores were created
+
+```{r cts_pc-scale-table, results = 'asis'}
+# Create the table as a data frame
+cts_pc_scale_df <- data.frame(
+  var_name = c( "cts_pc_nvdp", "cts_pc_nvdc", "cts_pc_nvdm", "cts_pc_nvdpp", 
+                "cts_pc_nvdl", "cts_pc_nvdep", "cts_pc_psap", "cts_pc_psac",
+                "cts_pc_psam", "cts_pc_psapp", "cts_pc_psal", "cts_pc_psaep", 
+                "cts_pc_phap", "cts_pc_phac", "cts_pc_pham",  "cts_pc_phapp", 
+                "cts_pc_phal", "cts_pc_phaep", "cts_pc_wkdp", "cts_pc_wkdc", 
+                "cts_pc_wkdm", "cts_pc_wkdpp", "cts_pc_negp", "cts_pc_negc", 
+                "cts_pc_negm", "cts_pc_negpp", "cts_pc_negl", "cts_pc_negep"),
+
+  scale = c("Nonviolent Discipline - Past Year (Chronicity) (4)", 
+            "Count of Nonviolent Discipline Responses (4)", 
+            "Nonviolent Discipline Past Year - Mean (Chronicity)",
+            "Nonviolent Discipline Past Year (Prevalence) (4)",
+            "Nonviolent Discipline - Lifetime (Greater than past year Prevalence) (4)",
+            "Nonviolent Discipline (Ever Prevalence) (2)",
+            "Psychological Aggression - Past Year (Chronicity) (5)",
+            "Count of Psychological Aggression Responses (5)",
+            "Psychological Aggression Past Year - Mean (Chronicity) (5)", 
+            "Psychological Aggression - Past Year (Prevalence) (5)",
+            "Psychological Aggression Discipline - Lifetime (Ever Prevalence greater than past year) (5)",
+            "Psychological Aggression (Ever Prevalance) (2)",
+            "Physical Assault - Past Year (Chronicity) (5)",
+            "Count of Physical Assault Responses (5)",
+            "Physical Assault Past Year - Mean (Chronicity) (5)",
+            "Physical Assault - Past Year (Prevalence) (5)",
+            "Physical Assault - Lifetime (Ever Prevalence greater than 1 year) (5)",
+            "Physical Assault (Ever Prevalence) (2)",
+            "Weekly Discipline - Past Week (Chronicity) (3)",
+            "Count of Weekly Discipline Responses (3)", 
+            "Weekly Discipline Past Week - Mean (Chronicity) (2)",
+            "Weekly Discipline - Past Week (Prevalence) (3)",
+            "Neglect - Past Year (Chronicity) (5)", 
+            "Count of Neglect Responses (2)",
+            "Neglect Past Year - Mean (Chronicity) (5)",
+            "Neglect - Past Year (Prevalence) (5)", 
+            "Neglect - Lifetime (Ever Prevalence) (5)", 
+            "Neglect (Ever Prevalance) (2)"
+            ),
+
+  scale_construction = c("`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
+                         "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
+                         "`cts_pc_NVDC`, `cts_pc_NVDP`",
+                         "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
+                         "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
+                         "`cts_pc_NVDL`, `cts_pc_NVDPP`",
+                         "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
+                         "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
+                         "`cts_pc_PSAC`, `cts_pc_PSAP`",
+                         "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
+                         "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
+                         "`cts_pc_PSAL`, `cts_pc_PSAPP`",
+                         "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
+                         "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
+                         "`cts_pc_PHAC`, `cts_pc_PHAP`",
+                         "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
+                         "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
+                         "`cts_pc_PHAL`, `cts_pc_PHAPP`",
+                         "`cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
+                         "`cts_pc_WKDP`, `cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
+                         "`cts_pc_WKDC`, `cts_pc_WKDP`",
+                         "`cts_pc_WKDP`, `cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
+                         "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
+                         "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
+                         "`cts_pc_NEGC`, `cts_pc_NEGP`",
+                         "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
+                         "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
+                         "`cts_pc_NEGL`, `cts_pc_NEGPP`"
+                         ),
+  scale_range = c("", "", "", "", "", "", "", "", "", "",
+                  "", "", "", "", "", "", "", "", "", "", 
+                  "", "", "", "", "", "","","")
+  ) %>%
+  mutate(scale_construction = tolower(scale_construction))
+
+
+# Create the gt table object
+cts_pc_scale_table <- gt(cts_pc_scale_df) %>%
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Scale (# of items)", 
+            #score_method = "Score Method",
+            scale_construction = "Scale Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  #cols_width(scale ~ px(200)) %>% 
+  apply_tbl_theme() 
+
+# Print the table
+print(cts_pc_scale_table)
+
+```
+
 ### Summary Statistics
 
 #### Descriptive Statistics
+Descriptive statistics are presented below for each item and subscale
 
-Only missing percentages of variables are presented. 
+For binary items: 
+```{r cts_pc-binary}
+# Create subset of cts_pc binary items
+cts_pc_data_subset_binary <- complete %>%
+  select(cts_parent_screen)
+
+# Calculate the dichotomous summary statistics for each variable
+cts_pc_summary_data_binary <- lapply(cts_pc_data_subset_binary, function(x) {
+  per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+  per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+  num_no <- sum(x == 0, na.rm = TRUE)
+  num_yes <-sum(x == 1, na.rm = TRUE)
+  miss_val <- round(mean(is.na(x)) * 100, 2)
+  c(per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+cts_pc_summary_data_binary <- as.data.frame(cts_pc_summary_data_binary)
+
+# Set items as first row
+cts_pc_summary_data_binary <- rbind(names(cts_pc_summary_data_binary), cts_pc_summary_data_binary) %>% 
+  t() %>% 
+  as.data.frame()
+
+# Create the gt table
+cts_pc_tbl_binary <- cts_pc_summary_data_binary %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             num_no = "N",
+             per_no = "%",
+             num_yes = "N",
+             per_yes = "%",
+             Missing = "% Missing") %>% 
+  cols_width(#everything() ~ px(115),
+             `1` ~ px(200),
+             num_no ~ px(120),
+             num_yes ~ px(120),
+             per_no ~ px(120),
+             per_yes ~ px(120)) %>%
+  cols_align(columns = c("per_no", "per_yes", "num_no", "num_yes", "Missing"), align = "center") %>% 
+  tab_spanner(label = "No", columns = c(num_no, per_no)) %>% 
+  tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1")),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = colorspace::lighten("#9BB6D1", .4))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no))) %>%
+  tab_footnote("*% may not equal 100%; % is of total sample, not the subsample for whom these items are applicable") %>%
+  tab_options(table.width = pct(100))
+
+# Render the table
+cts_pc_tbl_binary
+```
 
 ```{r cts_pc-missing}
 # Create subset of items
 cts_pc_data_subset <- complete %>%
-  select(cts_parent_screen:cts_pc23)
+  select(cts_pc1:cts_pc23)
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
@@ -5067,12 +5226,7 @@ CTS_word_long <- CTS_word %>%
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>% 
   mutate(notes = if_else(var_name == "cts screen", "If TC answered No for this question the rest of survey will be skipped", notes),
-    description = if_else(var_name == "ct0", "Have you lived with any other children, under the age of 17, since the time of your last interview? Only think about children who you or your partner was responsible for parenting. Please do not include any children listed in the other sections or children that you have reported before.", 
-                               if_else(var_name == "ct000", "How many new children are you parenting since your last interview on (last interview date)?",
-                                       if_else(var_name ==  "cts screen", "Have you been in a (romantic) relationship in the past year?",
-                                               if_else(var_name == "cts parent screen", "Have you parented a child (under 18) in the past year?", description))))
-  ) 
-
+    description = if_else(var_name ==  "cts screen", "Have you been in a (romantic) relationship in the past year?", description))
 ```
 
 This survey was not adminstered for participants who were incarcerated at the time of the assessment. 
