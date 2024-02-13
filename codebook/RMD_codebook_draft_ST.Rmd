@@ -5328,9 +5328,9 @@ ggarrange(p_cts_neg, p_cts_part + rremove("ylab")
 The BCAP is a 34-item brief version of the Child Abuse Potential Inventory (CAPI), a self-report inventory used to assess parental child abuse risk.          
 
 -   For the present study, 34 items from the BCAP were
-collected. # update if there are 4 reverse scored items 
+collected. The data file contains 38 items, including the four items that were reverse scored. 
 
--   reverse scoring noted here?
+-   Four items should be reverse scored (`bcap1`, `bcap2`, `bcap23`, and `bcap29`). Reverse scored items are included in the data file: `bcap1_r`, `bcap2_r`, `bcap23_r` and `bcap29_r`
 
 -   **Higher** scores indicate **greater** risk for child abuse.  As noted by the measure authors and in alignment with the CAPI, high scores by no means indicate the presence or the immediate likelihood of child maltreatment. The BCAP should be used in conjunction with relevant research on the BCAP. 
 
@@ -6557,7 +6557,7 @@ print(dast_label_table_total)
 
 All DAST survey items are presented in the following table:
 
-**Question Stem: This questionnaire deals with certain drug use and social behavior patterns. Please answer each of the items truthfully by stating Yes or No, thinking about the past 6 months.**
+**Question Stem: This questionnaire deals with certain drug use and social behavior patterns. Please answer each of the items truthfully by stating `Yes` or `No`, thinking about the past 6 months.**
 
 ```{r DAST-var-prep}
 # Pull question wording from qualtrics data
@@ -6580,7 +6580,7 @@ dast_word_long <- dast_word %>%
                                  TRUE ~ description),
          var_name = str_to_lower(var_name),
          notes = case_when(var_name == "dast4" ~ "This item should be reverse scored. `dast4_r` is reverse scored",
-                           var_name == "dast5" ~ "This item should be reverse scored. `dast4_r` is reverse scored",
+                           var_name == "dast5" ~ "This item should be reverse scored. `dast5_r` is reverse scored",
                            TRUE ~ as.character("")
                            )
          ) %>% 
@@ -6772,7 +6772,8 @@ dast_tbl <- dast_summary_data %>%
   cols_width(everything() ~ px(115)) %>%
   tab_options(table.width = pct(100))%>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
-  tab_footnote("*Range of data values") %>% 
+  tab_footnote("*Range of data values") %>%
+  tab_footnote("*Missing percentage is high due to the number of participants who reported no past 6-month other drug use at the time of the assessment (skip rules)") %>%
   tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 
@@ -6955,20 +6956,25 @@ socinf_sub_tbl
 
 ### MHC Description
 
-The MHC is a 14-item questionnaire designed to measure *insert*.
+The MHC-SF is a 14-item questionnaire designed to measure positive mental health. As stated by the measure authors, the MHC-SF consists of 14 items that were selected to represent each facet of well-being. The MHC-SF was derived from the MHC long form (40 items). 
 
-For the present study, 14 items from the MHC were collected in order to
-#TODO: insert text here
+-   The short form consists of 3 emotional well-being items (`mhc_pa`; reflects hedonic well-being), 6 psychological well-being items (`mhc_pwb`), and 5 social well-being items (`mhc_swb`). When social and psychological well-being are combined, they reflect eudemonic well-being.
 
-No items need to be reverse scored. *TODO: need change text here Higher
-scores indicate more severe mental health symptoms.*
+-   Please see measure documentation to compute flourishing and languishing mental health indicators based on these three subscales. These computations and variables are not included in our documentation. 
 
-The missing data rule was applied. 
-## MIN CHECK missing data
+-   For the present study, 14 items from the MHC were collected. The data file contains a total of 18 items, including computed variables. 
 
-Reference: [@keyes2009brief]
-[@lamers2011evaluating](https://onlinelibrary.wiley.com/doi/abs/10.1002/jclp.20741);
-[DOI](https://doi.org/10.1002/jclp.20741)
+-   No items need to be reverse scored. 
+
+-   **Higher** scores indicate **better** mental health.
+
+-   The missing data rule was applied, including for `-77` responses.  
+
+
+Reference:  
+
+-   [@keyes2009brief](https://psycnet.apa.org/doiLanding?doi=10.1037%2Ft30592-000)
+-   [@lamers2011evaluating](https://onlinelibrary.wiley.com/doi/abs/10.1002/jclp.20741)
 
 ### MHC Variables
 
@@ -7011,6 +7017,8 @@ print(mhc_label_table)
 
 MHC survey items are presented in the following table:
 
+**Question stem: During the past month, how often did you feel...**
+
 ```{r mhc-var-prep}
 # Pull question wording from qualtrics data
 mhc_word <- qualtrics %>% 
@@ -7049,8 +7057,7 @@ print(mhc_gt_table)
 
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
-Variables were constructed by summing included items.
+Information on the total score and subscale variables are below. Variables were constructed by summing included items.
 
 ```{r mhc df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 mhc_complete <-
@@ -7096,11 +7103,11 @@ mhc_pwb_alpha <-
 # Create the table as a data frame
 mhc_scale_df <- data.frame(
   var_name = c("mhc_raw_total", "mhc_pa_total", "mhc_swb_total", "mhc_pwb_total"),
-  scale = c("MHC Total score (14)", "Positive Affect (3)", "Social Well-being (4)", "Psychological well-being (6)"),
+  scale = c("MHC Total score (14)", "Emotional Well-Being (positive affect) (3)", "Social Well-Being (5)", "Psychological Well-Being (6)"),
   scale_construction = c(" `mhc1`, `mhc2`, `mhc3`, `mhc4`, `mhc5`, `mhc6`, `mhc7`, `mhc8`, `mhc9`, `mhc10`, `mhc11`, `mhc12`, `mhc13`, `mhc14`",
                          "`mhc1`, `mhc2`,`mhc3`", "`mhc4`, `mhc5`, `mhc6`, `mhc7`, `mhc8`", "`mhc9`, `mhc10`, `mhc11`, `mhc12`, `mhc13`, `mhc14`"
                          ),
-  scale_range = c("0-70", "0-5", "0-20", "0-30"), #TODO Maria, double check 
+  scale_range = c("0-70", "0-15", "0-25", "0-30"),
   alpha = c(round(mhc_alpha$total$raw_alpha, 3),
             round(mhc_pa_alpha$total$raw_alpha, 3),
             round(mhc_swb_alpha$total$raw_alpha, 3),
@@ -7188,26 +7195,26 @@ p_mhc_pa <- mhc_complete %>%
   composite_hist(
     x = mhc_pa
   ) +
-  labs(title = 'Positive Affect Subscale')
+  labs(title = 'Emotional Well-Being Subscale')
 
 p_mhc_swb <- mhc_complete %>%
   filter(mhc_swb >= 0) %>%
   composite_hist(
     x = mhc_swb
   ) +
-  labs(title = 'Social Well-being Subscale')
+  labs(title = 'Social Well-Being Subscale')
 
 p_mhc_pwb <- mhc_complete %>%
    filter(mhc_pwb >= 0) %>%
   composite_hist(
     x = mhc_pwb
   ) +
-  labs(title = 'Psychological Well-being Subscale')
+  labs(title = 'Psychological Well-Being Subscale')
 
 ggarrange(p_mhc_total, p_mhc_pa + rremove("ylab"), 
           p_mhc_swb, p_mhc_pwb + rremove("ylab")
           ) %>%
-  annotate_figure(top = text_grob( "Distribution for MHC-SF total and subscale \n(x-axis and y-axis are in different scales)"))
+  annotate_figure(top = text_grob( "Distribution for MHC-SF total and subscales \n(x-axis and y-axis are in different scales)"))
 ```
 
 
@@ -7215,11 +7222,11 @@ ggarrange(p_mhc_total, p_mhc_pa + rremove("ylab"),
 
 ### FI Description
 
-The Flourishing Index is a 12-item questionnaire designed to measure five domains of flourishing. The scale contains 2 items for each domain, including happiness and life satisfaction, mental and physical health, meaning and purpose, character and virtue, and close social relationships. There are also two items that represent "secure flourish" indicating financial and material stability, noted by the measure authors to help individuals sustain flourishing across other domains captured through the measure. 
+The Flourishing Index is a 12-item questionnaire designed to measure five domains of flourishing. The scale contains 2 items for each domain, including happiness and life satisfaction, mental and physical health, meaning and purpose, character and virtue, and close social relationships. There are also two items that represent "secure flourish" indicating financial and material stability, noted by the measure authors to help individuals sustain flourishing across other domains captured through the measure. Scale authors note that questions were selected primarily from among existing questions that have some empirical validation and that are widely used in the well-being literature. 
 
 -   The dataset contains 14 FLO items, including the Flourishing Index `flo_total` and the Secure Flourish Index `secure_flourish`.
 
--   Although not computed in our datafile, subscales based on the five domains can be computed. See the measure reference for additional scoring details. 
+-   Although not computed in our data file, subscales based on the five domains can be computed. See the measure reference for additional scoring details. 
   
 -   No items need to be reverse scored. 
   
