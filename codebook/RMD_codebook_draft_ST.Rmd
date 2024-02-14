@@ -2569,7 +2569,7 @@ The Life Events Checklist for DSM-5 (LEC-5) is a self-report measure designed to
 
 -   No items in this measure are reverse scored
 
--   There are XXX LEC-5 items in our data file. Many of these were derived from follow up questions from each of the 19 life events that were asked about.
+-   There are 439 LEC-5 items in our data file. Many of these were derived from follow up questions from each of the 19 life events that were asked about.
 
     + We asked about whether each event was experienced ("happened to me"), witnessed , or learned about. 
     + We asked the developmental time period in which each event was experienced or witnessed (`0-5`, `6-11`, `12-19`, `adulthood`). 
