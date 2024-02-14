@@ -2763,7 +2763,14 @@ lec_word_long <- lec_word %>%
   mutate(notes = if_else(endsWith(var_name, "_text"),
                          "Open Text Entry", 
                          notes)) %>%
-  mutate(notes = if_else(grepl("_relation", var_name), "a.Your child/offspring\n b.Someone you were close to (romantic partner/family member, friend)\n c.Someone you were not close to\n Did not witness it at this age \n Decline to Answer", notes)) 
+  mutate(notes = if_else(grepl("_relation", var_name), 
+                       paste("a. Your child/offspring",
+                             "b. Someone you were close to (romantic partner/family member, friend)",
+                             "c. Someone you were not close to",
+                             "Did not witness it at this age",
+                             "Decline to Answer",
+                             collapse = "\n"), 
+                       notes)) 
 ```
 
 ```{r lec-var-table}
@@ -2894,7 +2901,7 @@ lec_tbl_binary
 
 #### Distributions
 
-Distributions are presented below for the total score and each subscale:
+Distributions are presented below for each total score:
 
 ```{r lec-distributions, class.source='fold', echo = FALSE}
 p_lec_total_witness <- complete %>%
@@ -4194,7 +4201,6 @@ The Sex History Survey was administered as part of the CINT and focuses on the p
 References:  
 
 -   [@capaldi2002heterosexual](https://psycnet.apa.org/fulltext/2002-12745-005.pdf)
-
 -   [@smith2006adolescent](https://journals.sagepub.com/doi/epdf/10.1177/1077559506291950)
 
   
