@@ -1805,6 +1805,151 @@ ggarrange(p_cts_psy_mut, p_cts_ing_mut + rremove("ylab"),
           p_cts_ass_mut, p_cts_sex_mut + rremove("ylab")) %>%
   annotate_figure(top = text_grob( "Distribution for CTS Mutual Subscale \n(x-axis and y-axis are in different scales)"))
 ```
+#### ELL EXTRA CODE #####
+```{r ell df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+ell <-
+  complete %>%
+  select(
+    starts_with("ell"),
+    -c(matches("aa$"))
+  ) %>%
+  # rename(
+  #   ell35a  = x35a
+  # ) %>%
+  mutate(
+    across(
+      matches("a$"),
+      ~case_when(
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_,
+        is.na(.x) ~ NA_real_,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ell_calc <-
+  ell %>%
+  select(
+    matches("a$")
+  ) %>%
+  mutate(
+    across(
+      #.cols = -id,
+      .fns = ~case_when(
+        .x == -77 ~ NA_real_,
+        TRUE ~ .x
+      )
+    ),
+    across(
+      .names = "{.col}a"
+    ),
+    across(
+      c(
+        matches("a$"),
+        matches("aa$")
+      ),
+      ~case_when(
+        .x == 1 ~ 0,
+        .x == 2 ~ 1,
+        .x == 3 ~ 2,
+        .x == 4 ~ 3,
+        .x == 5 ~ 4,
+        .x == 6 ~ 5,
+        .x == 7 ~ -77,
+        .x == 8 ~ NA_real_,
+        TRUE ~ NA_real_
+      )
+    ),
+    across(
+      c(
+        matches("aa$")
+      ),
+      ~case_when(
+        .x >= 4 ~ 4,
+        TRUE ~ .x
+      )
+    )
+  )
+
+ell_count_calc <-
+  ell %>%
+  select(
+    # id,
+    matches("\\d$")
+  ) %>%
+  mutate(
+    across(
+      # -id,
+      .cols = everything(),
+      ~case_when(
+        .x == 0 ~ 0,
+        .x > 0 ~ 1,
+        #.x < 0 ~ NA,
+        #TRUE ~ .x
+      )
+    )
+  )
 
 
+```
 
+
+```{r ell calculation, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+# ell_complete <-
+#   ell_calc %>%
+#   subscale_create(
+#     total_only = TRUE,
+#     scale1 = c(
+#       "ell4a", "ell5a", "ell6a", "ell8a", "ell9a",
+#       "ell10a", "ell11a", "ell14a", "ell16a", "ell20a",
+#       "ell21a", "ell22a", "ell24a", "ell25a", "ell27a", "ell29a",
+#       "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
+#     ),
+#     scale2 = c(
+#       "ell4aa", "ell5aa", "ell6aa", "ell8aa", "ell9aa",
+#       "ell10aa", "ell11aa", "ell14aa", "ell16aa", "ell20aa",
+#       "ell21aa", "ell22aa", "ell24aa", "ell25aa", "ell27aa", "ell29aa",
+#       "ell31aa", "ell32aa", "ell33aa", "ell38aa", "ell39aa"
+#     )
+#   ) %>%
+#   rename(
+#     ell_raw_total = total1,
+#     ell_censor_total = total2
+#   )
+#
+#
+# ell_count_complete <-
+#   ell_count_calc %>%
+#   composite_total_avg_fun(
+#     id = c(
+#       'id', "ell1", "ell2", "ell3", "ell7",
+#       "ell12", "ell13", "ell15", "ell17", "ell18",
+#       "ell19", "ell23", "ell26", "ell28", "ell30",
+#       "ell34", "ell35", "ell36", "ell37"
+#     ),
+#     max_value = 1,
+#     n_items = 21
+#   ) %>%
+#   distinct(
+#     across(
+#       .cols = everything()
+#     )
+#   ) %>%
+#   rename(
+#     ell_count_total = sum_values,
+#     ell_count_avg = mean_values
+#   ) %>%
+#   mutate(
+#     across(
+#       c(
+#         ell_count_total,
+#         ell_count_avg
+#       ),
+#       ~case_when(
+#       #  id %in% ell_count_remove ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
+```
