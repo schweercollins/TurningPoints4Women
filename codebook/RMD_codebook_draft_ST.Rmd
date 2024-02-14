@@ -1670,6 +1670,7 @@ ell_word_long <- ell_word %>%
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "^\\d+a.\\s*", ""),
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>% 
   mutate(description = gsub("ASSESSOR NOTE.*","",description))# %>%
@@ -1700,158 +1701,13 @@ print(ell_gt_table)
 #### Scale and Subscales
 
 Information on the total score and subscale variables are below.
-Variables were c onstructed by summing included items.
-
-```{r ell df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-ell <-
-  complete %>%
-  select(
-    starts_with("ell"),
-    -c(matches("aa$"))
-  ) %>%
-  # rename(
-  #   ell35a  = x35a
-  # ) %>%
-  mutate(
-    across(
-      matches("a$"),
-      ~case_when(
-        .x == 7 ~ -77,
-        .x == 8 ~ NA_real_,
-        is.na(.x) ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
-
-ell_calc <-
-  ell %>%
-  select(
-    matches("a$")
-  ) %>%
-  mutate(
-    across(
-      #.cols = -id,
-      .fns = ~case_when(
-        .x == -77 ~ NA_real_,
-        TRUE ~ .x
-      )
-    ),
-    across(
-      .names = "{.col}a"
-    ),
-    across(
-      c(
-        matches("a$"),
-        matches("aa$")
-      ),
-      ~case_when(
-        .x == 1 ~ 0,
-        .x == 2 ~ 1,
-        .x == 3 ~ 2,
-        .x == 4 ~ 3,
-        .x == 5 ~ 4,
-        .x == 6 ~ 5,
-        .x == 7 ~ -77,
-        .x == 8 ~ NA_real_,
-        TRUE ~ NA_real_
-      )
-    ),
-    across(
-      c(
-        matches("aa$")
-      ),
-      ~case_when(
-        .x >= 4 ~ 4,
-        TRUE ~ .x
-      )
-    )
-  )
-
-ell_count_calc <-
-  ell %>%
-  select(
-   # id,
-    matches("\\d$")
-  ) %>%
-  mutate(
-    across(
-     # -id,
-      .cols = everything(),
-      ~case_when(
-        .x == 0 ~ 0,
-        .x > 0 ~ 1,
-        #.x < 0 ~ NA,
-        #TRUE ~ .x
-      )
-    )
-  )
+Variables were constructed by summing included items.
 
 
-```
-
-```{r ell calculation, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-# ell_complete <-
-#   ell_calc %>%
-#   subscale_create(
-#     total_only = TRUE,
-#     scale1 = c(
-#       "ell4a", "ell5a", "ell6a", "ell8a", "ell9a",
-#       "ell10a", "ell11a", "ell14a", "ell16a", "ell20a",
-#       "ell21a", "ell22a", "ell24a", "ell25a", "ell27a", "ell29a",
-#       "ell31a", "ell32a", "ell33a", "ell38a", "ell39a"
-#     ),
-#     scale2 = c(
-#       "ell4aa", "ell5aa", "ell6aa", "ell8aa", "ell9aa",
-#       "ell10aa", "ell11aa", "ell14aa", "ell16aa", "ell20aa",
-#       "ell21aa", "ell22aa", "ell24aa", "ell25aa", "ell27aa", "ell29aa",
-#       "ell31aa", "ell32aa", "ell33aa", "ell38aa", "ell39aa"
-#     )
-#   ) %>%
-#   rename(
-#     ell_raw_total = total1,
-#     ell_censor_total = total2
-#   )
-# 
-# 
-# ell_count_complete <-
-#   ell_count_calc %>%
-#   composite_total_avg_fun(
-#     id = c(
-#       'id', "ell1", "ell2", "ell3", "ell7",
-#       "ell12", "ell13", "ell15", "ell17", "ell18",
-#       "ell19", "ell23", "ell26", "ell28", "ell30",
-#       "ell34", "ell35", "ell36", "ell37"
-#     ),
-#     max_value = 1,
-#     n_items = 21
-#   ) %>%
-#   distinct(
-#     across(
-#       .cols = everything()
-#     )
-#   ) %>%
-#   rename(
-#     ell_count_total = sum_values,
-#     ell_count_avg = mean_values
-#   ) %>%
-#   mutate(
-#     across(
-#       c(
-#         ell_count_total,
-#         ell_count_avg
-#       ),
-#       ~case_when(
-#       #  id %in% ell_count_remove ~ NA_real_,
-#         TRUE ~ .x
-#       )
-#     )
-#   )
-```
 
 ```{r ell alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-#TODO: Shaina: JP doesn't include alpha in his script. Please review and delete if not needed
+#TODO:JP doesn't include alpha in his script. Please review and delete if not needed
 
 
 ```
@@ -1859,21 +1715,25 @@ ell_count_calc <-
 ```{r ELL-scale-table, results = 'asis'}
 # Create the table as a data frame
 ell_scale_df <- data.frame(
-  var_name = c("ell_raw_total"),
-  scale = c("ELL score (Raw) (21)", "ELL Total (Censored) (21)", "ELL Total (Binary Count Data) (18)"),
-  scale_construction = c(" `ell4a`, `ell5a`, `ell6a`, `ell8a`, `ell9a`,
-      `ell10a`, `ell11a`, `ell14a`, `ell16a`, `ell20a`,
-      `ell21a`, `ell22a`, `ell24a`, `ell25a`, `ell27a`, `ell29a`,
-      `ell31a`, `ell32a`, `ell33a`, `ell38a`, `ell39a`", 
-      " `ell4aa`, `ell5aa`,`ell6aa`, `ell8aa`, `ell9aa`,
-      `ell10aa`, `ell11aa`, `ell14aa`, `ell16aa`, `ell20aa`,
-      `ell21aa`, `ell22aa`, `ell24aa`, `ell25aa`, `ell27aa`, `ell29aa`,
-      `ell31aa`, `ell32aa`, `ell33aa`, `ell38aa`, `ell39aa`",
-      "`ell1`, `ell2`, `ell3`, `ell7`,
-      `ell12`, `ell13`, `ell15`, `ell17`, `ell18`,
-      `ell19`, `ell23`, `ell26`, `ell28`, `ell30`,
-      `ell34`, `ell35`, `ell36`, `ell37`"),
-  scale_range = c("","","") #TODO fill in range 
+  var_name = c("ell_raw_total", "ell_total_index_offenses ", "ell_total_index_minor_offenses"),
+  scale = c("ELL Total Score (Raw) (38)", "Total Index Offenses(9)", "Total Index of Minor Offenses (29)"),
+  scale_construction = c("`ell1`, `ell2`, `ell3`,`ell4`, `ell5`, `ell6`, 
+                          `ell7`,  `ell8`, `ell9`, `ell10`, `ell11`,                      
+                          `ell12`, `ell13`, `ell14`, `ell15`,                       
+                          `ell16`, `ell17`, `ell18`, `ell19`,                       
+                          `ell20`, `ell21`, `ell22`, `ell24`, 
+                          `ell25`, `ell26`, `ell27`, `ell28`, `ell29`, `ell30`, `ell31`,                       
+                          `ell32`, `ell33`, `ell34`, `ell35`,                       
+                          `ell36`, `ell37`, `ell38`, `ell39`",                       
+
+      "`ell4`, `ell5`, `ell10 `, `ell16`, `ell25`, `ell29`, `ell32`, `ell38`, `ell39`",
+      
+      "`ell1`, `ell2`, `ell3`, `ell6`, `ell7`, `ell8`, 
+       `ell9`, `ell11`, `ell12`, `ell13`, `ell14`, `ell15`, 
+      `ell17`, `ell18`, `ell19`, `ell20`, `ell21`, `ell22`, 
+      `ell24`, `ell26`, `ell27`, `ell28`, `ell30`, `ell31`, 
+      `ell33`, `ell34`, `ell35`, `ell36`, `ell37`"),
+  scale_range = c("0-- no upper limit","0-- no upper limit","0-- no upper limit") 
   #alpha = c(round(eds_alpha$total$raw_alpha, 3))
 )
 
@@ -1888,7 +1748,7 @@ ell_scale_df <- gt(ell_scale_df) %>%
              ) %>% 
   tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
-  cols_width(scale ~ px(135)) %>% 
+  #cols_width(scale ~ px(135)) %>% 
   tab_options(table.width = pct(100))%>%
   apply_tbl_theme() 
 
@@ -1906,38 +1766,47 @@ Descriptive statistics are presented below for each item, total, and
 subscale score:
 
 ```{r ell-mean-items}
+# Create subset of items
+ell_data_subset <- complete %>%
+  select(ell1:ell_total_index_minor_offenses)
+
 # Calculate the summary statistics for each variable
-# ell_summary_data <- lapply(ell, function(x) {
-#   mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-#   sd_val <- round(sd(x, na.rm = TRUE), 2)
-#   range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-#   miss_val <- round(mean(is.na(x)) * 100, 2)
-#   c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
-# })
-# 
-# # Convert summary_data to a data frame
-# ell_summary_data <- as.data.frame(ell_summary_data)
-# 
-# # Set items as first row
-# ell_summary_data <- rbind(names(ell_summary_data), ell_summary_data) %>% 
-#   t() %>% 
-#   as.data.frame()
-# 
-# # Create the gt table
-# ell_tbl <- ell_summary_data %>%
-#   gt() %>%
-#   cols_label(`1` = "Variable",
-#              Range = "Range*",
-#              Missing = "% Missing") %>% 
-#   #cols_width(everything() ~ px(115)) %>%
-#   tab_options(table.width = pct(100))%>%
-#   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
-#   tab_footnote("*Range of data values") %>% 
-#   tab_options(table.border.bottom.style = "hidden") %>%
-#   apply_tbl_theme()
-# 
-# # Render the table
-# ell_tbl
+ell_summary_data <- lapply(ell_data_subset, function(x) {
+ x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+ell_summary_data <- as.data.frame(ell_summary_data)
+
+# Set items as first row
+ell_summary_data <- rbind(names(ell_summary_data), ell_summary_data) %>%
+  t() %>%
+  as.data.frame()
+
+# Create the gt table
+ell_tbl <- ell_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>%
+  #cols_width(everything() ~ px(115)) %>%
+  tab_options(table.width = pct(100))%>%
+  cols_width(`1` ~ px(250)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>%
+  tab_footnote("*Range of data values") %>%
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+ell_tbl
 
 ```
 
@@ -1946,23 +1815,30 @@ subscale score:
 Distributions are presented below for the total score and each subscale:
 
 ```{r ell-distributions, class.source='fold', echo = FALSE}
-# ell_complete %>%
-#   composite_hist(
-#     x = ell_raw_total
-#   ) +
-#   labs(title = 'Distribution of Total Scores for \nElliott Self Delinquency Scale (Raw)')
+p_ell_total <- complete %>%
+  filter(ell_total >= 0) %>%
+  composite_hist(
+    x = ell_total
+  ) +
+  labs(title = 'Total Scores')
 
-# ell_complete %>%
-#   composite_hist(
-#     x = ell_censor_total
-#   ) +
-#   labs(title = 'Distribution of Total Scores for \nElliott Self Delinquency Scale (Censored)')
-# 
-# ell_count_complete %>%
-#   composite_hist(
-#     x = ell_count_total
-#   ) +
-#   labs(title = "Distribution of Total Scores for \nElliott Self Delinquency Scale (Binary Count Data)")
+p_ell_total_index_offenses <- complete %>%
+  filter(ell_total_index_offenses >= 0) %>%
+  composite_hist(
+    x = ell_total_index_offenses
+  ) +
+  labs(title = 'Index Offenses')
+
+p_ell_total_index_minor_offenses <- complete %>%
+  filter(ell_total_index_minor_offenses >= 0) %>%
+  composite_hist(
+    x = ell_total_index_minor_offenses
+  ) +
+  labs(title = "Index Minor Offenses")
+
+ggarrange(p_ell_total, p_ell_total_index_offenses + rremove("ylab"),
+          p_ell_total_index_minor_offenses) %>%
+  annotate_figure(top = text_grob( "Distribution for Elliott Delinquency Scale Self Report \n(x-axis and y-axis are in different scales)"))
 ```
 
 # Mental Health/Psychological
