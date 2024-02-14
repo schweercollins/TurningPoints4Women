@@ -2763,7 +2763,7 @@ lec_word_long <- lec_word %>%
   mutate(notes = if_else(endsWith(var_name, "_text"),
                          "Open Text Entry", 
                          notes)) %>%
-  mutate(notes = if_else(endsWith(var_name, "_relation"),
+  mutate(notes = if_else(grepl("_relation", var_name),
                            "a. Your child/offspring  
                         \n  b. Someone you were close to (romantic partner/family member, friend)  
                         \n  c. Someone you were not close to   
