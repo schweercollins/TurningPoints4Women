@@ -3810,6 +3810,7 @@ sus <- sus %>%
   # if sus13a is <=1 and sus13 != 1, sus14b:sus14b2  were not asked 
   mutate_at(vars(sus14b:sus14b2), ~case_when(sus13a <=1 | sus13 != 1 ~ "-55", TRUE ~ .)) %>%
   # TODO: Maria, sus14b2_1:sus14b2_77 is for question 14b1, do you want me correct this?
+  
   # if sus13a is <=2 and sus13 != 1, sus14c:sus14c2 were not asked 
   mutate_at(vars(sus14c:sus14c2), ~case_when(sus13a <=2 | sus13 != 1 ~ "-55", TRUE ~ .)) %>%
   # if sus13a is <=3 and sus13 != 1, sus14d:sus14d2  were not asked 
