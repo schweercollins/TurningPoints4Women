@@ -2681,23 +2681,35 @@ complete %>%
 
 
 
-## Life Experiences Checklist (LEC)
-<MARIA: you might want to switch this to full name to be consistent with other measure.> 
-  
-  
+## Life Events Checklist (LEC-5)
+
 ### LEC Description
+
+The Life Events Checklist for DSM-5 (LEC-5) is a self-report measure designed to screen for potentially traumatic events in a respondent's lifetime. The LEC-5 assesses exposure to 16 events known to potentially result in PTSD or distress and includes one additional item assessing any other extraordinarily stressful event not captured in the first 16 items. In this study, we used a modified version of the LEC-5 extended; we also incorporated two additional items:
+
+-   `LEC_18_...` "Unfairly treated or discriminated against because of your race, ethnicity, or culture"
+
+-   `LEC_17_...` "Unfairly stopped, searched, questioned, physically threatened or abused by the police"
+
+-   No items in this measure are reverse scored
+
+-   There are XXX LEC-5 items in our data file. Many of these were derived from follow up questions from each of the 19 life events that were asked about.
+
+    + We asked about whether each event was experienced ("happened to me"), witnessed , or learned about. 
+    + We asked the developmental time period in which each event was experienced or witnessed (`0-5`, `6-11`, `12-19`, `adulthood`). 
+    + We asked about the frequency of the life experience for those events that participants endorsed as having happened to them or those they witnessed.
+    + We also asked about the relationship of the participant to the person involved in the life event, only for those events that happened to the participant or those events the participants witnessed. 
   
-  <MARIA> please insert a breif description for this measure 
+-   Our datafile also contains computed variables that provide information as to the first developmental period in which an event happened to each participant (ex., `lec1_devperiod`)
 
+-   `lec_total_happen` is a computed total score of the number of life events that happened to each participant. 
 
-* reverse scored. 
-
-* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+-   `lec_total_witness` is a computed total score of the number of life events that each participant witnessed.
 
 
 
 Reference:
-  <Maria, please add a reference if needed> 
+[@gray2004psychometric](https://journals.sagepub.com/doi/epdf/10.1177/1073191104269954)
   
 ### LEC Variables
   
@@ -2876,11 +2888,11 @@ lec_word_long <- lec_word %>%
                          "Open Text Entry", 
                          notes)) %>%
   mutate(notes = if_else(endsWith(var_name, "_relation"),
-                         "a. Your childoffspring
-                         \n b.Someone your were close to (romantic partnerfamily member, friedn)
-                         \n c.Someone you were not close to 
-                         \n Did not witness it at this age 
-                         \n Decline to Answer",
+                           "a. Your child/offspring  
+                        \n  b. Someone you were close to (romantic partner/family member, friend)  
+                        \n  c. Someone you were not close to   
+                        \n  Did not witness it at this age   
+                        \n  Decline to Answer",
                          notes))
 ```
 
@@ -2908,16 +2920,16 @@ lec_gt_table
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and subscale score:
+Descriptive statistics are presented below for each item and continuous total and subscale score:
 
-```{r}
+```{r cont_graph}
 # subset items
 lec_data_subset <- complete %>%
   select(matches("^lec\\d+_freq"),  lec_total_happen, lec_total_witness, -ends_with("text"))
 
 # Calculate the summary statistics for each variable
 lec_summary_data <- lapply(lec_data_subset, function(x) {
-   x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+   x <- replace(x, (x < -40 & x!= 0 & x!= -55 & x!= -88), NA)  # Your original recoding
   x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
   # Exclude negative values and specific negative values from calculations
   x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
@@ -2958,7 +2970,7 @@ For binary items:
 ```{r lec-missing}
 # Create subset of items
 lec_data_subset_binary <- complete %>%
-  select(starts_with("lec"), -ends_with("_hapwit_dev"),-ends_with("_freq0-5"),-ends_with("_freq6-11"),-ends_with("_freq12-19") , -ends_with("_freqadult"), -ends_with("_text"), -ends_with("_relation"))
+  select(starts_with("lec"), -ends_with("_hapwit_dev"),-ends_with("_freq0-5"),-ends_with("_freq6-11"),-ends_with("_freq12-19") , -ends_with("_freqadult"), -ends_with("_text"), -ends_with("_relation"), -ends_with("_devperiod"), -lec_total_happen, -lec_total_witness)
 
 
 # Calculate the dichotomous summary statistics for each variable
