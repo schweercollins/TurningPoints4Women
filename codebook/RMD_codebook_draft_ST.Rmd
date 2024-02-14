@@ -52,6 +52,18 @@ editor_options:
   padding-left: 2em;
 }
 
+/* Third-level header */
+.tocify-subheader .tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 4em; /* Adjust the padding as needed */
+}
+
+/* Fourth-level header */
+.tocify-subheader .tocify-subheader .tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 6em; /* Adjust the padding as needed */
+}
+
 </style>
 
 
@@ -259,9 +271,6 @@ apply_labtab_theme <- function(table) {
 
 This study is a longitudinal extension which aims to further our understanding of trajectories of adult offending in a sample of 158 (n = 8 participants are now deceased) women who participated in a randomized intervention trial aimed at reducing conduct problems and delinquency during adolescence. The study was originally supported and funded through the Oregon Youth Authority and by Grant R01 DA015208 (P.I., Patricia Chamberlain, Ph.D.) from the National Institute on Drug Abuse, and by Grant R01 MH054257 (P.I., Patricia Chamberlain, Ph.D.) from the National Institute of Mental Health. In the original study, juvenile justice involved girls ages 13 – 17 who had been referred for out-of-home placement due to chronic delinquency were randomly assigned to participate in services as usual (group care; GC) or in Treatment Foster Care Oregon (TFCO, Chamberlain, 2003). The first extension of this longitudinal study was funded by Grant R01 DA024672 (P.I., Leslie Leve, Ph.D.). That study examined the developmental pathways of risk for juvenile justice involved girls into young adulthood with the original participants who were at the time, ages 16-29 years.
 
-## Data Collection Activities in this Wave  
-
-There were several data collection activities. First, one telephone interview was conducted with original participants (*M* = 18 years after each participants’ baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. The second part of the assessment was a 1 hour biological and physical health assessment. While prior waves collected limited information on self-reported health, this longitudinal extension also included a more robust battery of health conditions and a robust battery of 12 biomarkers, used to assess allostatic load, including cardiovascular, metabolic, and immune system function. This biological assessment was conducted either in person or virtually due to COVID-19 restrictions. Last, arrest records from the adult corrections system were collected. The age at last known arrest, number of arrests, whether each resulted in incarceration, and the length of incarceration was coded from the records and archived in aggregate to ensure that records are not identifiable.
 
 ## Study Goals (udpate these TODO Maria)
 
@@ -284,6 +293,12 @@ If you have questions about the data or study, please contact the Principal Inve
 ### Credit Author Statement
 
 **Schweer-Collins** conceptualization; software; validation; data curation (specifically checking code for data cleaning and codebook creation, managed data archival) project administration; supervision; funding acquisition; **Trevino** software; validation; data curation (specifically developing codebook, functions, and protocols, data cleaning, codebook creation; data archival); supervision; **Pedroza** software; data curation (specifically making functions used in codebook, data retrieval from Qualtrics; cleaning; codebook creation, visualization); **Zhang** software; validation; data curation (specifically making functions used in codebook, primary responsibility for data retrieval from Qualtrics; data cleaning, codebook creation, visualization)
+
+## Data Collection Activities in this Wave  
+
+There were several data collection activities. First, one telephone interview was conducted with original participants (*M* = 18 years after each participants’ baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. The second part of the assessment was a 1 hour biological and physical health assessment. While prior waves collected limited information on self-reported health, this longitudinal extension also included a more robust battery of health conditions and a robust battery of 12 biomarkers, used to assess allostatic load, including cardiovascular, metabolic, and immune system function. This biological assessment was conducted either in person or virtually due to COVID-19 restrictions. Last, arrest records from the adult corrections system were collected. The age at last known arrest, number of arrests, whether each resulted in incarceration, and the length of incarceration was coded from the records and archived in aggregate to ensure that records are not identifiable.
+
+## Data and Codebook Guide
 
 ### Study Acronymns
 
@@ -4608,7 +4623,7 @@ socinf_gen_word_long <- socinf_gen_word %>%
   mutate(description = if_else(var_name == "socinf_general_screener", "ASSESSOR RESPOND: Has TC reported being in a (romantic) relationship in the past 6 months?", description)) %>%
  
   mutate(Value = "") %>%
-  mutate(Value = if_else(var_name %in% c("socinf_general_screener"), "1 = Yes\n 0 = No" , `Value`)) %>%
+  mutate(Value = if_else(var_name %in% c("socinf_general_screener"), "0 = No \n1 = Yes" , `Value`)) %>%
   mutate(Value = if_else(var_name %in% c("sg1", "sg2","sg3", "sg5"), "0 = Never or almost never true
         \n1 = Hardly ever true
         \n2 = Sometimes true
