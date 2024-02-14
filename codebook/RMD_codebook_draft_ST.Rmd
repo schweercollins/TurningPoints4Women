@@ -2763,13 +2763,7 @@ lec_word_long <- lec_word %>%
   mutate(notes = if_else(endsWith(var_name, "_text"),
                          "Open Text Entry", 
                          notes)) %>%
-  mutate(notes = if_else(grepl("_relation", var_name),
-                           "a. Your child/offspring  
-                        \n  b. Someone you were close to (romantic partner/family member, friend)  
-                        \n  c. Someone you were not close to   
-                        \n  Did not witness it at this age   
-                        \n  Decline to Answer",
-                         notes))
+  mutate(notes = if_else(grepl("_relation", var_name), "a.Your child/offspring\n b.Someone you were close to (romantic partner/family member, friend)\n c.Someone you were not close to\n Did not witness it at this age \n Decline to Answer", notes)) 
 ```
 
 ```{r lec-var-table}
@@ -2783,7 +2777,7 @@ lec_gt_table <- lec_gt_table %>%
              #notes = "Notes"
   ) %>% 
   apply_tbl_theme() %>% 
-  cols_width(notes ~ px(150),
+  cols_width(notes ~ px(170),
              var_name ~ px(100)
   ) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
@@ -2846,7 +2840,7 @@ For binary items:
 ```{r lec-missing}
 # Create subset of items
 lec_data_subset_binary <- complete %>%
-  select(starts_with("lec"), -ends_with("_hapwit_dev"),-ends_with("_freq0-5"),-ends_with("_freq6-11"),-ends_with("_freq12-19") , -ends_with("_freqadult"), -ends_with("_text"), -ends_with("_relation"), -ends_with("_devperiod"), -lec_total_happen, -lec_total_witness)
+  select(starts_with("lec"), -ends_with("_hapwit_dev"),-ends_with("_freq0-5"),-ends_with("_freq6-11"),-ends_with("_freq12-19") , -ends_with("_freqadult"), -ends_with("_text"), -contains("relation"), -ends_with("_devperiod"), -lec_total_happen, -lec_total_witness)
 
 
 # Calculate the dichotomous summary statistics for each variable
@@ -2895,6 +2889,33 @@ lec_tbl_binary <- lec_summary_data %>%
 # Render the table
 lec_tbl_binary
 
+
+```
+
+#### Distributions
+
+Distributions are presented below for the total score and each subscale:
+
+```{r lec-distributions, class.source='fold', echo = FALSE}
+p_lec_total_witness <- complete %>%
+  composite_hist(
+    x = lec_total_witness,
+    bins = 8
+  ) +
+  labs(title = "Lec Total Witness")
+
+p_lec_total_happen <- complete %>%
+  filter(lec_total_happen >= 0) %>%
+  composite_hist(
+    x = lec_total_happen,
+    bins = 8
+  ) +
+  labs(title = "LEC Total Happened")
+
+
+ggarrange(p_lec_total_witness, p_lec_total_happen + rremove("ylab")
+          ) %>%
+  annotate_figure(top = text_grob( "Distribution for LEC Subscale \n(x-axis and y-axis are in different scales)"))
 
 ```
 
