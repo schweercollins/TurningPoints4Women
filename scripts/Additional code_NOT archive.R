@@ -1952,4 +1952,151 @@ ell_count_calc <-
 #       )
 #     )
 #   )
-```
+
+
+# DAS ----
+
+# We had other code doing the same thing
+# Dyadc_total: all 32 variables
+# Dyadic Consensus - 1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15 (65 points possible)\
+# Affectional Expression - 4, 6, 29, 30 (12 points possible)
+# Dyadic Satisfaction - 16, 17, 18, 19, 20, 21, 22, 23, 31, 32 (50 points possible)
+# Dyadic Cohesion - 24, 25, 26, 27, 28 (24 points possible)
+dyadc_complete <- dyadc_calc %>%
+  mutate(dyadc_con = das1+ das2+ das3+ das5+ das7+ das8+ das10+ das11+ das12+ das13+ das14+ das15,
+         #round(dyadc_con * 100)/100,
+         dyadc_aff_exp = das4 + das6 + das29 + das30,
+         #round(dyadc_aff_exp * 100) / 100,
+         dyadc_satis = das16 + das17 + das18_r + das19_r + das20 + das21 + das22 + das23 + das31 + das32,
+         #round(dyadc_satis * 100) / 100,
+         dyadc_cohes = das24 + das25+  das26 + das27 + das28,
+         #round(dyadc_cohes * 100) / 100,
+         dyadc_total = das1 + das2+ das3+das4+das5+das6+das7+das8+das9+das10+das11+das12+das13+das14+das15+das16+das17+das18_r+das19_r+das20+das21+das22+das23+das24+das25+das26+das27+das28+das29+das30+das31+das32) %>%
+  # apply missing rules for Dyadic Consensus
+  mutate(across(c(dyadc_con), ~case_when(id %in% dyadc_dc_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rules for Affectional Expression
+  mutate(across(c(dyadc_aff_exp), ~case_when(id %in% dyadc_ae_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rules for Dyadic Satisfaction
+  mutate(across(c(dyadc_satis), ~case_when(id %in% dyadc_ds_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rules for Dyadic Dyadic Cohesion
+  mutate(across(c(dyadc_cohes), ~case_when(id %in% dyadc_dc_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rules for dyadc_total
+  mutate(across(c(dyadc_total), ~case_when(id %in% dyadc_remove ~ -99, TRUE ~ .x)))
+
+
+
+
+dyadc_complete <- dyadc_complete %>%
+## this code was finalize the archive file
+mutate(dyadc_screener = ifelse(id %in% c("HR211", "HR181", "P819", "HR218"), "-55", as.character(dyadc_screener)),
+       across(starts_with("das"), ~case_when(dyadc_screener == 0 ~ "-55", TRUE ~ as.character(.))),
+       across(where(is.character), ~replace(., is.na(.) | . == "", -77)))
+#%>%
+#  mutate_at(vars(-id), as.numeric))
+
+
+
+
+## these will not be archived, only used for creation of other data
+## archive this code
+dyadc_calc <- dyadc_calc %>%
+  mutate(
+    COUNTA = ifelse(dyadc_screener == 1,
+                    rowSums(as.matrix(dyadc_calc[, c("das1", "das2", "das3", "das5", "das7", "das8", "das9", "das10", "das11", "das12", "das13", "das14", "das15")]) == -77),
+                    NA),
+    COUNTB = ifelse(dyadc_screener == 1,
+                    rowSums(as.matrix(dyadc_calc[, c("das4", "das6", "das29", "das30")]) == -77),
+                    NA),
+    COUNTB1 = ifelse(dyadc_screener == 1,
+                     rowSums(as.matrix(dyadc_calc[, c("das29", "das30")]) == -77),
+                     NA),
+    COUNTB5 = ifelse(dyadc_screener == 1,
+                     rowSums(as.matrix(dyadc_calc[, c("das4", "das6")]) == -77),
+                     NA),
+    COUNTC = ifelse(dyadc_screener == 1,
+                    rowSums(as.matrix(dyadc_calc[, c("das16", "das17", "das18", "das19", "das20", "das21", "das22", "das23", "das31", "das32")]) == -77),
+                    NA),
+    COUNTC4 = ifelse(dyadc_screener == 1,
+                     rowSums(as.matrix(dyadc_calc[, "das23"]) == -77),
+                     NA),
+    COUNTC5 = ifelse(dyadc_screener == 1,
+                     rowSums(as.matrix(dyadc_calc[, c("das16", "das17", "das18", "das19", "das20", "das21", "das22", "das32")]) == -77),
+                     NA),
+    COUNTC6 = ifelse(dyadc_screener == 1,
+                     rowSums(as.matrix(dyadc_calc[, "das31"]) == -77),
+                     NA),
+    COUNTD = ifelse(dyadc_screener == 1,
+                    rowSums(as.matrix(dyadc_calc[, c("das24", "das25", "das26", "das27", "das28")]) == -77),
+                    NA),
+    COUNTD4 = ifelse(dyadc_screener == 1,
+                     rowSums(as.matrix(dyadc_calc[, "das24"]) == -77),
+                     NA),
+    COUNTD5 = ifelse(dyadc_screener == 1,
+                     rowSums(as.matrix(dyadc_calc[, c("das25", "das26", "das27", "das28")]) == -77),
+                     NA)
+  )
+
+
+
+
+dyadc_complete <- dyadc_calc %>%
+  # rowwise() %>%
+  # mutate_at(vars(dyadc_screener :COUNTD5), as.numeric) %>%
+  #  mutate(
+  #   das1 = replace(das1, das1 %in% c(-55, -77), NA_real_),
+  #   das2 = replace(das2, das2 %in% c(-55, -77), NA_real_),
+  #   das3 = replace(das3, das3 %in% c(-55, -77), NA_real_),
+  #   das4 = replace(das4, das4 %in% c(-55, -77), NA_real_),
+  #   das5 = replace(das5, das5 %in% c(-55, -77), NA_real_),
+  #   das6 = replace(das6, das6 %in% c(-55, -77), NA_real_),
+  #   das7 = replace(das7, das7 %in% c(-55, -77), NA_real_),
+  #   das8 = replace(das8, das8 %in% c(-55, -77), NA_real_),
+#   das9 = replace(das9, das9 %in% c(-55, -77), NA_real_),
+#   das10 = replace(das10, das10 %in% c(-55, -77), NA_real_),
+#   das11 = replace(das11, das11 %in% c(-55, -77), NA_real_),
+#   das12 = replace(das12, das12 %in% c(-55, -77), NA_real_),
+#   das13 = replace(das13, das13 %in% c(-55, -77), NA_real_),
+#   das14 = replace(das14, das14 %in% c(-55, -77), NA_real_),
+#   das15 = replace(das15, das15 %in% c(-55, -77), NA_real_),
+#   das16 = replace(das16, das16 %in% c(-55, -77), NA_real_),
+#   das17 = replace(das17, das17 %in% c(-55, -77), NA_real_),
+#   das18 = replace(das18, das18 %in% c(-55, -77), NA_real_),
+#   das19 = replace(das19, das19 %in% c(-55, -77), NA_real_),
+#   das20 = replace(das20, das20 %in% c(-55, -77), NA_real_),
+#   das21 = replace(das21, das21 %in% c(-55, -77), NA_real_),
+#   das22 = replace(das22, das22 %in% c(-55, -77), NA_real_),
+#   das23 = replace(das23, das23 %in% c(-55, -77), NA_real_),
+#   das24 = replace(das24, das24 %in% c(-55, -77), NA_real_),
+#   das25 = replace(das25, das25 %in% c(-55, -77), NA_real_),
+#   das26 = replace(das26, das26 %in% c(-55, -77), NA_real_),
+#   das27 = replace(das27, das27 %in% c(-55, -77), NA_real_),
+#   das28 = replace(das28, das28 %in% c(-55, -77), NA_real_),
+#   das29 = replace(das29, das29 %in% c(-55, -77), NA_real_),
+#   das30 = replace(das30, das30 %in% c(-55, -77), NA_real_),
+#   das31 = replace(das31, das31 %in% c(-55, -77), NA_real_),
+#   das32 = replace(das32, das32 %in% c(-55, -77), NA_real_)
+# ) %>%
+# mutate(
+#   dyadc_con = das1+ das2+ das3+ das5+ das7+ das8+ das10+ das11+ das12+ das13+ das14+ das15,
+#   dyadc_aff_exp = case_when(
+#     COUNTB == 0 ~ das4 + das6 + das29 + das30,
+#     COUNTB == 1 & COUNTB1 == 1 ~ (das4 + das6 + das29 + das30) / 11 * 12,
+#     COUNTB == 1 & COUNTB5 == 1 ~ (das4 + das6 + das29 + das30) / 7 * 12,
+#     TRUE ~ NA_real_  # Add a default condition, return NA if none of the conditions are met
+#   ),
+#   dyadc_satis = case_when(
+#     COUNTC == 0 ~ das16 + das17 + das18 + das19 + das20 + das21 + das22 + das23 + das31 + das32,
+#     COUNTC == 1 & COUNTC4 == 1 ~ (das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 46 * 50,
+#     COUNTC == 1 & COUNTC5 == 1 ~(das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 45 * 50,
+#     COUNTC == 1 & COUNTC6 == 1 ~ (das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 44 * 50,
+#     COUNTC == 2 & COUNTC4 == 1 & COUNTC5 == 1 ~ (das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 41 * 50,
+#     COUNTC == 2 & COUNTC5 == 2 ~(das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 40 * 50,
+#     COUNTC == 2 & COUNTC5 == 1 & COUNTC6 == 1 ~ (das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 39 * 50,
+#     TRUE ~ NA_real_
+#   ),
+#   dyadc_cohes = case_when(
+#     COUNTD == 0 ~ das24 + das25+  das26 + das27 + das28,
+#     COUNTD == 1 & COUNTD4 == 1 ~ (das24 + das25+  das26 + das27 + das28) /20 * 24,
+#     COUNTD == 1 & COUNTD5 == 1 ~ (das24 + das25+  das26 + das27 + das28) /19 * 24,
+#     TRUE ~ NA_real_
+#   ),
