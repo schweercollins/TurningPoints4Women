@@ -104,7 +104,7 @@ bsi <- bsi %>%
   mutate(
     bsi4 = case_when(
       # for participants who are incarcerated, bsi4 wasn't shown 
-      id %in% c("HR211", "HR181", "P819") & is.na(bsi4) ~ "-55",
+      id %in% c("HR211", "HR181", "P819", "HR218") & is.na(bsi4) ~ "-55",
       TRUE ~ bsi4
     )
   )
@@ -221,10 +221,10 @@ cesd <- cesd %>%
   mutate(c22 = ifelse((c21 == 0 |c21 ==  "-77"), "-55", c22),
          c23 = ifelse((c21 == 0 |c21 ==  "-77"), "-55", c23),
          # for incarcerated TC, c21-c24 wasn't shown 
-         c21 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c21) ~ "-55",TRUE ~ c21),
-         c22 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c22) ~ "-55",TRUE ~ c22),
-         c23 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c23) ~ "-55",TRUE ~ c23),
-         c24 = case_when( id %in% c("HR211", "HR181", "P819") & is.na(c24) ~ "-55",TRUE ~ c24)
+         c21 = case_when( id %in% c("HR211", "HR181", "P819", "HR218") & is.na(c21) ~ "-55",TRUE ~ c21),
+         c22 = case_when( id %in% c("HR211", "HR181", "P819", "HR218") & is.na(c22) ~ "-55",TRUE ~ c22),
+         c23 = case_when( id %in% c("HR211", "HR181", "P819", "HR218") & is.na(c23) ~ "-55",TRUE ~ c23),
+         c24 = case_when( id %in% c("HR211", "HR181", "P819", "HR218") & is.na(c24) ~ "-55",TRUE ~ c24)
       )
 
 
@@ -1533,7 +1533,7 @@ ssq_complete <- ssq_complete %>%
 
 ```{r eds df, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 
-# reverse scoring
+# pull in variables
 eds <-
   tpw_raw %>%
   select(
@@ -1547,6 +1547,7 @@ eds <-
 ```
 
 ```{r}
+# reverse scoring all
 elf <-
   tpw_raw %>%
   select(
@@ -1564,7 +1565,7 @@ elf <-
         .x == "Some" ~ "2",
         .x == "Very Few" ~ "1",
         .x == "None" ~ "0",
-        .x == "Does not apply" ~ "-55",   #TODO: Min, this should be -55 it is the same as NA.I've updated but you need to update missing data section  
+        .x == "Does not apply" ~ "-55",    
         .x == "Decline to Answer" ~ "-77",
         TRUE ~ .x
       )
@@ -1606,8 +1607,8 @@ ell <-
     across(
       matches("a$"),
       ~case_when(
-        .x == "Once a month" ~ "1",  #4
-        .x == "Once every 2-3 weeks" ~ "2",  #
+        .x == "Once a month" ~ "1",  
+        .x == "Once every 2-3 weeks" ~ "2",  
         .x == "Once a week" ~ "3",
         .x == "2-3 times a week" ~ "4",
         .x == "Once a day" ~ "5",
@@ -1661,10 +1662,7 @@ ell <- ell %>%
   select(-ell23a)
 
 # ELL Count Missing Data
-# most participants will respond to the first part of each item
-# don't respond to anything on the scale
-# TODO: Maria: we are only counting the ellx questions for missing percentage. (ellxa qusetions are not included.)
-## Min, I do want to retain the other questions, but we aren't using them for any ssubscale or total scale computation right now.
+
 ell_miss <- ell %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
@@ -1702,7 +1700,7 @@ ell_total_index_offenses_remove <- ell_total_index_offenses_miss %>% filter(miss
 
 # missing for total index of minor offenses 
 # (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37) 
-ell_total_index_minor_offenses_miss <- ell %>%
+ell_total_minor_offenses_miss <- ell %>%
     mutate(across(-id, as.numeric)) %>%
   select(id, ell1, ell2, ell3, ell6, ell7, ell8, ell9, ell11, ell12, ell13, ell14, ell15, ell17, ell18, ell19, ell20, ell21, ell22, ell24, ell26, ell27, ell28, ell30, ell31, ell33, ell34, ell35, ell36, ell37) %>%
   pct_miss_fun(
@@ -1711,22 +1709,20 @@ ell_total_index_minor_offenses_miss <- ell %>%
   )
 
 
-ell_total_index_minor_offenses_miss %>%
+ell_total_minor_offenses_miss %>%
   gt::gt() %>%
   gt::tab_header(title = 'Missing Data',
                  subtitle = 'By Each Participant')
 
-ell_total_index_minor_offenses_remove <- ell_total_index_minor_offenses_miss %>% filter(miss_pct >= 30) %>% pull(id)
+ell_total_minor_offenses_remove <- ell_total_minor_offenses_miss %>% filter(miss_pct >= 30) %>% pull(id)
 
 ```
 
 ### ELL Calculation & Subscale 
 
 ```{r ell_calculation}
-## Min for this variable I want us to save the censorsed data only for internal uses so you can pull that script.
-## next I want you to sum for the following items, removing item #23 from these scales
+
 # total score of all items (38 items in total but not #23)
-# Min, need to check if we need to apply missing data rule specifically for index offenses; if someone is missing more than 3 items specifically from index offenses we wouldn't compute
 # total index offenses (9 items el 4 el 5; ell10 ; ell 16; ell 25; ell 29; ell 32; ell 38; ell 39)
 # total index of minor offenses (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37)
 
@@ -1760,16 +1756,16 @@ ell_complete <- ell_calc %>%
   # apply missing rule to ell_total_index_offenses
   mutate_at(vars(ell_total_index_offenses), ~case_when(id %in% ell_total_index_offenses_remove ~ -99, TRUE ~ .x )) %>%
   # total index of minor offenses (29 items but not 23; 1, 2, 3, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24, 26, 27, 28, 30, 31, 33, 34, 35, 36, 37) 
-  mutate(ell_total_index_minor_offenses = rowSums(select(., c(ell1, ell2, ell3, ell6, ell7, ell8, ell9, ell11, ell12, ell13, ell14, ell15, ell17, ell18, ell19, ell20, ell21, ell22, ell24, ell26, ell27, ell28, ell30, ell31, ell33, ell34, ell35, ell36, ell37)), na.rm = T)) %>%
+  mutate(ell_total_minor_offenses = rowSums(select(., c(ell1, ell2, ell3, ell6, ell7, ell8, ell9, ell11, ell12, ell13, ell14, ell15, ell17, ell18, ell19, ell20, ell21, ell22, ell24, ell26, ell27, ell28, ell30, ell31, ell33, ell34, ell35, ell36, ell37)), na.rm = T)) %>%
   # apply missing rule to ell_total_index_minor_offenses
-  mutate_at(vars(ell_total_index_minor_offenses), ~case_when(id %in% ell_total_index_minor_offenses_remove ~ -99, TRUE ~ .x )) 
+  mutate_at(vars(ell_total_minor_offenses), ~case_when(id %in% ell_total_minor_offenses_remove ~ -99, TRUE ~ .x )) 
 
   
 ell_complete <- ell_complete%>%
-  select(id, ell_total, ell_total_index_offenses, ell_total_index_minor_offenses) %>%
+  select(id, ell_total, ell_total_index_offenses, ell_total_minor_offenses) %>%
   merge (ell, by = "id", all.y = TRUE) %>%
   relocate(id, .before = "ell1") %>% 
-  relocate(ell_total, ell_total_index_offenses,ell_total_index_minor_offenses, .after = "ell39a")
+  relocate(ell_total, ell_total_index_offenses,ell_total_minor_offenses, .after = "ell39a")
 
 ```
 
@@ -3282,7 +3278,7 @@ socinf_sub <- socinf_sub%>%
   # if socd3 is NO/0, -77, socd4a:socd4k were not asked
   mutate_at(vars(socd4a:socd4k), ~case_when(socd3 == 0 |socd3 < 0 ~ "-55", TRUE ~ .)) %>%
   # Incarcerated participants weren't administered for this survey
-  mutate_at(vars(socinf_preg_screener:socd4k), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.) ~ "-55", TRUE ~ .)) # they will therefore not have screener questions asked
+  mutate_at(vars(socinf_preg_screener:socd4k), ~case_when(id %in% c("HR211", "HR181", "P819", "HR218") & is.na(.) ~ "-55", TRUE ~ .)) # they will therefore not have screener questions asked
 
 
 ```
@@ -3336,11 +3332,11 @@ socinf_gen<- tpw_raw %>%
 # We do not apply missing data rules
 # No scales or subscales 
 
-socinf_gen <- socinf_gen%>%
+socinf_gen <- socinf_gen %>%
   # if socinf_general_screener is NO/0, the entire questionnaire was not administered. 
   mutate_at(vars(sg1:sg13d), ~case_when(socinf_general_screener == 0 ~ "-55", TRUE ~ .)) %>%
   # Incarcerated participants weren't administered for this survey
-  mutate_at(vars(sg1:sg13d, socinf_general_screener), ~case_when(id %in% c("HR211", "HR181", "P819") ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(sg1:sg13d, socinf_general_screener), ~case_when(id %in% c("HR211", "HR181", "P819", "HR218") ~ "-55", TRUE ~ .)) %>%
   mutate_at(vars(sg1:sg13d), ~case_when(is.na(.) ~ "-55", TRUE ~ .))
 
 

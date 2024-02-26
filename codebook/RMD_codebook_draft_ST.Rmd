@@ -298,6 +298,8 @@ If you have questions about the data or study, please contact the Principal Inve
 
 There were several data collection activities. First, one telephone interview was conducted with original participants (*M* = 18 years after each participants’ baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. The second part of the assessment was a 1 hour biological and physical health assessment. While prior waves collected limited information on self-reported health, this longitudinal extension also included a more robust battery of health conditions and a robust battery of 12 biomarkers, used to assess allostatic load, including cardiovascular, metabolic, and immune system function. This biological assessment was conducted either in person or virtually due to COVID-19 restrictions. Last, arrest records from the adult corrections system were collected. The age at last known arrest, number of arrests, whether each resulted in incarceration, and the length of incarceration was coded from the records and archived in aggregate to ensure that records are not identifiable.
 
+Maria insert about retention; ns for type of data; caveat publications using data from all waves
+
 ## Data and Codebook Guide
 
 ### Study Acronymns
@@ -509,9 +511,9 @@ cint_sociodems_word_long <- cint_sociodems_word %>%
   mutate(description = if_else(var_name == "cint_0", "I have some questions about your school and work experiences. What is the highest level of education you have completed?", description)) %>%
   mutate(description = if_else(var_name == "cint1_choice1", "What is your current employment status? (Indicate all that apply)", description)) %>%
   mutate(description = if_else(var_name == "cint1_choice2", "What is your current employment status? (if option 1 was selected in cint1_choice1 than the participant can select another option)", description)) %>%
-  mutate(description = if_else(var_name == "cint3", "Is this due to COVID-19 (if participant select 'temporarily laid off' in CINT1)", description)) %>%
-  mutate(description = if_else(var_name == "cint4", "Is this due to COVID-19 (if participant select 'on leave' in CINT1)", description)) %>%
-  mutate(description = if_else(var_name == "cint5", "Is this due to COVID-19 (if participant select 'unemployed or looking for work' in CINT1)", description)) %>%
+  mutate(description = if_else(var_name == "cint3", "Is this due to COVID-19 (if participant selected 'temporarily laid off' in CINT1)", description)) %>%
+  mutate(description = if_else(var_name == "cint4", "Is this due to COVID-19 (if participant selected 'on leave' in CINT1)", description)) %>%
+  mutate(description = if_else(var_name == "cint5", "Is this due to COVID-19 (if participant selected 'unemployed or looking for work' in CINT1)", description)) %>%
   mutate(description = if_else(var_name == "cint1_8_text", "If 'something else, please briefly describe' was selected in cint1", description)) %>%
   mutate(description = if_else(var_name == "cintidentity", "What is your gender identity?", description)) %>%
   mutate(description = if_else(var_name == "cintidentity_8_text", "What is your gender identity? - Prefer to self-identify selected", description)) %>%
@@ -1442,202 +1444,38 @@ cint_covid_tbl_
 
 # Delinquency and Crime 
 
+## Elliott Delinquency Scale Self Report (EDS-SR)
 
-## Elliott Delinquency Scale (EDS) Friends/Peers report
+### EDS-SR Description
 
-### EDS Description
+The Self-Reported Delinquency Scale was designed to measure participants’ delinquent activities, tapping the areas of property damage, theft, assault, and substance use. For each type of delinquent act, the participant is asked how many times in the past six months they had participated in the delinquent act. When a participant endorsed 10 or more times, they were asked a follow up question (variables ending in `a`).
 
-The EDS is a 39-item questionnaire designed to measure *insert*.
+-   For the present study, 39 items were administered, with 38 additional follow-up items for all original items except for `ell23`. There are a total of 80 EDS-SR items in this dataset, together with the computed scales.  
 
-For the present study, 39 items from the EDS were collected in order to
-#TODO: insert text here
+-   Items for participant's report on their own behaviors use the prefix `ell`
 
-All 39 items need to be reverse scored. Since it applied to ALL variables, we did not save reverse scored data in separate variable, all data in the data file are already reverse scored. The value below are also reversed. 
+-   **Higher** values for each item indicate **greater**  delinquency. 
 
-The missing data rule was applied. Calculations were completed for
-participants with 33% or less missing data (this includes -77 responses)
+-   The missing data rules were applied when scoring the measure.
 
-This survey was not administered for participants who were incarcerated at the time of the assessment.
+-   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
-## edit this this is the number matching with original scale 
-01 = 01, 02 = 03, 03 = 04, 04 = 05, 05 = 06, 06 = 07, 07 = 08, 08 = 09, 09 = 10, 10 = 11, 11 = 12, 12 = 13, 13 = N/A, 14 = 14, 15 = 15, 16 = 16, 17 = 17, 18 = 19, 19 = 20, 20 = 22, 21 = 24, 22 = 25, 23 = N/A, 24 = 26, 25 = 27, 26 = 28, 27 = 29, 28 = 30, 29 = 32, 30 = 34, 31 = 35, 32 = 37, 33 = 38, 34 = 40, 35 = 41, 36 = 42, 37 = 43, 38 = 44, 39 = 45
+-   Item numbers in this dataset may not always match original item numbers from the EDS. Please reference this guide to see match with original EDS (original EDS item number in *italics*): 01 = *01*, 02 = *03*, 03 = *04*, 04 = *05*, 05 = *06*, 06 = *07*, 07 = *08*, 08 = *09*, 09 = *10*, 10 = *11*, 11 = *12*, 12 = *13*, 13 = N/A, 14 = *14*, 15 = *15*, 16 = *16*, 17 = *17*, 18 = *19*, 19 = *20*, 20 = *22*, 21 = *24*, 22 = *25*, 23 = N/A, 24 = *26*, 25 = *27*, 26 = *28*, 27 = *29*, 28 = *30*, 29 = *32*, 30 = *34*, 31 = *35*, 32 = *37*, 33 = *38*, 34 = *40*, 35 = *41*, 36 = *42*, 37 = *43*, 38 = *44*, 39 = *45*
+
+-   There are various ways to score the EDS measure. We have provided three scored variables
+
+    + **EDS-SR Total Score** (`ell_raw_total`) is a sum of the total number of delinquent acts for all items except ell23
+    + **Total Index Offenses** (`ell_total_index_offenses`) is a total of 9 items that are considered to be index (more severe) crimes.
+    + **Total Minor Offenses** (`ell_total_minor_offenses`) is a sum of 29 items that are considered to be minor crimes.
 
 Reference:
-[@feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686);
-[DOI](https://doi.org/10.1177/1077559505276686)
+[@huizinga1986reassessing](https://www.jstor.org/stable/23365666)
 
-### EDS Variables
+### EDS-SR Variables
 
 #### Value Labels
 
-All EDS variables have the same response options.
-
-```{r EDS-label-table, results = 'asis'}
-
-eds_label_df <- data.frame(
-  value = c("4", "3", "2", "1", "0", "0 "),
-  label = c("All",
-            "Most",
-            "Some",
-            "Very Few",
-            "None",
-            "Does not apply")) %>% 
-  t() %>% 
-  as.data.frame()
-
-eds_label_df <- setNames(eds_label_df[-1, ], unlist(eds_label_df[1, ]))
-
-
-#create table
-eds_label_table <- eds_label_df %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  #cols_width(everything() ~ px(150)) %>% 
-  tab_options(table.width = pct(100))%>%
-  apply_labtab_theme()
-
-# Print the table
-print(eds_label_table)
-
-
-```
-
-#### Survey Items
-
-EDS survey items are presented in the following table:
-
-```{r eds-var-prep}
-# Pull question wording from qualtrics data
-eds_word <- qualtrics %>% 
-  select(starts_with("elf")) %>% 
-  slice(1)
-
-
-#create table with variable name, description, and notes
-eds_word_long <- eds_word %>% 
-  pivot_longer(cols = everything(), 
-               names_to = "var_name",
-               values_to = "description") %>% 
-  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
-         var_name = str_to_lower(var_name),
-          notes = ("")
-          # notes = paste0("This item should be reverse scored. `", var_name, "_c` is reverse scored")
-           ) %>% 
-  slice(1:39)
-# TODO: need double check reverse code variable name, it's inconsistant with other measure's reverse score name 
-
-```
-
-```{r eds-var-table, results ='asis'}
-# Create the gt table object and apply generic theme
-eds_gt_table <- gt(eds_word_long)
-
-# Table-specific formatting (col width, names)
-eds_gt_table <- eds_gt_table %>% 
-  cols_label(var_name = "Variable", 
-             description = "Description",
-             notes = "Notes") %>% 
-  apply_tbl_theme() %>% 
-  cols_width(notes ~ px(150),
-             var_name ~ px(100)) %>%
-  tab_options(table.width = pct(100))%>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
-
-
-# Print the table
-print(eds_gt_table)
-
-
-```
-
-<Maria, pleas add note about we are note presenting calculated variable> 
-
-### Summary Statistics
-
-#### Descriptive Statistics
-
-Descriptive statistics are presented below for each item, total, and
-subscale score:
-
-```{r eds-mean-items}
-eds_descrip <-
-  complete %>%
-  select(
-    matches(
-      "^elf"
-    )
-  )
-
-# Calculate the summary statistics for each variable
-eds_summary_data <- lapply(eds_descrip, function(x) {
-  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
-  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
-  # Exclude negative values and specific negative values from calculations
-  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
-  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
-  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
-  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
-  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
-  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
-})
-
-# Convert summary_data to a data frame
-eds_summary_data <- as.data.frame(eds_summary_data)
-
-# Set items as first row
-eds_summary_data <- rbind(names(eds_summary_data), eds_summary_data) %>% 
-  t() %>% 
-  as.data.frame()
-
-
-# Create the gt table
-eds_tbl <- eds_summary_data %>%
-  gt() %>%
-  cols_label(`1` = "Variable",
-             Range = "Range*",
-             Missing = "% Missing") %>% 
- #cols_width(everything() ~ px(115)) %>%
-    tab_options(table.width = pct(100))%>%
-  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
-  tab_footnote("*Range of data values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>%
-  apply_tbl_theme()
-
-# Render the table
-eds_tbl
-
-```
-
-
-
-
-## Elliott Delinquency Scale Self Report (ELL)
-
-### ELL Description
-
-The Ell is a 39-item questionnaire designed to measure *insert*.
-
-For the present study, 39 items from the ELL were collected in order to
-#TODO: insert text here
-
-No items need to be reverse scored. *TODO: need change text here Higher
-scores indicate more severe mental health symptoms.*
-
-The missing data rule was applied. Calculations were completed for
-participants with 33% or less missing data (this includes -77 responses)
-
-Reference:
-[@feiring2005persistence](https://journals.sagepub.com/doi/abs/10.1177/1077559505276686);
-[DOI](https://doi.org/10.1177/1077559505276686)
-
-### ELL Variables
-
-#### Value Labels
-
-Variable Scale (for variables that end with a) and for any item that has
-been done 10 or more times.
-TODO: Shaina: please review text above as I altered JP's text.
+Response options for items that end with an `a`, with the exception of `ell23`. These questions were asked for any item(s) that a participant endorsed doing 10 or more times in the past six months.
 
 ```{r ELL-label-table, results = 'asis'}
 ell_label_df <- data.frame(
@@ -1645,7 +1483,7 @@ ell_label_df <- data.frame(
   label = c("Once a month",
             "Once every 2-3 weeks",
             "Once a week",
-            "2-3 times a dday",
+            "2-3 times a day",
             "Once a day",
             "2-3 times a day")) %>% 
   t() %>% 
@@ -1669,9 +1507,38 @@ print(ell_label_table)
 
 ```
 
+This is the response option for `ell23`
+
+```{r ELL23-label-table, results = 'asis'}
+
+
+ell23_label_df <- data.frame(
+  value = c("1", "2", "3"),
+  label = c("Only threatened to hit",
+            "Tried but didn't succeed",
+            "Actually hit")) %>% 
+  t() %>% 
+  as.data.frame()
+
+ell23_label_df <- setNames(ell23_label_df[-1, ], unlist(ell23_label_df[1, ]))
+
+
+#create table
+ell23_label_table <- ell23_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(150)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(ell23_label_table)
+```
+
 #### Survey Items
 
-ELL survey items are presented in the following table. Variables are not ending with a are open ended. Vairable end with a only been ask for item that has been done 10 or more times. 
+EDS-SR survey items are presented in the following table. Variables that do not end with `a` are open text. Variables that end with an `a` were only asked for items for which a participant endorsed the item 10 or more times. 
 
 ```{r ell-var-prep}
 # Pull question wording from qualtrics data
@@ -1713,16 +1580,16 @@ print(ell_gt_table)
 
 ```
 
+
+
 #### Scale and Subscales
 
-Information on the total score and subscale variables are below.
+Information on the computed scores are provided below.
 Variables were constructed by summing included items.
 
 
-
 ```{r ell alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-#Calculate internal reliability 
-#TODO:JP doesn't include alpha in his script. Please review and delete if not needed
+# Internal consistency not computed
 
 
 ```
@@ -1731,7 +1598,7 @@ Variables were constructed by summing included items.
 # Create the table as a data frame
 ell_scale_df <- data.frame(
   var_name = c("ell_raw_total", "ell_total_index_offenses ", "ell_total_index_minor_offenses"),
-  scale = c("ELL Total Score (Raw) (38)", "Total Index Offenses(9)", "Total Index of Minor Offenses (29)"),
+  scale = c("EDS-SR Total Score (38)", "Total Index Offenses (9)", "Total Minor Offenses (29)"),
   scale_construction = c("`ell1`, `ell2`, `ell3`,`ell4`, `ell5`, `ell6`, 
                           `ell7`,  `ell8`, `ell9`, `ell10`, `ell11`,                      
                           `ell12`, `ell13`, `ell14`, `ell15`,                       
@@ -1761,7 +1628,7 @@ ell_scale_df <- gt(ell_scale_df) %>%
              scale_range = "Range*",
              # alpha = "Alpha"
              ) %>% 
-  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
   #cols_width(scale ~ px(135)) %>% 
   tab_options(table.width = pct(100))%>%
@@ -1777,13 +1644,12 @@ print(ell_scale_df)
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item, total, and
-subscale score:
+Descriptive statistics are presented below for each item and computed scale.
 
 ```{r ell-mean-items}
 # Create subset of items
 ell_data_subset <- complete %>%
-  select(ell1:ell_total_index_minor_offenses)
+  select(ell1:ell_total_minor_offenses)
 
 # Calculate the summary statistics for each variable
 ell_summary_data <- lapply(ell_data_subset, function(x) {
@@ -1844,17 +1710,211 @@ p_ell_total_index_offenses <- complete %>%
   ) +
   labs(title = 'Index Offenses')
 
-p_ell_total_index_minor_offenses <- complete %>%
-  filter(ell_total_index_minor_offenses >= 0) %>%
+p_ell_total_minor_offenses <- complete %>%
+  filter(ell_total_minor_offenses >= 0) %>%
   composite_hist(
-    x = ell_total_index_minor_offenses
+    x = ell_total_minor_offenses
   ) +
   labs(title = "Index Minor Offenses")
 
 ggarrange(p_ell_total, p_ell_total_index_offenses + rremove("ylab"),
-          p_ell_total_index_minor_offenses) %>%
+          p_ell_total_minor_offenses) %>%
   annotate_figure(top = text_grob( "Distribution for Elliott Delinquency Scale Self Report \n(x-axis and y-axis are in different scales)"))
 ```
+
+
+## Elliott Delinquency Scale Friends/Peers (EDS-F)
+
+### EDS-F Description
+
+The Self-Reported Delinquency measure (participant report on friends [EDS-F]) was designed to measure participants’ friends' delinquent activities, tapping the areas of property damage, theft, assault, and substance use. For each type of delinquent act, the participant is asked how many of the participant's friend(s) had ever committed the delinquent act.
+
+-   For the present study, 39 items were included. Items use the prefix `elf`
+
+-   All 39 items needed to be reverse scored based on how the original data was collected. Since the reverse scoring applied to **all** variables, we did not save reverse scored data in separate variable, all data in the data file are already reverse scored.
+
+-   **Higher** values for each item indicate **greater** friend/peer delinquency. 
+
+-   Because no scale scores were computed, the missing data rules were note applied. 
+
+
+Reference:
+[@huizinga1986reassessing](https://www.jstor.org/stable/23365666)
+
+### EDS-F Variables
+
+#### Value Labels
+
+All EDS-F variables except for `elf23` have the same response options listed below.
+
+```{r EDS-label-table, results = 'asis'}
+
+eds_label_df <- data.frame(
+  value = c("-55", "0", "1", "2", "3", "4"),
+  label = c("Does not apply",
+            "None",
+            "Very Few",
+            "Some",
+            "Most",
+            "All")) %>% 
+  t() %>% 
+  as.data.frame()
+
+eds_label_df <- setNames(eds_label_df[-1, ], unlist(eds_label_df[1, ]))
+
+
+#create table
+eds_label_table <- eds_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(150)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(eds_label_table)
+
+
+```
+
+The response options for `elf23` are listed below.
+
+```{r EDS23-label-table, results = 'asis'}
+
+
+eds23_label_df <- data.frame(
+  value = c("1", "2", "3"),
+  label = c("Only threatened to hit",
+            "Tried but didn't succeed",
+            "Actually hit")) %>% 
+  t() %>% 
+  as.data.frame()
+
+eds23_label_df <- setNames(eds23_label_df[-1, ], unlist(eds23_label_df[1, ]))
+
+
+#create table
+eds23_label_table <- eds23_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(150)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(eds23_label_table)
+
+
+```
+
+#### Survey Items
+
+EDS-F survey items are presented in the following table:
+
+```{r eds-var-prep}
+# Pull question wording from qualtrics data
+eds_word <- qualtrics %>% 
+  select(starts_with("elf")) %>% 
+  slice(1)
+
+
+#create table with variable name, description, and notes
+eds_word_long <- eds_word %>% 
+  pivot_longer(cols = everything(), 
+               names_to = "var_name",
+               values_to = "description") %>% 
+  mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         var_name = str_to_lower(var_name),
+          notes = ("")
+          # notes = paste0("This item should be reverse scored. `", var_name, "_c` is reverse scored")
+           ) %>% 
+  mutate(description = if_else(var_name == "elf23", "Thinking of the most severe (worst) time, did any of your friends actually hit them or just threaten to?", description)) %>% 
+  mutate(description = if_else(var_name == "elf24", "How many of your friends have been loud, rowdy, or unruly in a public place – disorderly conduct?", description)) %>% 
+  slice(1:39)
+
+
+```
+
+```{r eds-var-table, results ='asis'}
+# Create the gt table object and apply generic theme
+eds_gt_table <- gt(eds_word_long)
+
+# Table-specific formatting (col width, names)
+eds_gt_table <- eds_gt_table %>% 
+  cols_label(var_name = "Variable", 
+             description = "Description",
+             notes = "Notes") %>% 
+  apply_tbl_theme() %>% 
+  cols_width(notes ~ px(150),
+             var_name ~ px(100)) %>%
+  tab_options(table.width = pct(100))%>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+
+# Print the table
+print(eds_gt_table)
+
+
+```
+
+
+### Summary Statistics
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for each item. 
+
+```{r eds-mean-items}
+eds_descrip <-
+  complete %>%
+  select(
+    matches(
+      "^elf"
+    )
+  )
+
+# Calculate the summary statistics for each variable
+eds_summary_data <- lapply(eds_descrip, function(x) {
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
+  c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+})
+
+# Convert summary_data to a data frame
+eds_summary_data <- as.data.frame(eds_summary_data)
+
+# Set items as first row
+eds_summary_data <- rbind(names(eds_summary_data), eds_summary_data) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+# Create the gt table
+eds_tbl <- eds_summary_data %>%
+  gt() %>%
+  cols_label(`1` = "Variable",
+             Range = "Range*",
+             Missing = "% Missing") %>% 
+ #cols_width(everything() ~ px(115)) %>%
+    tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_footnote("*elf23 has a SD of `NA` as there is only one valid value for that variable ") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+eds_tbl
+```
+
 
 # Mental Health/Psychological
 
@@ -1864,20 +1924,21 @@ ggarrange(p_ell_total, p_ell_total_index_offenses + rremove("ylab"),
 
 The Brief Symptom Inventory (BSI) is designed to reflect psychological symptom patterns of psychiatric and medical patients. The BSI instrument is especially appropriate in clinical situations where debilitation results in reduced attention and endurance, in research with limited interview schedules, and in outpatient clinics where testing procedures demand brevity. The BSI instrument is also frequently used in measuring patient progress during treatment or in the assessment of treatment outcome.
 
-*   For the present study, 19 items from the BSI were collected in order to calculate the **Somatization**, **Anxiety**, and **Depression** raw subscales.
+-   For the present study, 19 items from the BSI were collected in order to calculate the **Somatization**, **Anxiety**, and **Depression** raw subscales.
 
     + **Somatization** reflects distress arising from perceptions of bodily dysfunction.
     + **Anxiety** reflects general signs such as nervousness and tension are included in the Anxiety dimension, as are panic attacks and feelings of terror.
     + **Depression** reflects symptoms of dysphoric mood and affect are represented as are lack of motivation and loss of interest in life.  
-&nbsp; 
-*   Item numbers in this data set may not match original item numbers from the BSI. Please reference this guide to see match with original BSI (original BSI item number in *italics*): 01 = *01*, 02 = *02*, 03 = *07*, 04 = *09*, 05 = *12*, 06 = *16*, 07 = *17*, 08 = *18*, 09 = *19*, 10 = *23*, 11 = *29*, 12 = *30*, 13 = *33*, 14 = *35*, 15 = *37*, 16 = *38*, 17 = *45*, 18 = *49*, 19 = *50* 
+&nbsp;
 
-  * No items need to be reverse scored. 
+-   Item numbers in this data set may not match original item numbers from the BSI. Please reference this guide to see match with original BSI (original BSI item number in *italics*): 01 = *01*, 02 = *02*, 03 = *07*, 04 = *09*, 05 = *12*, 06 = *16*, 07 = *17*, 08 = *18*, 09 = *19*, 10 = *23*, 11 = *29*, 12 = *30*, 13 = *33*, 14 = *35*, 15 = *37*, 16 = *38*, 17 = *45*, 18 = *49*, 19 = *50* 
 
-  * **Higher** scores indicate **more** severe
+-   No items need to be reverse scored. 
+
+-   **Higher** scores indicate **more** severe
 psychological symptoms.
 
-  * The missing data rule was not applied. The only missing data in this measure reflects responses not collected on `bsi4` due to our protocols for participants who were incarcerated at the time of the assessment. According to the BSI manual, up to one item can be missing from each subscale to obtain valid subscale scores.
+-   The missing data rule was not applied. The only missing data in this measure reflects responses not collected on `bsi4` due to our protocols for participants who were incarcerated at the time of the assessment. According to the BSI manual, up to one item can be missing from each subscale to obtain valid subscale scores.
 
 Reference:
 [@derogatis1983brief](https://www.cambridge.org/core/journals/psychological-medicine/article/abs/brief-symptom-inventory-an-introductory-report/307F805810B165ED58581E355F24329F)
@@ -4577,32 +4638,32 @@ sex_tbl
 
 
 ## Social Influences - General (SOCINF-G)
-<MARIA: you might want to switch this to full name to be consistent with other measure.> 
+
+### SOCINF-G Description
   
-  
-### SOCINF_General Description
-  
-  <MARIA> please insert a breif description for this measure 
+The SOCINF-G assesses partner influences on delinquent or risky behaviors. There are 17 SOCINF-G items in our data file.
 
+-   No items have been reverse scored. 
 
-* No items need to be reverse scored. 
+-   No missing data rules were applied as no scales were computed. 
 
-* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+-   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
-This survey was not administered for participants who were incarcerated at the time of the assessment. 
+-   Participants who reported being in a relationship in the past six months responded to this survey (`socinf_general_screener` = yes) whereas participants who were not in a relationship in the past six months skipped this survey (`-55` values).
 
 Reference:
-  <Maria, please add a reference if needed> 
+[@capaldi2003](here)
   
-### SOCINF_General Variables
+### SOCINF-G Variables
   
 #### Value Labels and Survey Items 
   
-  All SOCINF_General variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+All SOCINF-G variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
 
-SOCINF_General survey items are presented in the following table:
+SOCINF-G survey items are presented in the following table:
   
-Leading question: Thinking about your partner, how often is it true that they:
+**Question stem: Thinking about your partner in the past 6 months, how often is it true that s/he:**
+
 ```{r socinf_gen-var-prep}
 # Pull question wording from Qualtrics data
 socinf_gen_word <- qualtrics %>% 
@@ -4620,10 +4681,11 @@ socinf_gen_word_long <- socinf_gen_word %>%
          var_name = str_to_lower(var_name)) %>%
   # Edits Variable description and value
   mutate(description = if_else(var_name == "sg13", "In general, is your partner against using tobacco (smoke or chew)?", description)) %>%
-  mutate(description = if_else(var_name == "socinf_general_screener", "ASSESSOR RESPOND: Has TC reported being in a (romantic) relationship in the past 6 months?", description)) %>%
+  mutate(description = if_else(var_name == "socinf_general_screener", "Has the participant been in a (romantic) relationship in the past 6 months?", description)) %>%
  
   mutate(Value = "") %>%
-  mutate(Value = if_else(var_name %in% c("socinf_general_screener"), "0 = No \n1 = Yes" , `Value`)) %>%
+  mutate(Value = if_else(var_name %in% c("socinf_general_screener"), "0 = No 
+                             \n1 = Yes" , `Value`)) %>%
   mutate(Value = if_else(var_name %in% c("sg1", "sg2","sg3", "sg5"), "0 = Never or almost never true
         \n1 = Hardly ever true
         \n2 = Sometimes true
@@ -4680,12 +4742,14 @@ socinf_gen_data_subset <- complete %>%
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
 socinf_gen_summary_data <- lapply(socinf_gen_data_subset, function(x) {
-  x <- replace(x, x < -40, NA)
-  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  # sd_val <- round(sd(x, na.rm = TRUE), 2)
-  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
-  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+ # mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+ # sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+ # range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -4704,8 +4768,8 @@ socinf_gen_tbl <- socinf_gen_summary_data %>%
              Missing = "% Missing") %>% 
   # cols_width(everything() ~ pct(100)) %>%
   cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
+  tab_footnote(footnote = "") %>%
   apply_tbl_theme()
 
 # Render the table
@@ -6880,31 +6944,29 @@ complete %>%
 
 
 ## Social Influences - Substances (SOCINF-S)
-
-<MARIA: you might want to switch this to full name to be consistent with other measure.> 
   
-  
-### SOCINF_SUBSTANCES Description
-  
-  <MARIA> please insert a breif description for this measure 
+### SOCINF-S Description
+ 
+The SOCINF-S assesses partner influences on substance use behaviors. There are 70 SOCINF-S items in our data file.
 
+-   No items have been reverse scored. 
 
-* No items need to be reverse scored. 
+-   No missing data rules were applied as no scales were computed. 
 
-* This is not a a standardized questionnaire, so missing data rule was not applied. And no subscale was computed. 
+-   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
-This survey was not administered for participants who were incarcerated at the time of the assessment. 
+-   Participants responded to this questionnaire if they met two criteria. First, participants must have reported being in a relationship in the past six months responded to this survey (`socinf_relationship_screener` = "Yes") and could not be currently pregnant (`socinf_preg_screener` = "No"). Participants who did not meet these criteria skipped past this survey (`-55` values).
 
 Reference:
-  <Maria, please add a reference if needed> 
-  
-### SOCINF_SUBSTANCES Variables
+[@capaldi2003](here)
+
+## SOCINF-S Variables
   
 #### Value Labels and Survey Items 
   
-  All SOCINF_SUBSTANCES variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+  All SOCINF-S variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
 
-SOCINF_SUBSTANCES survey items are presented in the following table:
+SOCINF-S survey items are presented in the following table:
   
   
 ```{r socinf_sub-var-prep}
@@ -6926,9 +6988,9 @@ socinf_sub_word_long <- socinf_sub_word %>%
          description = str_replace(description, "\\d+[a-zA-Z]\\. ", ""),
          var_name = str_to_lower(var_name)) %>%
   # Edits Variable description and value
-  mutate(description = if_else(var_name == "socinf_preg_screener", "ASSESSOR RESPOND: Is TC currently pregnant?", description)) %>%
-  mutate(description = if_else(var_name == "socinf_relationship_screener", "Assessor Respond: Has the TC previously reported being in a romantic 
-                               relationship in the past 6 months?", description)) %>%
+  mutate(description = if_else(var_name == "socinf_preg_screener", "Is the participant currently pregnant?", description)) %>%
+  mutate(description = if_else(var_name ==
+"socinf_relationship_screener", "Has the participant been in a (romantic) relationship in the past 6 months", description)) %>%
   mutate(description = if_else(var_name == "soc2a", "Thinking about your partner’s use of tobacco (smoking or chewing) in the past 6 months, 
                                how often did/does your partner smoke, or chew, around you?", description)) %>% 
    mutate(description = if_else(var_name == "soc4a", "How much does your partner approve of your smoking/chewing tobacco? ", description)) %>%     
@@ -6948,9 +7010,9 @@ socinf_sub_word_long <- socinf_sub_word %>%
   mutate(description = if_else(var_name == "socd4a", "How much does your partner approve of your using drugs?", description)) %>%
   mutate(Value = "") %>%
   
-  mutate(Value = if_else(grepl("\\d$", var_name), "1 = Yes
-                         \n0 = No
-                         \n -66 = Don't Know
+  mutate(Value = if_else(grepl("\\d$", var_name), "0 = No
+                         \n1 = Yes
+                         \n-66 = Don't Know
                          \n-77  = Decline to Answer", Value))%>%
   mutate(Value = if_else(grepl("[a-zA-Z]$", var_name), "0 = Never
         \n1 = Hardly ever
@@ -6964,7 +7026,8 @@ socinf_sub_word_long <- socinf_sub_word %>%
        \n2 = Sometimes
        \n3 = Often
       \n-77 = Decline to Answer", `Value`)) %>%
-  mutate(Value = if_else(var_name %in% c("socinf_preg_screener", "socinf_relationship_screener"), "1 = Yes \n 0 = No" , `Value`))
+  mutate(Value = if_else(var_name %in% c("socinf_preg_screener", "socinf_relationship_screener"), "0 = No 
+                               \n 1 = Yes" , `Value`))
 
 
 ```
@@ -7004,12 +7067,14 @@ socinf_sub_data_subset <- complete %>%
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
 socinf_sub_summary_data <- lapply(socinf_sub_data_subset, function(x) {
-  x <- replace(x, x < -40, NA)
-  # mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
-  # sd_val <- round(sd(x, na.rm = TRUE), 2)
-  # range_val <- paste(min(x, na.rm = TRUE), max(x, na.rm = TRUE), sep = "-")
-  miss_val <- round(mean(is.na(x)) * 100, 2)
-  # c(Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  x <- replace(x, (x < -40 & x!= -55 & x!= -88), NA)  # Your original recoding
+  x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
+  # Exclude negative values and specific negative values from calculations
+  x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+#  mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
+#  sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
+#  range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
+  miss_val <- round(mean(is.na(x)) * 100, 2)  # Calculate missing value percentage using original x
   c(Missing = paste(miss_val, "%", sep = ""))
 })
 
@@ -7028,7 +7093,7 @@ socinf_sub_tbl <- socinf_sub_summary_data %>%
              Missing = "% Missing") %>% 
   # cols_width(everything() ~ pct(100)) %>%
   cols_align(columns = c("Missing"), align = "left") %>% 
-  tab_footnote("*Range of data values") %>% 
+  tab_footnote("") %>% 
   tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 
