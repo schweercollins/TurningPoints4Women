@@ -1039,6 +1039,7 @@ There are missing data in DAS and missing rule applied through the unique "COUNT
 ## make sure to include the new P810 if possible
 
 
+
 dyadc <- dyadc %>%
   # if answered no for screening question, the entire survey is skipped.
   mutate_at(vars(e1:e19_r), ~case_when(dyadc_screener == 0  ~ "-55", TRUE ~ . )) %>%
