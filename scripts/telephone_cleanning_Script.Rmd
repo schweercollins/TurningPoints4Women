@@ -895,9 +895,6 @@ bcap_complete <- bcap %>%
 ### DAS Select Variables and Recode 
 ```{r dyadc}
 # Referred to as dyadc in coding, but this is the DAS. 
-
-
-
 dyadc <-
   tpw_raw %>% 
   select(
@@ -1027,7 +1024,6 @@ dyadc <-
       TRUE ~ e32
     )
   )
-
 ```
 
 ### DAS Missing Data
@@ -1037,7 +1033,7 @@ There are missing data in DAS and missing rule applied through the unique "COUNT
 ## can you please let me know how many valid responses we have to this measure meaning dyadc_screener = 1
 ## can you also let me know how many total scores we have
 ## make sure to include the new P810 if possible
-
+## if incarcerated had data and we removed them 
 
 
 dyadc <- dyadc %>%
@@ -1046,263 +1042,198 @@ dyadc <- dyadc %>%
     # Participants who were incarcerated at the time of assessment where not administered this survey
   mutate_at(vars(dyadc_screener, e1:e19_r), ~ ifelse(id %in% c("HR211", "HR181", "P819", "HR218"), "-55", .)) 
 
-dyadc %>%
+# recode to das prefix
+dyadc <- dyadc %>%
+  rename_with(~sub("^e", "das", .), starts_with("e"))
+
+
+# Missing percentage for all 32 variables 
+dyadc_miss <- dyadc %>%
     mutate(across(-id, as.numeric)) %>%
   pct_miss_fun(
     id = c('id', 'dyadc_screener'),
     n_items = 32
-  ) %>%
+  ) 
+
+dyadc_miss %>%
   gt::gt() %>% 
   gt::tab_header(
     title = 'DYADC Missing Data',
     subtitle = 'By Participant'
   )
+
+dyadc_remove <- dyadc_miss %>% filter(miss_pct > 20) %>% pull(id)
+
+# Missing percentage for Dyadic Consensus - 1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15 (65 points possible)
+dyadc_dc_miss <- dyadc %>%
+  mutate(across(-id, as.numeric)) %>%
+  select(id, das1, das2, das3, das5,
+                 das7, das8, das9, das10,
+                 das11, das12, das13, das14, das15) %>%
+  pct_miss_fun(
+    id = c('id'),
+    n_items = 13
+  ) 
+
+dyadc_dc_miss %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DYADC Dyadic Consensus Missing Data',
+    subtitle = 'By Participant'
+  )
+dyadc_dc_remove <- dyadc_dc_miss %>% filter(miss_pct > 20) %>% pull(id)
+
+# Missing percentage for Affectional Expression - 4, 6, 29, 30 (12 points possible)
+dyadc_ae_miss <- dyadc %>%
+  mutate(across(-id, as.numeric)) %>%
+  select(id, das4, das6, das29, das30) %>%
+  pct_miss_fun(
+    id = c('id'),
+    n_items = 4
+  ) 
+
+dyadc_ae_miss %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DYADC Affectional Expression Missing Data',
+    subtitle = 'By Participant'
+  )
+dyadc_ae_remove <- dyadc_ae_miss %>% filter(miss_pct > 33) %>% pull(id)
+
+# Missing percentage for Dyadic Satisfaction - 16, 17, 18, 19, 20, 21, 22, 23, 31, 32 (50 points possible)
+dyadc_ds_miss <- dyadc %>%
+  mutate(across(-id, as.numeric)) %>%
+  select(id, das16, das17, das18, das19, das20,
+                 das21, das22, das23, das31, das32) %>%
+  pct_miss_fun(
+    id = c('id'),
+    n_items = 10
+  ) 
+
+dyadc_ds_miss %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DYADC Dyadic Satisfaction Missing Data',
+    subtitle = 'By Participant'
+  )
+dyadc_ds_remove <- dyadc_ds_miss %>% filter(miss_pct > 20) %>% pull(id)
+
+# Missing percentage for Dyadic Cohesion - 24, 25, 26, 27, 28 (24 points possible) 
+dyadc_dc_miss <- dyadc %>%
+  mutate(across(-id, as.numeric)) %>%
+  select(id, das24, das25, das26, das27, das28) %>%
+  pct_miss_fun(
+    id = c('id'),
+    n_items = 5
+  ) 
+
+dyadc_dc_miss %>%
+  gt::gt() %>% 
+  gt::tab_header(
+    title = 'DYADC Dyadic Cohesion Missing Data',
+    subtitle = 'By Participant'
+  )
+dyadc_dc_remove <- dyadc_dc_miss %>% filter(miss_pct > 30) %>% pull(id)
 ```
 
 ### DAS Calculations & Subscale
 ```{r dyadc_calculations}
-# recode to das prefix
-
-dyadc <- dyadc %>%
-  rename_with(~sub("^e", "das", .), starts_with("e"))
-
-dyadc  <- as.data.frame(lapply(dyadc , as.numeric))
-
-dyadc %>%
-  pct_miss_fun(
-    id = c('id', 'dyadc_screener'),
-    n_items = 32
-  ) %>%
-  gt::gt() %>% 
-  gt::tab_header(
-    title = 'DYADC Missing Data',
-    subtitle = 'By Participant'
-  )
-## try new code 
-
+# change all negative values to NA for calculation 
 dyadc_calc <-
   dyadc %>%
-  mutate_all(~ifelse(. %in% c(-55, -77), NA, .)) %>%
-  pct_miss_fun(
-    id = c('id', 'dyadc_screener'),
-    n_items = 32
-  ) %>%
-  full_join(dyadc,
-            by = 'id') %>%
-  filter(
-    is.na(miss_pct) |
-    miss_pct < 20
-    ) %>%
+  mutate(across(-id, as.numeric)) %>%
   mutate(
     across(
-      .cols = c(das1:das32),
+      .cols = -id, 
       .fns = ~case_when(
-        .x == -77 ~ NA_real_,
-        .x == -55 ~ NA_real_,
+        .x < 0 ~ NA_real_,
+        TRUE ~.x
+      )
+    )
+  )
+
+
+## creating subscales here 
+# Calculate total score for das: ## Total = all 32 items
+dyadc_complete <-
+  dyadc_calc %>%
+  composite_total_avg_fun(
+    id = c('id', 'dyadc_screener','das18', 'das19'), # we are using reverse score for das 18 and das19
+    n_items = 32
+  ) %>%
+  distinct(
+    across(
+      .cols = everything()
+    )
+  ) %>%
+  rename(
+    dyadc_total = sum_values
+  ) %>%
+  # apply missing rule for dyadc_total
+  mutate(
+    across(
+      .cols = dyadc_total,
+      .fns = ~ case_when(
+        id %in% dyadc_remove ~ -99,
         TRUE ~ .x
       )
     )
   )
 
-dyadc_complete <-
-  dyadc_calc %>%
-    select(
-      -missing_n,
-      -miss_pct
-           ) %>%
-    composite_total_avg_fun(
-      id = c('id', 'dyadc_screener'),
-      n_items = 32
-    ) %>%
-    rename(
-      dyadc_total = sum_values,
-      dyadc_avg = mean_values
-    )
-
-
-## creating subscales here 
-
-## Total = all 32 items
-
-## Dyadic Consensus - 1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15 (65 points possible)
-
-## Affectional Expression - 4, 6, 29, 30 (12 points possible)
-
-## Dyadic Satisfaction - 16, 17, 18, 19, 20, 21, 22, 23, 31, 32 (50 points possible)
-
-## Dyadic Cohesion - 24, 25, 26, 27, 28 (24 points possible) 
 
 dyadc_complete <-
   dyadc_complete %>%
-    subscale_create(
-      total_only = FALSE,
-      scale1 = c('das1', 'das2', 'das3', 'das4', 'das5',
-                 'das6', 'das7', 'das8', 'das9', 'das10',
-                 'das11', 'das12', 'das13'),
-      scale1_nitems = 13,
-      scale2 = c('das4', 'das6',
-                 'das29', 'das30'),
-      scale2_nitems = 4,
-      scale3 = c('das16', 'das17', 'das18', 'das19', 'das20',
-                 'das21', 'das22', 'das23', 'das31', 'das32'),
-      scale3_nitems = 10,
-      scale4 = c('das24', 'das25', 'das26', 'das27', 'das28'),
-      scale4_nitems = 5
-    ) %>%
-    rename(
-      dyadc_con_total = total1,
-      dyadc_con_avg = avg1,
-      dyadc_aff_exp_total = total2,
-      dyadc_aff_exp_avg = avg2,
-      dyadc_satis_total = total3,
-      dyadc_satis_avg = avg3,
-      dyadc_cohes_total = total4,
-      dyadc_cohes_avg = avg4
-    )
+  subscale_create(
+    total_only = TRUE,
+    ## Dyadic Consensus - 1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15 (65 points possible)
+    scale1 = c('das1', 'das2', 'das3', 'das5',
+               'das7', 'das8', 'das9', 'das10',
+               'das11', 'das12', 'das13', 'das14', 'das15'),
+    scale1_nitems = 13,
+    ## Affectional Expression - 4, 6, 29, 30 (12 points possible),
+    scale2 = c('das4', 'das6',
+               'das29', 'das30'),
+    scale2_nitems = 4,
+    ## Dyadic Satisfaction - 16, 17, 18, 19, 20, 21, 22, 23, 31, 32 (50 points possible)
+    scale3 = c('das16', 'das17', 'das18_r', 'das19_r', 'das20',
+               'das21', 'das22', 'das23', 'das31', 'das32'),
+    scale3_nitems = 10,
+    ## Dyadic Cohesion - 24, 25, 26, 27, 28 (24 points possible) 
+    scale4 = c('das24', 'das25', 'das26', 'das27', 'das28'),
+    scale4_nitems = 5
+  ) %>%
+  rename(
+    dyadc_con = total1,
+    dyadc_aff_exp = total2,
+    dyadc_satis = total3,
+    dyadc_cohes = total4,
+  ) %>%
+  # apply missing rules for Dyadic Consensus
+  mutate(across(c(dyadc_con), ~case_when(id %in% dyadc_dc_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rules for Affectional Expression
+  mutate(across(c(dyadc_aff_exp), ~case_when(id %in% dyadc_ae_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rules for Dyadic Satisfaction
+  mutate(across(c(dyadc_satis), ~case_when(id %in% dyadc_ds_remove ~ -99, TRUE ~ .x))) %>%
+  # apply missing rules for Dyadic Satisfaction
+  mutate(across(c(dyadc_cohes), ~case_when(id %in% dyadc_dc_remove ~ -99, TRUE ~ .x)))
 
-## this code was finalize the archive file 
-  mutate(dyadc_screener = ifelse(id %in% c("HR211", "HR181", "P819", "HR218"), "-55", as.character(dyadc_screener)),
-         across(starts_with("das"), ~case_when(dyadc_screener == 0 ~ "-55", TRUE ~ as.character(.))),
-         dyadc_con = ifelse(is.na(dyadc_con), -99, dyadc_con),
-         dyadc_aff_exp = ifelse(is.na(dyadc_aff_exp), -99, dyadc_aff_exp),
-         dyadc_satis = ifelse(is.na(dyadc_satis), -99, dyadc_satis),
-         dyadc_cohes = ifelse(is.na(dyadc_cohes), -99, dyadc_cohes),
-         dyadc_total = ifelse(is.na(dyadc_total), -99, dyadc_total),
-        across(where(is.character), ~replace(., is.na(.) | . == "", -77)))
-#%>%
- #  mutate_at(vars(-id), as.numeric))
 
 
 # DAS compute variable that will include in the archive 
 dyadc_complete <- dyadc_complete %>%
   select(id, dyadc_con, dyadc_aff_exp, dyadc_satis, dyadc_cohes, dyadc_total)  
 
-# DAS finalized data 
-dyadc_complete <- dyadc %>%
-  select(id, c(dyadc_screener, starts_with("e"))) %>%
-  rename_with(~sub("^e", "das", .), starts_with("e"))%>%
-  rename(das_screener = dyadc_screener) %>%
-  merge(dyadc_complete, by = "id")
-# we don't need averages, just totals
-## create variables to check for missing data thresholds to be used in subscale creation
-## these will not be archived, only used for creation of other data
-## archive this code 
-dyadc_calc <- dyadc_calc %>%
-  mutate(
-    COUNTA = ifelse(dyadc_screener == 1, 
-                    rowSums(as.matrix(dyadc_calc[, c("das1", "das2", "das3", "das5", "das7", "das8", "das9", "das10", "das11", "das12", "das13", "das14", "das15")]) == -77),
-                    NA),
-    COUNTB = ifelse(dyadc_screener == 1, 
-                    rowSums(as.matrix(dyadc_calc[, c("das4", "das6", "das29", "das30")]) == -77),
-                    NA),
-    COUNTB1 = ifelse(dyadc_screener == 1, 
-                     rowSums(as.matrix(dyadc_calc[, c("das29", "das30")]) == -77),
-                     NA),
-    COUNTB5 = ifelse(dyadc_screener == 1, 
-                     rowSums(as.matrix(dyadc_calc[, c("das4", "das6")]) == -77),
-                     NA),
-    COUNTC = ifelse(dyadc_screener == 1, 
-                    rowSums(as.matrix(dyadc_calc[, c("das16", "das17", "das18", "das19", "das20", "das21", "das22", "das23", "das31", "das32")]) == -77),
-                    NA),
-    COUNTC4 = ifelse(dyadc_screener == 1, 
-                     rowSums(as.matrix(dyadc_calc[, "das23"]) == -77),
-                     NA),
-    COUNTC5 = ifelse(dyadc_screener == 1, 
-                     rowSums(as.matrix(dyadc_calc[, c("das16", "das17", "das18", "das19", "das20", "das21", "das22", "das32")]) == -77),
-                     NA),
-    COUNTC6 = ifelse(dyadc_screener == 1, 
-                     rowSums(as.matrix(dyadc_calc[, "das31"]) == -77),
-                     NA),
-    COUNTD = ifelse(dyadc_screener == 1, 
-                    rowSums(as.matrix(dyadc_calc[, c("das24", "das25", "das26", "das27", "das28")]) == -77),
-                    NA),
-    COUNTD4 = ifelse(dyadc_screener == 1, 
-                     rowSums(as.matrix(dyadc_calc[, "das24"]) == -77),
-                     NA),
-    COUNTD5 = ifelse(dyadc_screener == 1, 
-                     rowSums(as.matrix(dyadc_calc[, c("das25", "das26", "das27", "das28")]) == -77),
-                     NA)
-  )
 
-
-
-
-dyadc_complete <- dyadc_calc %>%
- # rowwise() %>%
-# mutate_at(vars(dyadc_screener :COUNTD5), as.numeric) %>%
-  #  mutate(
-  #   das1 = replace(das1, das1 %in% c(-55, -77), NA_real_),
-  #   das2 = replace(das2, das2 %in% c(-55, -77), NA_real_),
-  #   das3 = replace(das3, das3 %in% c(-55, -77), NA_real_),
-  #   das4 = replace(das4, das4 %in% c(-55, -77), NA_real_),
-  #   das5 = replace(das5, das5 %in% c(-55, -77), NA_real_),
-  #   das6 = replace(das6, das6 %in% c(-55, -77), NA_real_),
-  #   das7 = replace(das7, das7 %in% c(-55, -77), NA_real_),
-  #   das8 = replace(das8, das8 %in% c(-55, -77), NA_real_),
-  #   das9 = replace(das9, das9 %in% c(-55, -77), NA_real_),
-  #   das10 = replace(das10, das10 %in% c(-55, -77), NA_real_),
-  #   das11 = replace(das11, das11 %in% c(-55, -77), NA_real_),
-  #   das12 = replace(das12, das12 %in% c(-55, -77), NA_real_),
-  #   das13 = replace(das13, das13 %in% c(-55, -77), NA_real_),
-  #   das14 = replace(das14, das14 %in% c(-55, -77), NA_real_),
-  #   das15 = replace(das15, das15 %in% c(-55, -77), NA_real_),
-  #   das16 = replace(das16, das16 %in% c(-55, -77), NA_real_),
-  #   das17 = replace(das17, das17 %in% c(-55, -77), NA_real_),
-  #   das18 = replace(das18, das18 %in% c(-55, -77), NA_real_),
-  #   das19 = replace(das19, das19 %in% c(-55, -77), NA_real_),
-  #   das20 = replace(das20, das20 %in% c(-55, -77), NA_real_),
-  #   das21 = replace(das21, das21 %in% c(-55, -77), NA_real_),
-  #   das22 = replace(das22, das22 %in% c(-55, -77), NA_real_),
-  #   das23 = replace(das23, das23 %in% c(-55, -77), NA_real_),
-  #   das24 = replace(das24, das24 %in% c(-55, -77), NA_real_),
-  #   das25 = replace(das25, das25 %in% c(-55, -77), NA_real_),
-  #   das26 = replace(das26, das26 %in% c(-55, -77), NA_real_),
-  #   das27 = replace(das27, das27 %in% c(-55, -77), NA_real_),
-  #   das28 = replace(das28, das28 %in% c(-55, -77), NA_real_),
-  #   das29 = replace(das29, das29 %in% c(-55, -77), NA_real_),
-  #   das30 = replace(das30, das30 %in% c(-55, -77), NA_real_),
-  #   das31 = replace(das31, das31 %in% c(-55, -77), NA_real_),
-  #   das32 = replace(das32, das32 %in% c(-55, -77), NA_real_)
-  # ) %>%
-  # mutate(
-  #   dyadc_con = das1+ das2+ das3+ das5+ das7+ das8+ das10+ das11+ das12+ das13+ das14+ das15,
-  #   dyadc_aff_exp = case_when(
-  #     COUNTB == 0 ~ das4 + das6 + das29 + das30,
-  #     COUNTB == 1 & COUNTB1 == 1 ~ (das4 + das6 + das29 + das30) / 11 * 12,
-  #     COUNTB == 1 & COUNTB5 == 1 ~ (das4 + das6 + das29 + das30) / 7 * 12,
-  #     TRUE ~ NA_real_  # Add a default condition, return NA if none of the conditions are met
-  #   ),
-  #   dyadc_satis = case_when(
-  #     COUNTC == 0 ~ das16 + das17 + das18 + das19 + das20 + das21 + das22 + das23 + das31 + das32,
-  #     COUNTC == 1 & COUNTC4 == 1 ~ (das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 46 * 50,
-  #     COUNTC == 1 & COUNTC5 == 1 ~(das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 45 * 50,
-  #     COUNTC == 1 & COUNTC6 == 1 ~ (das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 44 * 50,
-  #     COUNTC == 2 & COUNTC4 == 1 & COUNTC5 == 1 ~ (das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 41 * 50,
-  #     COUNTC == 2 & COUNTC5 == 2 ~(das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 40 * 50,
-  #     COUNTC == 2 & COUNTC5 == 1 & COUNTC6 == 1 ~ (das16+ das17+ das18+ das19+ das20+ das21+ das22+ das23+ das31+ das32) / 39 * 50,
-  #     TRUE ~ NA_real_
-  #   ),
-  #   dyadc_cohes = case_when(
-  #     COUNTD == 0 ~ das24 + das25+  das26 + das27 + das28,
-  #     COUNTD == 1 & COUNTD4 == 1 ~ (das24 + das25+  das26 + das27 + das28) /20 * 24,
-  #     COUNTD == 1 & COUNTD5 == 1 ~ (das24 + das25+  das26 + das27 + das28) /19 * 24,
-  #     TRUE ~ NA_real_
-  #   ),
-  # ) %>%
-  mutate(dyadc_con = das1+ das2+ das3+ das5+ das7+ das8+ das10+ das11+ das12+ das13+ das14+ das15,
-           #round(dyadc_con * 100)/100, 
-         dyadc_aff_exp = das4 + das6 + das29 + das30,
-           #round(dyadc_aff_exp * 100) / 100,
-         dyadc_satis = das16 + das17 + das18 + das19 + das20 + das21 + das22 + das23 + das31 + das32,
-           #round(dyadc_satis * 100) / 100,
-         dyadc_cohes = das24 + das25+  das26 + das27 + das28,
-           #round(dyadc_cohes * 100) / 100,
-         dyadc_total = das1 + das2+ das3+das4+das5+das6+das7+das8+das9+das10+das11+das12+das13+das14+das15+das16+das17+das18+das19+das20+das21+das22+das23+das24+das25+das26+das27+das28+das29+das30+das31+das32) %>%
-  select(-starts_with("COUNT")) %>% # dropping count variables
-  # add appropriate missing values back in
+# DAS finalized data: add appropriate missing values back in
   # if answered no for screening question, the entire survey is skipped.
   # Incarcerated TC weren't administered for this survey
- 
+dyadc_complete <- dyadc %>%
+  select(id, c(dyadc_screener, starts_with("das"))) %>%
+  #rename_with(~sub("^e", "das", .), starts_with("e"))%>%
+  rename(das_screener = dyadc_screener) %>%
+  merge(dyadc_complete, by = "id")
+
+
 ```
 
 ## ARQ
