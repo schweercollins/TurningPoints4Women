@@ -1,38 +1,25 @@
 ---
 title: "Turning Points Codebook"
-#  author: 
-#    - name: "Maria L. Schweer-Collins, PhD (corresponding author)"
-#      email: "mschweer@uoregon.edu"
-# #     affiliations:
-# #       - name: 'University of Oregon'
-# #         city: 'Eugene'
-# #         state: 'OR'
-#    - name: "Shaina Trevino, PhD"
-# #     email: "strevino@uoregon.edu"
-#    - name: "Jonathan A. Pedroza, PhD"
-# #     email: "cpppedroza@gmail.com"
-#    - name: "Min Zhang"
-# #     email: "mzhang8@uoregon.edu"
-date: ""
-output: 
+date: ''
+output:
   html_document:
     toc: true
     toc_depth: 4
     toc_float: true
-    self_contained: yes
-    number_sections: no
-    #html#toc_title: Contents
-    #number_sections: true
-    #html#number_depth: 3
-    #qmd#colorlinks: true
-    #keep_tex: yes
-    #pdf#latex_engine: pdflatex
-    #error#includes: 
-      #error#in_header: styles.css
-#pdf#geometry: landscape
+    self_contained: true
+    number_sections: false
+  word_document:
+    toc: true
+    toc_depth: '4'
+  pagedown::html_pretty:
+    toc: true
+    toc_depth: '4'
+  pdf_document:
+    toc: true
+    toc_depth: '4'
 bibliography: tpw_references.bib
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 <!-- TOC highlight color -->
@@ -1462,7 +1449,7 @@ The Self-Reported Delinquency Scale was designed to measure participants’ deli
 
 -   Item numbers in this dataset may not always match original item numbers from the EDS. Please reference this guide to see match with original EDS (original EDS item number in *italics*): 01 = *01*, 02 = *03*, 03 = *04*, 04 = *05*, 05 = *06*, 06 = *07*, 07 = *08*, 08 = *09*, 09 = *10*, 10 = *11*, 11 = *12*, 12 = *13*, 13 = N/A, 14 = *14*, 15 = *15*, 16 = *16*, 17 = *17*, 18 = *19*, 19 = *20*, 20 = *22*, 21 = *24*, 22 = *25*, 23 = N/A, 24 = *26*, 25 = *27*, 26 = *28*, 27 = *29*, 28 = *30*, 29 = *32*, 30 = *34*, 31 = *35*, 32 = *37*, 33 = *38*, 34 = *40*, 35 = *41*, 36 = *42*, 37 = *43*, 38 = *44*, 39 = *45*
 
--   There are various ways to score the EDS measure. We have provided three scored variables
+-   There are various ways to score the EDS measure. We have provided three scored variables:
 
     + **EDS-SR Total Score** (`ell_raw_total`) is a sum of the total number of delinquent acts for all items except ell23
     + **Total Index Offenses** (`ell_total_index_offenses`) is a total of 9 items that are considered to be index (more severe) crimes.
@@ -1475,7 +1462,7 @@ Reference:
 
 #### Value Labels
 
-Response options for items that end with an `a`, with the exception of `ell23`. These questions were asked for any item(s) that a participant endorsed doing 10 or more times in the past six months.
+Response options for items that end with an `a`, with the exception of `ell23` are presented below. These questions were asked for any item(s) that a participant endorsed doing 10 or more times in the past six months.
 
 ```{r ELL-label-table, results = 'asis'}
 ell_label_df <- data.frame(
@@ -1683,6 +1670,7 @@ ell_tbl <- ell_summary_data %>%
   cols_width(`1` ~ px(250)) %>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>%
   tab_footnote("*Range of data values") %>%
+  tab_footnote("`N` values indiate that 1 or fewer participants responded to that item") %>%
   tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 
@@ -4780,33 +4768,32 @@ socinf_gen_tbl
 
 
 ## Conflict Tactics Scale Parent-Child (CTS P-C)
-<MARIA: you might want to switch this to full name to be consistent with other measure.> 
-  
-  
-### CTS Parent Child  Description
-  
-  <MARIA> please insert a breif description for this measure 
 
+  
+### CTS P-C Description
+  
+The Conflict Tactics Scale – Parent Child (CTS-PC) is a 23-item questionnaire which measures how often parents used specific acts of discipline (both violent and nonviolent) with their child in the past year. It does not measure whether or not the child was injured. The CTS-PC also has a supplemental scale on neglect and one on sexual abuse. There are six subscales of the CTS-PC: nonviolent discipline, psychological aggression, minor physical assault, severe physical assault, very severe physical assault, and neglect.
 
-* All items need to be reverse scored. 
+-   Participants responded to all items in this questionnaire if they responded 'yes' to the screening item `cts_parent_screen`, which asked if they had parented a child under the age of 18 in the past year.
+
 
 
 
 Reference:
-  <Maria, please add a reference if needed> 
+(@straus1998identification)[https://files.eric.ed.gov/fulltext/ED411251.pdf]
   
-### CTS Parent Child  Variables
+### CTS P-C Variables
   
 #### Value Labels
 
-Response options for `cts parent screen`
+Response options for `cts_parent_screen`
 
 ```{r cts_pc-label-table, results = 'asis'}
 
 cts_pc_label_df <- data.frame(
-  value = c("1", "2"),
-  label = c("Yes",
-            "No")
+  value = c("0", "1"),
+  label = c("No",
+            "Yes")
 ) %>% 
   t() %>% 
   as.data.frame()
@@ -4867,11 +4854,51 @@ print(cts_pc_label_table2)
 
 
 ```
+
+
+Response option for `cts_pc1_r` -  `cts_pc23_r`.
+
+
+```{r cts_pc-label-table-3, results = 'asis'}
+
+cts_pc_label_df3 <- data.frame(
+  value = c("0", "1", "2", "4", "8", "15", "25", "-2"),
+  label = c("None - has never happened/None",
+            "Once",
+            "Twice",
+            "3-5 times",
+            "6-10 times",
+            "11-20 times",
+            "More than 20 times",
+            "Not in the past year, but it happened before")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+
+cts_pc_label_df3 <- setNames(cts_pc_label_df3[-1, ], unlist(cts_pc_label_df3[1, ]))
+
+
+#create table
+cts_pc_label_table3 <- cts_pc_label_df3 %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(180)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(cts_pc_label_table3)
+
+
+```
   
 ####Survey items
-CTS Parent Child  survey items are presented in the following table:
+
+CTS P-C survey items are presented in the following table:
   
-Leading question: Thinking about your partner, how often is it true that they:
+**Question Stem: How often did you do the following in the past year?**
 ```{r cts_pc-var-prep}
 # Pull question wording from Qualtrics data
 cts_pc_word <- qualtrics %>% 
@@ -4889,12 +4916,12 @@ cts_pc_word_long <- cts_pc_word %>%
          var_name = str_to_lower(var_name),
          notes = as.character("")) %>% 
   # Edits Variable description and value
-  # Min: NAMING UPDATE Maria changed these values so if it won't render check here; also remove note once it renders; need these to be updated to cts_pc from "a"
   mutate(description = if_else(var_name == "cts parent screen", "Have you parented a child (under 18) in the past year?", description)) %>%
+  mutate(var_name = if_else(var_name == "cts parent screen", "cts_parent_screen", var_name)) %>%
   mutate(notes = if_else(var_name %in% c("cts_pc1", "cts_pc2", "cts_pc3", "cts_pc4", "cts_pc5", "cts_pc6",
                                          "cts_pc7",  "cts_pc8",  "cts_pc9",  "cts_pc10" , "cts_pc11",  "cts_pc12" , "cts_pc13",              
                                         "cts_pc14", "cts_pc15", "cts_pc16", "cts_pc17"  ,"cts_pc18" , "cts_pc19"  ,"cts_pc20",              
-                                        "cts_pc21", "cts_pc22", "cts_pc23"), paste0("This item should be reverse scored. `", var_name, "_r` is reverse scored"), notes)) 
+                                        "cts_pc21", "cts_pc22", "cts_pc23"), paste0("This item should be recoded so that ranges are transformed to the midpoint value of each range. `", var_name, "_r` is recoded"), notes)) 
 
 ```
 
@@ -4925,6 +4952,7 @@ CREATION. Severity scores are calculated ... <MARIA> INSERT INFO ON
 COMPOSITE SCORE CREATION. Mutuatlity scores are created by ... <MARIA>
 INSERT INFO ON COMPOSITE SCORE CREATION
 
+Unless otherwise listed, sum
 <SHAINA/MIN> TODO: NEED fill Range once we understand how composite
 scores were created
 
@@ -4941,7 +4969,7 @@ cts_pc_scale_df <- data.frame(
 
   scale = c("Nonviolent Discipline - Past Year (Chronicity) (4)", 
             "Count of Nonviolent Discipline Responses (4)", 
-            "Nonviolent Discipline Past Year - Mean (Chronicity)",
+            "Nonviolent Discipline Past Year - Mean (Chronicity) (2)",
             "Nonviolent Discipline Past Year (Prevalence) (4)",
             "Nonviolent Discipline - Lifetime (Greater than past year Prevalence) (4)",
             "Nonviolent Discipline (Ever Prevalence) (2)",
@@ -4971,32 +4999,32 @@ cts_pc_scale_df <- data.frame(
 
   scale_construction = c("`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
                          "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
-                         "`cts_pc_NVDC`, `cts_pc_NVDP`",
+                         "`cts_pc_NVDC`/ `cts_pc_NVDP`",
                          "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
                          "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
-                         "`cts_pc_NVDL`, `cts_pc_NVDPP`",
+                         "`cts_pc_NVDL`/ `cts_pc_NVDPP`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "`cts_pc_PSAC`, `cts_pc_PSAP`",
+                         "`cts_pc_PSAC`/ `cts_pc_PSAP`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "`cts_pc_PSAL`, `cts_pc_PSAPP`",
+                         "`cts_pc_PSAL`/ `cts_pc_PSAPP`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
-                         "`cts_pc_PHAC`, `cts_pc_PHAP`",
+                         "`cts_pc_PHAC`/ `cts_pc_PHAP`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
                          "`cts_pc_PHAL`, `cts_pc_PHAPP`",
                          "`cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
                          "`cts_pc_WKDP`, `cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
-                         "`cts_pc_WKDC`, `cts_pc_WKDP`",
+                         "`cts_pc_WKDC`/ `cts_pc_WKDP`",
                          "`cts_pc_WKDP`, `cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
                          "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
                          "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
-                         "`cts_pc_NEGC`, `cts_pc_NEGP`",
+                         "`cts_pc_NEGC`/ `cts_pc_NEGP`",
                          "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
                          "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
-                         "`cts_pc_NEGL`, `cts_pc_NEGPP`"
+                         "`cts_pc_NEGL`/ `cts_pc_NEGPP`"
                          ),
   scale_range = c("", "", "", "", "", "", "", "", "", "",
                   "", "", "", "", "", "", "", "", "", "", 
@@ -5026,7 +5054,7 @@ print(cts_pc_scale_table)
 ### Summary Statistics
 
 #### Descriptive Statistics
-Descriptive statistics are presented below for each item and subscale
+Descriptive statistics are presented below for each item and subscale score.
 
 For binary items: 
 ```{r cts_pc-binary}
@@ -5034,7 +5062,7 @@ For binary items:
 cts_pc_data_subset_binary <- complete %>%
   select(cts_parent_screen)
 
-# Calculate the dichotomous summary statistics for each variable
+# Calculate the binary summary statistics for each variable
 cts_pc_summary_data_binary <- lapply(cts_pc_data_subset_binary, function(x) {
   per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
   per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
@@ -5085,7 +5113,7 @@ cts_pc_tbl_binary
 ```{r cts_pc-missing}
 # Create subset of items
 cts_pc_data_subset <- complete %>%
-  select(cts_pc1:cts_pc23)
+  select(cts_pc1:cts_pc23, cts_pc_nvdp:cts_pc_negep)
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
@@ -5094,6 +5122,7 @@ cts_pc_summary_data <- lapply(cts_pc_data_subset, function(x) {
   x <- replace(x, (x == "-44" | x== "-77" | x== "-99"), NA)  # Additional recoding
   # Exclude negative values and specific negative values from calculations
   x_no_negatives <- replace(x, (x < 0 | x == -44 | x == -77 | x == -99), NA)
+#  x_no_negatives2 <- replace(x, (x < -10 | x == -44 | x == -77 | x == -99), NA)
   mean_val <- ifelse(all(is.na(x_no_negatives)), NA, sprintf("%.2f", round(mean(x_no_negatives, na.rm = TRUE), 2)))
   sd_val <- ifelse(all(is.na(x_no_negatives)), NA, round(sd(x_no_negatives, na.rm = TRUE), 2))
   range_val <- ifelse(all(is.na(x_no_negatives)), NA, paste(min(x_no_negatives, na.rm = TRUE), max(x_no_negatives, na.rm = TRUE), sep = "-"))
