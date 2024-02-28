@@ -18,6 +18,10 @@ tpw_raw <- read.csv(here("do_not_push", "tpw_measure.csv")) %>%
   select(-X) %>%
   filter(start_date != "Start Date")
 
+# import parent data for archive 
+tpw_parent_data <- read.csv(here("do_not_push", "ParentDataforArchive.csv")) %>%
+  rename(id = FAM.ID)
+
 
 source(here("functions", "codebook_fun.R"))
 
@@ -28,44 +32,13 @@ tpw_archive_id <- tpw_raw %>%
   select(id)
 
 # import historical variables
-
+eval_chunks <- 
 ```
 
-## Min's TODO/Note 
-add prompt for each measure in codebook.
-check missing rules in codebook 
-
-cleanning todo: 
-check pct_miss_fun have right numbers 
-check all pct_miss_fun has   mutate(across(-c(id), as.numeric))%>%.  # done checking through cintsubstance 
-check multiple choices questions shouldn't be changed to as.numeric 
-
-Missing data rule should apply to all missing numbers 
-note if a question was skipped for incarerated TC. 
-
-convert text to number 
-reverse score column 
-create sub-scale 
--use his out put file 
--sum/avg 
-! data order: original items; reverse coded items; total/subscales
-
-question: for NA/None answer option, should I recode them to -55 (e.g. ibq9/ cint63)
-There are answer options which are excluded from analysis, it will be NA, is there ways that we can identify NA is actually shows because they choose NA answer options (SOCINF General)
-
-question about missing value, I feel like there are item shouldn't be counted when calculate the missing percentage, ie: there are columns for text entry when TC choose other, if TC choose other answer option, this shouldn't be counted when count missing percentage? 
-cint_socio won't have any data after applying missing data 
-## Min, note from MSC here -- I think we should only include -77 or -99 in the missing data; if something was skipped due to skip rule it is not missing; likewise, if TC said "NA" and it is -55 it is not truly missing, but also can't be included in the scoring, so for scoring purposes, -55 shouldn't really affect calculations. Is this correct? In a different time, I might have now (in hindsight) used a skip rule missing value versus when a TC said "NA" but for analysis purposes, these two things are equivalent. 
-
-which( colnames(df)=="b" )
-# Find NA values in the data frame
-na_positions <- which(is.na(df), arr.ind = TRUE)
-
-Min: need work on Missing data and calculation for measure after sex history 
 
 ## BSI
 ### BSI Select Variables and Recode 
-```{r bsi}
+```{r bsi, eval=eval_chunks}
 # Select bsi questions and recede
 bsi <-
   tpw_raw %>%
@@ -4852,6 +4825,7 @@ Merge together all measures
 # This file contain all data including correct missing code for missing values (-77, -99, -55 etc.). 
 # This file also contain all the computed variables. 
 tpw_archive_calc <- tpw_archive_id %>%
+  left_join(tpw_parent_data, by = "id") %>%
   left_join(bsi_complete, by = "id") %>%
   left_join(cesd_complete, by = "id") %>%
   left_join(ciq_complete, by = "id") %>%

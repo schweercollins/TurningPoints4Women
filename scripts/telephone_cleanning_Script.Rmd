@@ -19,6 +19,15 @@ tpw_raw <- read.csv(here("do_not_push", "tpw_measure.csv")) %>%
   filter(start_date != "Start Date")
 
 
+# import parent data for archive 
+tpw_parent_data <- read.csv(here("do_not_push", "ParentDataforArchive.csv")) %>%
+  rename(id = FAM.ID)%>%
+  select(-p00a, - X)
+
+
+# import CLS data for archive 
+cls_data <- read.csv(here("do_not_push", "tpw_cls_archive.csv")) 
+# import functions 
 source(here("functions", "codebook_fun.R"))
 
 # Scientific Notation 
@@ -29,6 +38,10 @@ tpw_archive_id <- tpw_raw %>%
 
 # import historical variables
 
+
+# Set a variable to control the chunks for archive
+# Set to FALSE if generate for NIJ archive 
+eval_chunks <- TRUE
 ```
 
 ## Min's TODO/Note 
@@ -5111,6 +5124,8 @@ Merge together all measures
 # This file contain all data including correct missing code for missing values (-77, -99, -55 etc.). 
 # This file also contain all the computed variables. 
 tpw_archive_calc <- tpw_archive_id %>%
+  left_join(tpw_parent_data, by = "id") %>%
+  left_join(cls_data, by = "id") %>%
   left_join(bsi_complete, by = "id") %>%
   left_join(cesd_complete, by = "id") %>%
   left_join(ciq_complete, by = "id") %>%

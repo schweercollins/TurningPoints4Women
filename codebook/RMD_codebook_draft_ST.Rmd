@@ -395,8 +395,62 @@ Note that
 -   For scales with [only 2 items]{.underline}, composite scores
     (average/total) are calculated on a [case by case basis]{.underline}
 
+# Parent Data 
 
+*<MARIA> INSERT BRIEF DESCRIPTION *
 
+```{r parent-data-table, results = 'asis'}
+#create table of info
+parent_data_df <- data.frame(
+  Variable = c("num_wv14_preg", "num_wv14_births", "num_wv14_preg_loss", "num_wv14_abortion", "num_wv14_miscarriage", "num_wv14_stillbirth", 
+            "num_priorbirth_wv14", "num_prior_child_archive", "num_step_wv14", "pregnant_wv14_yes"),
+  Description = c("Total number of pregnancies wave 14",
+            "Total number of child births wave14",
+            "Total number of pregnancy losses wave 14",
+            "Total number of abortions wave 14",
+            "Total number of miscarriages wave 14",
+            "Total number of stillbirths wave 14",
+            "Total number of reported child births prior to wave 14",
+            "Total number of reported children prior to wave 14",
+            "Total number of step children wave 14",
+            "Yes participant currently pregnant when assessment is conduct")) 
+
+#create gt table
+parent_data_df_table <- parent_data_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Variable ~ px(200)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(parent_data_df_table)
+
+```
+
+# CLS
+*<MARIA> INSERT BRIEF DESCRIPTION *
+
+```{r cls-table, results = 'asis'}
+#create table of info
+cls_df <- data.frame(
+  Variable = c("tp_num_transitions", "tp_num_incarcerated", "total_days_incarcerated", "tp_num_homeless", "total_days_homeless"),
+  Description = c("Total number of housing transitions reported by participant Wave 14",
+            "Total number of times the participant has been incarcerated Wave 14",
+            "Total number of days the participant has been incarcerated Wave 14",
+            "Total number of times the particpant has reported being without housing Wave 14",
+            "Total number of days the participant has reported being without housing Wave 14")) 
+
+#create gt table
+clsf_table <- cls_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Variable ~ px(200)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(clsf_table)
+
+```
 # CINT 
 
 CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. 
