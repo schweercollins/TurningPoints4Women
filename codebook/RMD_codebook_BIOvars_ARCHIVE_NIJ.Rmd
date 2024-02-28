@@ -1,0 +1,2195 @@
+---
+title: "Codebook draft for DBS and BIO vars_ARCHIVE_NIJ"
+author: "Shaina Trevino"
+date: "2023-12-15"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(readxl, here, tidyverse, openxlsx, gt, tidyverse, scales, ggpubr)
+
+```
+
+```{r import, include = FALSE}
+#Import DBS file
+#file path
+dbs_fp <- here("do_not_push", "dbs_archive.xlsx")
+
+#import data from all tabs
+dbs_cho_df <- read_excel(dbs_fp, sheet = "CHO") 
+
+dbs_hdl_df <- read_excel(dbs_fp, sheet = "HDL") 
+
+dbs_trg_df <- read_excel(dbs_fp, sheet = "TRG")
+
+dbs_crp_df <- read_excel(dbs_fp, sheet = "CRP")
+
+dbs_ebv_df <- read_excel(dbs_fp, sheet = "EBV")
+
+dbs_a1c_df <- read_excel(dbs_fp, sheet = "A1c")
+
+dbs_il6_df <- read_excel(dbs_fp, sheet = "IL6")
+
+#import BIO assessment file
+bio_df <- read_excel(here("do_not_push", "bio_archive.xlsx"))
+#import meta data for variable tables
+bio_md <- read_excel(here("codebook", "bio_metadata_archive.xlsx")) %>% 
+  rename(Variable = DATA,
+         Description = `Variable description`) %>%
+  filter(!str_ends(Variable, "pal")) %>%
+  filter(!str_ends(Variable, "cal"))
+
+```
+
+```{r DELETE}
+#COPIED FROM CODEBOOK SO THIS WILL RENDER WITH SAME FORMAT/THEME - DELETE WHEN INTEGRATING INTO FULL CODEBOOK
+source(here("functions", "codebook_fun.R"))
+
+# Color palettes 
+ Two_color = c("#246B69", "#604C41")
+
+# Histogram style 
+# hist_style <- geom_histogram(bins=20, color = "white", fill = "#246B69", alpha = 0.7)
+
+
+bar_style <- geom_bar(color = "white", fill = "#246B69", alpha = 0.7)
+
+THEME <-     theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),legend.key = element_rect(fill = "White", colour = "transparent"),plot.title = element_text(size= 13),
+    )
+
+#re-work JP cutoff function due to error "cant use `{{` in non-quoting function
+cutoff_plot2 <- function(data,
+                        x,
+                        cutoff = 0,
+                        cutoff_color = '#324B4A',
+                        cutoff_other = NULL,
+                        cutoff_other_color = '#95B1AF',
+                        cutoff_other2 = NULL,
+                        cutoff_other2_color = '#546085',
+                        bins = 20) {
+
+  library(magrittr)
+  library(dplyr)
+  library(ggplot2)
+
+  x <- enquo(x)
+
+  if (is.null(cutoff_other)) {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = '#246B69',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 20),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  } else if (is.null(cutoff_other2)) {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = '#246B69',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other,
+                 color = cutoff_other_color,
+                 linetype = 3,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 13),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  } else {
+    data %>%
+      ggplot(aes(!!x)) +
+      geom_histogram(bins = bins,
+                     color = 'white',
+                     fill = 'black',
+                     alpha = .7) +
+      geom_vline(xintercept = cutoff,
+                 color = cutoff_color,
+                 linetype = 2,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other,
+                 color = cutoff_other_color,
+                 linetype = 3,
+                 linewidth = 1.25) +
+      geom_vline(xintercept = cutoff_other2,
+                 color = cutoff_other2_color,
+                 linetype = 4,
+                 linewidth = 1.25)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          panel.border = element_blank(),
+          axis.line = element_line(colour = "black",size = .8),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.key = element_rect(fill = "White",
+                                    colour = "transparent"),
+          plot.title = element_text(size= 13),
+          #scale_x_discrete(guide = guide_axis(n.dodge=3))
+    )
+  }
+}
+
+# gt-theme-general
+apply_tbl_theme <- function(table) {
+  table %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
+            locations = cells_body(columns = everything())) %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
+                         cell_fill(color = "#246B69", alpha = .7)),
+            locations = cells_column_labels()) %>% 
+  tab_options(column_labels.border.top.color = "black",
+              column_labels.border.bottom.color = "black",
+              table_body.border.bottom.color = "black",
+              table.border.top.color = "white",
+              heading.border.bottom.color = "black",
+              table_body.hlines.color = "white")%>% 
+  tab_options(table.align = "left")
+}
+
+#theme for value label tables
+apply_labtab_theme <- function(table) {
+  table %>% 
+  cols_align(columns = everything(), align = "center") %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1))),
+            locations = cells_body(columns = everything())) %>% 
+  tab_style(style = list(cell_borders(sides = "all", color = "black", weight = px(1)),
+                         cell_fill(color = "#246B69", alpha = .7)),
+            locations = cells_column_labels()) %>% 
+  tab_options(column_labels.border.top.color = "black",
+              column_labels.border.bottom.color = "black",
+              table_body.border.bottom.color = "black",
+              table.border.top.color = "white",
+              heading.border.bottom.color = "black",
+              table_body.hlines.color = "white") %>% 
+  tab_options(table.align = "left")
+}
+
+```
+
+```{r bio-functions-KEEP}
+#custom functions for bio codebook
+#create function for calculating continuous summary statistics
+calc_cont_sum_stats <- function(df) {
+  stats_list <- lapply(names(df), function(name) {
+    x <- df[[name]]
+    mean_val <- sprintf("%.2f", round(mean(x, na.rm = TRUE), 2))
+    sd_val <- round(sd(x, na.rm = TRUE), 2)
+    range_val <- paste(round(min(x, na.rm = TRUE), 2),
+                       round(max(x, na.rm = TRUE), 2), sep = "-")
+    miss_val <- round(mean(is.na(x)) * 100, 2)
+    data.frame(Variable = name, Mean = mean_val, SD = sd_val, Range = range_val, Missing = paste(miss_val, "%", sep = ""))
+  })
+  stats_df <- do.call(rbind, stats_list)
+  return(stats_df)
+}
+
+#create function for calculating dichotomous summary statistics
+calc_dichot_sum_stats <- function(df) {
+  stats_list <- lapply(names(df), function(name) {
+    x <- df[[name]]
+    per_no <- paste0(round(sum(x == 0, na.rm = TRUE) / length(x) *100, 1), "%")
+    per_yes <- paste0(round(sum(x == 1, na.rm = TRUE) / length(x) *100, 1), "%")
+    num_no <- sum(x == 0, na.rm = TRUE)
+    num_yes <-sum(x == 1, na.rm = TRUE)
+    miss_val <- round(mean(is.na(x)) * 100, 2)
+    data.frame(Variable = name, per_no = per_no, per_yes = per_yes, num_no = num_no, num_yes = num_yes, Missing = paste(miss_val, "%", sep = ""))
+  })
+  stats_df <- do.call(rbind, stats_list)
+  return(stats_df)
+}
+
+#create function to create plot for AL indicators
+create_AL_plot <- function(data, column_name, composite_name) {
+  transform_AL_plot <- function(x) {
+    factor(x, levels = c("0", "1", "-99"), labels = c("No", "Yes", "Missing"))
+  }
+  if (!is.character(column_name) || !column_name %in% names(data)) {
+    stop("column_name must be a character string and exist in the dataframe.")
+  }
+  data %>%
+    mutate("{column_name}" := transform_AL_plot(.[[column_name]])) %>%
+    ggplot(aes_string(x = column_name)) +
+    bar_style +
+    labs(x = "Response", y = "Count", title = paste("Distribution for", composite_name)) +
+    THEME
+}
+
+#create function to process columns with multiple responses
+calc_multi_column <- function(column, responses) {
+  responses_list <- strsplit(as.character(column), ";")
+  flat_responses <- unlist(responses_list)
+  flat_responses <- trimws(flat_responses)  
+
+  valid_responses <- flat_responses[flat_responses %in% c(responses, "-55")]
+
+  count_response <- function(response) {
+    sum(valid_responses == response, na.rm = TRUE)
+  }
+
+  total_valid_responses <- length(valid_responses)
+
+  response_counts <- sapply(c(responses, "-55"), count_response)
+  response_percents <- round(response_counts / total_valid_responses * 100, 1)
+
+  data.frame(
+    Response = c(responses, "-55"),
+    Count = response_counts,
+    Percent = response_percents,
+    stringsAsFactors = FALSE
+  )
+}
+
+#create function for all bio vars in bio data
+create_bio_var_tbl <- function(data, prefix) {
+  filtered_data <- data %>%
+    filter(str_starts(Variable, prefix))
+
+  var_table <- filtered_data %>%
+    gt() %>%
+    cols_width(
+      Variable ~ pct(25),
+      Description ~ pct(75)) %>%
+    apply_tbl_theme() %>%
+    tab_style(
+      style = cell_text(align = "left"), 
+      locations = cells_column_labels())
+
+  return(var_table)
+}
+
+#create function to make dichotomous table
+create_dichot_gt_table <- function(data) {
+  table <- data %>%
+    gt() %>%
+    cols_label(num_no = "N",
+               per_no = "%",
+               num_yes = "N",
+               per_yes = "%",
+               Missing = "% Missing") %>%
+    tab_options(table.width = pct(100)) %>%
+    cols_align(columns = c(per_no, per_yes, num_no, num_yes, Missing), align = "center") %>%
+    tab_spanner(label = "No", columns = c(num_no, per_no)) %>%
+    tab_spanner(label = "Yes", columns = c(num_yes, per_yes)) %>%
+    tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(num_yes, num_no, per_yes, per_no)))
+  
+  return(table)
+}
+
+
+
+
+```
+
+
+# Allostatic Load Assessment
+
+*<MARIA> INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN (includes DBS and bio assessment data)*
+
+## Dried Blood Spot Data Collection
+
+These data are in the `dbs_archive.xlsx` file where each construct domain is a separate tab. 
+
+*<MARIA, insert brief description about DBS assessment/construct domain and how it was measured>* 
+
+The seven biological constructs assessed were cholesterol, high-density lipoprotein cholesterol, Triglycerides, c-reactive protein, Epstein-Barr virus, hemoglobin A1C, and Interleukin-6.. 
+
+For each biological construct, allostatic load indicators were calculated based on *<MARIA INSERT, include difference between AL and percentile AL indicator if possible>.*
+
+*<MARIA, insert any references to include here (or only for composite scores?)>*
+
+### Cholesterol (CHO) Description
+
+These data include variables related to the cholesterol assessment, including direct and plasma equivalent (PE) cholesterol values for participants. Higher values indicate higher cholesterol. The PE cholesterol value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`cho_punch_note`, `cho_assay_note`, and `cho_result_note`) are below: 
+
+```{r CHO-label-table, results = 'asis'}
+
+cho_label_df <- data.frame(
+  value = c("1", "4", "5", "37", "42"),
+  label = c("Blank punch",
+            "Small spot, <80%",
+            "Non-circular dried blood spot",
+            "Punch did not elute",
+            "Blood from filter paper touched inside back cover")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+cho_label_df <- setNames(cho_label_df[-1, ], unlist(cho_label_df[1, ]))
+
+
+#create table
+cho_label_table <- cho_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cho_label_table)
+
+```
+```{r CHO-dichot-value, results = 'asis'}
+#create dichotomous table to be re-used
+dichot_label_df <- data.frame(
+  value = c("0", "1"),
+  label = c("No",
+            "Yes")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+dichot_label_df <- setNames(dichot_label_df[-1, ], unlist(dichot_label_df[1, ]))
+
+
+#create table
+dichot_label_table <- dichot_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+```
+
+
+#### Variables
+
+All CHO variables are presented in the following table.
+
+```{r CHO-var-table, results = 'asis'}
+#create table of info
+cho_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "cho_direct", "cho_pe", "cho_punch_note", "cho_assay_note", "cho_result_note", 
+            "cho_plate", "cho_date"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct cholesterol analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent cholesterol analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+cho_var_table <- cho_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(cho_var_table)
+
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key CHO variables.
+
+**Raw cholesterol values:** 
+
+```{r cho-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+cho_sum_df <- dbs_cho_df %>% 
+  select(cho_direct, cho_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+cho_sum_tbl <- cho_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+cho_sum_tbl
+
+```
+
+
+**Data collection notes:** 
+
+```{r cho-cat-summary-table, results = 'asis'}
+#notes for cho_df
+cho_notes <- c(1, 4, 5, 37, 42)
+
+cho_note_df <- dbs_cho_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+cho_note_list <- lapply(cho_note_df, function(column) calc_multi_column(column, cho_notes))
+
+#combine results into df
+cho_note_sum <- bind_rows(cho_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+cho_tbl_notes <- cho_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_37 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_37 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Count_1", "Count_4", "Count_5", "Count_37", "Count_42", "Percent_1",
+                         "Percent_4", "Percent_5", "Percent_37", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Did not elute", columns = c(Count_37, Percent_37)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_4, Percent_4,
+                                                        Count_5, Percent_5, Count_37, Percent_37,
+                                                        Count_42, Percent_42))) 
+
+# Render the table
+print(cho_tbl_notes) 
+
+
+
+```
+
+
+### High-Density Lipoprotein Cholesterol (HDL) Description
+
+These data include variables related to the HDL cholesterol assessment, including direct and plasma equivalent (PE) HDL cholesterol values for participants. Higher values indicate higher HDL cholesterol. The PE value was used to calculate allostatic load indicators.
+
+*<MARIA> INSERT INFO RE: LOWER HDL IS WORSE (FOR AL INDICATOR) if desired - since HDL AL indicator is based off low values vs higher values in other variables*
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`hdl_punch_note`, `hdl_assay_note`, and `hdl_result_note`) are below: 
+
+```{r hdl-label-table, results = 'asis'}
+#same notes as cho vars
+# Print the table
+print(cho_label_table)
+
+```
+
+
+#### Variables
+
+All HDL variables are presented in the following table.
+
+```{r hdl-var-table, results = 'asis'}
+#create table of info
+hdl_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "hdl_direct", "hdl_pe", "hdl_punch_note", "hdl_assay_note", "hdl_result_note", 
+            "hdl_plate", "hdl_date"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct HDL cholesterol analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent HDL cholesterol analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+hdl_var_table <- hdl_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(hdl_var_table)
+
+```
+
+
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key HDL variables.
+
+**Raw HDL cholesterol values:** 
+
+```{r hdl-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+hdl_sum_df <- dbs_hdl_df %>% 
+  select(hdl_direct, hdl_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% # warning due to <10 response
+  calc_cont_sum_stats()
+
+#create gt table
+hdl_sum_tbl <- hdl_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+hdl_sum_tbl
+
+```
+
+
+**Data collection notes:** 
+
+```{r hdl-cat-summary-table, results = 'asis'}
+
+#notes for hdl_df
+hdl_notes <- c(1, 4, 5, 37, 42)
+
+hdl_note_df <- dbs_hdl_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+hdl_note_list <- lapply(hdl_note_df, function(column) calc_multi_column(column, hdl_notes))
+
+#combine results into df
+hdl_note_sum <- bind_rows(hdl_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+hdl_tbl_notes <- hdl_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_37 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_37 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Count_1", "Count_4", "Count_5", "Count_37", "Count_42", "Percent_1",
+                         "Percent_4", "Percent_5", "Percent_37", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Did not elute", columns = c(Count_37, Percent_37)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_4, Percent_4,
+                                                        Count_5, Percent_5, Count_37, Percent_37,
+                                                        Count_42, Percent_42))) 
+
+# Render the table
+print(hdl_tbl_notes) 
+
+
+
+```
+
+
+### Triglycerides (TRG) Description
+
+These data include variables related to the triglycerides assessment, including direct and plasma equivalent (PE) triglyceride values for participants. Higher values indicate higher triglycerides. The PE triglyceride value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`trg_punch_note`, `trg_assay_note`, and `trg_result_note`) are below: 
+
+```{r trg-label-table, results = 'asis'}
+#Same as CHO notes table
+# Print the table
+print(cho_label_table)
+
+```
+
+
+
+#### Variables
+
+All TRG variables are presented in the following table.
+
+```{r TRG-var-table, results = 'asis'}
+#create table of info
+trg_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "trg_direct", "trg_pe", "trg_punch_note", "trg_assay_note", "trg_result_note", 
+            "trg_plate", "trg_date"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct triglycerides analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent triglycerides analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+trg_var_table <- trg_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(trg_var_table)
+
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key TRG variables.
+
+**Raw triglyceride values:** 
+
+```{r trg-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+trg_sum_df <- dbs_trg_df %>% 
+  select(trg_direct, trg_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+trg_sum_tbl <- trg_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+trg_sum_tbl
+
+```
+
+
+**Data collection notes:** 
+
+```{r trg-cat-summary-table, results = 'asis'}
+#notes for trg_df
+trg_notes <- c(1, 4, 5, 37, 42)
+
+trg_note_df <- dbs_trg_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+trg_note_list <- lapply(trg_note_df, function(column) calc_multi_column(column, trg_notes))
+
+#combine results into df
+trg_note_sum <- bind_rows(trg_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+trg_tbl_notes <- trg_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_37 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_37 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Count_1", "Count_4", "Count_5", "Count_37", "Count_42", "Percent_1",
+                         "Percent_4", "Percent_5", "Percent_37", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Did not elute", columns = c(Count_37, Percent_37)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_4, Percent_4,
+                                                        Count_5, Percent_5, Count_37, Percent_37,
+                                                        Count_42, Percent_42))) 
+
+# Render the table
+print(trg_tbl_notes) 
+
+
+
+```
+
+
+
+### C-Reactive Protein (CRP) Description
+
+These data include variables related to the c-reactive protein assessment, including direct and plasma equivalent (PE) c-reactive protein values for participants. Higher values indicate higher c-reactive protein. The PE value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`crp_punch_note`, `crp_assay_note`, and `crp_result_note`) are below: 
+
+```{r CRP-label-table, results = 'asis'}
+crp_label_df <- data.frame(
+  value = c("1", "3", "4", "5", "29", "42"),
+  label = c("Blank punch",
+            "Smeared Drops/ Inconsistent Absorption",
+            "Small spot, <80%",
+            "Non-circular dried blood spot",
+            "Below lower limit of detection (LLoD)",
+            "Blood from filter paper touched inside back cover")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+crp_label_df <- setNames(crp_label_df[-1, ], unlist(crp_label_df[1, ]))
+
+
+#create table
+crp_label_table <- crp_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(crp_label_table)
+
+```
+
+
+
+#### Variables
+
+All CRP variables are presented in the following table.
+
+```{r CRP-var-table, results = 'asis'}
+#create table of info
+crp_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "crp_direct", "crp_pe", "crp_punch_note", "crp_assay_note", "crp_result_note", 
+            "crp_plate", "crp_date"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct c-reactive protein analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent c-reactive protein analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+crp_var_table <- crp_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(crp_var_table)
+
+```
+
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key CRP variables.
+
+**Raw c-reactive protein values:** 
+
+```{r CRP-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+crp_sum_df <- dbs_crp_df %>% 
+  select(crp_direct, crp_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% # warning due to <10 response
+  calc_cont_sum_stats()
+
+#create gt table
+crp_sum_tbl <- crp_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+crp_sum_tbl
+
+```
+
+
+**Data collection notes:** 
+
+```{r crp-cat-summary-table, results = 'asis'}
+#notes for crp_df
+crp_notes <- c(1, 3, 4, 5, 29, 42)
+
+crp_note_df <- dbs_crp_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+crp_note_list <- lapply(crp_note_df, function(column) calc_multi_column(column, crp_notes))
+
+#combine results into df
+crp_note_sum <- bind_rows(crp_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+crp_tbl_notes <- crp_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_3 = "N", 
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_29 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_3 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_29 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100)) %>%
+  cols_align(columns = c("Count_1", "Count_3", "Count_4", "Count_5", "Count_29", "Count_42", "Percent_1", "Percent_3",
+                         "Percent_4", "Percent_5", "Percent_29", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Smeared drops",  columns =  c(Count_3, Percent_3)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Below limit", columns = c(Count_29, Percent_29)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_3, Percent_3,
+                                                        Count_4, Percent_4, Count_5, Percent_5, 
+                                                        Count_29, Percent_29, Count_42, Percent_42))) 
+
+# Render the table
+print(crp_tbl_notes) 
+
+
+```
+
+
+### Epstein-Barr virus (EBV) Description
+
+These data include variables related to the Epstein-Barr virus assessment, including direct and plasma equivalent (PE) Epstein-Barr virus values for participants. Higher values indicate higher Epstein-Barr virus concentration *<MARIA> CONFRIM CORRECT*. The PE Epstein-Barr virus value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`ebv_punch_note`, `ebv_assay_note`, and `ebv_result_note`) are below: 
+
+```{r ebv-label-table, results = 'asis'}
+#specify notes in EBV data
+ebv_label_df <- data.frame(
+  value = c("1", "3", "4", "5", "12", "13", "42"),
+  label = c("Blank punch",
+            "Smeared Drops/ Inconsistent Absorption",
+            "Small spot, <80%",
+            "Non-circular dried blood spot",
+            "Drop outside printed circle",
+            "No DBS remains",
+            "Blood from filter paper touched inside back cover")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+ebv_label_df <- setNames(ebv_label_df[-1, ], unlist(ebv_label_df[1, ]))
+
+
+#create table
+ebv_label_table <- ebv_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(ebv_label_table)
+
+```
+
+
+
+
+#### Variables
+
+All EBV variables are presented in the following table.
+
+```{r EBV-var-table, results = 'asis'}
+#create table of info
+ebv_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "ebv_direct", "ebv_pe", "ebv_punch_note", "ebv_assay_note", "ebv_result_note", 
+            "ebv_plate", "ebv_date"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct Epstein-Barr virus analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent Epstein-Barr virus analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+ebv_var_table <- ebv_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(ebv_var_table)
+
+```
+
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key EBV variables.
+
+**Raw Epstein-Barr virus values:** 
+
+```{r ebv-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+ebv_sum_df <- dbs_ebv_df %>% 
+  select(ebv_direct, ebv_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+ebv_sum_tbl <- ebv_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+ebv_sum_tbl
+
+```
+
+
+**Data collection notes:** 
+
+```{r ebv-cat-summary-table, results = 'asis'}
+#notes for ebv_df
+ebv_notes <- c(1, 3, 4, 5, 12, 13, 42)
+
+ebv_note_df <- dbs_ebv_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+ebv_note_list <- lapply(ebv_note_df, function(column) calc_multi_column(column, ebv_notes))
+
+#combine results into df
+ebv_note_sum <- bind_rows(ebv_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+ebv_tbl_notes <- ebv_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_3 = "N",
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_12 = "N",
+             Count_13 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_3 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_12 = "%",
+             Percent_13 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100))%>%
+  cols_align(columns = c("Count_1", "Count_3", "Count_4", "Count_5", "Count_12", "Count_13",
+                         "Count_42", "Percent_1", "Percent_3", "Percent_4", "Percent_5",
+                         "Percent_12", "Percent_13", "Percent_42", "Percent_-55"), 
+             align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Smeared drop",  columns =  c(Count_3, Percent_3)) %>%
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Outside circle",  columns = c(Count_12, Percent_12)) %>% 
+  tab_spanner(label = "No DBS remains", columns = c(Count_13, Percent_13)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_3, Percent_3,
+                                                        Count_4, Percent_4, Count_5, Percent_5,
+                                                        Count_12, Percent_12, Count_13, Percent_13,
+                                                        Count_42, Percent_42))) 
+
+# Render the table
+print(ebv_tbl_notes) 
+
+
+
+```
+
+
+### Hemoglobin A1C (A1C) Description
+
+These data include variables related to the hemoglobin A1C assessment. *<MARIA> EXPLAIN WHY NO PE AND DIRECT VALUE BUT ONLY AIC_HB VALUE* 
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`a1c_punch_note`, `a1c_assay_note`, and `a1c_result_note`) are below: 
+
+```{r a1c-label-table, results = 'asis'}
+#specify notes
+a1c_label_df <- data.frame(
+  value = c("1", "3", "4", "5", "13", "37", "42"),
+  label = c("Blank punch",
+            "Smeared Drops/ Inconsistent Absorption",
+            "Small spot, <80%",
+            "Non-circular dried blood spot",
+            "No DBS remains",
+            "Punch did not elute",
+            "Blood from filter paper touched inside back cover")
+) %>% 
+  t() %>% 
+  as.data.frame()
+
+a1c_label_df <- setNames(a1c_label_df[-1, ], unlist(a1c_label_df[1, ]))
+
+
+#create table
+a1c_label_table <- a1c_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(a1c_label_table)
+
+```
+
+
+
+
+#### Variables
+
+All A1C variables are presented in the following table.
+
+```{r a1c-var-table, results = 'asis'}
+#create table of info
+a1c_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "a1c_hb", "a1c_punch_note", "a1c_assay_note", "a1c_result_note", 
+            "a1c_plate", "a1c_date"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Hemoglobin A1C analyte concentrate obtained from dried blood spot",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+a1c_var_table <- a1c_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(a1c_var_table)
+
+```
+
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key A1C variables.
+
+**Raw hemoglobin A1C values:** 
+
+```{r A1C-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+a1c_sum_df <- dbs_a1c_df %>% 
+  select(a1c_hb) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+a1c_sum_tbl <- a1c_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+a1c_sum_tbl
+
+```
+
+**Data collection notes:** 
+
+```{r a1c-cat-summary-table, results = 'asis'}
+#notes for a1c_df
+a1c_notes <- c(1, 3, 4, 5, 29, 42)
+
+a1c_note_df <- dbs_a1c_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+a1c_note_list <- lapply(a1c_note_df, function(column) calc_multi_column(column, a1c_notes))
+
+#combine results into df
+a1c_note_sum <- bind_rows(a1c_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+a1c_tbl_notes <- a1c_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Count_3 = "N", 
+             Count_4 = "N",
+             Count_5 = "N",
+             Count_29 = "N",
+             Count_42 = "N",
+             Percent_1 = "%",
+             Percent_3 = "%",
+             Percent_4 = "%",
+             Percent_5 = "%",
+             Percent_29 = "%",
+             Percent_42 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100)) %>%
+  cols_align(columns = c("Count_1", "Count_3", "Count_4", "Count_5", "Count_29", "Count_42", "Percent_1", "Percent_3",
+                         "Percent_4", "Percent_5", "Percent_29", "Percent_42", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_spanner(label = "Smeared drops",  columns =  c(Count_3, Percent_3)) %>% 
+  tab_spanner(label = "Small spot,",  columns =  c(Count_4, Percent_4)) %>% 
+  tab_spanner(label = "Non-circular",  columns = c(Count_5, Percent_5)) %>% 
+  tab_spanner(label = "Below limit", columns = c(Count_29, Percent_29)) %>% 
+  tab_spanner(label = "Touched cover", columns = c(Count_42, Percent_42)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1, Count_3, Percent_3,
+                                                        Count_4, Percent_4, Count_5, Percent_5, 
+                                                        Count_29, Percent_29, Count_42, Percent_42))) 
+
+# Render the table
+print(a1c_tbl_notes) 
+
+
+```
+
+
+
+### Interleukin-6 (IL6) Description
+
+These data include variables related to the Interleukin-6 assessment, including direct and plasma equivalent (PE) Interleukin-6 values for participants. Higher values indicate higher Interleukin-6. The PE value was used to calculate allostatic load indicators.
+
+The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+
+Reference: *<MARIA> INSERT REF if applicable*
+
+
+#### Value Labels
+
+The value labels for all `_note` variables (`il6_punch_note`, `il6_assay_note`, and `il6_result_note`) are below: 
+
+```{r il6-label-table, results = 'asis'}
+il6_label_df <- data.frame(`1` = "Blank punch", check.names = FALSE)
+
+
+#create table
+il6_label_table <- il6_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(il6_label_table)
+
+```
+
+
+
+#### Variables
+
+All IL6 variables are presented in the following table.
+
+```{r IL6-var-table, results = 'asis'}
+#create table of info
+il6_var_df <- data.frame(
+  Variable = c("dbs_id", "family", "il6_direct", "il6_pe", "il6_punch_note", "il6_assay_note", "il6_result_note", 
+            "il6_plate", "il6_date"),
+  Description = c("Unique ID for each assay",
+            "Participant ID",
+            "Direct Interleukin-6 analyte concentrate obtained from dried blood spot",
+            "Plasma-equivalent Interleukin-6 analyte concentration",
+            "Note made by technician during sample preparation (punching)",
+            "Note made by technician during assay",
+            "Note indicating reportability of values",
+            "ID for the plate used during assay",
+            "Date of assay")) %>% 
+  mutate(Notes = ifelse(grepl("_note", Variable), "When multiple notes were provided, they are separated by a semi-colon", ""))
+
+#create gt table
+il6_var_table <- il6_var_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Description ~ px(300),
+             Variable ~ px(100)
+             ) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(il6_var_table)
+
+```
+
+
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for key IL6 variables.
+
+Raw Interleukin-6 values: 
+
+```{r IL6-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats
+il6_sum_df <- dbs_il6_df %>% 
+  select(il6_direct, il6_pe) %>% 
+  mutate_all(~ifelse(. == -99, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats()
+
+#create gt table
+il6_sum_tbl <- il6_sum_df  %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+il6_sum_tbl
+
+```
+
+
+**Data collection notes:** 
+
+```{r il6-cat-summary-table, results = 'asis'}
+#notes for il6_df
+il6_notes <- c(1)
+
+il6_note_df <- dbs_il6_df %>% 
+  select(ends_with("note"))
+
+#apply function to each note column
+il6_note_list <- lapply(il6_note_df, function(column) calc_multi_column(column, il6_notes))
+
+#combine results into df
+il6_note_sum <- bind_rows(il6_note_list, .id = "Variable") %>% 
+  pivot_wider(names_from = Response, values_from = c(Count, Percent)) %>% 
+  mutate(across(starts_with("Percent"), ~ paste0(.x, "%"))) %>% 
+  select(-`Count_-55`)
+
+#create gt table
+il6_tbl_notes <- il6_note_sum %>%
+  gt() %>%
+  cols_label(Count_1 = "N",
+             Percent_1 = "%",
+             `Percent_-55` = "% NA*") %>% 
+  tab_options(table.width = pct(100)) %>%
+  cols_align(columns = c("Count_1", "Percent_1", "Percent_-55"), align = "center") %>% 
+  tab_spanner(label = "Blank punch",  columns =  c(Count_1, Percent_1)) %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  tab_footnote(footnote = "*NA = Not Applicable") %>%
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(Count_1, Percent_1))) 
+
+# Render the table
+print(il6_tbl_notes) 
+
+
+```
+
+## Other Health Measures 
+
+These data are in the `bio_archive.xlsx` file. Participant ID corresponds to the `family` variable, which can be used to merge additional data files from this study. 
+
+*<MARIA> INSERT brief description about how bio assessment (bio variables and survey variables) was measured and any special considerations for the full file/sample (e.g., incarcerated participants were not asked some questions)*
+
+The original survey included exact dates/times and confidential health information. To protect participant confidentiality, exact dates/times were transformed into approximate time elapsed since date/time. Confidential health information was removed from this data file. 
+
+### Blood Pressure (BP) Description
+
+These data include variables on systolic and diastolic blood pressure collected from participants. Higher scores indicate higher blood pressure. 
+
+Using these values, average blood pressure and allostatic load indicators for high blood pressure were computed. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
+
+### BP Variables
+#### Variables
+
+All BP variables are presented in the following table: 
+
+```{r bp-var-tbl, results = 'asis'}
+#create table for bp vars
+print(create_bio_var_tbl(bio_md, "bp"))
+```
+
+#### Composite Variables
+
+For both systolic and diastolic blood pressure, an average value and two allostatic load indicators were calculated. One based on the clinical cut off for high blood pressure (ending in `_cal`) and the other is a percentile-based cut-off for high blood pressure (ending in `pal`) defined as the top 25% of values.
+
+Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
+
+
+```{r bp-comp-tbl, results = 'asis'}
+#extract variables from metadata
+bp_scale_vars <- bio_md %>% 
+  filter(str_starts(Variable, "bp") & str_ends(Variable, "avg")) %>% 
+  pull(Variable)
+
+#create table of info for AL indicators
+bp_scale_df <- data.frame(
+  var_name = bp_scale_vars,
+  scale = c("Average systolic blood pressure (2)",
+            "Average diastolic blood pressure (2)",
+            "Allostatic load indicator based on clinical cut-off for high systolic BP (1)",
+            "Allostatic load indicator based on clinical cut-off for high diastolic BP (1)",
+            "Allostatic load indicator based on top 25% of systolic BP values (1)",
+            "Allostatic load indicator based on top 25% of diastolic BP values (1)"),
+  scale_construction = c("mean(`bp1`, `bp3`)",
+                         "mean(`bp2`, `bp4`)",
+                         "`bp_sys_avg` > 139",
+                         "`bp_dia_avg` > 89",
+                         "Top 25% of observed `bp_sys_avg` values",
+                         "Top 25% of observed `bp_dia_avg` values"),
+  scale_range = c(" ", " ", "0-1", "0-1", "0-1", "0-1")) #MARIA ENTER POSSIBLE VALUES FOR BP AVERAGE or leave blank/NA
+
+#create gt table
+bp_scale_table <- bp_scale_df %>%
+  gt() %>% 
+  cols_align(columns = c("scale_range"), align = "center") %>% 
+  cols_label(var_name = "Variable Name",
+            scale = "Description (# of items)", 
+            scale_construction = "Composite Construction",
+            scale_range = "Range*") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>% 
+  fmt_markdown() %>% 
+  #cols_width(scale_construction ~ pct(100)) %>% 
+  apply_tbl_theme() 
+
+#print table
+print(bp_scale_table)
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for BP variables.
+
+**Continuous values:** 
+
+```{r bp-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+bp_sum_tbl <- bio_df %>% 
+  select(bp1, bp2, bp3, bp4, bp_sys_avg, bp_dia_avg) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+bp_sum_tbl
+
+```
+
+
+
+
+### Body Mass Index (BMI) Description
+
+These data include variables on body mass index (BMI), including weight and height collected from participants. Higher scores indicate higher BMI. 
+
+Using BMI values, allostatic load indicators for high BMI were computed. The missing data rule was not applied since all participants who were asked BMI questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
+
+### BMI Variables
+#### Variables
+
+All BMI variables are presented in the following table: 
+
+```{r bmi-var-tbl, results = 'asis'}
+#create table for bmi vars
+print(create_bio_var_tbl(bio_md, "bmi"))
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for BMI variables.
+
+**Continuous values:** 
+
+```{r bmi-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+bmi_sum_tbl <- bio_df %>% 
+  select(bmi1, bmi2, bmi_score) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>%
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+bmi_sum_tbl
+
+```
+
+
+### Waist-to-Hip Ratio (WTH) Description
+
+These data include variables on waist-to-hip ratio collected from participants. Higher scores indicate higher measurements. 
+
+Using waist and hip measurements, waist-to-hip ratio was calculated. Allostatic load indicators for high waist-to-hip ratio were computed. The missing data rule was not applied since all participants who were asked WTH questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
+
+### WTH Variables
+
+#### Value Labels
+#### Variables
+
+All WTH variables are presented in the following table: 
+
+```{r wth-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "wth"))
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for WTH variables.
+
+**Continuous values:** 
+
+```{r wth-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+wth_sum_tbl <- bio_df %>% 
+  select(wth1, wth2, wth_ratio) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+wth_sum_tbl
+
+```
+
+
+
+### Peak Expiratory Flow (PEF) Description
+
+These data include variables on peak expiratory flow collected from participants, including direct peak expiratory flow and forced expiratory volume measurements. Lower scores indicate worse performance. 
+
+Using peak expiratory flow values, average peak expiratory flow was calculated. Allostatic load indicators for high peak expiratory flow were also computed. The missing data rule was applied. Calculations were completed for participants with no missing data. Missing data for each variable is presented in the descriptive statistics table below.
+
+### PEF Variables
+#### Variables
+
+All PEF variables are presented in the following table: 
+
+```{r pef-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "pef"))
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for PEF variables.
+
+**Continuous values:** 
+
+```{r pef-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+pef_sum_tbl <- bio_df %>% 
+  select(pef1, pef2, pef3, pef4, pef5, pef6, pef_avg) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+pef_sum_tbl
+
+```
+
+
+### Pulse Reading (PULSE) Description
+
+These data include variables on pulse readings collected from participants. Higher scores indicate increased resting pulse rate. 
+
+Using pulse readings, average pulse rate was calculated. Allostatic load indicators for high pulse rate were computed. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
+
+### PULSE Variables
+#### Variables
+
+All PULSE variables are presented in the following table: 
+
+```{r pulse-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "pulse"))
+```
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for PULSE variables.
+
+**Continuous values:** 
+
+```{r pulse-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+pulse_sum_tbl <- bio_df %>% 
+  select(pulse1, pulse2, pulse_avg) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55 , NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+pulse_sum_tbl
+
+```
+
+
+### RAND Health Survey, SF-36 (RHS) Description
+
+The RAND Health Survey SF-36 (RHS) is designed to measure health concepts, such as limitations, well-being, and general health. 
+
+For the present study, 12 out of the 36 items from the RHS were collected in order to calculate the **General health**, **Role limitations due to physical health**, and **Role limitations due to emotional problems** subscales.
+    + **General health** reflects ... <MARIA> INSERT INFO
+    + **Role limitations due to physical health** reflects ...
+    + **Role limitations due to emotional problems** reflects...
+
+Item numbers in this data set may not match original item numbers from the RHS-SF36. See the following table for corresponding item numbers from the original RHS-SF36:
+
+| Variable | Original Item |
+|----------|-------------|
+| rhs1     | Item 1      |
+| rhs2     | Item 13     |
+| rhs3     | Item 14     |
+| rhs4     | Item 15     |
+| rhs5     | Item 16     |
+| rhs6     | Item 17     |
+| rhs7     | Item 18     |
+| rhs8     | Item 19     |
+| rhs9     | Item 33     |
+| rhs10    | Item 34     |
+| rhs11    | Item 35     |
+| rhs12    | Item 36     |
+
+Raw RHS variables were recoded per the [RHS-SF36 scoring guide](https://www.rand.org/health-care/surveys_tools/mos/36-item-short-form/scoring.html). All recoded variables end with `_p` and range from 0 to 100. Higher scores indicate a more favorable health state. Recoded variables were used to calculate the subscales. 
+
+The missing data rule was not applied since all participants had less than 20% missing data. 
+
+**<MARIA> INSERT REFERENCE**
+
+### RHS Variables
+
+#### Value labels
+
+The value labels for `rhs1` are below:
+
+```{r rhs-label-table, results = 'asis'}
+
+rhs_label_df <- data.frame(
+  value = c("1", "2", "3", "4", "5"),
+  label = c("Excellent",
+            "Very good",
+            "Good",
+            "Fair",
+            "Poor")) %>% 
+  t() %>% 
+  as.data.frame()
+
+rhs_label_df <- setNames(rhs_label_df[-1, ], unlist(rhs_label_df[1, ]))
+
+
+#create table
+rhs_label_table <- rhs_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(rhs_label_table)
+
+
+```
+
+Variables `rhs2`, `rhs3`, `rhs4`, `rhs5`, `rhs6`, `rhs7`, and `rhs8` are dichotomous:
+
+```{r rhs-dichot-label, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+The value labels for `rhs9`, `rhs10`, `rhs11`, and `rhs12` are as follows:
+
+```{r rhs-labels2, results = 'asis'}
+rhs_label_df <- data.frame(
+  value = c("1", "2", "3", "4", "5"),
+  label = c("Definitely true",
+            "Mostly true",
+            "Don't know",
+            "Mostly false",
+            "Definitely false")) %>% 
+  t() %>% 
+  as.data.frame()
+
+rhs_label_df <- setNames(rhs_label_df[-1, ], unlist(rhs_label_df[1, ]))
+
+
+#create table
+rhs_label_table <- rhs_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(rhs_label_table)
+
+```
+
+#### Survey Items
+
+All RHS survey items and recoded variables are presented in the following table: 
+```{r rhs-var-tbl, results = 'asis'}
+#create df of vars
+rhs_var_md <- bio_md %>% 
+  filter(str_starts(Variable, "rhs")) %>% 
+  head(-3)
+
+#create and format the table
+rhs_var_table <- rhs_var_md %>%
+  gt() %>%
+  cols_width(
+      Variable ~ pct(25),
+      Description ~ pct(75)) %>% 
+  apply_tbl_theme() %>%
+  tab_row_group(label = "Recoded variables for computing subscales:", 
+                rows = 13:24,
+                id = "p_vars")  %>% 
+    tab_row_group(label = "How true or false is each of the following statements for you.", 
+                rows = 9:12,
+                id = "gen_health")  %>% 
+    tab_row_group(label = "During the past 4 weeks, have you had any of the following problems with your work or other regular daily activities as a result of any emotional problems (such as feeling depressed or anxious)?", 
+                rows = 6:8,
+                id = "emo_limit") %>%
+  tab_row_group(label = "During the past 4 weeks, have you had any of the following problems with your work or other regular activities as a result of your physical health?", 
+                rows = 2:5,
+                id = "phys_limit") %>%
+  tab_row_group(label = "", 
+                rows = 1,
+                id = "rhs1") %>% 
+  tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("phys_limit", "emo_limit", "gen_health", "rhs1", "p_vars"))) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print
+rhs_var_table
+
+```
+
+
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for all RHS variables.
+
+**Non-binary variables:** 
+
+```{r rhs-cont-summary-table, results = 'asis'}
+#apply function to calculate summary stats and create gt table
+rhs_sum_tbl <- bio_df %>% 
+  select(rhs1, rhs9:rhs_emo_limit) %>%
+  mutate_all(~ifelse(. == -99 | . == -55 | . == -77, NA, as.numeric(.))) %>% 
+  calc_cont_sum_stats() %>% 
+  gt() %>%
+  cols_label(Range = "Range*",
+             Missing = "% Missing") %>% 
+  cols_width(everything() ~ pct(100)) %>%
+  cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>% 
+  tab_footnote("*Range of data values") %>% 
+  tab_options(table.border.bottom.style = "hidden") %>%
+  apply_tbl_theme()
+
+# Render the table
+rhs_sum_tbl
+
+```
+
+**Binary variables:**
+
+```{r rhs-dichot-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+rhs_dichot_df <- bio_df %>% 
+  select(rhs2:rhs8) %>%
+  mutate_all(~ifelse(. == -99 | . == -55| . == -77, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+
+#create table
+rhs_tbl_dichot <- create_dichot_gt_table(rhs_dichot_df)
+
+#print table
+rhs_tbl_dichot
+
+```
+
+
+
+### COVID-19 Exposure and Vaccination (CEV) Description
+
+The COVID-19 Exposure and Vaccination (CEV) is a self-report measure with 10-items assessing ... *<MARIA INSERT DESCRIPTION OF CEV>*
+
+There were no subscales computed since the CEV is not a standardized measure with developed subscales but meant to assess COVID-19 exposure. *<MARIA CONFIRM/CORRECT>* Similarly, no distributions or clinical categories are presented as no subscales were calculated. 
+
+**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
+
+### CEV Variables
+
+#### Value labels
+
+Variables `cev1` through `cev9` are dichotomous:
+
+```{r cev-dichot-label, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+Value labels for `cev10` are below:
+
+```{r cev-label-table, results = 'asis'}
+cev_label_df <- data.frame(
+  value = c("1", "2", "3"),
+  label = c("Johnson & Johnson",
+            "Moderna",
+            "Pfizer")) %>% 
+  t() %>% 
+  as.data.frame()
+
+cev_label_df <- setNames(cev_label_df[-1, ], unlist(cev_label_df[1, ]))
+
+#create table
+cev_label_table <- cev_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(everything() ~ pct(100)) %>% 
+  apply_labtab_theme()
+
+# Print the table
+print(cev_label_table)
+
+
+```
+
+#### Survey Items
+
+All CEV survey items are presented in the following table: 
+
+```{r cev-var-tbl, results = 'asis'}
+#create table for vars
+print(create_bio_var_tbl(bio_md, "cev"))
+```
+
+#### Descriptive Statistics
+
+Descriptive statistics are presented below for all CEV variables.
+
+**Binary variables:** 
+
+```{r cev-dichot-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+cev_dichot_df <- bio_df %>% 
+  select(starts_with("cev")) %>%
+  select(-cev10) %>% 
+  mutate_all(~ifelse(. == -99 | . == -55| . == -77, NA, as.numeric(.))) %>% 
+  calc_dichot_sum_stats()
+
+
+#create table
+cev_tbl_dichot <- create_dichot_gt_table(cev_dichot_df)
+
+#print table
+cev_tbl_dichot
+
+```
+
+**Categorical variables:**
+
+```{r cev-cat-summary-table, results = 'asis'}
+#create df - apply function to calculate summary stats and create
+cev_cat_df <- bio_df %>% 
+  select(cev10) %>%
+  mutate_all(~ifelse(. == -99 | . == -55 | . == -77, NA, as.numeric(.))) %>% 
+  count(cev10) %>% 
+  mutate(percent = paste0(n / sum(n) * 100, "%")) %>% 
+  pivot_wider(names_from = cev10,
+              values_from = c(n, percent),
+              names_prefix = "grp_",
+              names_sep = "_") %>% 
+  select(-n_grp_NA) %>% 
+  mutate(Variable = "cev10") %>% 
+  select(Variable, everything())
+
+
+#create table
+cev_c_table <- cev_cat_df %>%
+    gt() %>%
+    cols_label(n_grp_1 = "N",
+               percent_grp_1 = "%",
+               n_grp_2 = "N",
+               percent_grp_2 = "%",
+               n_grp_3 = "N",
+               percent_grp_3 = "%",
+               percent_grp_NA = "% Missing") %>%
+    tab_options(table.width = pct(100)) %>%
+    cols_align(columns = c(n_grp_1, n_grp_2, n_grp_3, percent_grp_1, percent_grp_2, percent_grp_3, percent_grp_NA), align = "center") %>%
+    tab_spanner(label = "Johnson & Johnson", columns = c(n_grp_1, percent_grp_1)) %>%
+    tab_spanner(label = "Moderna", columns = c(n_grp_2, percent_grp_2)) %>%
+    tab_spanner(label = "Pfizer", columns = c(n_grp_3, percent_grp_3)) %>%
+    tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_spanners()) %>% 
+  apply_tbl_theme() %>% 
+  tab_style(style = list(cell_fill(color = alpha("#246B69", 0.6))),
+            locations = cells_column_labels(columns = c(n_grp_1, n_grp_2, n_grp_3, percent_grp_1, percent_grp_2, percent_grp_3,))) %>% 
+  cols_width(Variable ~ pct(20),
+             starts_with("n_") ~ pct(20),
+             starts_with("percent_") ~ pct(20))
+
+#print table
+cev_c_table
+
+```
+
+
+### Health and Biological Confound (HBC) Description
+
+The Health and Biological Confound (HBC) survey is a self-report measure designed to assess various health behaviors that could impact the biological data collection. *<MARIA CONFIRM/CORRECT>*
+
+There were no subscales computed since the HBC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. *<MARIA CONFIRM/CORRECT>* Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales. 
+
+Note: There are many conditional questions in this data set, thus there are many "Not Applicable" responses (`-55`).
+
+**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
+
+### HBC Variables
+
+#### Value labels
+
+Due to the quantity of HBC variables and different value labels, value labels are presented in the variable table below
+
+#### Survey Items
+
+All HBC survey items are presented in the following table. If the variable has value, labels those are presented in the last column, if there are no value labels the type of variable is listed. 
+
+```{r hbc-var-tbl, results = 'asis'}
+#create vector of dichotomous hbc vars
+vec_hbc_dichot <- c("hbc2", "hbc3", "hbc4", "hbc5", "hbc6", "hbc7", "hbc7a", "hbc8",
+                    "hbc8a", "hbc9", "hbc9a", "hbc10", "hbc10a", "hbc11", "hbc11a", 
+                    "hbc12", "hbc13", "hbc14", "hbc15", "hbc16", "hbc17", "hbc17b",
+                    "hbc18", "hbc18e")
+#create df of vars
+hbc_var_md <- bio_md %>% 
+  filter(str_starts(Variable, "hbc")) %>% 
+  mutate(Description = str_remove(Description, "^[0-9]+[a-zA-Z]?\\. "),
+         var_info = case_when(Variable %in% c("hbc7b", "hbc9c", "hbc18a") ~ "Open Text Variable",
+                              Variable %in% c("hbc1", "hbc7c", "hbc8b", "hbc9b",
+                                              "hbc10b", "hbc11b", "hbc12b",
+                                              "hbc12c", "hbc18b", "hbc18c", "hbc18f") ~ "Continuous Variable",
+                              Variable %in% vec_hbc_dichot ~ "0 = No 
+                                                             \n1 = Yes",
+                              Variable %in% c("hbc12a", "hbc12d") ~ "1 = 1 cigarette 
+                                                                  \n2 = 2-5 cigarettes
+                                                                  \n3 = 1 pack
+                                                                  \n4 = 2 packs",
+                              Variable %in% c("hbc13a", "hbc14a", "hbc15a", "hbc16a") ~
+                                            "1 = Never 
+                                           \n2 = .5-1 hour/day
+                                           \n3 = 1-5 hours/day
+                                           \n4 = 5 or more hours/day",
+                              Variable %in% c("hbc17a", "hbc17c") ~ 
+                                             "1 = 0 cups or cans 
+                                            \n2 = 1-3 cups or cans
+                                            \n3 = 4-6 cups or cans
+                                            \n4 = 7-9 cups or cans
+                                            \n5 = 10 or more cups or cans",
+                              Variable == "hbc18d" ~ "1 = Mild 
+                                                     \n2 = Moderate
+                                                     \n3 = Vigorous",
+                              TRUE ~ ""))
+
+
+#create and format the table
+hbc_var_table <- hbc_var_md %>%
+  gt() %>%
+  cols_width(
+      Variable ~ pct(25),
+      Description ~ pct(50),
+      var_info ~ pct(40)) %>% 
+  cols_label(var_info = "Variable Type or Value Labels") %>% 
+  apply_tbl_theme() %>%
+  tab_style(style = cell_text(align = "left"), 
+      locations = cells_column_labels()) %>% 
+  fmt_markdown()
+
+
+#print
+hbc_var_table
+```
+
+### Chronic Health Conditions (CHC) Description
+
+The Chronic Health Conditions (CHC) survey is a self-report measure designed to assess various health conditions that could impact the biological data collection. *<MARIA CONFIRM/CORRECT>*
+
+There were no subscales computed since the CHC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. *<MARIA CONFIRM/CORRECT>* Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales.
+
+Note: There are many conditional questions in this data set, thus there are many "Not Applicable" responses (`-55`).
+
+**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
+
+### CHC Variables
+
+#### Value labels
+
+All CHC variables are dichotomous.
+
+```{r chc-dichot-label, results = 'asis'}
+# Print the dichot table
+print(dichot_label_table)
+```
+
+
+#### Survey Items
+
+All CHC survey items are presented in the following table:
+
+```{r chc-var-tbl, results = 'asis'}
+#create df of vars
+chc_var_md <- bio_md %>% 
+  filter(str_starts(Variable, "chc")) %>% 
+  mutate(Description = str_remove(Description, "^[0-9]+[a-zA-Z]?\\. "))
+
+#create table for vars
+print(create_bio_var_tbl(chc_var_md, "chc"))
+
+```
+

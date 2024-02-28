@@ -4945,112 +4945,7 @@ cts_pc_gt_table <- cts_pc_gt_table %>%
 print(cts_pc_gt_table)
 ```
 
-#### Scale and Subscales
 
-Information on total score and subscale variables are below. Prevalence
-scales are calculated ... <MARIA> INSERT INFO ON COMPOSITE SCORE
-CREATION. Severity scores are calculated ... <MARIA> INSERT INFO ON
-COMPOSITE SCORE CREATION. Mutuatlity scores are created by ... <MARIA>
-INSERT INFO ON COMPOSITE SCORE CREATION
-
-Unless otherwise listed, sum
-<SHAINA/MIN> TODO: NEED fill Range once we understand how composite
-scores were created
-
-```{r cts_pc-scale-table, results = 'asis'}
-# Create the table as a data frame
-cts_pc_scale_df <- data.frame(
-  var_name = c( "cts_pc_nvdp", "cts_pc_nvdc", "cts_pc_nvdm", "cts_pc_nvdpp", 
-                "cts_pc_nvdl", "cts_pc_nvdep", "cts_pc_psap", "cts_pc_psac",
-                "cts_pc_psam", "cts_pc_psapp", "cts_pc_psal", "cts_pc_psaep", 
-                "cts_pc_phap", "cts_pc_phac", "cts_pc_pham",  "cts_pc_phapp", 
-                "cts_pc_phal", "cts_pc_phaep", "cts_pc_wkdp", "cts_pc_wkdc", 
-                "cts_pc_wkdm", "cts_pc_wkdpp", "cts_pc_negp", "cts_pc_negc", 
-                "cts_pc_negm", "cts_pc_negpp", "cts_pc_negl", "cts_pc_negep"),
-
-  scale = c("Nonviolent Discipline - Past Year (Chronicity) (4)", 
-            "Count of Nonviolent Discipline Responses (4)", 
-            "Nonviolent Discipline Past Year - Mean (Chronicity) (2)",
-            "Nonviolent Discipline Past Year (Prevalence) (4)",
-            "Nonviolent Discipline - Lifetime (Greater than past year Prevalence) (4)",
-            "Nonviolent Discipline (Ever Prevalence) (2)",
-            "Psychological Aggression - Past Year (Chronicity) (5)",
-            "Count of Psychological Aggression Responses (5)",
-            "Psychological Aggression Past Year - Mean (Chronicity) (5)", 
-            "Psychological Aggression - Past Year (Prevalence) (5)",
-            "Psychological Aggression Discipline - Lifetime (Ever Prevalence greater than past year) (5)",
-            "Psychological Aggression (Ever Prevalance) (2)",
-            "Physical Assault - Past Year (Chronicity) (5)",
-            "Count of Physical Assault Responses (5)",
-            "Physical Assault Past Year - Mean (Chronicity) (5)",
-            "Physical Assault - Past Year (Prevalence) (5)",
-            "Physical Assault - Lifetime (Ever Prevalence greater than 1 year) (5)",
-            "Physical Assault (Ever Prevalence) (2)",
-            "Weekly Discipline - Past Week (Chronicity) (3)",
-            "Count of Weekly Discipline Responses (3)", 
-            "Weekly Discipline Past Week - Mean (Chronicity) (2)",
-            "Weekly Discipline - Past Week (Prevalence) (3)",
-            "Neglect - Past Year (Chronicity) (5)", 
-            "Count of Neglect Responses (2)",
-            "Neglect Past Year - Mean (Chronicity) (5)",
-            "Neglect - Past Year (Prevalence) (5)", 
-            "Neglect - Lifetime (Ever Prevalence) (5)", 
-            "Neglect (Ever Prevalance) (2)"
-            ),
-
-  scale_construction = c("`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
-                         "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
-                         "`cts_pc_NVDC`/ `cts_pc_NVDP`",
-                         "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
-                         "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
-                         "`cts_pc_NVDL`/ `cts_pc_NVDPP`",
-                         "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "`cts_pc_PSAC`/ `cts_pc_PSAP`",
-                         "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "`cts_pc_PSAL`/ `cts_pc_PSAPP`",
-                         "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
-                         "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
-                         "`cts_pc_PHAC`/ `cts_pc_PHAP`",
-                         "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
-                         "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
-                         "`cts_pc_PHAL`, `cts_pc_PHAPP`",
-                         "`cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
-                         "`cts_pc_WKDP`, `cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
-                         "`cts_pc_WKDC`/ `cts_pc_WKDP`",
-                         "`cts_pc_WKDP`, `cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
-                         "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
-                         "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
-                         "`cts_pc_NEGC`/ `cts_pc_NEGP`",
-                         "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
-                         "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
-                         "`cts_pc_NEGL`/ `cts_pc_NEGPP`"
-                         ),
-  scale_range = c("", "", "", "", "", "", "", "", "", "",
-                  "", "", "", "", "", "", "", "", "", "", 
-                  "", "", "", "", "", "","","")
-  ) %>%
-  mutate(scale_construction = tolower(scale_construction))
-
-
-# Create the gt table object
-cts_pc_scale_table <- gt(cts_pc_scale_df) %>%
-  cols_align(columns = c("scale_range"), align = "center") %>% 
-  cols_label(var_name = "Variable Name",
-            scale = "Scale (# of items)", 
-            #score_method = "Score Method",
-            scale_construction = "Scale Construction",
-            scale_range = "Range*") %>% 
-  tab_footnote(footnote = "*Range of possible values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>% 
-  #cols_width(scale ~ px(200)) %>% 
-  apply_tbl_theme() 
-
-# Print the table
-print(cts_pc_scale_table)
-
-```
 
 ### Summary Statistics
 
@@ -5114,7 +5009,7 @@ cts_pc_tbl_binary
 ```{r cts_pc-missing}
 # Create subset of items
 cts_pc_data_subset <- complete %>%
-  select(cts_pc1:cts_pc23, cts_pc_nvdp:cts_pc_negep)
+  select(cts_pc1:cts_pc23)
 
 # Calculate the summary statistics for each variable
 ## mean is showing 2 decimals per authors
@@ -5279,84 +5174,7 @@ print(my_gt_table)
 #my_gt_table
 ```
 
-#### Scale and Subscales
-
-Information on total score and subscale variables are below. Prevalence
-scales are calculated ... <MARIA> INSERT INFO ON COMPOSITE SCORE
-CREATION. Severity scores are calculated ... <MARIA> INSERT INFO ON
-COMPOSITE SCORE CREATION. Mutuatlity scores are created by ... <MARIA>
-INSERT INFO ON COMPOSITE SCORE CREATION
-
-<SHAINA/MIN> TODO: NEED fill Range once we understand how composite
-scores were created
-
-```{r CTS-scale-table, results = 'asis'}
-# Create the table as a data frame
-CTS_scale_df <- data.frame(
-  var_name = c("cts_psy_agg_ind_sev", "cts_injury_ind_sev", "cts_assault_ind_sev",   "cts_sex_ind_sev",       #TC   severity 
-                "cts_psy_agg_part_sev","cts_injury_part_sev", "cts_assault_part_sev","cts_sex_part_sev",      #Partner severity 
-
-                "cts_psy_agg_ind_prev", "cts_injury_ind_prev", "cts_assault_ind_prev", "cts_sex_ind_prev", 
-                "cts_psy_agg_part_prev", "cts_injury_part_prev", "cts_assault_part_prev", "cts_sex_part_prev",
-               
-                "cts_psy_agg_mutual", "cts_injury_mutual", "cts_assault_mutual", "cts_sex_mutual",
-               
-                "cts_negotiate_ind",    "cts_negotiate_part"),
-
-  scale = c("TC Psychological Aggression (2)", "TC Physical Injury (2)", "TC Assault (2)", "TC Sexual Cohesion (2)",
-            "Partner Psychological Aggression (2)", "Partner Physical Injury (2)", "Partner Assault (2)", "Partner Sexual Cohesion (2)",
-
-            "TC Psychological Aggression (2)", "TC Physical Injury (2)", "TC Assault (2)", "TC Sexual Cohesion (2)",
-            "Partner Psychological Aggression (2)", "Partner Physical Injury (2)", "Partner Assault (2)", "Partner Sexual Cohesion (2)",
-            
-            "Psychological Aggression (4)", "Physical Injury (4)", "Assaul (4)t", "Sexual Cohesion (4)",
-            
-            "TC Negotiation (2)", "Partner Negotiation (2)"
-            ),
-  score_method = c("Severity", "Severity", "Severity", "Severity",
-                   "Severity", "Severity", "Severity", "Severity",
-                   "Prevalence", "Prevalence", "Prevalence", "Prevalence", 
-                   "Prevalence", "Prevalence", "Prevalence", "Prevalence", 
-                   "Mutuality", "Mutuality", "Mutuality", "Mutuality",
-                   "", ""
-                   ),
-
-  scale_construction = c("`cts3`, `cts13`", "`cts5`, `cts15`", "`cts9`, `cts11`", "`cts17`, `cts19`", 
-                         "`cts4`, `cts14`", "`cts6`, `cts16`", "`cts10`, `cts12`", "`cts18`, `cts20`", 
-                         
-                         "`cts3`, `cts13`", "`cts5`, `cts15`", "`cts9`, `cts11`", "`cts17`, `cts19`", 
-                         "`cts4`, `cts14`", "`cts6`, `cts16`", "`cts10`, `cts12`", "`cts18`, `cts20`",
-                         
-                         "`cts3`, `cts13`, `cts4`, `cts14`","`cts5`, `cts15`, `cts6`, `cts16`",
-                         "`cts9`, `cts11`, `cts10`, `cts12`", "`cts17`, `cts19`, `cts18`, `cts20`",
-                         
-                         "`cts1`, `cts7`", "`cts2`, `cts8`"
-                         
-                         ),
-  scale_range = c("", "", "", "", "", "", "", "", "", "",
-                  "", "", "", "", "", "", "", "", "", "", 
-                  "", "")
-  )
-
-
-# Create the gt table object
-CTS_scale_table <- gt(CTS_scale_df) %>%
-  cols_align(columns = c("scale_range"), align = "center") %>% 
-  cols_label(var_name = "Variable Name",
-            scale = "Scale (# of items)", 
-            score_method = "Score Method",
-            scale_construction = "Scale Construction",
-            scale_range = "Range*") %>% 
-  tab_footnote(footnote = "*Range of possible values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>% 
-  #cols_width(scale ~ px(200)) %>% 
-  apply_tbl_theme() 
-
-# Print the table
-print(CTS_scale_table)
-
-```
-
+#
 ### Summary Statistics
 
 #### Descriptive Statistics
@@ -5421,7 +5239,7 @@ cts_tbl_binary
 ```{r CTS-mean-items}
 # Create subset of CTS items
 cts_data_subset <- complete %>%
-  select(cts1:cts_sex_mutual)
+  select(cts1:cts20)
 
 # Calculate the summary statistics for each variable
 cts_summary_data <- lapply(cts_data_subset, function(x) {
@@ -5465,36 +5283,6 @@ cts_tbl <- cts_summary_data %>%
 # Render the table
 cts_tbl
 
-```
-
-#### Distributions
-
-Distributions are presented below for each subscale
-
-##### Negotiation distributions
-
-```{r CTS-Negotiation-distributions, class.source='fold', echo = FALSE}
-p_cts_neg <- complete %>% 
-  composite_hist(
-    cts_negotiate_ind,
-    bins = 10
-  ) +
-  labs(title = 'Individual (TC) Negotiation Subscale',
-       #subtitle = 'Individual (TC)'
-       )
-
-p_cts_part <- complete %>% 
-  composite_hist(
-    cts_negotiate_part,
-    bins = 10
-  ) +
-  labs(title = 'Partner Negotiation Subscale',
-      # subtitle = 'Partner'
-       )
-
-ggarrange(p_cts_neg, p_cts_part + rremove("ylab")
-          ) %>%
-  annotate_figure(top = text_grob( "Distribution for CTS Negotiation Subscale \n(x-axis and y-axis are in different scales)"))
 ```
 
 
