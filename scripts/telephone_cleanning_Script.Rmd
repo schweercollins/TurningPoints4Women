@@ -2746,6 +2746,8 @@ sex_complete <- sex %>%
 ### CINT-SOCIODEMS Select Variable & Recode
 ```{r cint_soci}
 # once we create new raw file we need to pull in glptx", "sex", "ethnic", "age_14_ex into the cleaned file and add to codebook
+## this file, Min "Sociodem_wv14_archive.sav"
+# make note this comes from the historical data
 cint_socio <- tpw_raw %>%
   select(id,cint_0:cint_income_support, cint_identity, cint_identity_8_text) %>%#, glptx, sex, ethnic, age_14_ex) %>%
   mutate(
@@ -3991,22 +3993,26 @@ sus <- sus %>%
 ## Maria export to csv and double code with Kaylee
 ## notes here
 # P865 (add count of 2 to sus1)
-# P856 (add count of 3 to sus 4)
-# P887 (add count of 1 to sus 1)
-# P849 (add count of 3 to sus 1)
-# P854 (add count of 1 to new sus 7 variable should reflect contact for child in my care, not my own child another persons DHS coase)
-# P882 (add count of 2 to sus 1)
-# P867 (Add count of 3 to sus 1)
-# P902 (Add count of 1 to sus 1)
-# P845 (add count of 3 to sus 2)
-# HR 194 (Add count of 1 to new cat 7)
-# HR204 (Add count of 3 to sus 2)
-# HR131 (add count of 3 to sus 4)
-# HR 175 (add count of 3 to sus 4)
-#HR 171 (add count of 1 to sus 3)
-# P805 add count of 3 to sus 7
-#P829 add count of 1 to sus 7
-#P890 add count of 1 to sus 1
+# P856 (add count of 3 to sus4)
+# P887 (add count of 1 to sus1)
+# P849 (add count of 3 to sus1)
+
+# P882 (add count of 2 to sus1)
+# P867 (Add count of 3 to sus1)
+# P902 (Add count of 1 to sus1)
+# P845 (add count of 3 to sus2)
+# HR204 (Add count of 3 to sus2)
+# HR131 (add count of 3 to sus4)
+# HR 175 (add count of 3 to sus4)
+#HR 171 (add count of 1 to sus3)
+# P805 add count of 3 to sus7
+#P829 add count of 1 to sus7
+#P890 add count of 1 to sus1
+
+## we should P801 to see if there are values
+
+## then remove 6a-6c from archive data and codebook
+## removed because recoded into other values
 
 
 
