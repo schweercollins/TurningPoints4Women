@@ -324,29 +324,21 @@ create_dichot_gt_table <- function(data) {
 ```
 
 
-# Allostatic Load Assessment
-
-*<MARIA> INSERT BRIEF DESCRIPTION ABOUT CONSTRUCT DOMAIN (includes DBS and bio assessment data)*
-
-## Dried Blood Spot Data Collection
+# Dried Blood Spot Data Collection
 
 These data are in the `dbs_archive.xlsx` file where each construct domain is a separate tab. 
 
-*<MARIA, insert brief description about DBS assessment/construct domain and how it was measured>* 
+The seven biological constructs assessed through dried blood spots were cholesterol, high-density lipoprotein cholesterol, Triglycerides, c-reactive protein, Epstein-Barr virus, hemoglobin A1C, and Interleukin-6.. 
 
-The seven biological constructs assessed were cholesterol, high-density lipoprotein cholesterol, Triglycerides, c-reactive protein, Epstein-Barr virus, hemoglobin A1C, and Interleukin-6.. 
+For each biological construct, allostatic load indicators can be computed using different methods including clinical cutoffs developed and published in the literature, or percentile based scores. Users of the data should explore recent literature to identify best practices, which are always evolving, when analyzing these date. Additionally, please note that users should identify potential outliers or out of range values. For the purposes of transparency, all raw data are archived and users of the data must do these basic data checks. 
 
-For each biological construct, allostatic load indicators were calculated based on *<MARIA INSERT, include difference between AL and percentile AL indicator if possible>.*
-
-*<MARIA, insert any references to include here (or only for composite scores?)>*
 
 ### Cholesterol (CHO) Description
 
-These data include variables related to the cholesterol assessment, including direct and plasma equivalent (PE) cholesterol values for participants. Higher values indicate higher cholesterol. The PE cholesterol value was used to calculate allostatic load indicators.
+These data include variables related to the cholesterol assessment, including direct and plasma equivalent (PE) cholesterol values for participants. Higher values indicate higher cholesterol. The PE cholesterol value should be used to compute an allostatic load indicator.
 
 The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
 
-Reference: *<MARIA> INSERT REF if applicable*
 
 
 #### Value Labels
@@ -528,14 +520,9 @@ print(cho_tbl_notes)
 
 ### High-Density Lipoprotein Cholesterol (HDL) Description
 
-These data include variables related to the HDL cholesterol assessment, including direct and plasma equivalent (PE) HDL cholesterol values for participants. Higher values indicate higher HDL cholesterol. The PE value was used to calculate allostatic load indicators.
-
-*<MARIA> INSERT INFO RE: LOWER HDL IS WORSE (FOR AL INDICATOR) if desired - since HDL AL indicator is based off low values vs higher values in other variables*
+These data include variables related to the HDL cholesterol assessment, including direct and plasma equivalent (PE) HDL cholesterol values for participants. Higher values indicate higher HDL cholesterol. However, it should be noted that lower values of HDL are considered poorer in terms of allostatic load, thus if percentile based scores are used, the bottom quartile should be considered as an indicator of greater allostatic load. The PE value should be used to calculate allostatic load indicators.
 
 The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
-
-Reference: *<MARIA> INSERT REF if applicable*
-
 
 #### Value Labels
 
@@ -677,11 +664,9 @@ print(hdl_tbl_notes)
 
 ### Triglycerides (TRG) Description
 
-These data include variables related to the triglycerides assessment, including direct and plasma equivalent (PE) triglyceride values for participants. Higher values indicate higher triglycerides. The PE triglyceride value was used to calculate allostatic load indicators.
+These data include variables related to the triglycerides assessment, including direct and plasma equivalent (PE) triglyceride values for participants. Higher values indicate higher triglycerides. The PE triglyceride values should be used to calculate allostatic load indicators.
 
 The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
-
-Reference: *<MARIA> INSERT REF if applicable*
 
 
 #### Value Labels
@@ -823,12 +808,9 @@ print(trg_tbl_notes)
 
 ### C-Reactive Protein (CRP) Description
 
-These data include variables related to the c-reactive protein assessment, including direct and plasma equivalent (PE) c-reactive protein values for participants. Higher values indicate higher c-reactive protein. The PE value was used to calculate allostatic load indicators.
+These data include variables related to the c-reactive protein assessment, including direct and plasma equivalent (PE) c-reactive protein values for participants. Higher values indicate higher c-reactive protein. The PE value should be used to calculate allostatic load indicators.
 
 The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
-
-Reference: *<MARIA> INSERT REF if applicable*
-
 
 #### Value Labels
 
@@ -993,12 +975,9 @@ print(crp_tbl_notes)
 
 ### Epstein-Barr virus (EBV) Description
 
-These data include variables related to the Epstein-Barr virus assessment, including direct and plasma equivalent (PE) Epstein-Barr virus values for participants. Higher values indicate higher Epstein-Barr virus concentration *<MARIA> CONFRIM CORRECT*. The PE Epstein-Barr virus value was used to calculate allostatic load indicators.
+These data include variables related to the Epstein-Barr virus assessment, including direct and plasma equivalent (PE) Epstein-Barr virus values for participants. Higher values indicate higher Epstein-Barr virus concentration in the blood. The PE Epstein-Barr virus value should be used to calculate allostatic load indicators.
 
 The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
-
-Reference: *<MARIA> INSERT REF if applicable*
-
 
 #### Value Labels
 
@@ -1034,7 +1013,6 @@ ebv_label_table <- ebv_label_df %>%
 print(ebv_label_table)
 
 ```
-
 
 
 
@@ -1176,9 +1154,7 @@ print(ebv_tbl_notes)
 These data include variables related to the hemoglobin A1C assessment. *<MARIA> EXPLAIN WHY NO PE AND DIRECT VALUE BUT ONLY AIC_HB VALUE* 
 
 The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
-
-Reference: *<MARIA> INSERT REF if applicable*
-
+sd
 
 #### Value Labels
 
@@ -1345,11 +1321,9 @@ print(a1c_tbl_notes)
 
 ### Interleukin-6 (IL6) Description
 
-These data include variables related to the Interleukin-6 assessment, including direct and plasma equivalent (PE) Interleukin-6 values for participants. Higher values indicate higher Interleukin-6. The PE value was used to calculate allostatic load indicators.
+These data include variables related to the Interleukin-6 assessment, including direct and plasma equivalent (PE) Interleukin-6 values for participants. Higher values indicate higher Interleukin-6. The PE value should be used to calculate allostatic load indicators.
 
 The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
-
-Reference: *<MARIA> INSERT REF if applicable*
 
 
 #### Value Labels
@@ -1485,9 +1459,9 @@ print(il6_tbl_notes)
 
 ## Other Health Measures 
 
-These data are in the `bio_archive.xlsx` file. Participant ID corresponds to the `family` variable, which can be used to merge additional data files from this study. 
+These data are in the `bio_archive.xlsx` file. Participant ID corresponds to the `id` variable, which can be used to merge additional data files from this study. 
 
-*<MARIA> INSERT brief description about how bio assessment (bio variables and survey variables) was measured and any special considerations for the full file/sample (e.g., incarcerated participants were not asked some questions)*
+Please note that participants who were incarcerated were only asked a subset of these questions. Additionally, they did not provide blood samples or participate in any other data collection activities that would require special equipment. 
 
 The original survey included exact dates/times and confidential health information. To protect participant confidentiality, exact dates/times were transformed into approximate time elapsed since date/time. Confidential health information was removed from this data file. 
 
@@ -1495,7 +1469,7 @@ The original survey included exact dates/times and confidential health informati
 
 These data include variables on systolic and diastolic blood pressure collected from participants. Higher scores indicate higher blood pressure. 
 
-Using these values, average blood pressure and allostatic load indicators for high blood pressure were computed. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
+Using these values, average blood pressure for high blood pressure were computed. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
 
 ### BP Variables
 #### Variables
@@ -1509,9 +1483,7 @@ print(create_bio_var_tbl(bio_md, "bp"))
 
 #### Composite Variables
 
-For both systolic and diastolic blood pressure, an average value and two allostatic load indicators were calculated. One based on the clinical cut off for high blood pressure (ending in `_cal`) and the other is a percentile-based cut-off for high blood pressure (ending in `pal`) defined as the top 25% of values.
-
-Reference: *<MARIA> INSERT REFERENCE for cutoffs, if applicable*
+For both systolic and diastolic blood pressure, an average value was computed. The average values should be used to compute allostatic load indicators.
 
 
 ```{r bp-comp-tbl, results = 'asis'}
@@ -1588,7 +1560,7 @@ bp_sum_tbl
 
 These data include variables on body mass index (BMI), including weight and height collected from participants. Higher scores indicate higher BMI. 
 
-Using BMI values, allostatic load indicators for high BMI were computed. The missing data rule was not applied since all participants who were asked BMI questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
+Using BMI values, allostatic load indicators for high BMI may be computed. The missing data rule was not applied since all participants who were asked BMI questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
 
 ### BMI Variables
 #### Variables
@@ -1630,9 +1602,9 @@ bmi_sum_tbl
 
 ### Waist-to-Hip Ratio (WTH) Description
 
-These data include variables on waist-to-hip ratio collected from participants. Higher scores indicate higher measurements. 
+These data include variables on waist-to-hip ratio collected from participants. Higher scores indicate higher measurements. #MARIA TO DO ENTER INTERP
 
-Using waist and hip measurements, waist-to-hip ratio was calculated. Allostatic load indicators for high waist-to-hip ratio were computed. The missing data rule was not applied since all participants who were asked WTH questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
+Using waist and hip measurements, waist-to-hip ratio was calculated and should be used to compute allostatic load indicators. The missing data rule was not applied since all participants who were asked WTH questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
 
 ### WTH Variables
 
@@ -1677,9 +1649,9 @@ wth_sum_tbl
 
 ### Peak Expiratory Flow (PEF) Description
 
-These data include variables on peak expiratory flow collected from participants, including direct peak expiratory flow and forced expiratory volume measurements. Lower scores indicate worse performance. 
+These data include variables on peak expiratory flow collected from participants using a spirometer, including direct peak expiratory flow and forced expiratory volume measurements. Lower scores indicate worse performance. # MARIA TO CHECK ABOUT HIGH AND LOW VALUES
 
-Using peak expiratory flow values, average peak expiratory flow was calculated. Allostatic load indicators for high peak expiratory flow were also computed. The missing data rule was applied. Calculations were completed for participants with no missing data. Missing data for each variable is presented in the descriptive statistics table below.
+Using peak expiratory flow values, average peak expiratory flow was calculated. Allostatic load indicators for high peak expiratory flow can be computed using the averages. The missing data rule was applied. Calculations were completed for participants with no missing data. Missing data for each variable is presented in the descriptive statistics table below.
 
 ### PEF Variables
 #### Variables
@@ -1723,7 +1695,7 @@ pef_sum_tbl
 
 These data include variables on pulse readings collected from participants. Higher scores indicate increased resting pulse rate. 
 
-Using pulse readings, average pulse rate was calculated. Allostatic load indicators for high pulse rate were computed. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
+Using pulse readings, average pulse rate was calculated. Allostatic load indicators for high pulse rate can be computed using the averafe pulse rate. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
 
 ### PULSE Variables
 #### Variables
@@ -1767,10 +1739,7 @@ pulse_sum_tbl
 
 The RAND Health Survey SF-36 (RHS) is designed to measure health concepts, such as limitations, well-being, and general health. 
 
-For the present study, 12 out of the 36 items from the RHS were collected in order to calculate the **General health**, **Role limitations due to physical health**, and **Role limitations due to emotional problems** subscales.
-    + **General health** reflects ... <MARIA> INSERT INFO
-    + **Role limitations due to physical health** reflects ...
-    + **Role limitations due to emotional problems** reflects...
+For the present study, 12 out of the 36 items from the RHS were collected.
 
 Item numbers in this data set may not match original item numbers from the RHS-SF36. See the following table for corresponding item numbers from the original RHS-SF36:
 
@@ -1789,7 +1758,7 @@ Item numbers in this data set may not match original item numbers from the RHS-S
 | rhs11    | Item 35     |
 | rhs12    | Item 36     |
 
-Raw RHS variables were recoded per the [RHS-SF36 scoring guide](https://www.rand.org/health-care/surveys_tools/mos/36-item-short-form/scoring.html). All recoded variables end with `_p` and range from 0 to 100. Higher scores indicate a more favorable health state. Recoded variables were used to calculate the subscales. 
+Raw RHS variables were recoded per the [RHS-SF36 scoring guide](https://www.rand.org/health-care/surveys_tools/mos/36-item-short-form/scoring.html). All recoded variables end with `_p` and range from 0 to 100. Higher scores indicate a more favorable health state. Recoded variables may be used to calculate subscales of interest. 
 
 The missing data rule was not applied since all participants had less than 20% missing data. 
 
@@ -1918,7 +1887,7 @@ Descriptive statistics are presented below for all RHS variables.
 ```{r rhs-cont-summary-table, results = 'asis'}
 #apply function to calculate summary stats and create gt table
 rhs_sum_tbl <- bio_df %>% 
-  select(rhs1, rhs9:rhs_emo_limit) %>%
+  select(rhs1, rhs9:rhs12_p) %>%
   mutate_all(~ifelse(. == -99 | . == -55 | . == -77, NA, as.numeric(.))) %>% 
   calc_cont_sum_stats() %>% 
   gt() %>%
@@ -1957,11 +1926,12 @@ rhs_tbl_dichot
 
 ### COVID-19 Exposure and Vaccination (CEV) Description
 
-The COVID-19 Exposure and Vaccination (CEV) is a self-report measure with 10-items assessing ... *<MARIA INSERT DESCRIPTION OF CEV>*
+The COVID-19 Exposure and Vaccination (CEV) is a self-report measure with 10-items assessing recent COVID-19 exposures, health behaviors, and vaccinations.
 
-There were no subscales computed since the CEV is not a standardized measure with developed subscales but meant to assess COVID-19 exposure. *<MARIA CONFIRM/CORRECT>* Similarly, no distributions or clinical categories are presented as no subscales were calculated. 
+There were no subscales computed since the CEV is not a standardized measure with developed subscales but meant to assess COVID-19 exposure.  Similarly, no distributions or clinical categories are presented as no subscales were calculated. 
 
-**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
+Reference: Unpublished measure developed for this study
+
 
 ### CEV Variables
 
@@ -2083,13 +2053,13 @@ cev_c_table
 
 ### Health and Biological Confound (HBC) Description
 
-The Health and Biological Confound (HBC) survey is a self-report measure designed to assess various health behaviors that could impact the biological data collection. *<MARIA CONFIRM/CORRECT>*
+The Health and Biological Confound (HBC) survey is a self-report measure designed to assess various health behaviors that could confound the biological data variables of interest.
 
-There were no subscales computed since the HBC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. *<MARIA CONFIRM/CORRECT>* Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales. 
+There were no subscales computed since the HBC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales. 
 
 Note: There are many conditional questions in this data set, thus there are many "Not Applicable" responses (`-55`).
 
-**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
+Reference: Unpublished measure developed for the current study
 
 ### HBC Variables
 
@@ -2158,13 +2128,13 @@ hbc_var_table
 
 ### Chronic Health Conditions (CHC) Description
 
-The Chronic Health Conditions (CHC) survey is a self-report measure designed to assess various health conditions that could impact the biological data collection. *<MARIA CONFIRM/CORRECT>*
+The Chronic Health Conditions (CHC) survey is a self-report measure designed to assess various health conditions that may be confounded with the biological data collected as part of this study. They may also be of interest as indicators of health. 
 
-There were no subscales computed since the CHC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. *<MARIA CONFIRM/CORRECT>* Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales.
+There were no subscales computed since the CHC is not a standardized measure with developed subscales but meant to assess potential health confounds related to the biological variables. Further, no descriptive statistics, distributions, or clinical categories are presented since these are not key study variables and there are no calculated subscales.
 
 Note: There are many conditional questions in this data set, thus there are many "Not Applicable" responses (`-55`).
 
-**<MARIA> INSERT REFERENCE (or mention no reference if it was developed for this study**
+Reference: Unpublished measure developed for the current study
 
 ### CHC Variables
 
