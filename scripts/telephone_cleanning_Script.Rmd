@@ -37,11 +37,8 @@ tpw_archive_id <- tpw_raw %>%
   select(id)
 
 # import historical variables
-
-
-# Set a variable to control the chunks for archive
-# Set to FALSE if generate for NIJ archive 
-eval_chunks <- TRUE
+Sociodem_wv14_archive <- read.csv(here("do_not_push", "Sociodem_wv14_archive.csv"), colClasses = c(sex = "character")) %>%
+  rename(id = FAMILY)
 ```
 
 ## Min's TODO/Note 
@@ -2758,11 +2755,8 @@ sex_complete <- sex %>%
 ## CINT
 ### CINT-SOCIODEMS Select Variable & Recode
 ```{r cint_soci}
-# once we create new raw file we need to pull in glptx", "sex", "ethnic", "age_14_ex into the cleaned file and add to codebook
-## this file, Min "Sociodem_wv14_archive.sav"
-# make note this comes from the historical data
 cint_socio <- tpw_raw %>%
-  select(id,cint_0:cint_income_support, cint_identity, cint_identity_8_text) %>%#, glptx, sex, ethnic, age_14_ex) %>%
+  select(id,cint_0:cint_income_support, cint_identity, cint_identity_8_text) %>%
   mutate(
     across(
       .cols = c(cint2:cint5),
@@ -2850,15 +2844,34 @@ cint_socio <- cint_socio %>%
 cint_socio <- cint_socio %>%
   relocate(cint1_choice1, cint1_choice2, .after = cint_0)
 
+
+# historical data for demographic: "glptx", "sex", "ethnic", "age_14_ex"
+# glptx, sex, ethnic, age_14_ex
+cint_socio <- Sociodem_wv14_archive %>%
+  select(id, GLPTX, sex, ETHNIC, age_14_ex) %>%
+  merge(cint_socio, by = "id")
 ```
 
 ### CINT-SOCIODEMS Missing
 ```{r cint_soci_missing}
+cint_socio <- cint_socio %>%
+  # if cint1_1 is not selected cint2 will not be asked 
+   mutate(cint2 = case_when(is.na(cint1_1) ~ "-55", TRUE ~ cint2)) %>%
+  # if cint1_2 is not selected cint3 will not be asked 
+   mutate(cint3 = case_when(is.na(cint1_2) ~ "-55", TRUE ~ cint3)) %>%
+  # if cint1_3 is not selected cint4 will not be asked 
+   mutate(cint4 = case_when(is.na(cint1_3) ~ "-55", TRUE ~ cint4)) %>%
+  # if cint1_4 is not selected cint5 will not be asked 
+   mutate(cint5 = case_when(is.na(cint1_4) ~ "-55", TRUE ~ cint5)) %>%
+  # if they did not select others (cint1_8, and cint_identity_8), the _text column should be -55
+  mutate(cint1_8_text = case_when(is.na(cint1_8) ~ "-55", TRUE ~ cint1_8_text)) %>%
+  mutate(cint_identity_8_text = case_when(is.na(cint_identity_8_text) ~ "-55", TRUE ~ cint_identity_8_text)) %>%
+  # cint_income & cint_income_support: this was request to answer, so if it's NA, it should be TC refuse to answer 
+  mutate(cint_income = case_when(is.na(cint_income) ~ "-55", TRUE ~ cint_income)) %>%
+  mutate(cint_income_support = case_when(is.na(cint_income_support) ~ "-55", TRUE ~ cint_income_support)) %>%
+  select(-c("cint1_1", "cint1_2", "cint1_3", "cint1_4", "cint1_5", "cint1_6", "cint1_7", "cint1_8", "cint1_77"))
 
-cint_socio_complete <-
-  cint_socio 
-
-
+cint_socio_complete <- cint_socio 
 ```
 
 ### CINT-SSES Select Variable & Recode

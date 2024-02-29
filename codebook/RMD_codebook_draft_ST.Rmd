@@ -475,10 +475,41 @@ Oregon Social Learning Center (OSLC) Instrument [Unpublished]
 #### Value Labels and Survey Items 
 
 All CINT-SOCIO variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+Historical Data 
+```{r Sociodem_wv14_archive, results = 'asis'}
+#create table of info
+#  GLPTX, sex, ETHNIC, age_14_ex
+Sociodem_wv14_archive <- data.frame(
+  Variable = c("GLPTX", "sex", "ETHNIC", "age_14_ex"),
+  Description = c("Randomization group",
+            "Sex",
+            "Ethnicity",
+            "Wave 14 Age"),
+  Value = c("0 = Treatment as usual (Group Care)\n1 = Treatment Foster Care Oregon (TFCO)",
+            "F = Female",
+            "1 = Caucasian
+            \n2 = African American
+            \n3 = Native American
+            \n4 = Hispanic
+            \n5 = Asian
+            \n6 = Pacific Islander
+            \n8 = Multiracial
+            \n9 = Other/Unknown",
+            "")) 
+
+#create gt table
+Sociodem_wv14_archive_table <- Sociodem_wv14_archive %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Variable ~ px(200)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(Sociodem_wv14_archive_table)
+
+```
 
 CINT-SOCIO survey items are presented in the following table:
-
-
 ```{r CINT-SOCIODEMS-var-prep}
 # Pull question wording from Qualtrics data
 cint_sociodems_word <- qualtrics %>% 
@@ -809,7 +840,7 @@ cint_relation_word_long <- cint_relation_word  %>%
                values_to = "description") %>%
   mutate(var_name = str_to_lower(var_name)) %>%
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
-         description = str_replace(description, "READ:", ""))%>%
+         description = str_replace(description, "READ:", "")) %>%
          #description = str_replace(description, "Assessor Note: Assessor give them a few moments to decide.", "\n"),
   # Edits Variable description and value
   mutate(description = if_else(var_name == "cint20", " How many people in total have you been involved with romantically or 
@@ -817,6 +848,7 @@ cint_relation_word_long <- cint_relation_word  %>%
   mutate(description = if_else(var_name == "cintq2", "Please think about the longest or most serious relationship 
                                over the past 6 months. How old was that partner?", description)) %>%
   mutate(description = if_else(var_name == "cintq3", "What was your relationship with that partner?", description)) %>% 
+  mutate(description = if_else(var_name == "cint26", "On a scale of 1 to 10, with 1 being not at all close and 10 being extremely close, how close did you feel to your partner in the last 6 months? (when seeing/dating your partner?)", description)) %>% 
   mutate(description = if_else(var_name == "cint27", "On a scale of 1 to 10, with 1 being not at all well and 10 being 
                                very well, how well did you and your partner get along in the last 6 months 
                                (when seeing/dating your partner)?", description)) %>% 
@@ -2849,10 +2881,9 @@ LEC survey items are presented in the following table:
 
 ```{r lec-var-prep}
 # Pull question wording from Qualtrics data
-lec_word <- qualtrics %>%
-    select(starts_with("pcl")) %>%
-    rename_with(~ paste0("lec", str_replace(., "^PCL", "")), starts_with("pcl")) %>%
-    slice(1)
+lec_word <- qualtrics %>% 
+  select(starts_with("lec"), -lec_total_happen, -lec_total_witness) %>%
+  slice(1) 
 
 
 #create table with variable name, description, and notes
