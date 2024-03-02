@@ -2170,6 +2170,7 @@ itq_calc <- itq %>%
   )
 
 # This code can be used to compute diagnoses based on participant endorsing at least one symptom in each cluster
+## 1 selected in the current study because answer scale for participants in the study was 1 = 1-2 times per week symptoms severity, 2 = 3-4 times per week, 3 = daily, 4 = multiple times daily; consistent with other trauma measures
 itq_calc <- itq_calc %>%
   mutate(
     itq_re_dx = case_when(
@@ -4019,7 +4020,6 @@ sus <- sus %>%
 # P856 (add count of 3 to sus4)
 # P887 (add count of 1 to sus1)
 # P849 (add count of 3 to sus1)
-
 # P882 (add count of 2 to sus1)
 # P867 (Add count of 3 to sus1)
 # P902 (Add count of 1 to sus1)
