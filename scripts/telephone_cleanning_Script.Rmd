@@ -3052,9 +3052,10 @@ cint_relation <- cint_relation %>%
    mutate_at(vars(cintq2:cint34), ~case_when(cint20 < 1 ~ "-55", TRUE ~ .)) %>%
   # if cint35 is none/0 or -77 cint36:cint37 was be asked 
    mutate_at(vars(cint36:cint37), ~case_when(cint35 == 0 |  cint35 == "-77" ~ "-55", TRUE ~ .)) %>% 
-   mutate_at(vars(cint30_7_text), ~case_when(cint30 != 7 ~ "-55", TRUE ~ .)) %>% 
-   mutate_at(vars(cint31_7_text), ~case_when(cint31 != 7 ~ "-55", TRUE ~ .)) %>% 
-   mutate_at(vars(cint32_7_text), ~case_when(cint32 != 6 ~ "-55", TRUE ~ .))
+   mutate_at(vars(cint30_7_text), ~case_when(cint30 != 6 ~ "-55", TRUE ~ .)) %>% 
+   mutate_at(vars(cint31_7_text), ~case_when(cint31 != 6 ~ "-55", TRUE ~ .)) %>% 
+   mutate_at(vars(cint32_7_text), ~case_when(cint32 != 6 ~ "-55", TRUE ~ .)) %>%
+   mutate_at(vars(cint28,cint29), ~case_when(id == "P813" ~ "-99", TRUE ~.))
 
 # Correct data type and create _complet df 
 cint_relation_complete <- cint_relation %>%
@@ -4013,10 +4014,6 @@ sus <- sus %>%
   select(-c("sus26b_1","sus26b_2","sus26b_3","sus26b_77"))
 
 
-
-
-## Note for Maria -- need to remove and recode 6a,6b, and 6c
-## Maria export to csv and double code with Kaylee
 ## notes here
 # P865 (add count of 2 to sus1)
 # P856 (add count of 3 to sus4)
@@ -4034,12 +4031,51 @@ sus <- sus %>%
 # P805 add count of 3 to sus7
 #P829 add count of 1 to sus7
 #P890 add count of 1 to sus1
+sus <- sus %>%
+  # removed and recede 6a,6b, and 6c because they include confidential information
+  #select(-sus6a, - sus6b, - sus6c) %>%
+  mutate(across(c(sus1, sus2, sus3, sus4, sus7), as.numeric))%>%
+  # P865 (add count of 2 to sus1)
+  mutate(sus1 = ifelse(id == "P865", sus1 + 2, sus1)) %>%
+  # P856 (add count of 3 to sus4)
+  mutate(sus4 = ifelse(id == "P856", sus4 + 3, sus4)) %>%
+  # P887 (add count of 1 to sus1)
+  mutate(sus1 = ifelse(id == "P887", sus1 + 1, sus1)) %>%
+  # P849 (add count of 3 to sus1)
+  mutate(sus1 = ifelse(id == "P849", sus1 + 3, sus1)) %>%
+  
+  # P882 (add count of 2 to sus1)
+  mutate(sus1 = ifelse(id == "P882", sus1 + 2, sus1)) %>%
+  # P867 (Add count of 3 to sus1)
+  mutate(sus1 = ifelse(id == "P867", sus1 + 3, sus1)) %>%
+  # P902 (Add count of 1 to sus1)
+  mutate(sus1 = ifelse(id == "P902", sus1 + 1, sus1)) %>%
+  # P845 (add count of 3 to sus2)
+  mutate(sus2 = ifelse(id == "P845", sus2 + 3, sus2)) %>%
+  # HR204 (Add count of 3 to sus2)
+  mutate(sus2 = ifelse(id == "HR204", sus2 + 3, sus2)) %>%
+  # HR131 (add count of 3 to sus4)
+  mutate(sus4 = ifelse(id == "HR131", sus4 + 3, sus4)) %>%
+  # HR175 (add count of 3 to sus4)
+  mutate(sus4 = ifelse(id == "HR175", sus4 + 3, sus4)) %>%
+  # HR171 (add count of 1 to sus3)
+  mutate(sus3 = ifelse(id == "HR171", sus3 + 1, sus3)) %>%
+  # P805 add count of 3 to sus7
+  mutate(sus7 = ifelse(id == "P805", sus7 + 3, sus7)) %>%
+  # P829 add count of 1 to sus7
+  mutate(sus7 = ifelse(id == "P829", sus7 + 1, sus7)) %>%
+  #P890 add count of 1 to sus1
+  mutate(sus1 = ifelse(id == "P890", sus1 + 1, sus1))
 
-## we should P801 to see if there are values
+
+## Maria export to csv and double code with Kaylee
+
+
+## we should P810 to see if there are values
+# No data in 6a, 6b,6c for P810
 
 ## then remove 6a-6c from archive data and codebook
 ## removed because recoded into other values
-
 
 
 
