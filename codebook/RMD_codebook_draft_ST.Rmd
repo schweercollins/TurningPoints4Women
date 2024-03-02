@@ -6598,7 +6598,7 @@ SUS  survey items are presented in the following table:
 ```{r sus-var-prep}
 # Pull question wording from Qualtrics data
 sus_word <- qualtrics %>% 
-  select(starts_with("SUS"), -matches("^sus14")) %>% # We are not presenting sus14 items because those contain identifiable information 
+  select(starts_with("SUS"), -matches("^sus14"), -SUS6a, -SUS6b, - SUS6c) %>% # We are not presenting sus14 items and sus6a-sus6c because those contain identifiable information 
   slice(1)
 
 #create table with variable name, description, and notes
