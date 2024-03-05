@@ -2654,7 +2654,7 @@ There are missing data and missing rule would be applied in future computations
 
 sex <- sex %>% 
   # for incarcerated TC, this survey wasn't shown 
-   mutate_at(vars(s_pregnancy_screen:s48), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.)  ~ "-55", TRUE ~ .)) %>%
+   mutate_at(vars(s_pregnancy_screen:s48), ~case_when(id %in% c("HR211", "HR181", "P819", "HR218") & is.na(.)  ~ "-55", TRUE ~ .)) %>%
    # Skip rule: if s1 select no/Decline (0/-77), then skip s1a:s8
    mutate_at(vars(s1a:s8), ~case_when(s1 != 1 ~ "-55", TRUE ~ . )) %>%
   mutate_at(vars(s2a,s2b,s2c), ~case_when(is.na(.x) ~ "0", TRUE ~ . )) %>%
@@ -2710,7 +2710,7 @@ sex <- sex %>%
    # skip rule: if s46 is not Yes (1), s47:s48 is skipped  
   mutate_at(vars(s47:s48), ~case_when(s46 != 1 ~ "-55", TRUE ~ . )) %>%
   # p813 for s12 changed to -99 because truly missing. 
-  mutate_at(vars(s12), ~case_when(id == "P813" ~ "-55", TRUE ~ . )) %>%
+  mutate_at(vars(s12), ~case_when(id == "P813" ~ "-99", TRUE ~ . )) %>%
   relocate(s25, .before = s25_8_text) %>%
   relocate(s32, .before = s33) %>%
   relocate(62:69, .after = 37) %>%
