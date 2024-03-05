@@ -394,7 +394,51 @@ Note that
 
 -   For scales with [only 2 items]{.underline}, composite scores
     (average/total) are calculated on a [case by case basis]{.underline}
+# Arrest Data 
 
+*<MARIA> INSERT BRIEF DESCRIPTION *
+
+```{r arrest-data-table, results = 'asis'}
+#create table of info
+arrest_data_df <- data.frame(
+  Variable = c( "LastOffAge", "LastOffAgeWith1", "F18OffAge",  "F18OffAgeWith1",  "FF18OffAge", "NumAdultFelony",  "Num14NewOff",  "Num14NewOffWith1", "Num14NewFOff", "Post18offseverity", "Post18offseverityWith1", "Wave14offseverity", "Wave14offseverityWith1",  "NumJailPost18", "NumPrisonPost18", "NumIncarPost18", "NumJailWave14", "NumPrisonWave14", "NumIncarWave14",  "NumPost18Off", "NumPost18OffWith1", "AdultDesistWith1", "AdultDesistNo1", "TPDesist_with1andCLSYes"),
+  Description = c(
+            "Age of last offense",
+            "Age of last offense including status offense",
+            "Age of first offense in adulthood",
+            "Age of first offense in adulthood including status offense",
+            "Age of first feloney offense in adulthood",
+            "Total number of Felony in adulthood",
+            "Total number of new offense wave 14",
+            "Total number of new offense including status offense wave 14",
+            "Total number of new feloney offense wave 14",
+            "Serverity in adulthood",
+            "Serverity in adulthood including status offense wave 14",
+            "Serverity wave 14", 
+            "Serverity wave 14 including status offense",
+             "Total number of times incarcerated in Jail post 18 - will remove after finalized data", 
+            "Total number of times incarcerated in Prison psot 18 - will remove after finalized data",
+            "Total number of times incarcerated in adulthood",
+            " will remove after finalized data", 
+            " will remove after finalized data",
+            "Total number of times incarcerated wave 14", 
+            "Total number of offense in adulthood",
+            "Total number of offense in adulthood incluing status offense",
+            "Adult Desist including status offense", 
+            "Adult Desist without status offense",
+            "TP Desist")) 
+
+#create gt table
+arrest_data_df_table <- arrest_data_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Variable ~ px(200)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(arrest_data_df_table)
+
+```
 # Parent Data 
 
 *<MARIA> INSERT BRIEF DESCRIPTION *
@@ -2057,7 +2101,6 @@ print(bsi_label_table)
 
 BSI survey items are presented in the following table:
 
-**Question stem: During the past week, how much were you bothered by...**
 
 ```{r BSI-var-prep}
 # Pull question wording from Qualtrics data
@@ -2090,6 +2133,12 @@ my_gt_table <- my_gt_table %>%
             description = "Description",
             notes = "Notes") %>% 
   apply_tbl_theme() %>% 
+  tab_row_group(label = "During the past week, how much were you bothered by…", 
+                rows = 1:19,
+                id = "set1") %>%
+   tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("set1"))) %>%
   cols_width(description ~ px(300),
              var_name ~ px(100)
              ) %>%
@@ -2330,8 +2379,6 @@ print(cesd2_label_table)
 
 All CES-D survey items are presented in the following table:
 
-**Question stem: During the past week...**
-
 ```{r CESD-var-prep}
 # Pull question wording from qualtrics data
 cesd_word <- qualtrics %>% 
@@ -2371,7 +2418,13 @@ cesd_gt_table <- cesd_gt_table %>%
   apply_tbl_theme() %>% 
   cols_width(notes ~ px(250),
              var_name ~ px(100)) %>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) %>%
+    tab_row_group(label = "During the past week...", 
+                rows = 1:24,
+                id = "set1") %>%
+   tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("set1"))) 
 
 # Print the table
 print(cesd_gt_table)
@@ -4984,7 +5037,7 @@ print(cts_pc_label_table3)
 
 CTS P-C survey items are presented in the following table:
   
-**Question Stem: How often did you do the following in the past year?**
+
 ```{r cts_pc-var-prep}
 # Pull question wording from Qualtrics data
 cts_pc_word <- qualtrics %>% 
@@ -5024,7 +5077,14 @@ cts_pc_gt_table <- cts_pc_gt_table %>%
   cols_width(description ~ px(300),
              var_name ~ px(100)
   ) %>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) %>%
+      tab_row_group(label = "How often did you do the following in the past year?", 
+                rows = 1:24,
+                id = "set1") %>%
+   tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("set1"))) 
+  
 
 # Print the table
 print(cts_pc_gt_table)
@@ -5340,7 +5400,7 @@ CTS_word_long <- CTS_word %>%
 
 This survey was not adminstered for participants who were incarcerated at the time of the assessment. 
 
-Please indicate how many times you did each of these things in the past year, and how many times you partner did them in the past year. 
+
 
 ```{r CTS-var-table, results ='asis'}
 # Create the gt table object and apply generic theme
@@ -5355,7 +5415,16 @@ my_gt_table <- my_gt_table %>%
   cols_width(notes ~ px(150),
              var_name ~ px(100)) %>%
   tab_options(table.width = pct(100))%>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())%>%
+      tab_row_group(label = "Please indicate how many times you did each of these things in the past year, and how many times you partner did them in the past year. ", 
+                rows = 2:21,
+                id = "set2") %>%
+  tab_row_group(label = "",
+                rows = 1,
+                id = "set1") %>%
+   tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("set1", "set2"))) 
 
 # Print the table
 print(my_gt_table)
@@ -6819,7 +6888,6 @@ print(dast_label_table_total)
 
 All DAST survey items are presented in the following table:
 
-**Question Stem: This questionnaire deals with certain drug use and social behavior patterns. Please answer each of the items truthfully by stating `Yes` or `No`, thinking about the past 6 months.**
 
 ```{r DAST-var-prep}
 # Pull question wording from qualtrics data
@@ -6865,7 +6933,16 @@ dast_gt_table <- dast_gt_table %>%
   cols_width(notes ~ px(150),
              var_name ~ px(100)) %>%
   tab_options(table.width = pct(100))%>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())%>%
+      tab_row_group(label = "This questionnaire deals with certain drug use and social behavior patterns. Please answer each of the items truthfully by stating Yes or No, thinking about the past 6 months.", 
+                rows = 2:21,
+                id = "set2") %>%
+  tab_row_group(label = "",
+                rows = 1,
+                id = "set1") %>%
+   tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("set1", "set2"))) 
  
 
 # Print the table
@@ -7285,7 +7362,7 @@ print(mhc_label_table)
 
 MHC survey items are presented in the following table:
 
-**Question stem: During the past month, how often did you feel...**
+**Question stem: **
 
 ```{r mhc-var-prep}
 # Pull question wording from qualtrics data
@@ -7317,7 +7394,14 @@ mhc_gt_table <- mhc_gt_table %>%
   apply_tbl_theme() %>% 
   cols_width(notes ~ px(150),
              var_name ~ px(100)) %>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())%>%
+      tab_row_group(label = "During the past month, how often did you feel...", 
+                rows = 1:14,
+                id = "set1") %>%
+   tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("set1"))) 
+ 
 
 # Print the table
 print(mhc_gt_table)
