@@ -2421,7 +2421,7 @@ sex <- tpw_raw%>%
         .x == "1 - heterosexual (attracted to the opposite sex)" ~ "1",
         .x == "2 - gay or lesbian (attracted to the same sex)" ~ "2",
         .x == "3 - bi-sexual (attracted to both males and females)" ~ "3",
-        .x == "4 - Other: Please describe" ~"4",
+        .x == "4 - Other: Please describe" ~"4", # this is recode to Pansexual in later code 
         
         # sex_talk_safesex ~ s11
         # sex_talk_safesex_other_person ~ s16
@@ -2639,11 +2639,19 @@ sex <- sex %>%
   ) %>%
   select(-s32_1, -s32_2, -s32_3, -s32_4, -s32_5, -s32_6, -s32_7, -s32_8, -s32_9, -s32_77) # removing -77 because no one endorsed
 
+# recode the s10_4_text to s10 
+sex <- sex %>%
+  mutate_at(vars(s10), ~ ifelse(s10_4_text %in% c("Non-discriminatory, \"I am not really sure, maybe pan sexual\"", "Pansexual"), 4, .)) %>%
+  mutate_at(vars(s10), ~ ifelse(s10_4_text %in% c("Lesbian but open-minded."), 2, .)) %>% # 2 for lesbian/gay
+  mutate_at(vars(s10), ~ ifelse(s10_4_text %in% c("Currently, male-leaning bisexual."), 3, .)) %>% # 3 for bi-sexual
+  # add data from cint-relation cintq3 for incarcerated TC 
+  mutate(s1 = ifelse(id == "HR181", 1, s1))
 
 ```
 
 There are missing data and missing rule would be applied in future computations
 ```{r sex_missing}
+
 sex <- sex %>% 
   # for incarcerated TC, this survey wasn't shown 
    mutate_at(vars(s_pregnancy_screen:s48), ~case_when(id %in% c("HR211", "HR181", "P819") & is.na(.)  ~ "-55", TRUE ~ .)) %>%
@@ -2706,39 +2714,34 @@ sex <- sex %>%
   relocate(s25, .before = s25_8_text) %>%
   relocate(s32, .before = s33) %>%
   relocate(62:69, .after = 37) %>%
-  relocate(70:78, .after = 53 ) 
+  relocate(70:78, .after = 53 )   %>%
+# remove s10_4_text
+  select(-s10_4_text) 
+
+
+
 
 
 # before next steps, editing dates so only mm/dddd and DD 01 for s2, s5, and s7
 
 ## Function to convert character to date with day to 01
-
-convert_to_date <- function(x) {
-  parsed_date <- tryCatch({
-    # Try parsing as "MM/YYYY" format
-    parsed_date <- ifelse(grepl("^\\d{2}/\\d{4}$", x),
-                          as.character(as.Date(paste0("01/", x), format = "%d/%m/%Y")),
-                          NA)
-    # Try parsing as "DD/MM/YYYY" format if previous parsing failed
-    parsed_date[is.na(parsed_date)] <- ifelse(grepl("^\\d{2}/\\d{2}/\\d{4}$", x),
-                                             as.character(as.Date(x, format = "%d/%m/%Y")),
-                                             NA)
-    # Set day values to the start of the month (01)
-    parsed_date <- ifelse(!is.na(parsed_date),
-                          format(as.Date(parsed_date), "%Y-%m-01"),
-                          NA)
-    parsed_date
-  }, error = function(e) NA)
-  return(parsed_date)
+convert_to_date <- function(date_str) {
+  if (grepl("^-?\\d{1,2}/\\d{4}$", date_str)) {  # Check if mm/yyyy format
+    parts <- unlist(strsplit(date_str, "/"))
+    return(paste("01", sprintf("%02d", as.numeric(parts[1])), parts[2], sep = "/"))
+  } else if (grepl("^-?\\d{1,2}/\\d{1,2}/\\d{4}$", date_str)) {  # Check if mm/dd/yyyy format
+    parts <- unlist(strsplit(date_str, "/"))
+    return(paste(sprintf("%02d", as.numeric(parts[1])), parts[2], parts[3], sep = "/"))
+  } else {
+    return(date_str)  # Return unchanged if not in expected formats
+  }
 }
 
-
-
-
 # Apply the function to the 's2' and 's5' and 's7' columns
-sex$s2 <- convert_to_date(sex$s2)
-sex$s5 <- convert_to_date(sex$s5)
-sex$s7 <- convert_to_date(sex$s7)
+
+sex$s2 <- sapply(sex$s2, convert_to_date)
+sex$s5 <- sapply(sex$s5, convert_to_date)
+sex$s7 <- sapply(sex$s7, convert_to_date)
 
 
 ```
@@ -3164,7 +3167,7 @@ cint_substance$cint84 <- apply(cint_substance[, c("cint84_1", "cint84_2", "cint8
 ```{r cint_subs_missing}
 cint_substance <- cint_substance %>%
        # TCs who were incarcerated weren't administered this survey
-  mutate_at(vars(cint39:cint84), ~ ifelse(id %in% c("HR211", "HR181", "P819"), -55, .)) %>%
+  mutate_at(vars(cint39:cint84), ~ ifelse(id %in% c("HR211", "HR181", "P819", "HR218"), -55, .)) %>%
   # if cint_pregnancy_screen is yes/1, cint40:cint43 were not asked 
    mutate_at(vars(cint39:cint84), ~case_when(cint_pregnancy_screen == 1 ~ "-55", TRUE ~ .)) %>%
   # if cint39 is 0/No or -77 cint40:cint42 were not asked 
