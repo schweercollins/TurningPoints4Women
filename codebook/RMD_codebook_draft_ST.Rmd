@@ -259,15 +259,17 @@ apply_labtab_theme <- function(table) {
 This study is a longitudinal extension which aims to further our understanding of trajectories of adult offending in a sample of 158 (n = 8 participants are now deceased) women who participated in a randomized intervention trial aimed at reducing conduct problems and delinquency during adolescence. The study was originally supported and funded through the Oregon Youth Authority and by Grant R01 DA015208 (P.I., Patricia Chamberlain, Ph.D.) from the National Institute on Drug Abuse, and by Grant R01 MH054257 (P.I., Patricia Chamberlain, Ph.D.) from the National Institute of Mental Health. In the original study, juvenile justice involved girls ages 13 – 17 who had been referred for out-of-home placement due to chronic delinquency were randomly assigned to participate in services as usual (group care; GC) or in Treatment Foster Care Oregon (TFCO, Chamberlain, 2003). The first extension of this longitudinal study was funded by Grant R01 DA024672 (P.I., Leslie Leve, Ph.D.). That study examined the developmental pathways of risk for juvenile justice involved girls into young adulthood with the original participants who were at the time, ages 16-29 years.
 
 
-## Study Goals (udpate these TODO Maria)
+## Study Goals 
 
--   **Goal 1** Explore the constellation of risk factors and risk processes in the lives of adult women with histories in the juvenile justice system   
+-   **Goal 1** Explore the constellation of risk factors and risk processes in the lives of adult women with histories in the juvenile justice system 
 
--   **Goal 2** Understand how justice involvement is related to women's health outcomes, including biological indicators of health and stress.
+-   **Goal 2** Identify potential turning points across adulthood in the lives of adult women with histories in the juvenile justice system. 
 
--   **Goal 3** Examine the potential long-term impact of Treatment Foster Care Oregon, a gender-specific intervention. 
+-   **Goal 3** Understand how justice involvement is related to women's health outcomes, including biological indicators of health and stress.
 
- Maria add references if needed
+-   **Goal 4** Examine the potential long-term impact of Treatment Foster Care Oregon, a gender-specific intervention. 
+
+
 *Additional info to possibly include: links to
 supplemental materials, any disclaimers/info we think data users need to
 know to use these data accurately* Shaina/Min anything here? I think we have disclaimers and can use them in each measure, but anything overall?
@@ -275,7 +277,7 @@ One I am thinking of is that some publications contain data from other waves.
 
 ### Data and Study Author Contact
 
-If you have questions about the data or study, please contact the Principal Investigator, Maria Schweer-Collins through email and please use the subject "NACJD Turning Points Data Query" in the subject line. You can contact Maria through email at mariasc@iastate.edu.
+If you have questions about the data or study, please contact the Principal Investigator, Maria Schweer-Collins (mariasc@iastate.edu) through email and please use the subject "NACJD Turning Points Data Query" in the subject line.
 
 ### Credit Author Statement
 
@@ -283,9 +285,20 @@ If you have questions about the data or study, please contact the Principal Inve
 
 ## Data Collection Activities in this Wave  
 
-There were several data collection activities. First, one telephone interview was conducted with original participants (*M* = 18 years after each participants’ baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. The second part of the assessment was a 1 hour biological and physical health assessment. While prior waves collected limited information on self-reported health, this longitudinal extension also included a more robust battery of health conditions and a robust battery of 12 biomarkers, used to assess allostatic load, including cardiovascular, metabolic, and immune system function. This biological assessment was conducted either in person or virtually due to COVID-19 restrictions. Last, arrest records from the adult corrections system were collected. The age at last known arrest, number of arrests, whether each resulted in incarceration, and the length of incarceration was coded from the records and archived in aggregate to ensure that records are not identifiable.
+There were two assessment activities. 
 
-Maria insert about retention; ns for type of data; caveat publications using data from all waves
+**Telephone Interview**
+
+-   First, one telephone interview was conducted with original participants (*M* = 18 years after each participants’ baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. 
+-   In this assessment wave, we consented 133 participants of the 158 original participants who are living (84% retention). Of those, 130 participants completed the telephone portion of the assessment. Additionally, we were able to partner with the state department of corrections and interview all participants who were currently incarcerated in prison systems (*n* = 4).
+
+**Biological Assessment**
+
+-   The second part of the assessment was a 1 hour biological and physical health assessment. While prior waves collected limited information on self-reported health, this longitudinal extension also included a more robust battery of health conditions and a robust battery of 12 biomarkers, used to assess allostatic load, including cardiovascular, metabolic, and immune system function. This biological assessment was conducted either in person or virtually due to COVID-19 restrictions. 
+-   123 participants completed the biological assessment. Two of the four participants who were incarcerated also completed a small portion of the *self-report* (not biological) measures from the biological assessment, thus our total analytic file for the biological assessment is *n* = 125.  
+
+
+  
 
 ## Data and Codebook Guide
 
@@ -394,84 +407,9 @@ Note that
 
 -   For scales with [only 2 items]{.underline}, composite scores
     (average/total) are calculated on a [case by case basis]{.underline}
-# Arrest Data 
 
-*<MARIA> INSERT BRIEF DESCRIPTION *
 
-```{r arrest-data-table, results = 'asis'}
-#create table of info
-arrest_data_df <- data.frame(
-  Variable = c( "LastOffAge", "LastOffAgeWith1", "F18OffAge",  "F18OffAgeWith1",  "FF18OffAge", "NumAdultFelony",  "Num14NewOff",  "Num14NewOffWith1", "Num14NewFOff", "Post18offseverity", "Post18offseverityWith1", "Wave14offseverity", "Wave14offseverityWith1",  "NumJailPost18", "NumPrisonPost18", "NumIncarPost18", "NumJailWave14", "NumPrisonWave14", "NumIncarWave14",  "NumPost18Off", "NumPost18OffWith1", "AdultDesistWith1", "AdultDesistNo1", "TPDesist_with1andCLSYes"),
-  Description = c(
-            "Age of last offense",
-            "Age of last offense including status offense",
-            "Age of first offense in adulthood",
-            "Age of first offense in adulthood including status offense",
-            "Age of first feloney offense in adulthood",
-            "Total number of Felony in adulthood",
-            "Total number of new offense wave 14",
-            "Total number of new offense including status offense wave 14",
-            "Total number of new feloney offense wave 14",
-            "Serverity in adulthood",
-            "Serverity in adulthood including status offense wave 14",
-            "Serverity wave 14", 
-            "Serverity wave 14 including status offense",
-             "Total number of times incarcerated in Jail post 18 - will remove after finalized data", 
-            "Total number of times incarcerated in Prison psot 18 - will remove after finalized data",
-            "Total number of times incarcerated in adulthood",
-            " will remove after finalized data", 
-            " will remove after finalized data",
-            "Total number of times incarcerated wave 14", 
-            "Total number of offense in adulthood",
-            "Total number of offense in adulthood incluing status offense",
-            "Adult Desist including status offense", 
-            "Adult Desist without status offense",
-            "TP Desist")) 
-
-#create gt table
-arrest_data_df_table <- arrest_data_df %>%
-  gt() %>% 
-apply_tbl_theme() %>% 
-  cols_width(Variable ~ px(200)) %>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
-
-#print table
-print(arrest_data_df_table)
-
-```
-# Parent Data 
-
-*<MARIA> INSERT BRIEF DESCRIPTION *
-
-```{r parent-data-table, results = 'asis'}
-#create table of info
-parent_data_df <- data.frame(
-  Variable = c("num_wv14_preg", "num_wv14_births", "num_wv14_preg_loss", "num_wv14_abortion", "num_wv14_miscarriage", "num_wv14_stillbirth", 
-            "num_priorbirth_wv14", "num_prior_child_archive", "num_step_wv14", "pregnant_wv14_yes"),
-  Description = c("Total number of pregnancies wave 14",
-            "Total number of child births wave14",
-            "Total number of pregnancy losses wave 14",
-            "Total number of abortions wave 14",
-            "Total number of miscarriages wave 14",
-            "Total number of stillbirths wave 14",
-            "Total number of reported child births prior to wave 14",
-            "Total number of reported children prior to wave 14",
-            "Total number of step children wave 14",
-            "Yes participant currently pregnant when assessment is conduct")) 
-
-#create gt table
-parent_data_df_table <- parent_data_df %>%
-  gt() %>% 
-apply_tbl_theme() %>% 
-  cols_width(Variable ~ px(200)) %>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
-
-#print table
-print(parent_data_df_table)
-
-```
-
-# CLS
+# Characteristics of Living
 *<MARIA> INSERT BRIEF DESCRIPTION *
 
 ```{r cls-table, results = 'asis'}
@@ -907,8 +845,8 @@ cint_relation_word_long <- cint_relation_word  %>%
                                  in the past 6 months?", description)) %>%     
     mutate(description = if_else(var_name == "cint31_7_text", "How would you describe the way your partner smokes pot, 
                                  on average, in the past 6 months? 'Other' selected, please specify", description)) %>%
-    mutate(description = if_else(var_name == "cint31_7_text", "How would you describe the way your partner uses hard drugs, 
-                                 on average, in the past 6 months? ", description)) %>%    
+    mutate(description = if_else(var_name == "cint32", "How would you describe the way your partner uses hard drugs, on average, in the past 6 months?", description)) %>% 
+  mutate(description = if_else(var_name == "cint35", "About how many close friends do you have?", description)) %>% 
     mutate(description = if_else(var_name == "cint32_7_text", "How would you describe the way your partner uses hard drugs, 
                                  on average, in the past 6 months? 'Other' selected, please specify", description)) %>%    
     mutate(description = if_else(var_name == "cint33", "What is the highest level of school your partner has finished so far?", description)) %>%  
@@ -1094,7 +1032,7 @@ cint_relation_tbl
 
 ### CINT-Sub Description
 
-This set of questions was administered as part of the CINT focus on the participant's substance use. All questions for substance use were drawn from an unpublished measure  but are aligned with typical retrospective reports of substance use similar to the widely used Timeline Follow-Back procedure (Sobell and Sobell, 1992).
+This set of questions was administered as part of the CINT's focus on the participant's substance use. All questions for substance use were drawn from an unpublished measure  but are aligned with typical retrospective reports of substance use similar to the widely used Timeline Follow-Back procedure (Sobell and Sobell, 1992).
 
 -   There are 49 items. 
 
@@ -1119,7 +1057,7 @@ References:
   
 #### Value Labels and Survey Items 
   
-All CINT-Sub variables have multiple responses options, value labels for each variable can be found in the following table:
+All CINT-Sub variables have multiple response options, value labels for each variable can be found in the following table:
   
   
 ```{r CINT-substance-var-prep}
@@ -1148,7 +1086,7 @@ cint_substance_word_long <- cint_substance_word %>%
     mutate(description = if_else(var_name == "cint31", "How would you describe the way your partner smokes pot, on average, 
                                  in the past 6 months?", description)) %>%     
     mutate(description = if_else(var_name == "cint48", "Thinking about all types of alcohol, like beer, wine, or hard liquor, how many drinks have you usually 
-                                 had at one time in the past 6 months? _______ Drinks in the past 6 months", description)) %>%
+                                 had at one time in the past 6 months?", description)) %>%
     mutate(description = if_else(var_name == "cint49", "About how much time would you usually take to drink that? ______ Minutes", description)) %>%    
     mutate(description = if_else(var_name == "cint51", "What is the largest number of drinks you have had (the most drinks you have had), on at least 2 
                                  different days or occasions in the last 6 months? ______ Drinks", description)) %>%    
@@ -1173,10 +1111,10 @@ cint_substance_word_long <- cint_substance_word %>%
                                                 "cint55", "cint57", "cint59", "cint62_6_text", "cint67", "cint69", "cint71", "cint73", "cint75" , 
                                                 "cint77", "cint79", "cint81", "cint83"), "Open Text Entry", `Value`)) %>%
       mutate(`Value` = if_else(var_name %in% c( "cint46"), "0 = Not at all
-        1 = A little drunk
-        2 = Quite drunk
-        3 = Very drunk
-      -77 = Decline to Answer", `Value`)) %>%
+                                                          \n1 = A little drunk
+                                                          \n2 = Quite drunk
+                                                          \n3 = Very drunk
+                                                          \n-77 = Decline to Answer", `Value`)) %>%
       mutate(`Value` = if_else(var_name %in% c( "cint47"), "1 = Drank alcohol only a few times during the past 6 months (up to 5 times)
                                                         \n 2 = Drink regularly for a few weeks or more, then don't for a few weeks or more or drank for a period and then stopped altogether
                                                         \n 3 = Drink about once a month
@@ -1205,7 +1143,7 @@ cint_substance_word_long <- cint_substance_word %>%
                                                           \n 3 = Friend
                                                           \n 4 = Family member
                                                           \n 5 = Romantic partner
-                                                          \n 6 = Other
+                                                          \n 6 = Other: Specify
                                                           \n -77 = Decline to Answer", `Value`)) %>%
   mutate(var_name = ifelse(var_name == "cintpregnancy screen", "cint_pregnancy_screen", var_name))
 
@@ -2033,6 +1971,53 @@ eds_tbl <- eds_summary_data %>%
 eds_tbl
 ```
 
+## Adult Criminal Legal System Records Data
+
+-   Information on arrests, charges, dispositions, and incarceration were sought from the adult criminal legal system in each state/county where the participant had reported residing since the last assessment wave. For each participant, all identified offenses (charges) were collated, the offense date, arrest status for each offense, disposition(s), when available were coded. When fines,  jail, prison, or probation were sentenced and the information was provided, the amount/ length of the sentence was recorded. Offenses were also coded according to the type of offense and severity of the offense (e.g., status, misdemeanor, felony) according to methods that have been used in the history of this longitudinal study (Arrest Codes; OSLC unpublished coding scheme). Records were sought for 100% of participants. 
+
+-   We archived these data in aggregate to preserve participant confidentiality. See computed variables below.  
+
+```{r arrest-data-table, results = 'asis'}
+#create table of info
+arrest_data_df <- data.frame(
+  Variable = c( "LastOffAge", "LastOffAgeWith1", "F18OffAge",  "F18OffAgeWith1",  "FF18OffAge", "NumAdultFelony",  "Num14NewOff",  "Num14NewOffWith1", "Num14NewFOff", "Post18offseverity", "Post18offseverityWith1", "Wave14offseverity", "Wave14offseverityWith1",  "NumJailPost18", "NumPrisonPost18", "NumIncarPost18", "NumJailWave14", "NumPrisonWave14", "NumIncarWave14",  "NumPost18Off", "NumPost18OffWith1", "AdultDesistWith1", "AdultDesistNo1", "TPDesist_with1andCLSYes"),
+  Description = c(
+            "Age of last offense",
+            "Age of last offense including status offense",
+            "Age of first offense in adulthood",
+            "Age of first offense in adulthood including status offense",
+            "Age of first feloney offense in adulthood",
+            "Total number of Felony in adulthood",
+            "Total number of new offense wave 14",
+            "Total number of new offense including status offense wave 14",
+            "Total number of new feloney offense wave 14",
+            "Serverity in adulthood",
+            "Serverity in adulthood including status offense wave 14",
+            "Serverity wave 14", 
+            "Serverity wave 14 including status offense",
+             "Total number of times incarcerated in Jail post 18 - will remove after finalized data", 
+            "Total number of times incarcerated in Prison psot 18 - will remove after finalized data",
+            "Total number of times incarcerated in adulthood",
+            " will remove after finalized data", 
+            " will remove after finalized data",
+            "Total number of times incarcerated wave 14", 
+            "Total number of offense in adulthood",
+            "Total number of offense in adulthood incluing status offense",
+            "Adult Desist including status offense", 
+            "Adult Desist without status offense",
+            "TP Desist")) 
+
+#create gt table
+arrest_data_df_table <- arrest_data_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Variable ~ px(200)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(arrest_data_df_table)
+
+```
 
 # Mental Health/Psychological
 
@@ -2553,7 +2538,7 @@ ggarrange(p_cesd_dep_symp) %>%
 
 ### CIQ Description
 
-The CIQ is self-report survey used to assess the financial, resource, and psychological impacts of the COVID-19 pandemic.
+The CIQ is a self-report survey used to assess the financial, resource, and psychological impacts of the COVID-19 pandemic.
 
 *   For the present study, 3 items from the CIQ were collected in order to construct the psychological impacts subscale. We made this decision because data collection launched in the COVID-19 pandemic, whereas prior waves occurred before the onset of the COVID-19 pandemic.
 
@@ -3433,16 +3418,16 @@ All IBQ variables have the same response options.
 # Pull question wording from qualtrics data
 ibq_word <- qualtrics %>% 
   select(starts_with("ibq"))%>%
-  mutate(ibq10_school = "Part of question ibq10: Does TC select School/University/College") %>%
-  mutate(ibq10_juvenile_justice = "Part of question ibq10: Does TC select Juvenile Justice
+  mutate(ibq10_school = "Recoded value obtained from ibq10: Yes, TC selected School/University/College") %>%
+  mutate(ibq10_juvenile_justice = "Recoded value obtained from ibq10: Yes, TC selected Juvenile Justice
 ") %>%
-  mutate(ibq10_legal_system = "Part of question ibq10: Does TC select Legal System") %>%
-  mutate(ibq10_police = "Part of question ibq10: Does TC select Police") %>%
-  mutate(ibq10_medical = "Part of question ibq10: Does TC select Medical or Mental Health Clinic") %>%
-  mutate(ibq10_church = "Part of question ibq10: Does TC select Church") %>%
-  mutate(ibq10_foster_care = "Part of question ibq10: Does TC select Foster Care") %>%
-  mutate(ibq10_child_welfare = "Part of question ibq10: Does TC select Child Welfare") %>%
-  mutate(ibq10_other = "Part of question ibq10: Does TC select Other") %>%
+  mutate(ibq10_legal_system = "Recoded value obtained from ibq10: Yes, TC selected Legal System") %>%
+  mutate(ibq10_police = "Recoded value obtained from ibq10: Yes, TC selected Police") %>%
+  mutate(ibq10_medical = "Recoded value obtained from ibq10: Yes, TC selected Medical or Mental Health Clinic") %>%
+  mutate(ibq10_church = "Recoded value obtained from ibq10: Yes, TC selected Church") %>%
+  mutate(ibq10_foster_care = "Recoded value obtained from ibq10: Yes, TC selected Foster Care") %>%
+  mutate(ibq10_child_welfare = "Recoded value obtained from ibq10: Yes, TC selected Child Welfare") %>%
+  mutate(ibq10_other = "Recoded value obtained from ibq10: Yes, TC selected Other") %>%
   relocate(IBQ10_9_TEXT, .after = "ibq10_other") %>%
   slice(1)
 
@@ -3964,7 +3949,7 @@ ggarrange(p_pct_preg, p_pct_childbirth + rremove("ylab")) %>%
 
 ### PRSS Description
 
-The PRSS is a brief 5-item questionnaire designed to assess the construct of posttraumatic risk-seeking (Kerig, 2019) which proposes that, following trauma exposure, some individuals, particularly youth, engage in behaviors that that involve fear-defiance, rushing toward danger, and the cultivation of risky situations that might result in harm to themselves or others. This description was taken from the measure documentation. 
+The PRSS is a brief 5-item questionnaire designed to assess the construct of posttraumatic risk-seeking (Kerig, 2019) which proposes that, following trauma exposure, some individuals, particularly youth, engage in behaviors that involve fear-defiance, rushing toward danger, and the cultivation of risky situations that might result in harm to themselves or others. This description was taken from the measure documentation. 
 
 -   Please note that because PRSS is hypothesized to follow from trauma, individuals who do not endorse a trauma exposure will not have valid scores on the measure. Although our study appended the PRSS to other trauma indices, no decision rules were built in, thus individuals who analyze these data should be sure to check variable `lec_total_happen` and `lec_total_witness` to ensure that trauma exposure has occurred and that PRSS data are valid for analysis. 
 
@@ -4779,7 +4764,8 @@ The SOCINF-G assesses partner influences on delinquent or risky behaviors. There
 -   Participants who reported being in a relationship in the past six months responded to this survey (`socinf_general_screener` = yes) whereas participants who were not in a relationship in the past six months skipped this survey (`-55` values).
 
 Reference:
-[@capaldi2003](here)
+
+-   Capaldi, D. M., Kim, H.K., & Wilson, J. (2002). Social Influence (General and Substance use). Unpublished OSLC instrument. (Available from OSLC, 10 Shelton McMurphey Blvd., Eugene, OR 97401.)
   
 ### SOCINF-G Variables
   
@@ -4808,6 +4794,7 @@ socinf_gen_word_long <- socinf_gen_word %>%
          var_name = str_to_lower(var_name)) %>%
   # Edits Variable description and value
   mutate(description = if_else(var_name == "sg13", "In general, is your partner against using tobacco (smoke or chew)?", description)) %>%
+  mutate(description = if_else(var_name == "sg13a", "In general, is your partner against using tobacco (smoke or chew)?", description)) %>%
   mutate(description = if_else(var_name == "socinf_general_screener", "Has the participant been in a (romantic) relationship in the past 6 months?", description)) %>%
  
   mutate(Value = "") %>%
@@ -4918,8 +4905,7 @@ The Conflict Tactics Scale – Parent Child (CTS-PC) is a 23-item questionnaire 
 
 
 
-Reference:
-(@straus1998identification)[https://files.eric.ed.gov/fulltext/ED411251.pdf]
+Reference:[@straus1998identification](https://files.eric.ed.gov/fulltext/ED411251.pdf)
   
 ### CTS P-C Variables
   
@@ -5079,11 +5065,17 @@ cts_pc_gt_table <- cts_pc_gt_table %>%
   ) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) %>%
       tab_row_group(label = "How often did you do the following in the past year?", 
-                rows = 1:24,
+                rows = 1:15,
                 id = "set1") %>%
+  tab_row_group(label = "How often did you do the following in the past week?", 
+                rows = 16:19,
+                id = "set2") %>%
+  tab_row_group(label = "How often did you do the following in the past year?", 
+                rows = 20:24,
+                id = "set3") %>%
    tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
                          cell_borders(sides = c("left", "right", "top", "bottom"))),
-            locations = cells_row_groups(groups = c("set1"))) 
+            locations = cells_row_groups(groups = c("set1", "set2", "set3"))) 
   
 
 # Print the table
@@ -5946,7 +5938,7 @@ dyadc_gt_table <- gt(dyadc_word_long)
 # Table-specific formatting (col width, names)
 dyadc_gt_table <- dyadc_gt_table %>% 
   apply_tbl_theme() %>% 
-  tab_row_group(label = "Please indicate if items below were problems in your relationships in the past few weeks.", 
+  tab_row_group(label = "Please indicate if the following items were problems in your relationships in the past few weeks.", 
                 rows = 29:32,
                 id = "set4") %>%
   tab_row_group(label = "Thinking about the past 6 months,how often do you…", 
@@ -5955,7 +5947,7 @@ dyadc_gt_table <- dyadc_gt_table %>%
   tab_row_group(label = "In the past 6 months, how often. . .", 
                 rows = 23:24,
                 id = "set2") %>%
-  tab_row_group(label = "Thinking about the past 6 months, how often do you. . . ", 
+  tab_row_group(label = "Most people have disagreements in their relationships. Please indicate below the approximate extent of agreement or disagreement between you and your (romantic) partner for each item on the following list thinking about the past 6 months.", 
                 rows = 1:22,
                 id = "set1")%>%
   cols_label(var_name = "Variable", 
@@ -6508,6 +6500,37 @@ ggarrange(p_arq_model_s, p_arq_model_o
 ```
 
 
+## Pregnancy and Parenting Data 
+
+Data on pregnancy and childbirth have been obtained prospectively at each wave of the study. Participants self-reported this information in the current study. The presence or absence of a pregnancy, stillbirth, induced abortion, miscarriage, and live birth was coded as '1 = yes1 and '0 = no' to indicate presence or absence of a pregnancy or pregnancy outcome that occurred since the last time we had interviewed each participant. We also provided information from the longitudinal data in aggregate to document the total number of children previously born to the sample. Additional variables computed are indicated below.  
+
+```{r parent-data-table, results = 'asis'}
+#create table of info
+parent_data_df <- data.frame(
+  Variable = c("num_wv14_preg", "num_wv14_births", "num_wv14_preg_loss", "num_wv14_abortion", "num_wv14_miscarriage", "num_wv14_stillbirth", 
+            "num_priorbirth_wv14", "num_prior_child_archive", "num_step_wv14", "pregnant_wv14_yes"),
+  Description = c("Total number of pregnancies wave 14",
+            "Total number of child births wave14",
+            "Total number of pregnancy losses wave 14",
+            "Total number of abortions wave 14",
+            "Total number of miscarriages wave 14",
+            "Total number of stillbirths wave 14",
+            "Total number of reported child births prior to wave 14",
+            "Total number of reported children prior to wave 14",
+            "Total number of step children wave 14",
+            "Yes participant currently pregnant when assessment is conduct")) 
+
+#create gt table
+parent_data_df_table <- parent_data_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Variable ~ px(200)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(parent_data_df_table)
+
+```
 
 # Services
 
@@ -7150,7 +7173,8 @@ The SOCINF-S assesses partner influences on substance use behaviors. There are 7
 -   Participants responded to this questionnaire if they met two criteria. First, participants must have reported being in a relationship in the past six months responded to this survey (`socinf_relationship_screener` = "Yes") and could not be currently pregnant (`socinf_preg_screener` = "No"). Participants who did not meet these criteria skipped past this survey (`-55` values).
 
 Reference:
-[@capaldi2003](here)
+
+-   Capaldi, D. M., Kim, H.K., & Wilson, J. (2002). Social Influence (General and Substance use). Unpublished OSLC instrument. (Available from OSLC, 10 Shelton McMurphey Blvd., Eugene, OR 97401.)
 
 ## SOCINF-S Variables
   
