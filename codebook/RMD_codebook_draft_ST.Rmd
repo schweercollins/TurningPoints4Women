@@ -1610,8 +1610,9 @@ ell_word_long <- ell_word %>%
          description = str_replace(description, "^\\d+a.\\s*", ""),
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>% 
-  mutate(description = gsub("ASSESSOR NOTE.*","",description))# %>%
-  # slice(1:78)
+  mutate(description = gsub("ASSESSOR NOTE.*","",description)) %>%
+  mutate(description = if_else(var_name == "ell10", "How many times in the last 6 months have you attacked someone with the idea
+of seriously hurting or killing that person?", description))
 
 ```
 
@@ -2143,7 +2144,6 @@ Variables were constructed by averaging the included items.
 
 ```{r bsi alpha, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 #Calculate internal reliability 
-
 bsi_alpha_som <-
   complete %>%
   select(bsi2,bsi3,
@@ -2376,6 +2376,8 @@ cesd_word_long <- cesd_word %>%
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "During the past week, ", ""),
+         description = str_replace(description, "In the past 6 months, ", ""),
          var_name = str_to_lower(var_name), 
          #description = case_when(var_name == "c21" ~ "In the past 6 months, have you ever thought about killing yourself?"),
          notes = case_when(var_name == "c4" ~ "This item should be reverse scored. `c4_r` is reverse scored",
@@ -2386,7 +2388,7 @@ cesd_word_long <- cesd_word %>%
                            var_name %in% c("c22", "c23") ~ "Skipped if answered No for `c21`. \nThis was not asked for participants who were incarcerated at the time of the assessment",
                            var_name %in% c("c21","c24") ~ "This was not asked for participants who were incarcerated at the time of the assessment",
                            TRUE ~ as.character(""))) %>%
-  mutate(description = if_else(var_name == "c21", "In the past 6 months, have you ever thought about killing yourself?", description))
+  mutate(description = if_else(var_name == "c21", "have you ever thought about killing yourself?", description))
   
 
 ```
@@ -2404,12 +2406,15 @@ cesd_gt_table <- cesd_gt_table %>%
   cols_width(notes ~ px(250),
              var_name ~ px(100)) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) %>%
+  tab_row_group(label = "In the past 6 months..",
+                rows = 21:24,
+                id = "set2") %>%
     tab_row_group(label = "During the past week...", 
-                rows = 1:24,
+                rows = 1:20,
                 id = "set1") %>%
    tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
                          cell_borders(sides = c("left", "right", "top", "bottom"))),
-            locations = cells_row_groups(groups = c("set1"))) 
+            locations = cells_row_groups(groups = c("set1","set2"))) 
 
 # Print the table
 print(cesd_gt_table)
@@ -4530,7 +4535,7 @@ sex_word_long <- sex_word %>%
   mutate(`Value` = if_else(var_name %in% c( "s10"), "1 = heterosexual (attracted to the opposite sex)
                                                            \n 2 = gay or lesbian (attracted to the same sex)
                                                            \n 3 = bi-sexual (attracted to both males and females)
-                                                           \n 4 = Other: Please describe
+                                                           \n 4 = Pansexual (recoded from originally selected other)
                                                            \n -77  = Decline to Answer", `Value`)) %>%  # Maria: We might want to remove the number before variable lable
   mutate(`Value` = if_else(var_name %in% c( "s11", "s16"), " 0 = Never
                                                            \n 1 = Rarely
@@ -5064,18 +5069,20 @@ cts_pc_gt_table <- cts_pc_gt_table %>%
              var_name ~ px(100)
   ) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) %>%
-      tab_row_group(label = "How often did you do the following in the past year?", 
-                rows = 1:15,
-                id = "set1") %>%
-  tab_row_group(label = "How often did you do the following in the past week?", 
-                rows = 16:19,
-                id = "set2") %>%
-  tab_row_group(label = "How often did you do the following in the past year?", 
-                rows = 20:24,
+    tab_row_group(label = "How often did you do the following in the past week?", 
+                rows = 16:24,
                 id = "set3") %>%
+    tab_row_group(label = "How often did you do the following in the past year?", 
+                rows = 2:15,
+                id = "set2") %>%
+      tab_row_group(label = "", 
+                rows = 1,
+                id = "set1") %>%
+
+
    tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
                          cell_borders(sides = c("left", "right", "top", "bottom"))),
-            locations = cells_row_groups(groups = c("set1", "set2", "set3"))) 
+            locations = cells_row_groups(groups = c("set3", "set2", "set1"))) 
   
 
 # Print the table
@@ -7386,8 +7393,6 @@ print(mhc_label_table)
 
 MHC survey items are presented in the following table:
 
-**Question stem: **
-
 ```{r mhc-var-prep}
 # Pull question wording from qualtrics data
 mhc_word <- qualtrics %>% 
@@ -7402,6 +7407,8 @@ mhc_word_long <- mhc_word %>%
                names_to = "var_name",
                values_to = "description") %>% 
   mutate(description = str_replace(description, "^\\d+\\.\\s*", ""),
+         description = str_replace(description, "During the past month,", ""),
+         description = str_to_title(description),
          var_name = str_to_lower(var_name), 
          notes = as.character("")) 
 ```
