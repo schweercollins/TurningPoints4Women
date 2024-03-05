@@ -2208,12 +2208,14 @@ itq_complete <-
     total_only = TRUE,
     scale1 = c("itq1", "itq2"),
     scale2 = c("itq3", "itq4"),
-    scale3 = c("itq5", "itq6")
+    scale3 = c("itq5", "itq6"),
+    scale4 = c("itq7", "itq8", "itq9")
   ) %>%
   rename(
     itq_re_total = total1,
     itq_av_total = total2,
-    itq_th_total = total3
+    itq_th_total = total3,
+    itq_fi_total = total4
   ) %>%
   mutate(
     itq_ptsd_total = (itq_re_total + itq_av_total + itq_th_total)) %>%
@@ -2229,7 +2231,7 @@ itq_complete <-
   # )
 
 itq_complete <- itq_complete %>%
-  select(id, itq_re_total, itq_av_total, itq_th_total) %>%
+  select(id, itq_re_total, itq_av_total, itq_th_total, itq_fi_total, itq_ptsd_total) %>%
   merge(itq, by="id", all.y = TRUE) %>%
   relocate(itq_re_total, itq_av_total, itq_th_total, .after = "itq9")
 ```
