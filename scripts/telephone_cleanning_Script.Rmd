@@ -2126,7 +2126,7 @@ itq <- tpw_raw %>%
         .x == "Quite a bit" ~ "3",
         .x == "Extremely" ~ "4",
         .x == "Decline to Answer" ~ "-55",
-      #  is.na(.x) ~ -99, # if truly missing
+     #   is.na(.x) ~ -99, ## need to figure out how to get this right
         TRUE ~ .x
       )
     )
@@ -2169,8 +2169,8 @@ itq_calc <- itq %>%
     )
   )
 
-# This code can be used to compute diagnoses based on participant endorsing at least one symptom in each cluster
-## 1 selected in the current study because answer scale for participants in the study was 1 = 1-2 times per week symptoms severity, 2 = 3-4 times per week, 3 = daily, 4 = multiple times daily; consistent with other trauma measures
+# This code can be used to compute diagnoses based on participant endorsing at least one symptom in each cluster per ITQ guidelines
+## 1 selected in the current study because answer scale for participants in the study was 1 = 1-2 times per week symptoms severity, 2 = 3-4 times per week, 3 = daily, 4 = multiple times daily; consistent with other trauma measures it would be an underestimate to not include 1; however, measure is also potentially flawed because there is only 0 or 1-2 times per week. Researchers could use more stringent criteria of 2 for symptom manifestation.
 itq_calc <- itq_calc %>%
   mutate(
     itq_re_dx = case_when(
@@ -2231,9 +2231,9 @@ itq_complete <-
   # )
 
 itq_complete <- itq_complete %>%
-  select(id, itq_re_total, itq_av_total, itq_th_total, itq_fi_total, itq_ptsd_total) %>%
+  select(id, itq_re_total, itq_av_total, itq_th_total, itq_fi_total, itq_ptsd_total, itq_pstd_dx) %>%
   merge(itq, by="id", all.y = TRUE) %>%
-  relocate(itq_re_total, itq_av_total, itq_th_total, .after = "itq9")
+  relocate(itq_re_total, itq_av_total, itq_th_total, itq_fi_total, itq_ptsd_total, itq_pstd_dx, .after = "itq9")
 ```
 
 
@@ -2856,6 +2856,7 @@ cint_socio <- cint_socio %>%
 # glptx, sex, ethnic, age_14_ex
 cint_socio <- Sociodem_wv14_archive %>%
   select(id, GLPTX, sex, ETHNIC, age_14_ex) %>%
+  rename(glptx = GLPTX, ethnic = ETHNIC) %>%
   merge(cint_socio, by = "id")
 ```
 

@@ -270,16 +270,14 @@ This study is a longitudinal extension which aims to further our understanding o
 -   **Goal 4** Examine the potential long-term impact of Treatment Foster Care Oregon, a gender-specific intervention. 
 
 
-*Additional info to possibly include: links to
-supplemental materials, any disclaimers/info we think data users need to
-know to use these data accurately* Shaina/Min anything here? I think we have disclaimers and can use them in each measure, but anything overall?
-One I am thinking of is that some publications contain data from other waves. 
 
 ### Data and Study Author Contact
 
-If you have questions about the data or study, please contact the Principal Investigator, Maria Schweer-Collins (mariasc@iastate.edu) through email and please use the subject "NACJD Turning Points Data Query" in the subject line.
+If you have questions about the data or study, please contact the Principal Investigator, Maria Schweer-Collins (mariasc@iastate.edu) and please use the subject "NACJD Turning Points Data Query" in the subject line.
 
 ### Credit Author Statement
+
+This codebook was created by a team of individuals who contributed throughout different phases of the project, including Dr. Shaina Trevino, Min Zhang, and Dr. Jonathan Pedroza, together with PI Maria Schweer-Collins.
 
 **Schweer-Collins** conceptualization; software; validation; data curation (specifically checking code for data cleaning and codebook creation, managed data archival) project administration; supervision; funding acquisition; **Trevino** software; validation; data curation (specifically developing codebook, functions, and protocols, data cleaning, codebook creation; data archival); supervision; **Pedroza** software; data curation (specifically making functions used in codebook, data retrieval from Qualtrics; cleaning; codebook creation, visualization); **Zhang** software; validation; data curation (specifically making functions used in codebook, primary responsibility for data retrieval from Qualtrics; data cleaning, codebook creation, visualization)
 
@@ -307,9 +305,10 @@ There were two assessment activities.
 ```{r abbreviation_table, results = 'asis'}
 
 abbrev_table_df <- data.frame(
-  abbrev = c("TP", "TC", "NIJ", "CINT"),
+  abbrev = c("TP", "Wave 14", "TC", "NIJ", "CINT"),
   descrip = c(
     "This acronym is used to refer to the name of this study, the Turning Points Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data, as we use this study name to refer to the entire longitudinal study.",
+    "We refer to this wave of data collection also as 'Wave 14' thus, you may see variables that include this notation in the naming convention.",
     "In this study, we refer to original participants as TCs, which means 'Target Child.' This acronym has been continued because the original participants were minors at the start of this longitudinal study. Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants, not from partners, caregivers, or offspring.",
     "NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.",
     "CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. "
@@ -369,7 +368,7 @@ For each measure, this document typically contains the following descriptive inf
     outside what is allowable for missing data rules
 
 -   Not Applicable = -55: The subject was never asked a question for
-    some reason (conditional question)
+    some reason (most often conditional question [skip rules])
 
 -   Don't Know = -66: The subject was unable to answer a question,
     either because he or she had no opinion or because the required
@@ -381,17 +380,18 @@ For each measure, this document typically contains the following descriptive inf
 -   No Match = -88: This situation arises when data are drawn from
     different sources (for example, a survey questionnaire and an
     administrative database), and information from one source cannot be
-    located.
+    located. This code does not exist in our data.
 
 -   Processing Error = -44: For some reason, there is no answer to the
     question, although the subject provided one. This can result from
     interviewer error, incorrect coding, machine failure, or other
-    problems
+    problems. This code does not exist in our data.
 
 ### Missing Data Rule
 
 For summary or subscale scores that are computed with individual items, any of the above reasons are included in computing the percent of missing data. The following missing data rules are below and follow procedures used throughout the history of this longitudinal study. In some cases, measure specific guidelines for handling missing data were used when those guidelines were more stringent. Exceptions are called out within individual measure documentation.
-Note that 
+
+Note that we have made every effort to archive individual-level items so that users of the data can compute summary scores and complete analyses using a variety of modern missing data methods (e.g., imputation).  
 
 -   For scales with [10 or more items]{.underline}, a composite score
     (average/total) is computed for each participant that have less than
@@ -408,6 +408,9 @@ Note that
 -   For scales with [only 2 items]{.underline}, composite scores
     (average/total) are calculated on a [case by case basis]{.underline}
 
+### Data Use Notes and Disclaimers
+
+Because the use of and development of measures is ever evolving and there exist many ways to analyze data, we have made every effort to archive individual-level items so that users of the data can compute summary scores according to preferred methods, latest empirical findings, and recommended best practices, including the handling of missing data. Users are also encouraged to thoroughly read the data documentation and perform data checks for outliers, out-of-range values, and to determine if any cases should be excluded from analyses based on checks with relevant criteria for research questions or analyses of interest. Users are encouraged to query the study author if questions arise.
 
 # Characteristics of Living
 *<MARIA> INSERT BRIEF DESCRIPTION *
@@ -457,17 +460,19 @@ Oregon Social Learning Center (OSLC) Instrument [Unpublished]
 #### Value Labels and Survey Items 
 
 All CINT-SOCIO variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
-Historical Data 
+
+Demographic and study data obtained from prior data waves:
 ```{r Sociodem_wv14_archive, results = 'asis'}
 #create table of info
 #  GLPTX, sex, ETHNIC, age_14_ex
 Sociodem_wv14_archive <- data.frame(
-  Variable = c("GLPTX", "sex", "ETHNIC", "age_14_ex"),
+  Variable = c("glptx", "sex", "ethnic", "age_14_ex"),
   Description = c("Randomization group",
             "Sex",
             "Ethnicity",
             "Wave 14 Age"),
-  Value = c("0 = Treatment as usual (Group Care)\n1 = Treatment Foster Care Oregon (TFCO)",
+  Value = c("0 = Treatment as usual (Group Care)
+           \n1 = Treatment Foster Care Oregon (TFCO)",
             "F = Female",
             "1 = Caucasian
             \n2 = African American
@@ -477,7 +482,7 @@ Sociodem_wv14_archive <- data.frame(
             \n6 = Pacific Islander
             \n8 = Multiracial
             \n9 = Other/Unknown",
-            "")) 
+            "Numeric (years)")) 
 
 #create gt table
 Sociodem_wv14_archive_table <- Sociodem_wv14_archive %>%
@@ -1974,39 +1979,29 @@ eds_tbl
 
 ## Adult Criminal Legal System Records Data
 
--   Information on arrests, charges, dispositions, and incarceration were sought from the adult criminal legal system in each state/county where the participant had reported residing since the last assessment wave. For each participant, all identified offenses (charges) were collated, the offense date, arrest status for each offense, disposition(s), when available were coded. When fines,  jail, prison, or probation were sentenced and the information was provided, the amount/ length of the sentence was recorded. Offenses were also coded according to the type of offense and severity of the offense (e.g., status, misdemeanor, felony) according to methods that have been used in the history of this longitudinal study (Arrest Codes; OSLC unpublished coding scheme). Records were sought for 100% of participants. 
+-   Information on arrests, charges, dispositions, and incarceration were sought from the adult criminal legal system in each state/county where the participant had reported residing since the last assessment wave. For each participant, all identified offenses (charges) were collated, the offense date, arrest status for each offense, disposition(s), when available were coded. When fines,  jail, prison, or probation were sentenced and the information was provided, the amount/ length of the sentence was recorded. Offenses were also coded according to the type of offense and severity of the offense (e.g., status, misdemeanor, felony) according to methods that have been used in the history of this longitudinal study (Arrest Codes; OSLC unpublished coding scheme). 
 
 -   We archived these data in aggregate to preserve participant confidentiality. See computed variables below.  
 
 ```{r arrest-data-table, results = 'asis'}
 #create table of info
 arrest_data_df <- data.frame(
-  Variable = c( "LastOffAge", "LastOffAgeWith1", "F18OffAge",  "F18OffAgeWith1",  "FF18OffAge", "NumAdultFelony",  "Num14NewOff",  "Num14NewOffWith1", "Num14NewFOff", "Post18offseverity", "Post18offseverityWith1", "Wave14offseverity", "Wave14offseverityWith1",  "NumJailPost18", "NumPrisonPost18", "NumIncarPost18", "NumJailWave14", "NumPrisonWave14", "NumIncarWave14",  "NumPost18Off", "NumPost18OffWith1", "AdultDesistWith1", "AdultDesistNo1", "TPDesist_with1andCLSYes"),
+  Variable = c( "LastOffAge", "LastOffAgeWith1", "F18OffAge",  "F18OffAgeWith1",  "FF18OffAge", "Num14NewOff",  "Num14NewOffWith1", "Num14NewFOff", "Wave14offseverity", "Wave14offseverityWith1", "NumIncarWave14", "AdultDesistWith1", "AdultDesistNo1", "Wave14Desist"),
   Description = c(
             "Age of last offense",
-            "Age of last offense including status offense",
-            "Age of first offense in adulthood",
-            "Age of first offense in adulthood including status offense",
-            "Age of first feloney offense in adulthood",
-            "Total number of Felony in adulthood",
-            "Total number of new offense wave 14",
-            "Total number of new offense including status offense wave 14",
-            "Total number of new feloney offense wave 14",
-            "Serverity in adulthood",
-            "Serverity in adulthood including status offense wave 14",
-            "Serverity wave 14", 
-            "Serverity wave 14 including status offense",
-             "Total number of times incarcerated in Jail post 18 - will remove after finalized data", 
-            "Total number of times incarcerated in Prison psot 18 - will remove after finalized data",
-            "Total number of times incarcerated in adulthood",
-            " will remove after finalized data", 
-            " will remove after finalized data",
+            "Age of last offense including status offenses",
+            "Age of first offense in adulthood ( 18 or older)",
+            "Age of first offense in adulthood including status offenses (18 or older)",
+            "Age of first felony offense in adulthood (18 or older)",
+            "Total number of new offenses wave 14",
+            "Total number of new offenses wave 14 including status offenses ",
+            "Total number of new felony offenses wave 14",
+            "Serverity of offenses in wave 14", 
+            "Serverity of offenses in wave 14 including status offense",
             "Total number of times incarcerated wave 14", 
-            "Total number of offense in adulthood",
-            "Total number of offense in adulthood incluing status offense",
-            "Adult Desist including status offense", 
-            "Adult Desist without status offense",
-            "TP Desist")) 
+            "Adult desistance (yes) including status offense", 
+            "Adult desistance (yes) without status offense",
+            "Wave 14 new desistance (yes)")) 
 
 #create gt table
 arrest_data_df_table <- arrest_data_df %>%
@@ -2041,6 +2036,8 @@ The Brief Symptom Inventory (BSI) is designed to reflect psychological symptom p
 
 -   **Higher** scores indicate **more** severe
 psychological symptoms.
+
+-   Raw scores can be converted to T scores using the tables provided in the BSI measure documentation.
 
 -   The missing data rule was not applied. The only missing data in this measure reflects responses not collected on `bsi4` due to our protocols for participants who were incarcerated at the time of the assessment. According to the BSI manual, up to one item can be missing from each subscale to obtain valid subscale scores.
 
@@ -3251,10 +3248,10 @@ itq_th_alpha <- itq_complete %>%
 
 ```{r itq-scale-table, results = 'asis'}
 # Create the table as a data frame
-# MARIA TO DO SHIFT
+# MARIA TO DO SHIFT to add total and functional impairment
 itq_scale_df <- data.frame(
   var_name = c("Re-experiencing Subscale (2)", " Avoidance Subscale (2)", 
-               "Thread Subscale (2)"),
+               "Threat Subscale (2)"),
   scale = c("itq_re_total", "itq_av_total", "itq_th_total"),
   scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`"), # Maria, after you figure this out, please double check the scale construction 
   scale_range = c("0-8","0-8","0-8"), 
@@ -3446,7 +3443,7 @@ ibq_word_long <- ibq_word %>%
          notes = as.character("")) %>%
   mutate(description = if_else(var_name == "ibq10", "Total number of institutions involved.", description)) %>%
   mutate(description = if_else(var_name == "ibq10_9_text", "Part of question ibq10: Does TC select Other", description)) %>%
-  mutate(notes = if_else(var_name == "ibq10_9_text", "Open text response", notes)) 
+  mutate(notes = if_else(var_name == "ibq10_9_text", "Open text response (Please note this variable has been recoded if values were applicable to systems already listed above", notes)) 
 ```
 
 ```{r ibq-var-table, results ='asis'}
@@ -3488,7 +3485,7 @@ ibq_complete <- complete %>%
 # Create the table as a data frame
 ibq_scale_df <- data.frame(
   var_name = c("ibq_total", "ibq10"),
-  scale = c("IBQ Total Score(7)", "ibq10"),
+  scale = c("IBQ Total Score (7)", "ibq10"),
   scale_construction = c("`ibq1`, `ibq2`, `ibq3`, `ibq4`, `ibq5`,`ibq6`, `ibp7`",
                          "Total number of all institutions endorsed in ibq10_ variables"),
   scale_range = c("0-7", "0-9") 
@@ -6510,23 +6507,21 @@ ggarrange(p_arq_model_s, p_arq_model_o
 
 ## Pregnancy and Parenting Data 
 
-Data on pregnancy and childbirth have been obtained prospectively at each wave of the study. Participants self-reported this information in the current study. The presence or absence of a pregnancy, stillbirth, induced abortion, miscarriage, and live birth was coded as '1 = yes1 and '0 = no' to indicate presence or absence of a pregnancy or pregnancy outcome that occurred since the last time we had interviewed each participant. We also provided information from the longitudinal data in aggregate to document the total number of children previously born to the sample. Additional variables computed are indicated below.  
+Data on pregnancy and childbirth have been obtained prospectively at each wave of the study. Participants self-reported this information in the current study. The presence or absence of a pregnancy, stillbirth, induced abortion, miscarriage, and live birth was coded as `1 = yes1` and `0 = no` to indicate presence or absence of a pregnancy or pregnancy outcome that occurred since the last time we had interviewed each participant. We also provided information from the longitudinal data in aggregate to document the total number of children previously born to the sample. Additional variables computed are indicated below.  
 
 ```{r parent-data-table, results = 'asis'}
 #create table of info
 parent_data_df <- data.frame(
-  Variable = c("num_wv14_preg", "num_wv14_births", "num_wv14_preg_loss", "num_wv14_abortion", "num_wv14_miscarriage", "num_wv14_stillbirth", 
-            "num_priorbirth_wv14", "num_prior_child_archive", "num_step_wv14", "pregnant_wv14_yes"),
+  Variable = c("num_wv14_preg", "num_wv14_births", "num_wv14_preg_loss", "num_wv14_abortion", "num_wv14_miscarriage", "num_wv14_stillbirth", "num_prior_child_archive", "num_step_wv14", "pregnant_wv14_yes"),
   Description = c("Total number of pregnancies wave 14",
             "Total number of child births wave14",
             "Total number of pregnancy losses wave 14",
             "Total number of abortions wave 14",
             "Total number of miscarriages wave 14",
             "Total number of stillbirths wave 14",
-            "Total number of reported child births prior to wave 14",
             "Total number of reported children prior to wave 14",
             "Total number of step children wave 14",
-            "Yes participant currently pregnant when assessment is conduct")) 
+            "'Yes' participant currently pregnant when assessment is conduct")) 
 
 #create gt table
 parent_data_df_table <- parent_data_df %>%
@@ -7427,7 +7422,7 @@ mhc_gt_table <- mhc_gt_table %>%
   cols_width(notes ~ px(150),
              var_name ~ px(100)) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels())%>%
-      tab_row_group(label = "During the past month, how often did you feel...", 
+      tab_row_group(label = "During the past month...", 
                 rows = 1:14,
                 id = "set1") %>%
    tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
