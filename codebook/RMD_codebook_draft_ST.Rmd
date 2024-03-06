@@ -412,6 +412,29 @@ Note that we have made every effort to archive individual-level items so that us
 
 Because the use of and development of measures is ever evolving and there exist many ways to analyze data, we have made every effort to archive individual-level items so that users of the data can compute summary scores according to preferred methods, latest empirical findings, and recommended best practices, including the handling of missing data. Users are also encouraged to thoroughly read the data documentation and perform data checks for outliers, out-of-range values, and to determine if any cases should be excluded from analyses based on checks with relevant criteria for research questions or analyses of interest. Users are encouraged to query the study author if questions arise.
 
+# ARRIL Self-Reported Arrests
+*<MARIA> INSERT BRIEF DESCRIPTION *
+```{r arril-data-table, results = 'asis'}
+#create table of info
+arril_data_df <- data.frame(
+  Variable = c( "ar00", "ar00a", "AgeLastArrestSR"),
+  Description = c(
+            " Since the last time we talked to you, which was on ___________ [asssessor read], have you been arrested?",
+            "How many times?",
+            "Age of last arrest (self-report)")) 
+
+#create gt table
+arril_data_df_table <- arril_data_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Variable ~ px(200)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(arril_data_df_table)
+
+```
+
 # Characteristics of Living
 *<MARIA> INSERT BRIEF DESCRIPTION *
 
@@ -2001,7 +2024,11 @@ arrest_data_df <- data.frame(
             "Total number of times incarcerated wave 14", 
             "Adult desistance (yes) including status offense", 
             "Adult desistance (yes) without status offense",
-            "Wave 14 new desistance (yes)")) 
+            "Wave 14 new desistance (yes)")) %>%
+    mutate(notes = ("")) %>% 
+  mutate(notes = if_else(var_name == "elf23", "Thinking of the most severe (worst) time, did any of your friends actually hit them or just threaten to?", description)) %>% 
+  mutate(description = if_else(var_name == "elf24", "How many of your friends have been loud, rowdy, or unruly in a public place – disorderly conduct?", description)) %>% 
+  slice(1:39)
 
 #create gt table
 arrest_data_df_table <- arrest_data_df %>%
@@ -4839,7 +4866,23 @@ socinf_gen_gt_table <- socinf_gen_gt_table %>%
   cols_width(description ~ px(300),
              var_name ~ px(100)
   ) %>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) %>%
+  tab_row_group(label = "Thinking about your partner in the past 6 months, how true are these statements about them: ", 
+                rows = 8:17,
+                id = "set4") %>%
+  tab_row_group(label = "How true is it that you get the feeling that you partner would lik you to", 
+                rows = 6:7,
+                id = "set3") %>%
+  tab_row_group(label = "Thinking about your partner, how often is it true that they: ", 
+                rows = 2:5,
+                id = "set2") %>%
+  tab_row_group(label = "", 
+                rows = 1,
+                id = "set1")%>%
+  tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
+                         cell_borders(sides = c("left", "right", "top", "bottom"))),
+            locations = cells_row_groups(groups = c("set1", "set2", "set3", "set4"))) 
+
 
 # Print the table
 print(socinf_gen_gt_table)
@@ -6734,6 +6777,7 @@ sus_word_long <- sus_word %>%
   mutate(description = if_else(var_name == "sus17", "Have you been in short stay or evaluation inpatient treatment. 
                                This includes stays up to 72 hours (3 days), such as detox? ", description)) %>%
   mutate(description = if_else(var_name == "sus18", "Have you been in residential treatment for substance abuse?", description)) %>%
+   mutate(notes = if_else(var_name == "sus screen", "If responsed ‘no’ then sus1_sus10j skipped (`-55`)", notes)) %>%
   mutate(var_name = str_replace(var_name, "sus screen", "sus_screen")) %>%
   mutate(var_name = str_replace(var_name,  "sus - start", "sus_start")) %>%
   mutate(notes = if_else(var_name == "sus - start", "Open text field", notes)) %>%

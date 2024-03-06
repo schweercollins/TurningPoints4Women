@@ -11,6 +11,7 @@ library(tidyverse)
 library(dplyr)
 library(here)
 library(lubridate)
+library(haven)
 # import raw survey items
 # this is input file "tpw_measure.csv"
 # update this before archival
@@ -18,6 +19,9 @@ tpw_raw <- read.csv(here("do_not_push", "tpw_measure.csv")) %>%
   select(-X) %>%
   filter(start_date != "Start Date")
 
+# Create id for merge
+tpw_archive_id <- tpw_raw %>%
+  select(id)
 
 # import parent data for archive 
 tpw_parent_data <- read.csv(here("do_not_push", "ParentDataforArchive.csv")) %>%
@@ -26,19 +30,27 @@ tpw_parent_data <- read.csv(here("do_not_push", "ParentDataforArchive.csv")) %>%
 
 
 # import CLS data for archive 
-cls_data <- read.csv(here("do_not_push", "tpw_cls_archive.csv")) 
+cls_data <- read.csv(here("do_not_push", "tpw_cls_archive.csv")) %>%
+  select(- X)
 # import functions 
 source(here("functions", "codebook_fun.R"))
+
+
+# import historical variables
+Sociodem_wv14_archive <- read_sav(here("do_not_push", "Sociodem_wv14_archive.sav")) %>%
+  rename(id = FAMILY)
+
+# import ARRIL data 
+arril_clean <- read.csv(here("do_not_push", "tps_arril_clean.csv")) %>%
+  #filter(id != "TC ID:") %>%
+   # set negative values to NA 
+  mutate(date_last_arrest_SR_NA = ifelse(date_last_arrest_SR < 0, NA, date_last_arrest_SR)) %>%
+  mutate(date_last_arrest_SR_NA = as.Date(date_last_arrest_SR_NA, format = "%m/%d/%y"))
+
 
 # Scientific Notation 
 options(scipen = 2)
 
-tpw_archive_id <- tpw_raw %>%
-  select(id)
-
-# import historical variables
-Sociodem_wv14_archive <- read.csv(here("do_not_push", "Sociodem_wv14_archive.csv"), colClasses = c(sex = "character")) %>%
-  rename(id = FAMILY)
 ```
 
 ## Min's TODO/Note 
@@ -72,6 +84,38 @@ which( colnames(df)=="b" )
 na_positions <- which(is.na(df), arr.ind = TRUE)
 
 Min: need work on Missing data and calculation for measure after sex history 
+## ARRIL 
+```{r arril}
+# Merge arril with Sociodem_wv14_archive to get dob 
+arril <- Sociodem_wv14_archive %>%
+  select(id, dob) %>%
+  merge(arril_clean, by = "id", all.y = TRUE) %>%
+ # calculate AgeLastArrestSR for age of last arrest self-reported
+ mutate(AgeLastArrestSR = as.numeric(difftime(date_last_arrest_SR_NA, dob, units = "days")) /365.25, date_last_arrest_SR) %>%
+  select(id, ar00, ar00a,AgeLastArrestSR,date_last_arrest_SR) %>%
+    mutate(
+      across(
+        .cols = c(ar00),
+        .fns = ~case_when(
+         .x == "No" ~ "0",
+         .x == "Yes" ~ "1",
+         .x == "Decline to Answer" ~ "-77",
+         TRUE ~ .x
+        )
+      )
+    ) 
+```
+
+```{r arril-missing}
+arril <- arril %>%
+  filter(id != "" & id != "TC ID:") %>%
+  mutate(ar00 = ifelse(is.na(ar00), "-99", ar00))%>%
+  mutate(ar00a = ifelse(ar00 != "1", "-55", ar00a))%>%
+  mutate(AgeLastArrestSR = ifelse(date_last_arrest_SR < 0, date_last_arrest_SR, AgeLastArrestSR)) %>%
+  mutate(AgeLastArrestSR= ifelse(AgeLastArrestSR == "", -55, AgeLastArrestSR)) %>%
+  select(-date_last_arrest_SR) %>%
+  mutate(across(-id, as.numeric)) 
+```
 
 ## BSI
 ### BSI Select Variables and Recode 
@@ -5182,6 +5226,8 @@ Merge together all measures
 tpw_archive_calc <- tpw_archive_id %>%
   left_join(tpw_parent_data, by = "id") %>%
   left_join(cls_data, by = "id") %>%
+  left_join(arril, by = "id") %>%
+  
   left_join(bsi_complete, by = "id") %>%
   left_join(cesd_complete, by = "id") %>%
   left_join(ciq_complete, by = "id") %>%
