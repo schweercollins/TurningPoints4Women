@@ -4440,6 +4440,7 @@ sex_word_long <- sex_word %>%
   description = str_replace(description, "READ:", ""),
   description = str_replace(description, "DO NOT READ THE FOLLOWING TEXT ALOUD", ""),
        var_name = str_to_lower(var_name)) %>%
+   filter(var_name != "s10_4_text") %>%
   mutate(var_name = if_else(var_name == "s-pregnancy screen", "s_pregnancy_screen",var_name)) %>%
   # Edits Variable description and value
   mutate(description = if_else(var_name == "s_pregnancy_screen", "Is TC currently pregnant?", description)) %>%
@@ -4625,7 +4626,7 @@ sex_word_long <- sex_word %>%
                                                           \n -77 = Decline to Answer", `Value`)) %>%
   mutate(`Value` = if_else(var_name %in% c( "s46"), "1 = Yes, had oral sex without a dental dam
                                                           \n 0 = No, oral sex and always used dental dam (stop here, you are finished)
-                                                          \n -77 = Decline to Answer", `Value`))
+                                                          \n -77 = Decline to Answer", `Value`)) 
 
 ```
 

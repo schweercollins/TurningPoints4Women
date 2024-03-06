@@ -2641,11 +2641,12 @@ sex <- sex %>%
 
 # recode the s10_4_text to s10 
 sex <- sex %>%
-  mutate_at(vars(s10), ~ ifelse(s10_4_text %in% c("Non-discriminatory, \"I am not really sure, maybe pan sexual\"", "Pansexual"), 4, .)) %>%
+  mutate_at(vars(s10), ~ ifelse(s10_4_text %in% c("Pansexual"), 4, .)) %>%
   mutate_at(vars(s10), ~ ifelse(s10_4_text %in% c("Lesbian but open-minded."), 2, .)) %>% # 2 for lesbian/gay
-  mutate_at(vars(s10), ~ ifelse(s10_4_text %in% c("Currently, male-leaning bisexual."), 3, .)) %>% # 3 for bi-sexual
+  mutate_at(vars(s10), ~ ifelse(s10_4_text %in% c("Currently, male-leaning bisexual.", "Non-discriminatory, \"I am not really sure"), 3, .)) %>% # 3 for bi-sexual
   # add data from cint-relation cintq3 for incarcerated TC 
-  mutate(s1 = ifelse(id == "HR181", 1, s1))
+  mutate(s1 = ifelse(id == "HR181", 1, s1)) %>%
+  mutate(s6 = ifelse(id == "HR181", 1, s6))
 
 ```
 
