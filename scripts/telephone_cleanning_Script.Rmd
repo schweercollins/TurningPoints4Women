@@ -4074,6 +4074,7 @@ sus <- sus %>%
   
     # we have missing due to partial finish
   mutate(across(-id, ~ifelse(id == "HR173", -99, .))) %>%
+  mutate(across(sus11a:sus26c, ~ifelse(id == "P810", -99, .)))%>%
   # following question are not request to answer, so if NA it means TC refuse to answer -77 
   mutate(sus2 = case_when(is.na(sus2) ~ "-77", TRUE ~ sus2)) %>%
   mutate(sus14l = case_when(is.na(sus14l) ~ "-77", TRUE ~ sus14l)) %>%
@@ -4082,7 +4083,7 @@ sus <- sus %>%
   mutate(sus14m2 = case_when(is.na(sus14m2) ~ "-77", TRUE ~ sus14m2)) %>%
   mutate(sus18a = case_when(is.na(sus18a) ~ "-77", TRUE ~ sus18a)) %>%
   mutate(sus23a = case_when(is.na(sus23a) ~ "-77", TRUE ~ sus23a)) %>%
-  
+  mutate(sus11a = case_when(is.na(sus11a) ~ "-77", TRUE ~ sus11a)) %>%
   
   select(-c("sus11b_1","sus11b_2","sus11b_3","sus11b_77")) %>%
   select(-c("sus12b_1","sus12b_2","sus12b_3","sus12b_77")) %>%
