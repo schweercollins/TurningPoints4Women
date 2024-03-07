@@ -300,41 +300,6 @@ There were two assessment activities.
 
 ## Data and Codebook Guide
 
-### Study Acronymns
-
-```{r abbreviation_table, results = 'asis'}
-
-abbrev_table_df <- data.frame(
-  abbrev = c("TP", "Wave 14", "TC", "NIJ", "CINT"),
-  descrip = c(
-    "This acronym is used to refer to the name of this study, the Turning Points Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data, as we use this study name to refer to the entire longitudinal study.",
-    "We refer to this wave of data collection also as 'Wave 14' thus, you may see variables that include this notation in the naming convention.",
-    "In this study, we refer to original participants as TCs, which means 'Target Child.' This acronym has been continued because the original participants were minors at the start of this longitudinal study. Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants, not from partners, caregivers, or offspring.",
-    "NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.",
-    "CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. "
-  ),
-  stringsAsFactors = FALSE
-)
-
-#create table
-abbrev_table <- abbrev_table_df %>%
-  gt() %>% 
-  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
-              table.border.left.width = 1, table.border.right.width = 1) %>% 
-  cols_width(abbrev ~ px(100),
-             descrip ~ px(600)) %>%
-  tab_style(style = cell_text(align = "left"),locations = cells_body(columns = vars("descrip"))) %>%
- # cols_align(align = "left") %>%
-  cols_label(abbrev = "Abbreviation",
-            descrip = "Full Name and Explanation") %>%
-  apply_labtab_theme()
-
-
-# Print the table
-print(abbrev_table)
-
-```
-
 
 ### Introduction to Codebook Structure
 
@@ -377,11 +342,6 @@ For each measure, this document typically contains the following descriptive inf
 -   Refusal/No Answer = -77: The subject explicitly refused to answer a
     question or did not answer it when he or she should have.
 
--   No Match = -88: This situation arises when data are drawn from
-    different sources (for example, a survey questionnaire and an
-    administrative database), and information from one source cannot be
-    located. This code does not exist in our data.
-
 -   Processing Error = -44: For some reason, there is no answer to the
     question, although the subject provided one. This can result from
     interviewer error, incorrect coding, machine failure, or other
@@ -414,6 +374,40 @@ Note that we have made every effort to archive individual-level items so that us
 
 Because the use of and development of measures is ever evolving and there exist many ways to analyze data, we have made every effort to archive individual-level items so that users of the data can compute summary scores according to preferred methods, latest empirical findings, and recommended best practices, including the handling of missing data. Users are also encouraged to thoroughly read the data documentation and perform data checks for outliers, out-of-range values, and to determine if any cases should be excluded from analyses based on checks with relevant criteria for research questions or analyses of interest. Users are encouraged to query the study author if questions arise.
 
+### Study Acronymns
+
+```{r abbreviation_table, results = 'asis'}
+
+abbrev_table_df <- data.frame(
+  abbrev = c("TP", "Wave 14", "TC", "NIJ", "CINT"),
+  descrip = c(
+    "This acronym is used to refer to the name of this study, the Turning Points Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data, as we use this study name to refer to the entire longitudinal study.",
+    "We refer to this wave of data collection also as 'Wave 14' thus, you may see variables that include this notation in the naming convention.",
+    "In this study, we refer to original participants as TCs, which means 'Target Child.' This acronym has been continued because the original participants were minors at the start of this longitudinal study. Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants, not from partners, caregivers, or offspring.",
+    "NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.",
+    "CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. "
+  ),
+  stringsAsFactors = FALSE
+)
+
+#create table
+abbrev_table <- abbrev_table_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(abbrev ~ px(100),
+             descrip ~ px(600)) %>%
+  tab_style(style = cell_text(align = "left"),locations = cells_body(columns = vars("descrip"))) %>%
+ # cols_align(align = "left") %>%
+  cols_label(abbrev = "Abbreviation",
+            descrip = "Full Name and Explanation") %>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(abbrev_table)
+
+```
 
 # Characteristics of Living
 
