@@ -31,7 +31,8 @@ tpw_parent_data <- read.csv(here("do_not_push", "ParentDataforArchive.csv")) %>%
 
 # import CLS data for archive 
 cls_data <- read.csv(here("do_not_push", "tpw_cls_archive.csv")) %>%
-  select(- X)
+  select(-X, -total_days_incarcerated, -total_days_homeless)
+
 # import functions 
 source(here("functions", "codebook_fun.R"))
 
@@ -47,11 +48,16 @@ arril_clean <- read.csv(here("do_not_push", "tps_arril_clean.csv")) %>%
   mutate(date_last_arrest_SR_NA = ifelse(date_last_arrest_SR < 0, NA, date_last_arrest_SR)) %>%
   mutate(date_last_arrest_SR_NA = as.Date(date_last_arrest_SR_NA, format = "%m/%d/%y"))
 
+# import official arrest data
+arrest_clean <- read.csv(here("do_not_push", "tpw_arrest_archive.csv")) %>%
+  select(id, LastOffAge, LastOffAgeWith1, F18OffAge, F18OffAgeWith1, FF18OffAge, Num14NewOff,	Num14NewOffWith1, Num14NewFOff, Wave14offseverity, Wave14offseverityWith1, NumIncarWave14, TPDesist_with1andCLSYes) %>%
+  rename(Wave14Desist = TPDesist_with1andCLSYes)
 
 # Scientific Notation 
 options(scipen = 2)
 
 ```
+
 
 ## Min's TODO/Note 
 add prompt for each measure in codebook.
@@ -113,8 +119,7 @@ arril <- arril %>%
   mutate(ar00a = ifelse(ar00 != "1", "-55", ar00a))%>%
   mutate(AgeLastArrestSR = ifelse(date_last_arrest_SR < 0, date_last_arrest_SR, AgeLastArrestSR)) %>%
   mutate(AgeLastArrestSR= ifelse(AgeLastArrestSR == "", -55, AgeLastArrestSR)) %>%
-  select(-date_last_arrest_SR) %>%
-  mutate(across(-id, as.numeric)) 
+  select(-date_last_arrest_SR)
 ```
 
 ## BSI
@@ -5227,6 +5232,7 @@ tpw_archive_calc <- tpw_archive_id %>%
   left_join(tpw_parent_data, by = "id") %>%
   left_join(cls_data, by = "id") %>%
   left_join(arril, by = "id") %>%
+  left_join(arrest_clean, by = "id") %>%
   
   left_join(bsi_complete, by = "id") %>%
   left_join(cesd_complete, by = "id") %>%
