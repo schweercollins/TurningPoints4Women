@@ -3184,21 +3184,28 @@ ggarrange(p_lec_total_witness, p_lec_total_happen + rremove("ylab")
 
 ### ITQ Description
 
-The ITQ is a 9-item questionnaire designed to measure *insert*.
+The ITQ is a 9-item brief questionnaire designed to measure the core features of Posttraumatic Stress Disorder.
 
-For the present study, 9 items from the ITQ were collected in order to
-#TODO: insert text here We introduced the measure with the following text: 
+-   For the present study, 9 items from the ITQ were collected. The datafile contains
+a total 15 variables related to the ITQ.
+
+-   The language below was used to introduce the ITQ.
 
 >
-"Below are a number of problems that people sometimes report in response to traumatic or stressful life events. Please read each item carefully, then circle one of the numbers to the right to indicate how much you have been bothered by that problem in the past month."
+"I will read a number of problems that people sometimes report in response to traumatic or stressful life events. Please listen carefully and use the response options to indicate how much you have been bothered by that problem in the past month."
 >
 
-No items need to be reverse scored. *TODO: need change text here Higher
-scores indicate more severe mental health symptoms.*
+-   No items need to be reverse scored. 
 
-The missing data rule was applied. Calculations were completed for
-participants with 33% or less missing data (this includes -77 responses)
-<Maria, we removed missing rule> 
+-   The missing data rule was applied. Calculations were completed for
+participants with 33% or less missing data (this includes -77 responses).
+
+-   **Higher** scores reflect **greater** ptsd symptoms.
+
+-   There are several ways to score the ITQ and methods are available in the citation provided below. 
+
+-   One limitation of this measures in the current study is the answer scale shown to participant in this study (see value labels below). We computed criteria for PTSD based on participant endorsement of one symptom within each cluster based on a value of `A little bit 1-2 times per week`. The ITQ criteria differs across empirical studies and users may consider alternate scoring for PTSD diagnostic criteria, but should keep in mind the scale used in the current study. 
+
 
 Reference:
 [@cloitre2018international](https://onlinelibrary.wiley.com/doi/full/10.1111/acps.12956?casa_token=K4GIoIIYOkwAAAAA%3ABuaGU3cOQZwsFiM78FxHp_PHTQXDc72xABnVp8nlMCYRCHzf4c0oOMropyrzVjdClA3pFA-m01heootZ)
@@ -3213,10 +3220,10 @@ All ITQ variables have the same response options.
 itq_label_df <- data.frame(
   value = c("0", "1", "2", "3", "4"),
   label = c("Not at All",
-            "A Little Bit",
-            "Moderately",
-            "Quite a Bit",
-            "Extremely")) %>% 
+            "A Little Bit (1-2 times per week)",
+            "Moderately (3-4 times per week)",
+            "Quite a Bit (daily)",
+            "Extremely (several times/day)")) %>% 
   t() %>% 
   as.data.frame()
 
@@ -3305,22 +3312,36 @@ itq_av_alpha <- itq_complete %>%
 itq_th_alpha <- itq_complete %>% 
   select(itq5,itq6) %>% 
   psych::alpha(check.keys = TRUE)
+
+itq_fi_alpha <- itq_complete %>% 
+  select(itq7,itq8, itq9) %>% 
+  psych::alpha(check.keys = TRUE)
+
+itq_total_alpha <- itq_complete %>% 
+  select(itq1, itq2, itq3, itq4, itq5, itq6) %>% 
+  psych::alpha(check.keys = TRUE)
 ```
 
 
 
 ```{r itq-scale-table, results = 'asis'}
 # Create the table as a data frame
-# MARIA TO DO SHIFT to add total and functional impairment
+
 itq_scale_df <- data.frame(
   var_name = c("Re-experiencing Subscale (2)", " Avoidance Subscale (2)", 
-               "Threat Subscale (2)"),
-  scale = c("itq_re_total", "itq_av_total", "itq_th_total"),
-  scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`"), # Maria, after you figure this out, please double check the scale construction 
-  scale_range = c("0-8","0-8","0-8"), 
+               "Threat Subscale (2)", "Functional Impairment Subscale (3)", "Total Score not including functional impairmment (6)", "PTSD Diagnosis"),
+  scale = c("itq_re_total", "itq_av_total", "itq_th_total", "itq_fi_total", "itq_ptsd_total", "itq_ptsd_dx"),
+  scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`",
+                         "`itq7`, `itq8`, `itq9`",
+                         "`itq1`, `itq2`, `itq3`, `itq4`, `itq5`,`itq6`",
+                         "Score of 1 or greater for each symtpom cluster"), 
+  scale_range = c("0-8","0-8","0-8", "0-12", "0-24", "NA"), 
   alpha = c(round(itq_re_alpha$total$raw_alpha, 3), 
             round(itq_av_alpha$total$raw_alpha, 3), 
-            round(itq_th_alpha$total$raw_alpha, 3)
+            round(itq_th_alpha$total$raw_alpha, 3),
+            round(itq_fi_alpha$total$raw_alpha, 3),
+            round(itq_total_alpha$total$raw_alpha, 3),
+            "NA"
             )
 )
 
@@ -3333,7 +3354,7 @@ itq_scale_df <- gt(itq_scale_df) %>%
              scale_range = "Range*",
              # alpha = "Alpha"
              ) %>% 
-  tab_footnote(footnote = "*Range of possible values; `_r` Reverse scored variable") %>% 
+  tab_footnote(footnote = "*Range of possible values") %>% 
   tab_options(table.border.bottom.style = "hidden") %>% 
  # cols_width(var_name ~ px (300)) %>% 
   tab_options(table.width = pct(100))%>%
