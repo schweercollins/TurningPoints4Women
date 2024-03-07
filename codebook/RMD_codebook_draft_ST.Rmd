@@ -386,6 +386,8 @@ For each measure, this document typically contains the following descriptive inf
     question, although the subject provided one. This can result from
     interviewer error, incorrect coding, machine failure, or other
     problems. This code does not exist in our data.
+    
+-   **Important Note:** Data users should ensure that missing data values (all negative numbers in this dataset) are not being analyzed as valid numeric values prior to analyzing any data in the files associated with this study.
 
 ### Missing Data Rule
 
@@ -412,31 +414,14 @@ Note that we have made every effort to archive individual-level items so that us
 
 Because the use of and development of measures is ever evolving and there exist many ways to analyze data, we have made every effort to archive individual-level items so that users of the data can compute summary scores according to preferred methods, latest empirical findings, and recommended best practices, including the handling of missing data. Users are also encouraged to thoroughly read the data documentation and perform data checks for outliers, out-of-range values, and to determine if any cases should be excluded from analyses based on checks with relevant criteria for research questions or analyses of interest. Users are encouraged to query the study author if questions arise.
 
-# ARRIL Self-Reported Arrests
-*<MARIA> INSERT BRIEF DESCRIPTION *
-```{r arril-data-table, results = 'asis'}
-#create table of info
-arril_data_df <- data.frame(
-  Variable = c( "ar00", "ar00a", "AgeLastArrestSR"),
-  Description = c(
-            " Since the last time we talked to you, which was on ___________ [asssessor read], have you been arrested?",
-            "How many times?",
-            "Age of last arrest (self-report)"), 
-  Value = c("Yes = 1\nNo = 0\nDecline to Answer = -77", "", "") )
-
-#create gt table
-arril_data_df_table <- arril_data_df %>%
-  gt() %>% 
-apply_tbl_theme() %>% 
-  cols_width(Variable ~ px(200)) %>%
-  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
-
-#print table
-print(arril_data_df_table)
-```
 
 # Characteristics of Living
-*<MARIA> INSERT BRIEF DESCRIPTION *
+
+At every wave of this longitudinal study, we asked participants about each place they had lived, even if for only one night. We asked them the date they entered and left each location, and we coded the type of location(s). In this assessment, we started with their last known location and the date we had last interviewed each participant.
+
+- Below we provide the variables computed for those data, including the total number of transitions from one location to the next each participant had reported, since the last assessment wave (approximately 2015), and the number of times each participant reported being incarcerated in a jail or prison, or being unhoused. 
+
+Reference: Characteristics of Living Situations [CLS] (OSLC Unpublished Measure)
 
 ```{r cls-table, results = 'asis'}
 #create table of info
@@ -2000,14 +1985,24 @@ eds_tbl
 
 ## Adult Criminal Legal System Records Data
 
--   Information on arrests, charges, dispositions, and incarceration were sought from the adult criminal legal system in each state/county where the participant had reported residing since the last assessment wave. For each participant, all identified offenses (charges) were collated, the offense date, arrest status for each offense, disposition(s), when available were coded. When fines,  jail, prison, or probation were sentenced and the information was provided, the amount/ length of the sentence was recorded. Offenses were also coded according to the type of offense and severity of the offense (e.g., status, misdemeanor, felony) according to methods that have been used in the history of this longitudinal study (Arrest Codes; OSLC unpublished coding scheme). 
+Information on arrests, charges, dispositions, and incarceration were sought from the adult criminal legal system in each state/county where the participant had self-reported residing since the last assessment wave. For each participant, all identified offenses (charges) were collated, the offense date, arrest/referral status for each offense, disposition(s), when available were coded. When fines,  jail, prison, or probation were sentenced and the information was provided, the amount/ length of the sentence was recorded. 
 
-Value label for `Wave14Desist`. 
+-   Offenses were coded according to the severity of the offense (e.g., 1-status offenses, 2 - law violations/U misdemeanors; 3-5 misdemeanor offenses, 6-9 felony offenses) 
+
+-   Offenses were also coded according to the type of offense using methods that have been used in the history of this longitudinal study (see reference below) 
+
+-   Values that are not applicable are `-55` (for example, a participant who has not had an adult offense, does not have an age at first adult offense (any `F18_` or `FF18` variables))
+
+
+Reference: Arrest Codes; OSLC unpublished coding scheme 
+
+Value label for `Wave14Desist`. All other values are numeric.
+
 ```{r arrest-label-table, results = 'asis'}
 arrest_label_df <- data.frame(
   value = c("0", "1"),
-  label = c("Desist",
-            "Did not desist")) %>% 
+  label = c("Did not desist",
+            "Desisted (no new offenses since last assessment wave)")) %>% 
   t() %>% 
   as.data.frame()
 
@@ -2026,7 +2021,9 @@ arrest_label_table <- arrest_label_df %>%
 # Print the table
 print(arrest_label_table)
 ```
--   We archived these data in aggregate to preserve participant confidentiality. See computed variables below.  
+
+We archived these data in the aggregate variables to preserve participant confidentiality. See computed variables in the table below. 
+
 ```{r arrest-data-table, results = 'asis'}
 #create table of info
 arrest_data_df <- data.frame(
@@ -2041,7 +2038,7 @@ arrest_data_df <- data.frame(
             "Total number of new offenses wave 14 including status offenses ",
             "Total number of new felony offenses wave 14",
             "Serverity of offenses in wave 14", 
-            "Serverity of offenses in wave 14 including status offense",
+            "Serverity of offenses in wave 14 including status offenses",
             "Total number of times incarcerated wave 14", 
             "Wave 14 new desistance (yes)")) 
 
@@ -2054,6 +2051,37 @@ apply_tbl_theme() %>%
 
 #print table
 print(arrest_data_df_table)
+```
+
+
+## Self-Reported Arrests (ARRIL)
+
+At every wave of this young adult and adult assessments in this study, we asked participants if they had been arrested since the last assessment, how many times they had been arrested, and the date, location, and nature of those arrests. 
+
+- Below we provide the variables in the data related to self-reported arrests. Please note that sometimes participants consider 'arrests' to be 'offenses,' which may or may not result in arrest. Other times, participants consider 'arrests' that do not ultimately result in charges of official offenses. 
+
+Reference: Self-Reported Arrests [ARRIL] (OSLC Unpublished Measure)
+```{r arril-data-table, results = 'asis'}
+#create table of info
+arril_data_df <- data.frame(
+  Variable = c( "YesArrestSR", "NumArrestSR", "AgeLastArrestSR"),
+  Description = c(
+            " Since the last time we talked to you, which was on ___________ [assessor read date, approx. 2015], have you been arrested?",
+            "How many times?",
+            "Age of last arrest (self-report) [computed variable from date of arrest and DOB"), 
+  Value = c("Yes = 1
+           \nNo = 0
+           \nDecline to Answer = -77", "numeric", "numeric (age in years)") )
+
+#create gt table
+arril_data_df_table <- arril_data_df %>%
+  gt() %>% 
+apply_tbl_theme() %>% 
+  cols_width(Variable ~ px(200)) %>%
+  tab_style(style = cell_text(align = "left"), locations = cells_column_labels())
+
+#print table
+print(arril_data_df_table)
 ```
 
 # Mental Health/Psychological
@@ -3484,7 +3512,7 @@ ibq_word_long <- ibq_word %>%
          notes = as.character("")) %>%
   mutate(description = if_else(var_name == "ibq10", "Total number of institutions involved.", description)) %>%
   mutate(description = if_else(var_name == "ibq10_9_text", "Part of question ibq10: Does TC select Other", description)) %>%
-  mutate(notes = if_else(var_name == "ibq10_9_text", "Open text response (Please note this variable has been recoded if values were applicable to systems already listed above", notes)) 
+  mutate(notes = if_else(var_name == "ibq10_9_text", "Open text response (Please note this variable has been recoded if values were applicable to systems already listed above)", notes)) 
 ```
 
 ```{r ibq-var-table, results ='asis'}
@@ -4419,7 +4447,7 @@ ssq_data_subset %>%
   
 The Sex History Survey was administered as part of the CINT and focuses on the participant's sexual experiences. All questions for SEXEXP were drawn from Capaldi et al., 2002.
 
--   There are 77 items, which includes items that were created during data cleaning. 
+-   There are 75 items, which includes items that were created during data cleaning. 
 
 -   No items need to be reverse scored. 
 
@@ -4503,7 +4531,7 @@ sex_word_long <- sex_word %>%
   mutate(description = if_else(var_name == "s29", "What happened?", description)) %>%
   mutate(description = if_else(var_name == "s30", "How many times, in the last six months, have you had sexual relations? __ __ __ times", description)) %>%
   mutate(description = if_else(var_name == "s31", "With how many different people (in the last 6 months)? __ __ __ partners", description)) %>%
-   mutate(description = if_else(var_name == "s32", "Who were your partners (in the last 6 months)? (Select all that apply)", description)) %>%
+   mutate(description = if_else(var_name == "s32", "Who were your partners (in the last 6 months)? (Select all that apply) Note: not in datafile, only for reference", description)) %>%
   mutate(description = if_else(var_name == "s38", "In the last 6 months, have you had sexual relations with someone who injects drugs?", description)) %>%
   mutate(description = if_else(var_name == "s41", "How many times in the last 6 months? __ __ __ times", description)) %>%
   mutate(description = if_else(var_name == "s43", "In the last 6 months, when you've had intercourse with a male partner, what percentage of the time did you or your partner USE a birth control method specifically to prevent pregnancy?", description)) %>%
@@ -4819,7 +4847,6 @@ All SOCINF-G variables have multiple responses options, value labels for each va
 
 SOCINF-G survey items are presented in the following table:
   
-**Question stem: Thinking about your partner in the past 6 months, how often is it true that s/he:**
 
 ```{r socinf_gen-var-prep}
 # Pull question wording from Qualtrics data
@@ -4958,14 +4985,21 @@ socinf_gen_tbl
   
 ### CTS P-C Description
   
-The Conflict Tactics Scale – Parent Child (CTS-PC) is a 23-item questionnaire which measures how often parents used specific acts of discipline (both violent and nonviolent) with their child in the past year. It does not measure whether or not the child was injured. The CTS-PC also has a supplemental scale on neglect and one on sexual abuse. There are six subscales of the CTS-PC: nonviolent discipline, psychological aggression, minor physical assault, severe physical assault, very severe physical assault, and neglect.
+The Conflict Tactics Scale  Parent-Child (CTS P-C) is a 23-item questionnaire which measures how often parents used specific acts of discipline (both violent and nonviolent) with their child in the past year. It does not measure whether or not the child was injured. The CTS P-C also has a supplemental scale on neglect and one on sexual abuse. There are five subscales of the CTS P-C: nonviolent discipline, psychological aggression, physical assault, past week discipline, and neglect.
 
--   Participants responded to all items in this questionnaire if they responded 'yes' to the screening item `cts_parent_screen`, which asked if they had parented a child under the age of 18 in the past year.
+-   Participants responded to all items in this questionnaire if they responded 'yes' to the screening item `cts_parent_screen`, which asked if they had parented a child under the age of 18 in the past year. Skip rules will result in values of `-55` in this screener as a result. 
 
+- There are a total of 75 variables associated with this measure in the dataset, including computed subscales listed below. 
 
+- Values that are recoded have the suffix `_r`
 
+- The missing data rule was not applied to the scoring of subscales in this measure. Data users should examine missing data an apply missing data analyses and methods as appropriate.
 
-Reference:[@straus1998identification](https://files.eric.ed.gov/fulltext/ED411251.pdf)
+- **Higher** scores indicate the **greater** presence of behaviors measured in this questionnaire.
+
+-   This survey was not administered for participants who were incarcerated at the time of the assessment.
+
+Reference: [@straus1998identification](https://files.eric.ed.gov/fulltext/ED411251.pdf)
   
 ### CTS P-C Variables
   
@@ -5078,8 +5112,9 @@ print(cts_pc_label_table3)
 
 
 ```
+ 
   
-####Survey items
+#### Survey items
 
 CTS P-C survey items are presented in the following table:
   
@@ -5124,8 +5159,11 @@ cts_pc_gt_table <- cts_pc_gt_table %>%
              var_name ~ px(100)
   ) %>%
   tab_style(style = cell_text(align = "left"), locations = cells_column_labels()) %>%
+  tab_row_group(label = "How often did you do the following in the past year?", 
+                rows = 20:24,
+                id = "set4") %>%
     tab_row_group(label = "How often did you do the following in the past week?", 
-                rows = 16:24,
+                rows = 16:19,
                 id = "set3") %>%
     tab_row_group(label = "How often did you do the following in the past year?", 
                 rows = 2:15,
@@ -5137,7 +5175,7 @@ cts_pc_gt_table <- cts_pc_gt_table %>%
 
    tab_style(style = list(cell_fill(color = "#9BB6D1", alpha = 0.2),
                          cell_borders(sides = c("left", "right", "top", "bottom"))),
-            locations = cells_row_groups(groups = c("set3", "set2", "set1"))) 
+            locations = cells_row_groups(groups = c("set3", "set2", "set1", "set4"))) 
   
 
 # Print the table
@@ -5146,15 +5184,18 @@ print(cts_pc_gt_table)
 
 #### Scale and Subscales
 
-Information on total score and subscale variables are below. Prevalence
-scales are calculated ... <MARIA> INSERT INFO ON COMPOSITE SCORE
-CREATION. Severity scores are calculated ... <MARIA> INSERT INFO ON
-COMPOSITE SCORE CREATION. Mutuatlity scores are created by ... <MARIA>
-INSERT INFO ON COMPOSITE SCORE CREATION
+Information on how subscales are presented below in the table and below. 
 
-Unless otherwise listed, sum
-<SHAINA/MIN> TODO: NEED fill Range once we understand how composite
-scores were created
+-   **Prevalence** scales are calculated by summing all values in the associated items when those values are 0 or greater (excluding missing data values).
+
+-   **Count** variables are equivalent to **Prevalence** subscales, which count the presence of each behavior referenced within the set of associated subscale items; thus, an individual only has to report a given behavior 1 or more times for that behavior (item) to be included in the summed **prevalence** subscale score. **Count** variables are only included here to allow for the replication of other subscale scores. 
+
+-   **Mean Chronicity** provides a sort of average chronicity rating by dividing the chronity score of the subscale by the count of that subscale. 
+
+-   **Ever Prevalence** is a count of behaviors (items) within each subscale that have ever occurred for a participant across the lifetime. It is computed by summing behaviors reported only greater than one year ago (`-2` values) together with the **prevalence** of that subscale. Note that `Weekly Discipline` does not have an **ever prevalence** subscale score since it was only asked about for the past week.
+
+-   **Ever Prevalence Greater Than 1 Year** is a count of behaviors (items) within each subscale that have occurred for a participant only in the time period preceding one year ago or earlier. This is an indication of historical prevalence rather than recent prevalence.
+
 
 ```{r cts_pc-scale-table, results = 'asis'}
 # Create the table as a data frame
@@ -5184,7 +5225,7 @@ cts_pc_scale_df <- data.frame(
             "Physical Assault Past Year - Mean (Chronicity) (5)",
             "Physical Assault - Past Year (Prevalence) (5)",
             "Physical Assault - Lifetime (Ever Prevalence greater than 1 year) (5)",
-            "Physical Assault (Ever Prevalence) (2)",
+            "Physical Assault - Lifetime (Ever Prevalence) (2)",
             "Weekly Discipline - Past Week (Chronicity) (3)",
             "Count of Weekly Discipline Responses (3)", 
             "Weekly Discipline Past Week - Mean (Chronicity) (2)",
@@ -5193,42 +5234,42 @@ cts_pc_scale_df <- data.frame(
             "Count of Neglect Responses (2)",
             "Neglect Past Year - Mean (Chronicity) (5)",
             "Neglect - Past Year (Prevalence) (5)", 
-            "Neglect - Lifetime (Ever Prevalence) (5)", 
-            "Neglect (Ever Prevalance) (2)"
+            "Neglect - Lifetime (Ever Prevalence greater than 1 year) (5)",
+             "Neglect - Lifetime (Ever Prevalence) (2)"
             ),
 
   scale_construction = c("`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
                          "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
-                         "`cts_pc_NVDC`/ `cts_pc_NVDP`",
+                         "`cts_pc_NVDP` / `cts_pc_NVDC`",
                          "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
                          "`cts_pc1_r`, `cts_pc2_r`, `cts_pc5_r`, `cts_pc12_r`", 
-                         "`cts_pc_NVDL`/ `cts_pc_NVDPP`",
+                         "`cts_pc_NVDPP`, `cts_pc_NVDL`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "`cts_pc_PSAC`/ `cts_pc_PSAP`",
+                         "``cts_pc_PSAP`/ cts_pc_PSAC`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "`cts_pc_PSAL`/ `cts_pc_PSAPP`",
+                         "` `cts_pc_PSAPP`, `cts_pc_PSAL`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
-                         "`cts_pc_PHAC`/ `cts_pc_PHAP`",
+                         "`cts_pc_PHAP` / `cts_pc_PHAC`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
                          "`cts_pc_PHAL`, `cts_pc_PHAPP`",
                          "`cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
                          "`cts_pc_WKDP`, `cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
-                         "`cts_pc_WKDC`/ `cts_pc_WKDP`",
+                         "`cts_pc_WKDP`/ `cts_pc_WKDC`",
                          "`cts_pc_WKDP`, `cts_pc16_r`, `cts_pc17_r`, `cts_pc18_r`",
                          "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
                          "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
-                         "`cts_pc_NEGC`/ `cts_pc_NEGP`",
+                         "`cts_pc_NEGP` / `cts_pc_NEGC`",
                          "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
                          "`cts_pc19_r`, `cts_pc20_r`, `cts_pc21_r`, `cts_pc22_r`, `cts_pc23_r`",
-                         "`cts_pc_NEGL`/ `cts_pc_NEGPP`"
+                         "`cts_pc_NEGPP`,`cts_pc_NEGL`"
                          ),
-  scale_range = c("", "", "", "", "", "", "", "", "", "",
-                  "", "", "", "", "", "", "", "", "", "", 
-                  "", "", "", "", "", "","","")
+  scale_range = c("0-100", "0-4", "0-25", "0-4", "0-4", "0-4", "0-125", "0-5", "0-25", "0-5",
+                  "0-5", "0-5", "0-125", "0-5", "0-25", "0-5", "0-5", "0-5", "0-75", "0-3", 
+                  "0-25", "0-3", "0-125", "0-5", "0-25", "0-5","0-5","0-5")
   ) %>%
   mutate(scale_construction = tolower(scale_construction))
 
@@ -5358,32 +5399,25 @@ cts_pc_tbl
 
 ### CTS2S Description
 
-The CTS2S is a self-report measure used to assess tactics used when there
-is conflict in a relationship.
+The CTS2S is a self-report measure used to assess tactics used when there is conflict in a relationship.
 
-For the present study, all 20 items from the CTS short form were
+For the present study, all 20 items from the CTS2S were
 collected, and all scales (Negotiation, Physical Assault, and
-Psychological Aggression) and supplemental scales (Assault and Sexual
-Coercion) were calculated.
+Psychological Aggression) and supplemental scales (Assault and Sexual Coercion) were calculated. Please see measure documentation for guidance on computing these scales. 
 
-Authors describe that internal reliability is not appropriate for the
-CTS measure. CTS2S should not have a calculated total/average composite
-score. Instead, CTS2S has three different ways of scoring (Prevalence,
-Severity, Mutuality).
+-   There are 21 items archived in the datafile for the CTS2S.
 
-No items need to be reverse scored. <MARIA> TODO: How to word
-directionality with current values/labels. (e.g., Higher scores indicate
+-   The CTS2S does not have a composite score. Instead, CTS2S has three different ways of scoring (Prevalence, Severity, Mutuality).
 
-This survey was not administered for participants who were incarcerated at the time of the assessment.
-...
+-   No items need to be reverse scored.
 
-<SHAINA> TODO: CONFIRM & CHECK CALC CODE The missing data rule was
-applied. Calculations were completed only with participants that had
-less than 20% missing data (this includes `-77` responses)
+-   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
-Reference:
-[@straus2004short](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract);
-[DOI](10.1891/vivi.19.5.507.63686)
+-   The missing data rule was not applied because computed variables were not created.
+
+-   Authors describe that internal reliability is not appropriate for the CTS2S measure. 
+
+Reference: [@straus2004short](https://connect.springerpub.com/content/sgrvv/19/5/507.abstract)
 
 ### CTS2S Variables
 
@@ -5429,7 +5463,6 @@ print(CTS_label_table)
 #### Survey Items
 
 All CTS2S survey items are presented in the following table:
-This survey was not adminstered for participants who were incarcerated at the time of the assessment. 
 
 ```{r CTS-var-prep}
 # Pull question wording from Qualtrics data
@@ -5448,11 +5481,11 @@ CTS_word_long <- CTS_word %>%
          
          var_name = str_to_lower(var_name), 
          notes = as.character("")) %>% 
-  mutate(notes = if_else(var_name == "cts screen", "If TC answered `No` for this question the rest of survey will be skipped", notes),
+  mutate(notes = if_else(var_name == "cts screen", "If TC answered `No` for this question the rest of survey was skipped (`-55`)", notes),
     description = if_else(var_name ==  "cts screen", "Have you been in a (romantic) relationship in the past year?", description))
 ```
 
-This survey was not adminstered for participants who were incarcerated at the time of the assessment. 
+
 
 
 
@@ -5487,89 +5520,12 @@ print(my_gt_table)
 #my_gt_table
 ```
 
-#### Scale and Subscales
-
-Information on total score and subscale variables are below. Prevalence
-scales are calculated ... <MARIA> INSERT INFO ON COMPOSITE SCORE
-CREATION. Severity scores are calculated ... <MARIA> INSERT INFO ON
-COMPOSITE SCORE CREATION. Mutuatlity scores are created by ... <MARIA>
-INSERT INFO ON COMPOSITE SCORE CREATION
-
-<SHAINA/MIN> TODO: NEED fill Range once we understand how composite
-scores were created
-
-```{r CTS-scale-table, results = 'asis'}
-# Create the table as a data frame
-CTS_scale_df <- data.frame(
-  var_name = c("cts_psy_agg_ind_sev", "cts_injury_ind_sev", "cts_assault_ind_sev",   "cts_sex_ind_sev",       #TC   severity 
-                "cts_psy_agg_part_sev","cts_injury_part_sev", "cts_assault_part_sev","cts_sex_part_sev",      #Partner severity 
-
-                "cts_psy_agg_ind_prev", "cts_injury_ind_prev", "cts_assault_ind_prev", "cts_sex_ind_prev", 
-                "cts_psy_agg_part_prev", "cts_injury_part_prev", "cts_assault_part_prev", "cts_sex_part_prev",
-               
-                "cts_psy_agg_mutual", "cts_injury_mutual", "cts_assault_mutual", "cts_sex_mutual",
-               
-                "cts_negotiate_ind",    "cts_negotiate_part"),
-
-  scale = c("TC Psychological Aggression (2)", "TC Physical Injury (2)", "TC Assault (2)", "TC Sexual Cohesion (2)",
-            "Partner Psychological Aggression (2)", "Partner Physical Injury (2)", "Partner Assault (2)", "Partner Sexual Cohesion (2)",
-
-            "TC Psychological Aggression (2)", "TC Physical Injury (2)", "TC Assault (2)", "TC Sexual Cohesion (2)",
-            "Partner Psychological Aggression (2)", "Partner Physical Injury (2)", "Partner Assault (2)", "Partner Sexual Cohesion (2)",
-            
-            "Psychological Aggression (4)", "Physical Injury (4)", "Assaul (4)t", "Sexual Cohesion (4)",
-            
-            "TC Negotiation (2)", "Partner Negotiation (2)"
-            ),
-  score_method = c("Severity", "Severity", "Severity", "Severity",
-                   "Severity", "Severity", "Severity", "Severity",
-                   "Prevalence", "Prevalence", "Prevalence", "Prevalence", 
-                   "Prevalence", "Prevalence", "Prevalence", "Prevalence", 
-                   "Mutuality", "Mutuality", "Mutuality", "Mutuality",
-                   "", ""
-                   ),
-
-  scale_construction = c("`cts3`, `cts13`", "`cts5`, `cts15`", "`cts9`, `cts11`", "`cts17`, `cts19`", 
-                         "`cts4`, `cts14`", "`cts6`, `cts16`", "`cts10`, `cts12`", "`cts18`, `cts20`", 
-                         
-                         "`cts3`, `cts13`", "`cts5`, `cts15`", "`cts9`, `cts11`", "`cts17`, `cts19`", 
-                         "`cts4`, `cts14`", "`cts6`, `cts16`", "`cts10`, `cts12`", "`cts18`, `cts20`",
-                         
-                         "`cts3`, `cts13`, `cts4`, `cts14`","`cts5`, `cts15`, `cts6`, `cts16`",
-                         "`cts9`, `cts11`, `cts10`, `cts12`", "`cts17`, `cts19`, `cts18`, `cts20`",
-                         
-                         "`cts1`, `cts7`", "`cts2`, `cts8`"
-                         
-                         ),
-  scale_range = c("", "", "", "", "", "", "", "", "", "",
-                  "", "", "", "", "", "", "", "", "", "", 
-                  "", "")
-  )
-
-
-# Create the gt table object
-CTS_scale_table <- gt(CTS_scale_df) %>%
-  cols_align(columns = c("scale_range"), align = "center") %>% 
-  cols_label(var_name = "Variable Name",
-            scale = "Scale (# of items)", 
-            score_method = "Score Method",
-            scale_construction = "Scale Construction",
-            scale_range = "Range*") %>% 
-  tab_footnote(footnote = "*Range of possible values") %>% 
-  tab_options(table.border.bottom.style = "hidden") %>% 
-  #cols_width(scale ~ px(200)) %>% 
-  apply_tbl_theme() 
-
-# Print the table
-print(CTS_scale_table)
-
-```
 
 ### Summary Statistics
 
 #### Descriptive Statistics
 
-Descriptive statistics are presented below for each item and subscale score:
+Descriptive statistics are presented below for each item.
 
 For binary items: 
 ```{r cts-binary}
@@ -5629,7 +5585,7 @@ cts_tbl_binary
 ```{r CTS-mean-items}
 # Create subset of CTS items
 cts_data_subset <- complete %>%
-  select(cts1:cts_sex_mutual)
+  select(cts1:cts20)
 
 # Calculate the summary statistics for each variable
 cts_summary_data <- lapply(cts_data_subset, function(x) {
@@ -5675,35 +5631,7 @@ cts_tbl
 
 ```
 
-#### Distributions
 
-Distributions are presented below for each subscale
-
-##### Negotiation distributions
-
-```{r CTS-Negotiation-distributions, class.source='fold', echo = FALSE}
-p_cts_neg <- complete %>% 
-  composite_hist(
-    cts_negotiate_ind,
-    bins = 10
-  ) +
-  labs(title = 'Individual (TC) Negotiation Subscale',
-       #subtitle = 'Individual (TC)'
-       )
-
-p_cts_part <- complete %>% 
-  composite_hist(
-    cts_negotiate_part,
-    bins = 10
-  ) +
-  labs(title = 'Partner Negotiation Subscale',
-      # subtitle = 'Partner'
-       )
-
-ggarrange(p_cts_neg, p_cts_part + rremove("ylab")
-          ) %>%
-  annotate_figure(top = text_grob( "Distribution for CTS Negotiation Subscale \n(x-axis and y-axis are in different scales)"))
-```
 
 
 ## Brief Child Abuse Potential Inventory (BCAP)
@@ -6564,14 +6492,21 @@ ggarrange(p_arq_model_s, p_arq_model_o
 
 ## Pregnancy and Parenting Data 
 
-Data on pregnancy and childbirth have been obtained prospectively at each wave of the study. Participants self-reported this information in the current study. The presence or absence of a pregnancy, stillbirth, induced abortion, miscarriage, and live birth was coded as `1 = yes1` and `0 = no` to indicate presence or absence of a pregnancy or pregnancy outcome that occurred since the last time we had interviewed each participant. We also provided information from the longitudinal data in aggregate to document the total number of children previously born to the sample. Additional variables computed are indicated below.  
+Data on pregnancy and childbirth have been obtained prospectively at each wave of the study. Participants self-reported this information in the current study. 
+
+-   The presence or absence of a pregnancy, stillbirth, induced abortion, miscarriage, and live birth was coded as `1 = yes1` and `0 = no` to indicate presence or absence of a pregnancy or pregnancy outcome that occurred since the last time we had interviewed each participant. 
+
+-   We also provided information from the longitudinal data in aggregate to document the total number of children previously born to the sample. 
+
+-   Data are archived in aggregate to preserve participant and participant offspring confidentiality.
+
 
 Value label for `pregnant_wv14_yes`. 
 ```{r parenting-label-table, results = 'asis'}
 parenting_label_df <- data.frame(
   value = c("0", "1"),
-  label = c("Pregnant",
-            "Not Pregnant")) %>% 
+  label = c("Not Pregnant",
+            "Pregnant")) %>% 
   t() %>% 
   as.data.frame()
 
@@ -6591,6 +6526,8 @@ parenting_label_table <- parenting_label_df %>%
 print(parenting_label_table)
 ```
 
+Variables computed are indicated below. 
+
 ```{r parent-data-table, results = 'asis'}
 #create table of info
 parent_data_df <- data.frame(
@@ -6603,7 +6540,7 @@ parent_data_df <- data.frame(
             "Total number of stillbirths wave 14",
             "Total number of reported children prior to wave 14",
             "Total number of step children wave 14",
-            "'Yes' participant currently pregnant when assessment is conduct")) 
+            "'Yes' participant was pregnant at the time of the wave 14 assessment")) 
 
 #create gt table
 parent_data_df_table <- parent_data_df %>%
@@ -6631,6 +6568,8 @@ The measure asks about involvement with services, including child welfare servic
 -   This is not a a standardized questionnaire, so the missing data rules were not applied. No total or subscales were computed. 
 
 -   We are not presenting `sus14` items because those contain privately identifiable information that cannot be sufficiently de-identified. 
+
+-   There are a total of 69 SUS variables in this datafile.
 
 
 Reference: 
@@ -6816,7 +6755,7 @@ sus_word_long <- sus_word %>%
   mutate(description = if_else(var_name == "sus17", "Have you been in short stay or evaluation inpatient treatment. 
                                This includes stays up to 72 hours (3 days), such as detox? ", description)) %>%
   mutate(description = if_else(var_name == "sus18", "Have you been in residential treatment for substance abuse?", description)) %>%
-   mutate(notes = if_else(var_name == "sus screen", "If responsed ‘no’ then sus1_sus10j skipped (`-55`)", notes)) %>%
+   mutate(notes = if_else(var_name == "sus screen", "If responsed ‘no’ then sus1 through sus10j skipped (`-55`)", notes)) %>%
   mutate(var_name = str_replace(var_name, "sus screen", "sus_screen")) %>%
   mutate(var_name = str_replace(var_name,  "sus - start", "sus_start")) %>%
   mutate(notes = if_else(var_name == "sus - start", "Open text field", notes)) %>%

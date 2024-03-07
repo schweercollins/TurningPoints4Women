@@ -24,9 +24,10 @@ tpw_archive_id <- tpw_raw %>%
   select(id)
 
 # import parent data for archive 
-tpw_parent_data <- read.csv(here("do_not_push", "ParentDataforArchive.csv")) %>%
+parent_complete <- read.csv(here("do_not_push", "ParentDataforArchive.csv")) %>%
   rename(id = FAM.ID)%>%
-  select(-p00a, - X)
+  select(-p00a, - X) %>%
+  slice(-1)
 
 
 # import CLS data for archive 
@@ -49,9 +50,12 @@ arril_clean <- read.csv(here("do_not_push", "tps_arril_clean.csv")) %>%
   mutate(date_last_arrest_SR_NA = as.Date(date_last_arrest_SR_NA, format = "%m/%d/%y"))
 
 # import official arrest data
-arrest_clean <- read.csv(here("do_not_push", "tpw_arrest_archive.csv")) %>%
+arrest_complete <- read.csv(here("do_not_push", "tpw_arrest_archive.csv")) %>%
   select(id, LastOffAge, LastOffAgeWith1, F18OffAge, F18OffAgeWith1, FF18OffAge, Num14NewOff,	Num14NewOffWith1, Num14NewFOff, Wave14offseverity, Wave14offseverityWith1, NumIncarWave14, TPDesist_with1andCLSYes) %>%
-  rename(Wave14Desist = TPDesist_with1andCLSYes)
+  rename(Wave14Desist = TPDesist_with1andCLSYes) %>%
+  mutate_at(vars(starts_with("F18")), ~ifelse(is.na(.), -55, .)) %>%
+  mutate_at(vars(starts_with("FF18")), ~ifelse(is.na(.), -55, .)) %>%
+  mutate_at(vars(2:6), ~round(., 2))
 
 # Scientific Notation 
 options(scipen = 2)
@@ -113,13 +117,15 @@ arril <- Sociodem_wv14_archive %>%
 ```
 
 ```{r arril-missing}
-arril <- arril %>%
+arril_complete <- arril %>%
   filter(id != "" & id != "TC ID:") %>%
   mutate(ar00 = ifelse(is.na(ar00), "-99", ar00))%>%
   mutate(ar00a = ifelse(ar00 != "1", "-55", ar00a))%>%
-  mutate(AgeLastArrestSR = ifelse(date_last_arrest_SR < 0, date_last_arrest_SR, AgeLastArrestSR)) %>%
+ mutate(AgeLastArrestSR = ifelse(date_last_arrest_SR < 0, date_last_arrest_SR, round(AgeLastArrestSR, 2))) %>%
   mutate(AgeLastArrestSR= ifelse(AgeLastArrestSR == "", -55, AgeLastArrestSR)) %>%
-  select(-date_last_arrest_SR)
+  select(-date_last_arrest_SR) %>%
+  rename(YesArrestSR = ar00) %>%
+  rename(NumArrestSR = ar00a)
 ```
 
 ## BSI
@@ -680,7 +686,7 @@ cts <-
 ### CTS Missing Data 
 There are missing data in CTS and missing rule applied. 
 ```{r cts_missing}
-cts <- cts %>%
+cts_complete <- cts %>%
   # if answered no for screening question, the entire survey is skipped.
   mutate_at(vars(ct1:ct20), ~case_when(cts_screen == 0  ~ "-55", TRUE ~ . )) %>%
   # participants who were incarcerated at the time of participation were not administered this survey
@@ -701,166 +707,166 @@ cts %>%
 
 ### CTS Calculations & Subscale 
 ```{r cts_calculations }
-cts_calc <-
-  cts %>%
-  pct_miss_fun(
-    id = c('id', 'cts_screen'),
-    n_items = 20
-  ) %>%
-  full_join(cts,
-            by = 'id') %>%
-  mutate(across(-id, as.numeric)) %>%
-  filter(
-    is.na(miss_pct) |
-      miss_pct < 20
-         ) %>%
-  mutate(
-    across(
-      .cols = c(ct1:ct20),
-      .fns = ~case_when(
-        .x == -77 ~ NA_real_,
-        .x == -55 ~ NA_real_,
-        TRUE ~ .x
-      )
-    )
-  )
+# cts_calc <-
+#   cts %>%
+#   pct_miss_fun(
+#     id = c('id', 'cts_screen'),
+#     n_items = 20
+#   ) %>%
+#   full_join(cts,
+#             by = 'id') %>%
+#   mutate(across(-id, as.numeric)) %>%
+#   filter(
+#     is.na(miss_pct) |
+#       miss_pct < 20
+#          ) %>%
+#   mutate(
+#     across(
+#       .cols = c(ct1:ct20),
+#       .fns = ~case_when(
+#         .x == -77 ~ NA_real_,
+#         .x == -55 ~ NA_real_,
+#         TRUE ~ .x
+#       )
+#     )
+#   )
 
-cts_calc <- 
-  cts_calc %>% 
-  mutate(
-    across(
-      .cols = c(ct1, ct2, ct7, ct8),
-      .fns = ~case_when(
-        .x == 1 ~ 1,
-        .x == 2 ~ 2,
-        .x == 3 ~ 4,
-        .x == 4 ~ 8,
-        .x == 5 ~ 15.5, # midpoint between 11-20
-        .x == 6 ~ 20,
-        .x == 7 ~ 0,
-        .x == 8 ~ 0,
-        TRUE ~ NA_real_
-      ),
-      .names = '{col}_midpoint'
-    )
-  )
-
-
-
-
-cts_complete <-
-  cts_calc %>%
-  select(
-    -missing_n,
-    -miss_pct
-  ) %>%
-    mutate(
-      across(
-          .cols = c(ct1:ct20),
-          .fns = ~case_when(
-            .x %in% c(1, 2, 3, 4, 5, 6) ~ 1,
-            .x %in% c(7, 8) ~ 0,
-            TRUE ~ NA_real_
-          ),
-          .names = '{col}_dum'
-        )
-    )
-
-# ind = the participant's behaviors
-# part = the participant's partner's behaviors
-cts_complete <-
-  cts_complete %>%
-    subscale_create(
-      total_only = TRUE,
-      scale1 = c('ct3_dum', 'ct13_dum'),
-      scale2 = c('ct4_dum', 'ct14_dum'),
-      scale3 = c('ct5_dum', 'ct15_dum'),
-      scale4 = c('ct6_dum', 'ct16_dum'),
-      scale5 = c('ct9_dum', 'ct11_dum'),
-      scale6 = c('ct10_dum', 'ct12_dum'),
-      scale7 = c('ct17_dum', 'ct19_dum'),
-      scale8 = c('ct18_dum', 'ct20_dum'),
-      scale9 = c('ct1_midpoint', 'ct7_midpoint'),
-      scale10 = c('ct2_midpoint', 'ct8_midpoint')
-    ) %>%
-    rename(
-      # past year severity only
-      cts_psy_agg_ind_sev = total1,
-      cts_psy_agg_part_sev = total2,
-      cts_injury_ind_sev = total3,
-      cts_injury_part_sev = total4,
-      cts_assault_ind_sev = total5,
-      cts_assault_part_sev = total6,
-      cts_sex_ind_sev = total7,
-      cts_sex_part_sev = total8,
-      cts_negotiate_ind = total9,
-      cts_negotiate_part = total10
-    )
-
-cts_complete <-
-  cts_complete %>%
-    mutate(
-      cts_psy_agg_ind_prev = if_else(cts_psy_agg_ind_sev == 0, 0, 1),
-      cts_psy_agg_part_prev = if_else(cts_psy_agg_part_sev == 0, 0, 1),
-      cts_injury_ind_prev = if_else(cts_injury_ind_sev == 0, 0, 1),
-      cts_injury_part_prev = if_else(cts_injury_part_sev == 0, 0, 1),
-      cts_assault_ind_prev = if_else(cts_assault_ind_sev == 0, 0, 1),
-      cts_assault_part_prev = if_else(cts_assault_part_sev == 0, 0, 1),
-      cts_sex_ind_prev = if_else(cts_sex_ind_sev == 0, 0, 1),
-      cts_sex_part_prev = if_else(cts_sex_part_sev == 0, 0, 1),
-      cts_psy_agg_mutual = case_when(
-        (cts_psy_agg_ind_prev == 1 &
-          cts_psy_agg_part_prev == 1) ~ 3,
-        (cts_psy_agg_ind_prev == 0 &
-           cts_psy_agg_part_prev == 1) ~ 1,
-        (cts_psy_agg_ind_prev == 1 &
-           cts_psy_agg_part_prev == 0) ~ 2,
-        (cts_psy_agg_ind_prev == 0 &
-           cts_psy_agg_part_prev == 0) ~ -99
-      ),
-      cts_injury_mutual = case_when(
-        (cts_injury_ind_prev == 1 &
-           cts_injury_part_prev == 1) ~ 3,
-        (cts_injury_ind_prev == 0 &
-           cts_injury_part_prev == 1) ~ 1,
-        (cts_injury_ind_prev == 1 &
-           cts_injury_part_prev == 0) ~ 2,
-        (cts_injury_ind_prev == 0 &
-           cts_injury_part_prev == 0) ~ -99
-      ),
-      cts_assault_mutual = case_when(
-        (cts_assault_ind_prev == 1 &
-           cts_assault_part_prev == 1) ~ 3,
-        (cts_assault_ind_prev == 0 &
-           cts_assault_part_prev == 1) ~ 1,
-        (cts_assault_ind_prev == 1 &
-           cts_assault_part_prev == 0) ~ 2,
-        (cts_assault_ind_prev == 0 &
-           cts_assault_part_prev == 0) ~ -99
-      ),
-      cts_sex_mutual = case_when(
-        (cts_sex_ind_prev == 1 &
-           cts_sex_part_prev == 1) ~ 3,
-        (cts_sex_ind_prev == 0 &
-           cts_sex_part_prev == 1) ~ 1,
-        (cts_sex_ind_prev == 1 &
-           cts_sex_part_prev == 0) ~ 2,
-        (cts_sex_ind_prev == 0 &
-           cts_sex_part_prev == 0) ~ -99
-      )
-    )
-
-# Dropping dummy-coded variables for archive
-# pulling in original items with missing data code
-cts_complete <- cts_complete %>%
-  select(-ct1_dum:-ct20_dum) %>%
-  # We are not include midpoint variable becauey they were used to compute variable, but meaningless for analysis
-  select(id, cts_psy_agg_ind_sev:cts_sex_mutual) %>%
-  merge(cts, by="id") %>%
-  # reorder dataset 
-  relocate(cts_psy_agg_ind_sev:cts_sex_mutual, .after = "ct20") %>%
-  rename_with(~ ifelse(substr(., 1, 2) == "ct" & substr(., 1, 3) != "cts", paste0("cts", substr(., 3, nchar(.))), .), starts_with("ct"))
-  
+# cts_calc <- 
+#   cts_calc %>% 
+#   mutate(
+#     across(
+#       .cols = c(ct1, ct2, ct7, ct8),
+#       .fns = ~case_when(
+#         .x == 1 ~ 1,
+#         .x == 2 ~ 2,
+#         .x == 3 ~ 4,
+#         .x == 4 ~ 8,
+#         .x == 5 ~ 15.5, # midpoint between 11-20
+#         .x == 6 ~ 20,
+#         .x == 7 ~ 0,
+#         .x == 8 ~ 0,
+#         TRUE ~ NA_real_
+#       ),
+#       .names = '{col}_midpoint'
+#     )
+#   )
+# 
+# 
+# 
+# 
+# cts_complete <-
+#   cts_calc %>%
+#   select(
+#     -missing_n,
+#     -miss_pct
+#   ) %>%
+#     mutate(
+#       across(
+#           .cols = c(ct1:ct20),
+#           .fns = ~case_when(
+#             .x %in% c(1, 2, 3, 4, 5, 6) ~ 1,
+#             .x %in% c(7, 8) ~ 0,
+#             TRUE ~ NA_real_
+#           ),
+#           .names = '{col}_dum'
+#         )
+#     )
+# 
+# # ind = the participant's behaviors
+# # part = the participant's partner's behaviors
+# cts_complete <-
+#   cts_complete %>%
+#     subscale_create(
+#       total_only = TRUE,
+#       scale1 = c('ct3_dum', 'ct13_dum'),
+#       scale2 = c('ct4_dum', 'ct14_dum'),
+#       scale3 = c('ct5_dum', 'ct15_dum'),
+#       scale4 = c('ct6_dum', 'ct16_dum'),
+#       scale5 = c('ct9_dum', 'ct11_dum'),
+#       scale6 = c('ct10_dum', 'ct12_dum'),
+#       scale7 = c('ct17_dum', 'ct19_dum'),
+#       scale8 = c('ct18_dum', 'ct20_dum'),
+#       scale9 = c('ct1_midpoint', 'ct7_midpoint'),
+#       scale10 = c('ct2_midpoint', 'ct8_midpoint')
+#     ) %>%
+#     rename(
+#       # past year severity only
+#       cts_psy_agg_ind_sev = total1,
+#       cts_psy_agg_part_sev = total2,
+#       cts_injury_ind_sev = total3,
+#       cts_injury_part_sev = total4,
+#       cts_assault_ind_sev = total5,
+#       cts_assault_part_sev = total6,
+#       cts_sex_ind_sev = total7,
+#       cts_sex_part_sev = total8,
+#       cts_negotiate_ind = total9,
+#       cts_negotiate_part = total10
+#     )
+# 
+# cts_complete <-
+#   cts_complete %>%
+#     mutate(
+#       cts_psy_agg_ind_prev = if_else(cts_psy_agg_ind_sev == 0, 0, 1),
+#       cts_psy_agg_part_prev = if_else(cts_psy_agg_part_sev == 0, 0, 1),
+#       cts_injury_ind_prev = if_else(cts_injury_ind_sev == 0, 0, 1),
+#       cts_injury_part_prev = if_else(cts_injury_part_sev == 0, 0, 1),
+#       cts_assault_ind_prev = if_else(cts_assault_ind_sev == 0, 0, 1),
+#       cts_assault_part_prev = if_else(cts_assault_part_sev == 0, 0, 1),
+#       cts_sex_ind_prev = if_else(cts_sex_ind_sev == 0, 0, 1),
+#       cts_sex_part_prev = if_else(cts_sex_part_sev == 0, 0, 1),
+#       cts_psy_agg_mutual = case_when(
+#         (cts_psy_agg_ind_prev == 1 &
+#           cts_psy_agg_part_prev == 1) ~ 3,
+#         (cts_psy_agg_ind_prev == 0 &
+#            cts_psy_agg_part_prev == 1) ~ 1,
+#         (cts_psy_agg_ind_prev == 1 &
+#            cts_psy_agg_part_prev == 0) ~ 2,
+#         (cts_psy_agg_ind_prev == 0 &
+#            cts_psy_agg_part_prev == 0) ~ -99
+#       ),
+#       cts_injury_mutual = case_when(
+#         (cts_injury_ind_prev == 1 &
+#            cts_injury_part_prev == 1) ~ 3,
+#         (cts_injury_ind_prev == 0 &
+#            cts_injury_part_prev == 1) ~ 1,
+#         (cts_injury_ind_prev == 1 &
+#            cts_injury_part_prev == 0) ~ 2,
+#         (cts_injury_ind_prev == 0 &
+#            cts_injury_part_prev == 0) ~ -99
+#       ),
+#       cts_assault_mutual = case_when(
+#         (cts_assault_ind_prev == 1 &
+#            cts_assault_part_prev == 1) ~ 3,
+#         (cts_assault_ind_prev == 0 &
+#            cts_assault_part_prev == 1) ~ 1,
+#         (cts_assault_ind_prev == 1 &
+#            cts_assault_part_prev == 0) ~ 2,
+#         (cts_assault_ind_prev == 0 &
+#            cts_assault_part_prev == 0) ~ -99
+#       ),
+#       cts_sex_mutual = case_when(
+#         (cts_sex_ind_prev == 1 &
+#            cts_sex_part_prev == 1) ~ 3,
+#         (cts_sex_ind_prev == 0 &
+#            cts_sex_part_prev == 1) ~ 1,
+#         (cts_sex_ind_prev == 1 &
+#            cts_sex_part_prev == 0) ~ 2,
+#         (cts_sex_ind_prev == 0 &
+#            cts_sex_part_prev == 0) ~ -99
+#       )
+#     )
+# 
+# # Dropping dummy-coded variables for archive
+# # pulling in original items with missing data code
+# cts_complete <- cts_complete %>%
+#   select(-ct1_dum:-ct20_dum) %>%
+#   # We are not include midpoint variable because they were used to compute variable, but meaningless for analysis
+#   select(id, cts_psy_agg_ind_sev:cts_sex_mutual) %>%
+#   merge(cts, by="id") %>%
+#   # reorder dataset 
+#   relocate(cts_psy_agg_ind_sev:cts_sex_mutual, .after = "ct20") %>%
+#   rename_with(~ ifelse(substr(., 1, 2) == "ct" & substr(., 1, 3) != "cts", paste0("cts", substr(., 3, nchar(.))), .), starts_with("ct"))
+#   
   
 
 ```
@@ -1703,6 +1709,7 @@ ell <-
         .x == "Once a day" ~ "5",
         .x == "2-3 times a day" ~ "6",   
         .x == "Decline to Answer" ~ "-77",
+        is.na(.x) ~ "-99", ## NA in this case is true missing
         TRUE ~ .x
       )
     ),
@@ -2158,28 +2165,32 @@ flo_complete <- flo_complete %>%
 ##ITQ
 ### ITQ Select Vartiable and Recode 
 ```{r itq}
+
 itq <- tpw_raw %>% 
   select(
     id,
-    matches(
-      "^itq"
-    )
-  )  %>%
-    mutate(
+    matches("^itq")
+  ) %>%
+  mutate(
     across(
       .cols = c(itq1:itq9),
-      .fns = ~case_when(
-        .x == "Not at all" ~ "0",
-        .x == "A little bit" ~ "1",
-        .x == "Moderately" ~ "2",
-        .x == "Quite a bit" ~ "3",
-        .x == "Extremely" ~ "4",
-        .x == "Decline to Answer" ~ "-55",
-     #   is.na(.x) ~ -99, ## need to figure out how to get this right
-        TRUE ~ .x
-      )
+      .fns = ~ {
+        .x <- na_if(.x, "NA") # Replace "NA" strings with actual NA values
+        .x <- case_when(
+          .x == "Not at all" ~ "0",
+          .x == "A little bit" ~ "1",
+          .x == "Moderately" ~ "2",
+          .x == "Quite a bit" ~ "3",
+          .x == "Extremely" ~ "4",
+          .x == "Decline to Answer" ~ "-55",
+          is.na(.x) ~ "-99",  # Replace NA values with -99
+          TRUE ~ .x
+        )
+        return(.x)
+      }
     )
-  ) 
+  )
+
 ```
 
 ### ITQ Missing Data 
@@ -2218,8 +2229,9 @@ itq_calc <- itq %>%
     )
   )
 
-# This code can be used to compute diagnoses based on participant endorsing at least one symptom in each cluster per ITQ guidelines
-## 1 selected in the current study because answer scale for participants in the study was 1 = 1-2 times per week symptoms severity, 2 = 3-4 times per week, 3 = daily, 4 = multiple times daily; consistent with other trauma measures it would be an underestimate to not include 1; however, measure is also potentially flawed because there is only 0 or 1-2 times per week. Researchers could use more stringent criteria of 2 for symptom manifestation.
+# This code can be used to compute diagnoses based on participant endorsing at least one symptom in each cluster per ITQ measure guidelines
+
+## '1' (versus '2) selected in the current study because answer scale visual given to participants in the study was 1 = 1-2 times per week symptoms severity, 2 = 3-4 times per week, 3 = daily, 4 = multiple times daily; consistent with other trauma measures it would be an underestimate to not include 1; however, measure is also potentially flawed because there is only 0 or 1-2 times per week. Researchers could use more stringent criteria of 2 for symptom manifestation.
 itq_calc <- itq_calc %>%
   mutate(
     itq_re_dx = case_when(
@@ -2242,7 +2254,7 @@ itq_calc <- itq_calc %>%
       (itq7 < 1 & itq8 < 1 & itq9 < 1) ~ "diagnosis_not_met",
       TRUE ~ "conditions_not_met"
     ),
-    itq_pstd_dx = case_when(
+    itq_ptsd_dx = case_when(
       (itq_re_dx == "diagnosis_met" &
          itq_av_dx == "diagnosis_met" &
          itq_th_dx == "diagnosis_met" &
@@ -2279,10 +2291,18 @@ itq_complete <-
   #   )
   # )
 
+
 itq_complete <- itq_complete %>%
-  select(id, itq_re_total, itq_av_total, itq_th_total, itq_fi_total, itq_ptsd_total, itq_pstd_dx) %>%
+  mutate(
+    itq_re_total = if_else(id == "HR173", -99, itq_re_total),
+    itq_av_total = if_else(id == "HR173", -99, itq_av_total),
+    itq_th_total = if_else(id == "HR173", -99, itq_th_total),
+    itq_fi_total = if_else(id == "HR173", -99, itq_fi_total),
+    itq_ptsd_total = if_else(id == "HR173", -99, itq_ptsd_total),
+    itq_ptsd_dx = if_else(id == "HR173", "-99", itq_ptsd_dx)) %>%
+  select(id, itq_re_total, itq_av_total, itq_th_total, itq_fi_total, itq_ptsd_total, itq_ptsd_dx) %>%
   merge(itq, by="id", all.y = TRUE) %>%
-  relocate(itq_re_total, itq_av_total, itq_th_total, itq_fi_total, itq_ptsd_total, itq_pstd_dx, .after = "itq9")
+  relocate(itq_re_total, itq_av_total, itq_th_total, itq_fi_total, itq_ptsd_total, itq_ptsd_dx, .after = "itq9")
 ```
 
 
@@ -2403,10 +2423,22 @@ ibq_complete <- ibq_complete %>%
 ## update values when person endorsed a system already listed
 ## [   ] indicates the one word was removed to de-identify; otherwise, values were re-coded to be de-identified
 
-## pull in internal code when creating external archive file 
-
-# code goes here
-# this code also handles missing data
+ibq_complete <- ibq_complete %>%
+  mutate(ibq10_legal_system = if_else(id == "HR107" | id == "HR211", "1", as.character(ibq10_legal_system)),
+         ibq10_other_text = if_else(is.na(ibq10_other) | ibq10_other == 0, "", ibq10_other_text),
+         ibq10_other_text = if_else(id == "HR172", "County", ibq10_other_text),
+         ibq10_other_text = if_else(id == "HR181", "[   ]", ibq10_other_text),
+         ibq10_other_text = if_else(id == "HR214", "homeless shelter", ibq10_other_text),
+         ibq10_other_text = if_else(id == "P805", "community organization", ibq10_other_text),
+         ibq10_other_text = if_else(id == "P813", "community organization", ibq10_other_text),
+         ibq10_other_text = if_else(id == "P839", "women's advocacy center", ibq10_other_text),
+         ibq10_other_text = if_else(id == "P866", "prison system", ibq10_other_text),
+         ibq10_other_text = if_else(id == "P885", "prison system", ibq10_other_text),
+         ibq10_other_text = if_else(id == "P890", "state", ibq10_other_text),
+         ibq10_other_text = if_else(id == "P895", "[   ]", ibq10_other_text),
+         ibq10_other_text = if_else(is.na(ibq10_other_text) | ibq10_other_text == "", "-55", ibq10_other_text),
+         across(ibq10_school:ibq10_other_text, ~if_else(is.na(.x), "-55", as.character(.x)))
+  )
 
 
 ```
@@ -2789,10 +2821,9 @@ convert_to_date <- function(date_str) {
 
 # Apply the function to the 's2' and 's5' and 's7' columns
 
-sex$s2 <- sapply(sex$s2, convert_to_date)
-sex$s5 <- sapply(sex$s5, convert_to_date)
-sex$s7 <- sapply(sex$s7, convert_to_date)
-
+ sex$s2 <- sapply(sex$s2, convert_to_date)
+ sex$s5 <- sapply(sex$s5, convert_to_date)
+ sex$s7 <- sapply(sex$s7, convert_to_date)
 
 ```
 
@@ -2805,7 +2836,8 @@ sex_complete <- sex %>%
     s2 = ifelse(is.na(s2), -55, as.character(s2)),
     s5 = ifelse(is.na(s5), -55, as.character(s5)),
     s7 = ifelse(is.na(s7), -55, as.character(s7))
-  )
+  ) %>%
+  select(-s32) #dropping because we recoded; intentionally still references in codebook though
 ```
 
 ## CINT
@@ -3664,6 +3696,7 @@ pct <- pct %>%
   mutate_at(vars(pct1:pct3e), ~case_when(pct0 == "-55" ~ "-55", TRUE ~ .)) %>%
   # if pct1 is NO/0 or -77, the entire questionnaire was not administered because participant endorsed no prior traumatic pregnancies or childbirth experiences
    mutate_at(vars(pct2a:pct3e), ~case_when(pct1 == "0" ~ "-55", TRUE ~ .)) %>%
+  mutate_at(vars(pct2a:pct3e), ~ case_when(pct1 == "-77" ~ "-77", TRUE ~ .)) %>% # applies to one case
   # dropping pct2e and pct3e as all contain identifying child name and sometimes DOB; dropping pct0 as no new information from screener p00a; was only skip rule question
   select(-pct2e, -pct3e, -pct0) 
 
@@ -4089,7 +4122,7 @@ sus <- sus %>%
 #P890 add count of 1 to sus1
 sus <- sus %>%
   # removed and recede 6a,6b, and 6c because they include confidential information
-  #select(-sus6a, - sus6b, - sus6c) %>%
+  select(-sus6a, - sus6b, - sus6c) %>%
   mutate(across(c(sus1, sus2, sus3, sus4, sus7), as.numeric))%>%
   # P865 (add count of 2 to sus1)
   mutate(sus1 = ifelse(id == "P865", sus1 + 2, sus1)) %>%
@@ -4099,7 +4132,6 @@ sus <- sus %>%
   mutate(sus1 = ifelse(id == "P887", sus1 + 1, sus1)) %>%
   # P849 (add count of 3 to sus1)
   mutate(sus1 = ifelse(id == "P849", sus1 + 3, sus1)) %>%
-  
   # P882 (add count of 2 to sus1)
   mutate(sus1 = ifelse(id == "P882", sus1 + 2, sus1)) %>%
   # P867 (Add count of 3 to sus1)
@@ -4122,16 +4154,6 @@ sus <- sus %>%
   mutate(sus7 = ifelse(id == "P829", sus7 + 1, sus7)) %>%
   #P890 add count of 1 to sus1
   mutate(sus1 = ifelse(id == "P890", sus1 + 1, sus1))
-
-
-## Maria export to csv and double code with Kaylee
-
-
-## we should P810 to see if there are values
-# No data in 6a, 6b,6c for P810
-
-## then remove 6a-6c from archive data and codebook
-## removed because recoded into other values
 
 
 
@@ -5229,11 +5251,10 @@ Merge together all measures
 # This file contain all data including correct missing code for missing values (-77, -99, -55 etc.). 
 # This file also contain all the computed variables. 
 tpw_archive_calc <- tpw_archive_id %>%
-  left_join(tpw_parent_data, by = "id") %>%
+  left_join(parent_complete, by = "id") %>%
   left_join(cls_data, by = "id") %>%
-  left_join(arril, by = "id") %>%
-  left_join(arrest_clean, by = "id") %>%
-  
+  left_join(arril_complete, by = "id") %>%
+  left_join(arrest_complete, by = "id") %>%
   left_join(bsi_complete, by = "id") %>%
   left_join(cesd_complete, by = "id") %>%
   left_join(ciq_complete, by = "id") %>%
