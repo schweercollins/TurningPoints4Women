@@ -2806,6 +2806,7 @@ sex <- sex %>%
 # before next steps, editing dates so only mm/dddd and DD 01 for s2, s5, and s7
 
 ## Function to convert character to date with day to 01
+# we change all the date to first day of the month to keep confidentiality 
 convert_to_date <- function(date_str) {
   if (grepl("^-?\\d{1,2}/\\d{4}$", date_str)) {  # Check if mm/yyyy format
     parts <- unlist(strsplit(date_str, "/"))
