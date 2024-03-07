@@ -421,7 +421,8 @@ arril_data_df <- data.frame(
   Description = c(
             " Since the last time we talked to you, which was on ___________ [asssessor read], have you been arrested?",
             "How many times?",
-            "Age of last arrest (self-report)")) 
+            "Age of last arrest (self-report)"), 
+  Value = c("Yes = 1\nNo = 0\nDecline to Answer = -77", "", "") )
 
 #create gt table
 arril_data_df_table <- arril_data_df %>%
@@ -432,7 +433,6 @@ apply_tbl_theme() %>%
 
 #print table
 print(arril_data_df_table)
-
 ```
 
 # Characteristics of Living
@@ -441,12 +441,10 @@ print(arril_data_df_table)
 ```{r cls-table, results = 'asis'}
 #create table of info
 cls_df <- data.frame(
-  Variable = c("tp_num_transitions", "tp_num_incarcerated", "total_days_incarcerated", "tp_num_homeless", "total_days_homeless"),
+  Variable = c("tp_num_transitions", "tp_num_incarcerated", "tp_num_homeless"),
   Description = c("Total number of housing transitions reported by participant Wave 14",
             "Total number of times the participant has been incarcerated Wave 14",
-            "Total number of days the participant has been incarcerated Wave 14",
-            "Total number of times the particpant has reported being without housing Wave 14",
-            "Total number of days the participant has reported being without housing Wave 14")) 
+            "Total number of times the particpant has reported being without housing Wave 14")) 
 
 #create gt table
 clsf_table <- cls_df %>%
@@ -2004,12 +2002,35 @@ eds_tbl
 
 -   Information on arrests, charges, dispositions, and incarceration were sought from the adult criminal legal system in each state/county where the participant had reported residing since the last assessment wave. For each participant, all identified offenses (charges) were collated, the offense date, arrest status for each offense, disposition(s), when available were coded. When fines,  jail, prison, or probation were sentenced and the information was provided, the amount/ length of the sentence was recorded. Offenses were also coded according to the type of offense and severity of the offense (e.g., status, misdemeanor, felony) according to methods that have been used in the history of this longitudinal study (Arrest Codes; OSLC unpublished coding scheme). 
 
--   We archived these data in aggregate to preserve participant confidentiality. See computed variables below.  
+Value label for `Wave14Desist`. 
+```{r arrest-label-table, results = 'asis'}
+arrest_label_df <- data.frame(
+  value = c("0", "1"),
+  label = c("Desist",
+            "Did not desist")) %>% 
+  t() %>% 
+  as.data.frame()
 
+arrest_label_df <- setNames(arrest_label_df[-1, ], unlist(arrest_label_df[1, ]))
+
+
+#create table
+arrest_label_table <- arrest_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(150)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(arrest_label_table)
+```
+-   We archived these data in aggregate to preserve participant confidentiality. See computed variables below.  
 ```{r arrest-data-table, results = 'asis'}
 #create table of info
 arrest_data_df <- data.frame(
-  Variable = c( "LastOffAge", "LastOffAgeWith1", "F18OffAge",  "F18OffAgeWith1",  "FF18OffAge", "Num14NewOff",  "Num14NewOffWith1", "Num14NewFOff", "Wave14offseverity", "Wave14offseverityWith1", "NumIncarWave14", "AdultDesistWith1", "AdultDesistNo1", "Wave14Desist"),
+  Variable = c( "LastOffAge", "LastOffAgeWith1", "F18OffAge",  "F18OffAgeWith1",  "FF18OffAge", "Num14NewOff",  "Num14NewOffWith1", "Num14NewFOff", "Wave14offseverity", "Wave14offseverityWith1", "NumIncarWave14", "Wave14Desist"),
   Description = c(
             "Age of last offense",
             "Age of last offense including status offenses",
@@ -2022,13 +2043,7 @@ arrest_data_df <- data.frame(
             "Serverity of offenses in wave 14", 
             "Serverity of offenses in wave 14 including status offense",
             "Total number of times incarcerated wave 14", 
-            "Adult desistance (yes) including status offense", 
-            "Adult desistance (yes) without status offense",
-            "Wave 14 new desistance (yes)")) %>%
-    mutate(notes = ("")) %>% 
-  mutate(notes = if_else(var_name == "elf23", "Thinking of the most severe (worst) time, did any of your friends actually hit them or just threaten to?", description)) %>% 
-  mutate(description = if_else(var_name == "elf24", "How many of your friends have been loud, rowdy, or unruly in a public place – disorderly conduct?", description)) %>% 
-  slice(1:39)
+            "Wave 14 new desistance (yes)")) 
 
 #create gt table
 arrest_data_df_table <- arrest_data_df %>%
@@ -2039,7 +2054,6 @@ apply_tbl_theme() %>%
 
 #print table
 print(arrest_data_df_table)
-
 ```
 
 # Mental Health/Psychological
@@ -6551,6 +6565,31 @@ ggarrange(p_arq_model_s, p_arq_model_o
 ## Pregnancy and Parenting Data 
 
 Data on pregnancy and childbirth have been obtained prospectively at each wave of the study. Participants self-reported this information in the current study. The presence or absence of a pregnancy, stillbirth, induced abortion, miscarriage, and live birth was coded as `1 = yes1` and `0 = no` to indicate presence or absence of a pregnancy or pregnancy outcome that occurred since the last time we had interviewed each participant. We also provided information from the longitudinal data in aggregate to document the total number of children previously born to the sample. Additional variables computed are indicated below.  
+
+Value label for `pregnant_wv14_yes`. 
+```{r parenting-label-table, results = 'asis'}
+parenting_label_df <- data.frame(
+  value = c("0", "1"),
+  label = c("Pregnant",
+            "Not Pregnant")) %>% 
+  t() %>% 
+  as.data.frame()
+
+parenting_label_df <- setNames(parenting_label_df[-1, ], unlist(parenting_label_df[1, ]))
+
+
+#create table
+parenting_label_table <- parenting_label_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  #cols_width(everything() ~ px(150)) %>% 
+  tab_options(table.width = pct(100))%>%
+  apply_labtab_theme()
+
+# Print the table
+print(parenting_label_table)
+```
 
 ```{r parent-data-table, results = 'asis'}
 #create table of info
