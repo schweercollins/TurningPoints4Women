@@ -2733,7 +2733,6 @@ sex <- sex %>%
 
 There are missing data and missing rule would be applied in future computations
 ```{r sex_missing}
-
 sex <- sex %>% 
   # for incarcerated TC, this survey wasn't shown 
    mutate_at(vars(s_pregnancy_screen:s48), ~case_when(id %in% c("HR211", "HR181", "P819", "HR218") & is.na(.)  ~ "-55", TRUE ~ .)) %>%
@@ -2813,7 +2812,7 @@ convert_to_date <- function(date_str) {
     return(paste("01", sprintf("%02d", as.numeric(parts[1])), parts[2], sep = "/"))
   } else if (grepl("^-?\\d{1,2}/\\d{1,2}/\\d{4}$", date_str)) {  # Check if mm/dd/yyyy format
     parts <- unlist(strsplit(date_str, "/"))
-    return(paste(sprintf("%02d", as.numeric(parts[1])), parts[2], parts[3], sep = "/"))
+    return(paste("01", parts[2], parts[3], sep = "/"))
   } else {
     return(date_str)  # Return unchanged if not in expected formats
   }
@@ -2825,6 +2824,9 @@ convert_to_date <- function(date_str) {
  sex$s5 <- sapply(sex$s5, convert_to_date)
  sex$s7 <- sapply(sex$s7, convert_to_date)
 
+ sex <- sex %>%
+   # TC has two date entered we are only keep the first one to better align with the question
+ mutate_at(vars(s5), ~ ifelse(id == "P898",  "01/04/2012", .)) 
 ```
 
 ### Sex Calculation and Finalize Data (no scales)
@@ -5296,6 +5298,6 @@ tpw_internal <- tpw_archive_id %>%
 
 ```{r output}
 # write.csv(tpw_archive, here("do_not_push", "tpw_archive.csv"))
-write.csv(tpw_archive_calc, here("do_not_push", "tpw_archive_calc.csv"))
+write.csv(tpw_archive_calc, here("do_not_push", "tpw_archive.csv"))
 write.csv(tpw_internal, here("do_not_push", "tpw_internal.csv"))
 ```
