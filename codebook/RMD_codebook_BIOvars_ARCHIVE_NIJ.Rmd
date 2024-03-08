@@ -1,9 +1,52 @@
 ---
-title: "Codebook draft for DBS and BIO vars_ARCHIVE_NIJ"
-author: "Shaina Trevino"
-date: "2023-12-15"
-output: html_document
+title: "Biological Assessment Codebook"
+author: ""
+date: ""
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    self_contained: true
+    number_sections: false
+  pagedown::html_pretty:
+    toc: true
+    toc_depth: '4'
+bibliography: tpw_references.bib
+editor_options:
+  markdown:
+    wrap: 72
 ---
+<!-- TOC highlight color -->
+<style>
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    background-color: #246B69;
+}
+
+
+<!-- To have nice indentation in toc float -->
+.tocify-header {
+  text-indent: initial;
+}
+
+.tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 2em;
+}
+
+/* Third-level header */
+.tocify-subheader .tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 4em; /* Adjust the padding as needed */
+}
+
+/* Fourth-level header */
+.tocify-subheader .tocify-subheader .tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 6em; /* Adjust the padding as needed */
+}
+
+</style>
 
 ```{r setup, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
@@ -322,22 +365,183 @@ create_dichot_gt_table <- function(data) {
 
 
 ```
+# Overview
+
+## Longitudinal Study Background  
+
+This study is a longitudinal extension which aims to further our understanding of trajectories of adult offending in a sample of 158 (n = 8 participants are now deceased) women who participated in a randomized intervention trial aimed at reducing conduct problems and delinquency during adolescence. The study was originally supported and funded through the Oregon Youth Authority and by Grant R01 DA015208 (P.I., Patricia Chamberlain, Ph.D.) from the National Institute on Drug Abuse, and by Grant R01 MH054257 (P.I., Patricia Chamberlain, Ph.D.) from the National Institute of Mental Health. In the original study, juvenile justice involved girls ages 13 – 17 who had been referred for out-of-home placement due to chronic delinquency were randomly assigned to participate in services as usual (group care; GC) or in Treatment Foster Care Oregon (TFCO, Chamberlain, 2003). The first extension of this longitudinal study was funded by Grant R01 DA024672 (P.I., Leslie Leve, Ph.D.). That study examined the developmental pathways of risk for juvenile justice involved girls into young adulthood with the original participants who were at the time, ages 16-29 years.
 
 
-# Dried Blood Spot Data Collection
+## Study Goals 
 
-These data are in the `dbs_archive.xlsx` file where each construct domain is a separate tab. 
+-   **Goal 1** Explore the constellation of risk factors and risk processes in the lives of adult women with histories in the juvenile justice system 
 
-The seven biological constructs assessed through dried blood spots were cholesterol, high-density lipoprotein cholesterol, Triglycerides, c-reactive protein, Epstein-Barr virus, hemoglobin A1C, and Interleukin-6.. 
+-   **Goal 2** Identify potential turning points across adulthood in the lives of adult women with histories in the juvenile justice system. 
 
-For each biological construct, allostatic load indicators can be computed using different methods including clinical cutoffs developed and published in the literature, or percentile based scores. Users of the data should explore recent literature to identify best practices, which are always evolving, when analyzing these date. Additionally, please note that users should identify potential outliers or out of range values. For the purposes of transparency, all raw data are archived and users of the data must do these basic data checks. 
+-   **Goal 3** Understand how justice involvement is related to women's health outcomes, including biological indicators of health and stress.
+
+-   **Goal 4** Examine the potential long-term impact of Treatment Foster Care Oregon, a gender-specific intervention. 
+
+
+
+### Data and Study Author Contact
+
+If you have questions about the data or study, please contact the Principal Investigator, Maria Schweer-Collins (mariasc@iastate.edu) and please use the subject "NACJD Turning Points Data Query" in the subject line.
+
+### Credit Author Statement
+
+This codebook was created by a team of individuals who contributed throughout different phases of the project, including Dr. Shaina Trevino, Min Zhang, and Dr. Jonathan Pedroza, together with PI Maria Schweer-Collins.
+
+**Schweer-Collins** conceptualization; software; validation; data curation (specifically checking code for data cleaning and codebook creation, managed data archival) project administration; supervision; funding acquisition; **Trevino** software; validation; data curation (specifically developing codebook, functions, and protocols, data cleaning, codebook creation; data archival); supervision; **Pedroza** software; data curation (specifically making functions used in codebook, data retrieval from Qualtrics; cleaning; codebook creation, visualization); **Zhang** software; validation; data curation (specifically making functions used in codebook, primary responsibility for data retrieval from Qualtrics; data cleaning, codebook creation, visualization)
+
+## Data Collection Activities in this Wave  
+
+There were two assessment activities. 
+
+**Telephone Interview**
+
+-   First, one telephone interview was conducted with original participants (*M* = 18 years after each participant's baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. 
+-   In this assessment wave, we consented 133 participants of the 158 original participants who are living (84% retention). Of those, 130 participants completed the telephone portion of the assessment. Additionally, we were able to partner with the state department of corrections and interview all participants who were currently incarcerated in prison systems (*n* = 4).
+
+**Biological Assessment**
+
+-   The second part of the assessment was a 1 hour biological and physical health assessment. While prior waves collected limited information on self-reported health, this longitudinal extension also included a more robust battery of health conditions and a robust battery of 12 biomarkers, used to assess allostatic load, including cardiovascular, metabolic, and immune system function. This biological assessment was conducted either in person or virtually due to COVID-19 restrictions. 
+-   123 participants completed the biological assessment. Two of the four participants who were incarcerated also completed a small portion of the *self-report* (not biological) measures from the biological assessment, thus our total analytic file for the biological assessment is *n* = 125.  
+
+
+  
+
+## Data and Codebook Guide
+
+
+### Introduction to Codebook Structure
+
+This document is a codebook specifically for the **biological assessment**. There is a separate codebook for data obtained in the telephone assessment. This document provides a summary of each measure assessed in the Turning Points for Women Study. Most of the measures described here have actual or potential computed scale scores. Some measures, however, are simply collections of individual items (e.g., demographic variables). We have tried to use the official name of each measure as the heading for each section; many measures, however, do not have official names and therefore the chosen name is arbitrary. If you cannot find a study measure in the table of contents, you may want to search for a keyword in this document.
+
+For each measure, this document typically contains the following descriptive information:
+
+-   A brief description of what the instrument measures  
+
+-   Pertinent references  
+
+-   All measures were collected from the original study participant unless otherwise indicated  
+
+-   Variable name, variable description, and notes about the variable, for example, if a variable should be reverse scored or if a variable was not administered to participants who were incarcerated at the time of the assessment   
+
+-   Description of how missing data is coded and handled in scale scores. Generally, this information is covered in the introductory materials as missing codes are consistent across *all* study variables, but if exceptions apply, they will be noted in the cleaning script and this codebook.  
+
+-   Formulas for creating scale scores and the resulting variables  
+
+-   Coefficient alphas of scales or subscale scores and notes about their distribution and valid ranges of the data  
+
+
+### Missing Data
+
+-   Truly missing = `NA` (blank in file or -99): The question should
+    have been asked of the respondent, but for a reason other than those
+    listed below, no answer was given or recorded.
+
+    This -99 is also given in the case of a computed subscale or total
+    score or other summary when the percentage of missing data is
+    outside what is allowable for missing data rules
+
+-   Not Applicable = -55: The subject was never asked a question for
+    some reason (most often conditional question [skip rules])
+
+-   Don't Know = -66: The subject was unable to answer a question,
+    either because he or she had no opinion or because the required
+    information was not available (could not recall).
+
+-   Refusal/No Answer = -77: The subject explicitly refused to answer a
+    question or did not answer it when he or she should have.
+
+-   Processing Error = -44: For some reason, there is no answer to the
+    question, although the subject provided one. This can result from
+    interviewer error, incorrect coding, machine failure, or other
+    problems. This code does not exist in our data.
+    
+-   **Important Note:** Data users should ensure that missing data values (all negative numbers in this dataset) are not being analyzed as valid numeric values prior to analyzing any data in the files associated with this study.
+
+### Missing Data Rule
+
+For summary or subscale scores that are computed with individual items, any of the above reasons are included in computing the percent of missing data. The following missing data rules are below and follow procedures used throughout the history of this longitudinal study. In some cases, measure specific guidelines for handling missing data were used when those guidelines were more stringent. Exceptions are called out within individual measure documentation.
+
+Note that we have made every effort to archive individual-level items so that users of the data can compute summary scores and complete analyses using a variety of modern missing data methods (e.g., imputation).  
+
+-   For scales with [10 or more items]{.underline}, a composite score
+    (average/total) is computed for each participant that has less than
+    [20%]{.underline} of the items from that measure missing
+
+-   For scales with [7 to 9 items]{.underline}, a composite score
+    (average/total) is computed for each participant that has less than
+    [30%]{.underline} of the items from that measure missing
+
+-   For scales with [3 to 6 items]{.underline}, a composite score
+    (average/total) is computed for each participant that has less than
+    [33%]{.underline} of the items from that measure missing
+
+-   For scales with [only 2 items]{.underline}, composite scores
+    (average/total) are calculated on a [case by case basis]{.underline}
+
+### Data Use Notes and Disclaimers
+
+Because the use of and development of measures is ever evolving and there exist many ways to analyze data, we have made every effort to archive individual-level items so that users of the data can compute summary scores according to preferred methods, latest empirical findings, and recommended best practices, including best practices for handling missing data. Users are also encouraged to thoroughly read the data documentation and perform data checks for outliers, out-of-range values, and to determine if any cases should be excluded from analyses based on checks with relevant criteria for research questions or analyses of interest. Users are encouraged to query the study author if questions arise.
+
+### Study Acronyms
+
+```{r abbreviation_table, results = 'asis'}
+
+abbrev_table_df <- data.frame(
+  abbrev = c("TP", "Wave 14", "TC", "NIJ", "CINT"),
+  descrip = c(
+    "This acronym is used to refer to the name of this study, the Turning Points Study for Women. References in this codebook and in subsequent publications regarding the Turning Points study may or may not include data only from this assessment or data that also draw on the prior 13 waves of data, as we use this study name to refer to the entire longitudinal study.",
+    "We refer to this wave of data collection also as 'Wave 14' thus, you may see variables that include this notation in the naming convention.",
+    "In this study, we refer to original participants as TCs, which means 'Target Child.' This acronym has been continued because the original participants were minors at the start of this longitudinal study. Please note that we have continued to use this acronym to distinguish our original sample from other participants (e.g., partners of original participants, the offspring of original participants). The data represented in this codebook were collected only from original participants, not from partners, caregivers, or offspring.",
+    "NIJ is the acronym for the National Institute of Justice. NIJ funded this study and therefore the organization is referred to throughout our documentation and forthcoming publications and presentations.",
+    "CINT is our study name for 'Child Interview' and refers to an assessor administered interview that has been delivered to our participants at each wave of the longitudinal study, with some slight variation according to developmental stage and the focus of each assessment. This CINT interview includes information about demographics, substance use, and relationship variables. "
+  ),
+  stringsAsFactors = FALSE
+)
+
+#create table
+abbrev_table <- abbrev_table_df %>%
+  gt() %>% 
+  tab_options(table.border.top.width = 1, table.border.bottom.width = 1,
+              table.border.left.width = 1, table.border.right.width = 1) %>% 
+  cols_width(abbrev ~ px(100),
+             descrip ~ px(600)) %>%
+  tab_style(style = cell_text(align = "left"),locations = cells_body(columns = vars("descrip"))) %>%
+ # cols_align(align = "left") %>%
+  cols_label(abbrev = "Abbreviation",
+            descrip = "Full Name and Explanation") %>%
+  apply_labtab_theme()
+
+
+# Print the table
+print(abbrev_table)
+
+```
+
+# Dried Blood Spot Data
+
+These data are in the `dbs_archive_NIJ.csv` file.
+
+-   The seven biological constructs assessed through dried blood spots were cholesterol, high-density lipoprotein cholesterol, Triglycerides, c-reactive protein, Epstein-Barr virus, hemoglobin A1C, and Interleukin-6.. 
+
+-   For each biological construct, allostatic load indicators can be computed using different methods including clinical cutoffs developed and published in the literature, or percentile based scores. Users of the data should explore recent literature to identify best practices, which are always evolving, when analyzing these data. Additionally, please note that users should identify potential outliers or out of range values. For the purposes of transparency, all raw data are archived and users of the data must do these basic data checks. See reference below from the MacArthur Studies of Successful Aging for guidance on using the 13 allostatic load indicators in this file to compute an allostatic load index using either clinical or percentile based scoring methods.  
+
+-   Please see documentation called "Description of Assays for Dried Blood Spots...pdf" when writing up procedures used to obtain values provided in the associated `dbs_archive_NIJ.csv` datafile.
+
+Reference:[@seeman2001social](https://psycnet.apa.org/fulltext/2001-11106-001.pdf)
 
 
 ### Cholesterol (CHO) Description
 
 These data include variables related to the cholesterol assessment, including direct and plasma equivalent (PE) cholesterol values for participants. Higher values indicate higher cholesterol. The PE cholesterol value should be used to compute an allostatic load indicator.
 
-The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
+
+CHO is measured in mg/dL.
 
 
 
@@ -522,7 +726,9 @@ print(cho_tbl_notes)
 
 These data include variables related to the HDL cholesterol assessment, including direct and plasma equivalent (PE) HDL cholesterol values for participants. Higher values indicate higher HDL cholesterol. However, it should be noted that lower values of HDL are considered poorer in terms of allostatic load, thus if percentile based scores are used, the bottom quartile should be considered as an indicator of greater allostatic load. The PE value should be used to calculate allostatic load indicators.
 
-The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
+
+HDL is measured in mg/dL.
 
 #### Value Labels
 
@@ -666,7 +872,9 @@ print(hdl_tbl_notes)
 
 These data include variables related to the triglycerides assessment, including direct and plasma equivalent (PE) triglyceride values for participants. Higher values indicate higher triglycerides. The PE triglyceride values should be used to calculate allostatic load indicators.
 
-The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
+
+TRG is measured in mg/dL.
 
 
 #### Value Labels
@@ -810,7 +1018,9 @@ print(trg_tbl_notes)
 
 These data include variables related to the c-reactive protein assessment, including direct and plasma equivalent (PE) c-reactive protein values for participants. Higher values indicate higher c-reactive protein. The PE value should be used to calculate allostatic load indicators.
 
-The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
+
+CRP is measured in mg/L.
 
 #### Value Labels
 
@@ -977,7 +1187,9 @@ print(crp_tbl_notes)
 
 These data include variables related to the Epstein-Barr virus assessment, including direct and plasma equivalent (PE) Epstein-Barr virus values for participants. Higher values indicate higher Epstein-Barr virus concentration in the blood. The PE Epstein-Barr virus value should be used to calculate allostatic load indicators.
 
-The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
+
+EBV is measured in IU/mL.
 
 #### Value Labels
 
@@ -1151,10 +1363,12 @@ print(ebv_tbl_notes)
 
 ### Hemoglobin A1C (A1C) Description
 
-These data include variables related to the hemoglobin A1C assessment. *<MARIA> EXPLAIN WHY NO PE AND DIRECT VALUE BUT ONLY AIC_HB VALUE* 
+These data include variables related to the hemoglobin A1C assessment. Hemoglobin A1c does not have a plasma equivalent because it is presented as a direct value of the % (of total hemoglobin) in the dried blood spot sample.
 
-The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
-sd
+
+The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
+
+A1c is measured in % of total hemoglobin.
 
 #### Value Labels
 
@@ -1323,7 +1537,9 @@ print(a1c_tbl_notes)
 
 These data include variables related to the Interleukin-6 assessment, including direct and plasma equivalent (PE) Interleukin-6 values for participants. Higher values indicate higher Interleukin-6. The PE value should be used to calculate allostatic load indicators.
 
-The missing data rule was not applied since composite variables were based on a single item. Missing data for each variable is presented in the descriptive statistics table below.
+The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
+
+IL-6 is measured in pg/mL.
 
 
 #### Value Labels
@@ -1457,9 +1673,9 @@ print(il6_tbl_notes)
 
 ```
 
-## Other Health Measures 
+# Other Health Measurements and Data 
 
-These data are in the `bio_archive.xlsx` file. Participant ID corresponds to the `id` variable, which can be used to merge additional data files from this study. 
+These data are in the `bio_archive_NIJ.csv` file. Participant ID corresponds to the `id` variable, which can be used to merge additional data files from this study. 
 
 Please note that participants who were incarcerated were only asked a subset of these questions. Additionally, they did not provide blood samples or participate in any other data collection activities that would require special equipment. 
 
@@ -1469,9 +1685,9 @@ The original survey included exact dates/times and confidential health informati
 
 These data include variables on systolic and diastolic blood pressure collected from participants. Higher scores indicate higher blood pressure. 
 
-Using these values, average blood pressure for high blood pressure were computed. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
+The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
 
-### BP Variables
+
 #### Variables
 
 All BP variables are presented in the following table: 
@@ -1562,7 +1778,6 @@ These data include variables on body mass index (BMI), including weight and heig
 
 Using BMI values, allostatic load indicators for high BMI may be computed. The missing data rule was not applied since all participants who were asked BMI questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
 
-### BMI Variables
 #### Variables
 
 All BMI variables are presented in the following table: 
@@ -1602,13 +1817,11 @@ bmi_sum_tbl
 
 ### Waist-to-Hip Ratio (WTH) Description
 
-These data include variables on waist-to-hip ratio collected from participants. Higher scores indicate higher measurements. #MARIA TO DO ENTER INTERP
+These data include variables on waist-to-hip ratio collected from participants. Higher scores may be indicative of greater unhealthy body weight and therefore higher cardiometabolic risk.
 
 Using waist and hip measurements, waist-to-hip ratio was calculated and should be used to compute allostatic load indicators. The missing data rule was not applied since all participants who were asked WTH questions had valid data. Missing data for each variable presented in the descriptive statistics table below corresponds to "Not Applicable" values (`-55`).
 
-### WTH Variables
 
-#### Value Labels
 #### Variables
 
 All WTH variables are presented in the following table: 
@@ -1649,11 +1862,11 @@ wth_sum_tbl
 
 ### Peak Expiratory Flow (PEF) Description
 
-These data include variables on peak expiratory flow collected from participants using a spirometer, including direct peak expiratory flow and forced expiratory volume measurements. Lower scores indicate worse performance. # MARIA TO CHECK ABOUT HIGH AND LOW VALUES
+These data include variables on peak expiratory flow collected from participants using a spirometer, including direct peak expiratory flow and forced expiratory volume measurements. Lower scores indicate poorer air flow and poorer respiratory performance indicative of worse lung health.
 
-Using peak expiratory flow values, average peak expiratory flow was calculated. Allostatic load indicators for high peak expiratory flow can be computed using the averages. The missing data rule was applied. Calculations were completed for participants with no missing data. Missing data for each variable is presented in the descriptive statistics table below.
+Using peak expiratory flow values, average peak expiratory flow was calculated. Allostatic load indicators for peak expiratory flow can be computed using the averages, using values at or below the bottom percentile or values below clinical ranges indicative of healthy peak expiratory flow. The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
 
-### PEF Variables
+
 #### Variables
 
 All PEF variables are presented in the following table: 
@@ -1695,9 +1908,9 @@ pef_sum_tbl
 
 These data include variables on pulse readings collected from participants. Higher scores indicate increased resting pulse rate. 
 
-Using pulse readings, average pulse rate was calculated. Allostatic load indicators for high pulse rate can be computed using the averafe pulse rate. The missing data rule was applied. Calculations were completed for participants with no missing data due to the low number of variables used in calculations. Missing data for each variable is presented in the descriptive statistics table below.
+Using pulse readings, average pulse rate was calculated. Allostatic load indicators for high pulse rate can be computed using the averafe pulse rate. The missing data rule was not applied since no variables were computed. Missing data for each variable is presented in the descriptive statistics table below.
 
-### PULSE Variables
+
 #### Variables
 
 All PULSE variables are presented in the following table: 
@@ -1762,9 +1975,8 @@ Raw RHS variables were recoded per the [RHS-SF36 scoring guide](https://www.rand
 
 The missing data rule was not applied since all participants had less than 20% missing data. 
 
-**<MARIA> INSERT REFERENCE**
+Reference: [@hays1993rand](https://pubmed.ncbi.nlm.nih.gov/8275167/)
 
-### RHS Variables
 
 #### Value labels
 
@@ -1926,14 +2138,13 @@ rhs_tbl_dichot
 
 ### COVID-19 Exposure and Vaccination (CEV) Description
 
-The COVID-19 Exposure and Vaccination (CEV) is a self-report measure with 10-items assessing recent COVID-19 exposures, health behaviors, and vaccinations.
+The COVID-19 Exposure and Vaccination (CEV) is a self-report measure with 10 items assessing recent COVID-19 exposures, health behaviors, and vaccinations.
 
 There were no subscales computed since the CEV is not a standardized measure with developed subscales but meant to assess COVID-19 exposure.  Similarly, no distributions or clinical categories are presented as no subscales were calculated. 
 
 Reference: Unpublished measure developed for this study
 
 
-### CEV Variables
 
 #### Value labels
 
@@ -2061,7 +2272,6 @@ Note: There are many conditional questions in this data set, thus there are many
 
 Reference: Unpublished measure developed for the current study
 
-### HBC Variables
 
 #### Value labels
 
@@ -2136,7 +2346,6 @@ Note: There are many conditional questions in this data set, thus there are many
 
 Reference: Unpublished measure developed for the current study
 
-### CHC Variables
 
 #### Value labels
 
@@ -2163,3 +2372,4 @@ print(create_bio_var_tbl(chc_var_md, "chc"))
 
 ```
 
+# References 

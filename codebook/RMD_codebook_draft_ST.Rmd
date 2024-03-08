@@ -79,8 +79,8 @@ theme_set(theme_light())
 complete <- read_csv(here("do_not_push","tpw_archive.csv"))
 
 # import survey data header for parsing question text
-# Maria to update filename
-qualtrics <- read_csv(here("do_not_push", "tpw_telephone_metadata_codebook"))
+
+qualtrics <- read_csv(here("do_not_push", "tpw_telephone_metadata_codebook.csv"))
 
 source(here("functions", "codebook_fun.R"))
 ```
@@ -287,7 +287,7 @@ There were two assessment activities.
 
 **Telephone Interview**
 
--   First, one telephone interview was conducted with original participants (*M* = 18 years after each participants’ baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. 
+-   First, one telephone interview was conducted with original participants (*M* = 18 years after each participant's baseline assessment). This interview lasted approximately 2 hours and included an assessment of the following constructs: parenting, partner characteristics, health-risking behaviors, mental health and trauma/victimization experiences, and public system involvement. 
 -   In this assessment wave, we consented 133 participants of the 158 original participants who are living (84% retention). Of those, 130 participants completed the telephone portion of the assessment. Additionally, we were able to partner with the state department of corrections and interview all participants who were currently incarcerated in prison systems (*n* = 4).
 
 **Biological Assessment**
@@ -303,7 +303,7 @@ There were two assessment activities.
 
 ### Introduction to Codebook Structure
 
-This document provides a summary of each measure assessed in the Turning Points for Women Study. Most of the measures described here have actual or potential computed scale scores. Some measures, however, are simply collections of individual items (e.g., demographic variables). We have tried to use the official name of each measure as the heading for each section; many measures, however, do not have official names and therefore the chosen name is arbitrary. If you cannot find a study measure in the table of contents, you may want to search for a keyword in this document.
+This document provides a summary of each measure assessed in the Turning Points for Women Study, specifically for the **telephone assessment** Data are in the `tpw_archive_NIJ.csv` file). There is a separate codebook for documentation related to the biological assessment. Most of the measures described here have actual or potential computed scale scores. Some measures, however, are simply collections of individual items (e.g., demographic variables). We have tried to use the official name of each measure as the heading for each section; many measures, however, do not have official names and therefore the chosen name is arbitrary. If you cannot find a study measure in the table of contents, you may want to search for a keyword in this document.
 
 For each measure, this document typically contains the following descriptive information:
 
@@ -313,7 +313,7 @@ For each measure, this document typically contains the following descriptive inf
 
 -   All measures were collected from the original study participant unless otherwise indicated  
 
--   Variable name, variable description, and notes about the variable, for example, if a variable should be reverse scored or if a variable was not adminstered to participants who were incarcerated at the time of the assessment   
+-   Variable name, variable description, and notes about the variable, for example, if a variable should be reverse scored or if a variable was not administered to participants who were incarcerated at the time of the assessment   
 
 -   Description of how missing data is coded and handled in scale scores. Generally, this information is covered in the introductory materials as missing codes are consistent across *all* study variables, but if exceptions apply, they will be noted in the cleaning script and this codebook.  
 
@@ -356,15 +356,15 @@ For summary or subscale scores that are computed with individual items, any of t
 Note that we have made every effort to archive individual-level items so that users of the data can compute summary scores and complete analyses using a variety of modern missing data methods (e.g., imputation).  
 
 -   For scales with [10 or more items]{.underline}, a composite score
-    (average/total) is computed for each participant that have less than
+    (average/total) is computed for each participant that has less than
     [20%]{.underline} of the items from that measure missing
 
 -   For scales with [7 to 9 items]{.underline}, a composite score
-    (average/total) is computed for each participant that have less than
+    (average/total) is computed for each participant that has less than
     [30%]{.underline} of the items from that measure missing
 
 -   For scales with [3 to 6 items]{.underline}, a composite score
-    (average/total) is computed for each participant that have less than
+    (average/total) is computed for each participant that has less than
     [33%]{.underline} of the items from that measure missing
 
 -   For scales with [only 2 items]{.underline}, composite scores
@@ -374,7 +374,7 @@ Note that we have made every effort to archive individual-level items so that us
 
 Because the use of and development of measures is ever evolving and there exist many ways to analyze data, we have made every effort to archive individual-level items so that users of the data can compute summary scores according to preferred methods, latest empirical findings, and recommended best practices, including best practices for handling missing data. Users are also encouraged to thoroughly read the data documentation and perform data checks for outliers, out-of-range values, and to determine if any cases should be excluded from analyses based on checks with relevant criteria for research questions or analyses of interest. Users are encouraged to query the study author if questions arise.
 
-### Study Acronymns
+### Study Acronyms
 
 ```{r abbreviation_table, results = 'asis'}
 
@@ -423,7 +423,7 @@ cls_df <- data.frame(
   Variable = c("tp_num_transitions", "tp_num_incarcerated", "tp_num_homeless"),
   Description = c("Total number of housing transitions reported by participant Wave 14",
             "Total number of times the participant has been incarcerated Wave 14",
-            "Total number of times the particpant has reported being without housing Wave 14")) 
+            "Total number of times the participant has reported being without housing Wave 14")) 
 
 #create gt table
 clsf_table <- cls_df %>%
@@ -459,7 +459,7 @@ Oregon Social Learning Center (OSLC) Instrument [Unpublished]
 
 #### Value Labels and Survey Items 
 
-All CINT-SOCIO variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+All CINT-SOCIO variables have multiple response options, value labels for each variable can be found in the survey items table below. 
 
 Demographic and study data obtained from prior data waves:
 ```{r Sociodem_wv14_archive, results = 'asis'}
@@ -812,7 +812,7 @@ Oregon Social Learning Center (OSLC) Instrument [Unpublished]
   
 #### Value Labels and Survey Items 
   
-All CINT-R variables have multiple responses options, value labels for each variable can be found in the following table:
+All CINT-R variables have multiple response options, value labels for each variable can be found in the following table:
 
 ```{r CINT-relation-var-prep}
 # Pull question wording from Qualtrics wording
@@ -1744,7 +1744,7 @@ ell_tbl <- ell_summary_data %>%
   cols_width(`1` ~ px(250)) %>%
   cols_align(columns = c("Mean", "SD", "Range", "Missing"), align = "center") %>%
   tab_footnote("*Range of data values") %>%
-  tab_footnote("`N` values indiate that 1 or fewer participants responded to that item") %>%
+  tab_footnote("`N` values indicate that 1 or fewer participants responded to that item") %>%
   tab_options(table.border.bottom.style = "hidden") %>%
   apply_tbl_theme()
 
@@ -1793,11 +1793,11 @@ The Self-Reported Delinquency measure (participant report on friends [EDS-F]) wa
 
 -   For the present study, 39 items were included. Items use the prefix `elf`
 
--   All 39 items needed to be reverse scored based on how the original data was collected. Since the reverse scoring applied to **all** variables, we did not save reverse scored data in separate variable, all data in the data file are already reverse scored.
+-   All 39 items needed to be reverse scored based on how the original data was collected. Since the reverse scoring applied to **all** variables, we did not save reverse scored data in separate variables, all data in the data file are already reverse scored.
 
 -   **Higher** values for each item indicate **greater** friend/peer delinquency. 
 
--   Because no scale scores were computed, the missing data rules were note applied. 
+-   Because no scale scores were computed, the missing data rules were not applied. 
 
 
 Reference:
@@ -2115,7 +2115,7 @@ print(arril_data_df_table)
 
 ### BSI Description
 
-The Brief Symptom Inventory (BSI) is designed to reflect psychological symptom patterns of psychiatric and medical patients. The BSI instrument is especially appropriate in clinical situations where debilitation results in reduced attention and endurance, in research with limited interview schedules, and in outpatient clinics where testing procedures demand brevity. The BSI instrument is also frequently used in measuring patient progress during treatment or in the assessment of treatment outcome.
+The Brief Symptom Inventory (BSI) is designed to reflect psychological symptom patterns of psychiatric and medical patients. The BSI instrument is especially appropriate in clinical situations where debilitation results in reduced attention and endurance, in research with limited interview schedules, and in outpatient clinics where testing procedures demand brevity. The BSI instrument is also frequently used in measuring patient progress during treatment or in the assessment of treatment outcomes.
 
 -   For the present study, 19 items from the BSI were collected in order to calculate the **Somatization**, **Anxiety**, and **Depression** raw subscales.
 
@@ -3217,8 +3217,7 @@ ggarrange(p_lec_total_witness, p_lec_total_happen + rremove("ylab")
 
 The ITQ is an 18-item self-report brief questionnaire designed to measure the core features of Posttraumatic Stress Disorder.
 
--   For the present study, the first 9 items from the ITQ were collected. The datafile contains
-a total 15 variables related to the ITQ, including the computed variables.
+-   For the present study, the first 9 items from the ITQ were collected. The datafile contains a total of 15 variables related to the ITQ, including the computed variables.
 
 -   The language below was used to introduce the ITQ.
 
@@ -3234,7 +3233,7 @@ a total 15 variables related to the ITQ, including the computed variables.
 
 -   There are several ways to score the ITQ and methods are available in the citation provided below. 
 
--   One limitation of this measures in the current study is the answer scale that was shown to participants (see value labels below). We computed criteria for PTSD based on participant endorsement of one symptom within each cluster based on a value of `A little bit (1-2 times per week)`. The ITQ criteria for PTSD differs across empirical studies based on the answer scale used and users may consider alternate scoring for PTSD diagnostic criteria in this sample, but should keep in mind the scale used in the current study. 
+-   One limitation of this measure in the current study is the answer scale that was shown to participants (see value labels below). We computed criteria for PTSD based on participant endorsement of one symptom within each cluster based on a value of `A little bit (1-2 times per week)`. The ITQ criteria for PTSD differs across empirical studies based on the answer scale used and users may consider alternate scoring for PTSD diagnostic criteria in this sample, but should keep in mind the scale used in the current study. 
 
 
 Reference:
@@ -3359,12 +3358,12 @@ itq_total_alpha <- itq_complete %>%
 
 itq_scale_df <- data.frame(
   var_name = c("Re-experiencing Subscale (2)", " Avoidance Subscale (2)", 
-               "Sense of Threat Subscale (2)", "Functional Impairment Subscale (3)", "Total Score not including functional impairmment (6)", "PTSD Diagnosis"),
+               "Sense of Threat Subscale (2)", "Functional Impairment Subscale (3)", "Total Score not including functional impairment (6)", "PTSD Diagnosis"),
   scale = c("itq_re_total", "itq_av_total", "itq_th_total", "itq_fi_total", "itq_ptsd_total", "itq_ptsd_dx"),
   scale_construction = c("`itq1`, `itq2`", "`itq3`, `itq4`", "`itq5`,`itq6`",
                          "`itq7`, `itq8`, `itq9`",
                          "`itq1`, `itq2`, `itq3`, `itq4`, `itq5`,`itq6`",
-                         "Score of 1 or greater for each symtpom cluster"), 
+                         "Score of 1 or greater for each symptom cluster"), 
   scale_range = c("0-8","0-8","0-8", "0-12", "0-24", "NA"), 
   alpha = c(round(itq_re_alpha$total$raw_alpha, 3), 
             round(itq_av_alpha$total$raw_alpha, 3), 
@@ -4092,7 +4091,7 @@ The PRSS is a brief 5-item questionnaire designed to assess the construct of pos
 
 -   **Higher** scores indicate **greater** posttraumatic risk-seeking behaviors.
 
--   There are 6 total items presented below, included the computed total score.
+-   There are 6 total items presented below, including the computed total score.
 
 -   The missing data rule was applied. Calculations were completed for participants with 33% or less missing data (this includes `-77` responses)
 
@@ -4295,7 +4294,7 @@ complete %>%
 
 ### SSQ Description
 
-The SSQ is a 8-item questionnaire designed to measure abuse-related stigma and shame. These emotions are important to assess in the context of trauma exposure given they have been shown to promote cognitive and behavioral avoidance and therefore may contribute to prolonged or exacerbated posttraumatic stress symptoms. 
+The SSQ is an 8-item questionnaire designed to measure abuse-related stigma and shame. These emotions are important to assess in the context of trauma exposure given they have been shown to promote cognitive and behavioral avoidance and therefore may contribute to prolonged or exacerbated posttraumatic stress symptoms. 
 
 -   No items need to be reverse scored. 
 
@@ -4517,7 +4516,7 @@ The Sex History Survey was administered as part of the CINT and focuses on the p
 
 -   No total scores or subscales were computed, thus the missing data rules were not applied. 
 
--   For a 5-item health-risking sexual behavior scale suggestion suggestion, please see the Smith et al., 2006 reference below.
+-   For a 5-item health-risking sexual behavior scale suggestion, please see the Smith et al., 2006 reference below.
 
 -   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
@@ -4531,7 +4530,7 @@ References:
   
 #### Value Labels and Survey Items 
   
-All SEXEXP variables have multiple responses options, value labels for each variable can be found in the following table:
+All SEXEXP variables have multiple response options, value labels for each variable can be found in the following table:
   
   
 ```{r sex-var-prep}
@@ -4907,7 +4906,7 @@ Reference:
   
 #### Value Labels and Survey Items 
   
-All SOCINF-G variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+All SOCINF-G variables have multiple response options, value labels for each variable can be found in the survey items table below. 
 
 SOCINF-G survey items are presented in the following table:
   
@@ -5057,7 +5056,7 @@ The Conflict Tactics Scale  Parent-Child (CTS P-C) is a 23-item questionnaire wh
 
 - Values that are recoded have the suffix `_r`
 
-- The missing data rule was not applied to the scoring of subscales in this measure. Data users should examine missing data an apply missing data analyses and methods as appropriate.
+- The missing data rule was not applied to the scoring of subscales in this measure. Data users should examine missing data and apply missing data analyses and methods as appropriate.
 
 - **Higher** scores indicate the **greater** presence of behaviors measured in this questionnaire.
 
@@ -5248,13 +5247,13 @@ print(cts_pc_gt_table)
 
 #### Scale and Subscales
 
-Information on how subscales are presented below in the table and below. 
+Information on how subscales are computed is presented below in the table and described here. 
 
 -   **Prevalence** scales are calculated by summing all values in the associated items when those values are 0 or greater (excluding missing data values).
 
 -   **Count** variables are equivalent to **Prevalence** subscales, which count the presence of each behavior referenced within the set of associated subscale items; thus, an individual only has to report a given behavior 1 or more times for that behavior (item) to be included in the summed **prevalence** subscale score. **Count** variables are only included here to allow for the replication of other subscale scores. 
 
--   **Mean Chronicity** provides a sort of average chronicity rating by dividing the chronity score of the subscale by the count of that subscale. 
+-   **Mean Chronicity** provides a sort of average chronicity rating by dividing the chronicity score of the subscale by the count of that subscale. 
 
 -   **Ever Prevalence** is a count of behaviors (items) within each subscale that have ever occurred for a participant across the lifetime. It is computed by summing behaviors reported only greater than one year ago (`-2` values) together with the **prevalence** of that subscale. Note that `Weekly Discipline` does not have an **ever prevalence** subscale score since it was only asked about for the past week.
 
@@ -5310,10 +5309,10 @@ cts_pc_scale_df <- data.frame(
                          "`cts_pc_NVDPP`, `cts_pc_NVDL`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "``cts_pc_PSAP`/ cts_pc_PSAC`",
+                         "`cts_pc_PSAP`/ `cts_pc_PSAC`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
                          "`cts_pc6_r`, `cts_pc8_r`, `cts_pc9_r`, `cts_pc10_r`, `cts_pc14_r`",
-                         "` `cts_pc_PSAPP`, `cts_pc_PSAL`",
+                         "`cts_pc_PSAPP`, `cts_pc_PSAL`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
                          "`cts_pc3_r`, `cts_pc4_r`, `cts_pc7_r`, `cts_pc11_r`, `cts_pc13_r`",
                          "`cts_pc_PHAP` / `cts_pc_PHAC`",
@@ -6297,13 +6296,13 @@ The ARQ is a brief self-report measure used to categorize attachment styles in a
 
     + Higher ratings indicate more agreement with the statement.
 
-    + `arq_group` is a variable that represents each participants highest rating for attachment style across `rqa` - `rqd`, Participants were classified into one of four attachment groups (secure, dismissing, preoccupied, fearful). In cases where the participant's highest rating was equivalent across multiple styles, no classficiation was given (`-99`).
+    + `arq_group` is a variable that represents each participant's highest rating for attachment style across `rqa` - `rqd`, Participants were classified into one of four attachment groups (secure, dismissing, preoccupied, fearful). In cases where the participant's highest rating was equivalent across multiple styles, no classification was given (`-99`).
 
     + `arq_model_self_attach_anxiety` Model of the self (i.e., attachment anxiety) was calculated by summing secure and dismissing ratings then subtracting the sum of preoccupied and fearful items. 
 
     + `arq_model_other_attach_avoid` Model of the other (i.e., attachment avoidance) was constructed by summing secure and preoccupied items and subtracting the sum of dismissing and fearful items. 
 
-    + Postive scores on the two attachment models (self and other) indicate more positive attachment models ad negative scores indicate more negative models. See cited references for more information. 
+    + Positive scores on the two attachment models (self and other) indicate more positive attachment models and negative scores indicate more negative models. See cited references for more information. 
 
 -   The missing data rule is applied. Calculations were completed for
 participants with 20% or less missing data (this includes -77 responses)
@@ -6324,10 +6323,10 @@ Response options for `rq1`
 
 arq_label_df <- data.frame(
   value = c("A", "B", "C", "D"),
-  label = c("It is easy for me to become emotionally close to others. I am comfortable dependingon them and having them depend on me. I don't worry about being alone or havingothers not accept me.",
-            "I am uncomfortable getting close to others. I want emotionally close relationships, but Ifind it difficult to trust others completely, or to depend on them. I worry that I will be hurt ifI allow myself to become too close to others.",
+  label = c("It is easy for me to become emotionally close to others. I am comfortable depending on them and having them depend on me. I don't worry about being alone or having others not accept me.",
+            "I am uncomfortable getting close to others. I want emotionally close relationships, but I find it difficult to trust others completely, or to depend on them. I worry that I will be hurt if I allow myself to become too close to others.",
             "I want to be completely emotionally intimate with others, but I often find that others arereluctant to get as close as I would like. I am uncomfortable being without close relationships, but I sometimes worry that others don't value me as much as I value them.",
-            "I am comfortable without close emotional relationships. It is very important to me tofeel independent and self-sufficient, and I prefer not to depend on others or have othersdepend on me.")
+            "I am comfortable without close emotional relationships. It is very important to me to feel independent and self-sufficient, and I prefer not to depend on others or have others depend on me.")
 ) %>% 
   t() %>% 
   as.data.frame()
@@ -6629,7 +6628,7 @@ The measure asks about involvement with services, including child welfare servic
 
 -   No items need to be reverse scored. 
 
--   This is not a a standardized questionnaire, so the missing data rules were not applied. No total or subscales were computed. 
+-   This is not a standardized questionnaire, so the missing data rules were not applied. No total or subscales were computed. 
 
 -   We are not presenting `sus14` items because those contain privately identifiable information that cannot be sufficiently de-identified. 
 
@@ -6918,7 +6917,7 @@ sus_tbl
 
 The DAST was designed to provide a brief instrument for clinical and non-clinical screening to detect drug use disorders. It is most useful in settings in which seeking treatment for drug use problems is not the patient’s stated goal. It was adapted from the MAST to detect drug use disorders to a range of psychoactive substances other than alcohol. The 20-item version of the DAST used in the current study was found to have psychometric properties comparable with the original 28-item version.
 
--   For the present study, 22 items from the DAST were collected and a total score (`dast_total`) was constructed as well as a categorical variable representing drug use severity (`dast_total_r`). There are 25 items in the datefile, included the dast screener, the original dast items, the reverse scored variables, and the two computed variables.
+-   For the present study, 22 items from the DAST were collected and a total score (`dast_total`) was constructed as well as a categorical variable representing drug use severity (`dast_total_r`). There are 25 items in the datefile, including the dast screener, the original DAST items, the reverse scored variables, and the two computed variables.
 
 -   Two items (`d4` and `d5`) should to be reverse scored. The reverse scored variables are saved in the dataset (`d4_r` and `d5_r`). 
 
@@ -7255,7 +7254,7 @@ The SOCINF-S assesses partner influences on substance use behaviors. There are 7
 
 -   No items have been reverse scored. 
 
--   No missing data rules were applied as no scales were computed. 
+-   No missing data rules were not applied as no scales were computed. 
 
 -   This survey was not administered for participants who were incarcerated at the time of the assessment. 
 
@@ -7269,7 +7268,7 @@ Reference:
   
 #### Value Labels and Survey Items 
   
-  All SOCINF-S variables have multiple responses options, value labels for each variable can be found in the survey items table below. 
+  All SOCINF-S variables have multiple response options, value labels for each variable can be found in the survey items table below. 
 
 SOCINF-S survey items are presented in the following table:
   
