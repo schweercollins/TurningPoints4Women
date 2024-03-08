@@ -7624,7 +7624,7 @@ mhc_summary_data <- as.data.frame(mhc_summary_data)
 mhc_summary_data <- rbind(names(mhc_summary_data), mhc_summary_data) %>% 
   t() %>% 
   as.data.frame()
-# MIN check the missing % doesn't seem right
+
 # Create the gt table
 mhc_tbl <- mhc_summary_data %>%
   gt() %>%
